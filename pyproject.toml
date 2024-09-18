@@ -9,6 +9,11 @@ readme = "README.md"
 [[tool.poetry.source]]
 name = 'skao'
 url = 'https://artefact.skao.int/repository/pypi-internal/simple'
+priority = "primary"
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "supplemental"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -25,9 +30,9 @@ flake8-docstrings = "^1.7.0"
 flake8-rst-docstrings = "^0.3.0"
 flake8-pyproject = "^1.2.3"
 [tool.poetry.group.docs.dependencies]
-Sphinx = "^7.2.0"
-ska-ser-sphinx-theme = "^0.1.1"
-sphinx-autodoc-typehints = "^1.23.0"
+sphinx = ">=7.2.0"
+ska-ser-sphinx-theme = ">=0.1.1"
+sphinx-autodoc-typehints = ">=1.23.0"
 
 [tool.pytest.ini_options]
 addopts = "-v"
