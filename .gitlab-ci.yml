@@ -5,9 +5,9 @@ cache:
   paths:
     - build
 stages:
-  - lint
   - build
   - test
+  - lint
   - publish
   - pages
   - scan
