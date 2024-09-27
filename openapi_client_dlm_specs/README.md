@@ -1,0 +1,28 @@
+
+openapi-client code generated from
+
+```sh
+curl -H "Accept: application/json" -X GET http://localhost:8000/openapi.json -o specs/8000.json
+curl -H "Accept: application/json" -X GET http://localhost:8001/openapi.json -o specs/8001.json
+curl -H "Accept: application/json" -X GET http://localhost:8002/openapi.json -o specs/8002.json
+curl -H "Accept: application/json" -X GET http://localhost:8003/openapi.json -o specs/8003.json
+curl -H "Accept: application/json" -X GET http://localhost:8004/openapi.json -o specs/8004.json
+```
+
+Add tag field to all paths
+
+```json
+"tags": [
+  "gateway|ingest|storage|request|migration"
+],
+```
+
+```sh
+openapi-generator generate --generator-name python-pydantic-v1 -i dlm.json
+
+openapi-generator generate --generator-name python --api-package dlm_api -o openapi_client_dlm_project --package-name openapi_client_dlm --input-spec-root-directory specs
+```
+
+dlm.json was retrieved from the DLM REST api
+
+http://127.0.0.1:3000/openapi.json
