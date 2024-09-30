@@ -8,6 +8,8 @@ import time
 
 import aiokafka
 
+logging.basicConfig(level=logging.INFO)
+
 logger = logging.getLogger(__name__)
 
 
@@ -59,10 +61,11 @@ async def _start_watcher(args):
         async for msg in consumer:
             try:
                 data = json.loads(msg.value)
-                logger.info("Consuming message: %s", data)
+                logger.info("Consuming JSON message: %s", data)
             except json.JSONDecodeError:
-                logger.error("Unable to parse JSON")
-                continue
+                logger.warning(
+                    "Unable to parse message as JSON. Raw message: %s", msg.value.decode("utf-8")
+                )
 
     finally:
         await consumer.stop()
