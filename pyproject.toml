@@ -17,6 +17,7 @@ priority = "supplemental"
 
 [tool.poetry.dependencies]
 python = "^3.10"
+benedict = "^0.3.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"

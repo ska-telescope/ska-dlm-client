@@ -12,4 +12,10 @@ session = dlm_gateway_client.start_session(CONFIG.auth_token, CONFIG.DLM.gateway
 locations = dlm_storage_client.query_location(CONFIG.location_name)
 
 # init location
-dlm_storage_client.init_location(CONFIG.location_name, CONFIG.location_type, CONFIG.location_country, CONFIG.location_city, CONFIG.location_facility)
+dlm_storage_client.init_location(
+    CONFIG.location_name,
+    CONFIG.location_type,
+    CONFIG.location_country,
+    CONFIG.location_city,
+    CONFIG.location_facility,
+)

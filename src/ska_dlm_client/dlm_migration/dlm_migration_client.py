@@ -1,4 +1,4 @@
-"""dlm_migration REST client"""
+"""dlm_migration REST client."""
 
 MIGRATION_URL = ""
 SESSION = None

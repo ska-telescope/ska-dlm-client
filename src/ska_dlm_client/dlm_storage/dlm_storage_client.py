@@ -1,9 +1,8 @@
-"""dlm_storage REST client"""
+"""dlm_storage REST client."""
 
 import json
 
 import requests
-
 from ska_dlm.exceptions import (
     InvalidQueryParameters,
     UnmetPreconditionForOperation,
@@ -16,7 +15,7 @@ SESSION = None
 
 # pylint: disable=no-else-raise
 def _except(response: requests.Response):
-    """Check the response status code and return relevant exception"""
+    """Check the response status code and return relevant exception."""
     if response.status_code == 422:
         text = json.loads(response.text)
         if text["exec"] == "ValueAlreadyInDB":

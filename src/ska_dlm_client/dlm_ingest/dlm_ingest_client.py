@@ -1,4 +1,4 @@
-"""dlm_ingest REST client"""
+"""dlm_ingest REST client."""
 
 from typing import Any, Dict, List, Union
 

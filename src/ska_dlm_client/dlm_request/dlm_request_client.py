@@ -1,4 +1,4 @@
-"""dlm_request REST client"""
+"""dlm_request REST client."""
 
 from datetime import timedelta
 
