@@ -10,5 +10,12 @@ location:
   city: "MyLocationCity"
   facility: "MyLocationFacility"
 
+storage:
+  name: "MyStorageName"
+  type: "disk"
+  interface: "posix"
+  capacity: 100000000,
+  phase_level: "GAS"
+
 DLM:
   gateway_url: "http://localhost:3000"
