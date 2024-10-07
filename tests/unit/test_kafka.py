@@ -1,3 +1,5 @@
+"""Kafka tests."""
+
 import asyncio
 
 import pytest
@@ -10,14 +12,18 @@ TEST_TOPIC = "test-events"
 
 @pytest_asyncio.fixture(name="producer")
 async def producer_fixture():
+    """Fixture to set up and tear down a Kafka producer."""
     p = AIOKafkaProducer(bootstrap_servers=KAFKA_HOST)
     await p.start()
+    # TODO: Sometimes there is a 'KafkaConnectionError.' Based on experience, this might be
+    # because the Kafka server is not quite running yet, i.e., the tests are starting too soon.
     yield p
     await p.stop()
 
 
 @pytest_asyncio.fixture(name="consumer")
 async def consumer_fixture():
+    """Fixture to set up and tear down a Kafka consumer."""
     consumer = AIOKafkaConsumer(TEST_TOPIC, bootstrap_servers=KAFKA_HOST)
     await consumer.start()
     yield consumer
@@ -26,6 +32,7 @@ async def consumer_fixture():
 
 @pytest.mark.asyncio
 async def test_kafka_data_roundtrip(producer: AIOKafkaProducer, consumer: AIOKafkaConsumer):
+    """Test sending and receiving messages between Kafka producer and consumer."""
     messages = ["one", "two", "three"]
 
     tasks = [
@@ -46,11 +53,13 @@ async def test_kafka_data_roundtrip(producer: AIOKafkaProducer, consumer: AIOKaf
 
 
 async def send_messages(producer: AIOKafkaProducer, msgs: list[str]):
+    """Send a list of messages using the Kafka producer."""
     for msg in msgs:
         await producer.send_and_wait(TEST_TOPIC, msg.encode())
 
 
 async def receive_messages(consumer: AIOKafkaConsumer, max_num_messages: int) -> list[str]:
+    """Receive a specific number of messages from the Kafka consumer."""
     messages = []
     async for msg in consumer:
         messages.append(msg.value)
