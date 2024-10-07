@@ -1,5 +1,4 @@
 # Keep in sync with .gitlab-ci.yml python-tests job services
-version: '3.7'
 services:
   kafka:
     image: bitnami/kafka:3.5.0-debian-11-r1
