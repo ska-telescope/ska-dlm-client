@@ -17,3 +17,8 @@ services:
       # 128MiB is large enough to store all AA4-LOW jones
       # matrices for 4096 channels in a single message
       KAFKA_CFG_MESSAGE_MAX_BYTES: 134217728
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions.sh", "--bootstrap-server=localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 5

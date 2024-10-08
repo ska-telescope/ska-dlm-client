@@ -23,7 +23,7 @@ docs-pre-build:
 .PHONY: docs-pre-build
 
 docker-compose-up:
-	$(DOCKER_COMPOSE) --file tests/test-services.docker-compose.yml up --detach
+	$(DOCKER_COMPOSE) --file tests/test-services.docker-compose.yml up --detach --wait
 
 docker-compose-down:
 	$(DOCKER_COMPOSE) --file tests/test-services.docker-compose.yml down

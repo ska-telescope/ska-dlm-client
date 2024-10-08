@@ -31,7 +31,7 @@ def main():
 
     args = parser.parse_args()
 
-    asyncio.run(_start_watcher(args))
+    asyncio.run(_watch(args))
 
 
 async def _try_start_consumer(consumer: aiokafka.AIOKafkaConsumer):
@@ -43,7 +43,7 @@ async def _try_start_consumer(consumer: aiokafka.AIOKafkaConsumer):
         return False
 
 
-async def _start_watcher(args):
+async def _watch(args): # do an http call every time it sees a message. Callan will show me how to do a mock of that.
     """Start watching the given Kafka topic."""
     logger.debug("Connecting to Kafka server(s): %s", ", ".join(args.kafka_server))
     logger.info("Watching %s topic(s) for dataproducts to process", ", ".join(args.kafka_topic))
