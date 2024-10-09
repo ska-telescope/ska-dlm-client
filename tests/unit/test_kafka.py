@@ -19,8 +19,7 @@ TEST_TOPIC = "test-events"
 
 @dataclass
 class Args:
-    """Configuration class for Kafka server and topic. The _watch function takes this single
-    configuration object."""
+    """Configuration class for Kafka server and topic."""
 
     kafka_server = [KAFKA_HOST]
     kafka_topic = [TEST_TOPIC]
@@ -91,7 +90,6 @@ class TestWatchFunction(unittest.IsolatedAsyncioTestCase):
         self, mock_http_call, mock_try_start_consumer, mock_kafka_consumer
     ):
         """Test that the _watch function correctly handles a successful HTTP call."""
-
         # Create a mock for the Kafka consumer and simulate message consumption
         kafka_instance = mock_kafka_consumer.return_value
         kafka_instance.__aiter__.return_value = [
