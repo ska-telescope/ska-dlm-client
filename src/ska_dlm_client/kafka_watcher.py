@@ -7,6 +7,8 @@ import logging
 import time
 
 import aiokafka
+import requests
+import requests_mock
 
 logging.basicConfig(level=logging.INFO)
 
@@ -43,7 +45,19 @@ async def _try_start_consumer(consumer: aiokafka.AIOKafkaConsumer):
         return False
 
 
-async def _watch(args): # do an http call every time it sees a message. Callan will show me how to do a mock of that.
+async def mock_http_call(data):
+    """Stub function to simulate an HTTP POST call to DLM."""
+    # Use requests_mock to simulate an HTTP call
+    with requests_mock.Mocker() as m:
+        m.post("http://example.com/api", json={"success": True})
+
+        response = requests.post("http://example.com/api", json=data, timeout=5)
+
+        logger.info("Mock HTTP call completed with status code: %d", response.status_code)
+        logger.info("Response content: %s", response.json())
+
+
+async def _watch(args):
     """Start watching the given Kafka topic."""
     logger.debug("Connecting to Kafka server(s): %s", ", ".join(args.kafka_server))
     logger.info("Watching %s topic(s) for dataproducts to process", ", ".join(args.kafka_topic))
@@ -55,6 +69,7 @@ async def _watch(args): # do an http call every time it sees a message. Callan w
         while not await _try_start_consumer(consumer):
             attempts += 1
             if attempts > 5:
+                logger.error("Failed to connect to Kafka server(s) after %d attempts", attempts)
                 raise RuntimeError(f"Unable to connect to {args.kafka_server}")
             time.sleep(1)
 
@@ -62,6 +77,13 @@ async def _watch(args): # do an http call every time it sees a message. Callan w
             try:
                 data = json.loads(msg.value)
                 logger.info("Consuming JSON message: %s", data)
+
+                try:
+                    await mock_http_call(data)  # TODO YAN-1865: replace with real HTTP call to DLM
+                except requests.exceptions.RequestException as e:
+                    logger.error("HTTP call failed: %s", e)
+                    # Continue processing other messages despite the failure
+
             except json.JSONDecodeError:
                 logger.warning(
                     "Unable to parse message as JSON. Raw message: %s", msg.value.decode("utf-8")
@@ -72,5 +94,5 @@ async def _watch(args): # do an http call every time it sees a message. Callan w
 
 
 if __name__ == "__main__":
-    # NOTE: we call main() here, and then let main() call _start_watcher()
+    # NOTE: we call main() here, and then let main() call _watch()
     main()
