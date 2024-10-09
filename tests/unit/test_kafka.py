@@ -8,6 +8,7 @@ from unittest import mock
 
 import pytest
 import pytest_asyncio
+import requests
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
 from src.ska_dlm_client.kafka_watcher import _watch
@@ -141,7 +142,7 @@ class TestWatchFunction(unittest.IsolatedAsyncioTestCase):
         mock_try_start_consumer.side_effect = [True]
 
         # Mock HTTP call to simulate a failure (e.g., a non-200 response)
-        mock_http_call.side_effect = Exception("HTTP call failed")
+        mock_http_call.side_effect = requests.exceptions.RequestException("HTTP call failed")
 
         with self.assertLogs("src.ska_dlm_client.kafka_watcher", level="ERROR") as log:
             args = Args()
