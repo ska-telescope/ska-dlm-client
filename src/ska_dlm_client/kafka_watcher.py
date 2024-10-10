@@ -4,7 +4,6 @@ import argparse
 import asyncio
 import json
 import logging
-import time
 
 import aiokafka
 import requests
@@ -36,22 +35,30 @@ def main():
     asyncio.run(_watch(args))
 
 
-async def _try_start_consumer(consumer: aiokafka.AIOKafkaConsumer):
-    """Start the Kafka consumer."""
-    try:
-        await consumer.start()
-        return True
-    except aiokafka.errors.KafkaError:
-        return False
+async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int = 5):
+    """Starts a Kafka consumer with multiple retries."""
+    attempts = 0
+    while attempts < max_retries:
+        try:
+            await consumer.start()
+            return True  # Connection successful
+        except aiokafka.errors.KafkaError as e:
+            attempts += 1
+            if attempts >= max_retries:
+                raise aiokafka.errors.KafkaError(
+                    "Failed to connect to Kafka after max retries"
+                ) from e
+            await asyncio.sleep(1)  # Use await for proper async sleep
+    return False  # Should never reach here if max_retries is handled correctly
 
 
 async def mock_http_call(data):
     """Stub function to simulate an HTTP POST call to DLM."""
     # Use requests_mock to simulate an HTTP call
     with requests_mock.Mocker() as m:
-        m.post("http://example.com/api", json={"success": True})
+        m.post("http://dlm/api", json={"success": True})
 
-        response = requests.post("http://example.com/api", json=data, timeout=5)
+        response = requests.post("http://dlm/api", json=data, timeout=5)
 
         logger.info("Mock HTTP call completed with status code: %d", response.status_code)
         logger.info("Response content: %s", response.json())
@@ -64,25 +71,20 @@ async def _watch(args):
 
     consumer = aiokafka.AIOKafkaConsumer(*args.kafka_topic, bootstrap_servers=args.kafka_server)
 
-    try:
-        attempts = 0
-        while not await _try_start_consumer(consumer):
-            attempts += 1
-            if attempts > 5:
-                logger.error("Failed to connect to Kafka server(s) after %d attempts", attempts)
-                raise RuntimeError(f"Unable to connect to {args.kafka_server}")
-            time.sleep(1)
+    # Attempt to start the consumer once
+    await _start_consumer(consumer)
 
+    try:
         async for msg in consumer:
             try:
                 data = json.loads(msg.value)
                 logger.info("Consuming JSON message: %s", data)
 
-                try:
-                    await mock_http_call(data)  # TODO YAN-1865: replace with real HTTP call to DLM
-                except requests.exceptions.RequestException as e:
-                    logger.error("HTTP call failed: %s", e)
-                    # Continue processing other messages despite the failure
+                # Call the HTTP function (to be handled separately)
+                await mock_http_call(data)
+
+            except requests.exceptions.RequestException as e:
+                logger.error("HTTP call failed: %s", e)
 
             except json.JSONDecodeError:
                 logger.warning(

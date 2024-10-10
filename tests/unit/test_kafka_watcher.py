@@ -81,9 +81,9 @@ async def receive_messages(consumer: AIOKafkaConsumer, max_num_messages: int) ->
 
 @pytest.mark.asyncio
 @mock.patch("aiokafka.AIOKafkaConsumer")
-@mock.patch("src.ska_dlm_client.kafka_watcher._try_start_consumer")
+@mock.patch("src.ska_dlm_client.kafka_watcher._start_consumer")
 @mock.patch("src.ska_dlm_client.kafka_watcher.mock_http_call")  # Mock the HTTP call
-async def test_watch_function_success(mock_http_call, mock_try_start_consumer, mock_kafka_consumer):
+async def test_watch_function_success(mock_http_call, mock_start_consumer, mock_kafka_consumer):
     """Test that the _watch function correctly handles a successful HTTP call."""
     # Create a mock for the Kafka consumer and simulate message consumption
     kafka_instance = mock_kafka_consumer.return_value
@@ -94,8 +94,8 @@ async def test_watch_function_success(mock_http_call, mock_try_start_consumer, m
     # Mock consumer.stop() as an async function
     kafka_instance.stop = mock.AsyncMock()
 
-    # Mock _try_start_consumer to return False first, then True to simulate retry logic
-    mock_try_start_consumer.side_effect = [False, True]
+    # Mock _start_consumer to return False first, then True to simulate retry logic
+    mock_start_consumer.side_effect = [False, True]
 
     # Mock HTTP call to simulate a 200 response
     mock_http_call.return_value = asyncio.Future()
@@ -116,9 +116,11 @@ async def test_watch_function_success(mock_http_call, mock_try_start_consumer, m
 
 @pytest.mark.asyncio
 @mock.patch("aiokafka.AIOKafkaConsumer")
-@mock.patch("src.ska_dlm_client.kafka_watcher._try_start_consumer")
+@mock.patch("src.ska_dlm_client.kafka_watcher._start_consumer")
 @mock.patch("src.ska_dlm_client.kafka_watcher.mock_http_call")  # Mock the HTTP call
-async def test_watch_function_http_failure(mock_http_call, mock_try_start_consumer, mock_kafka_consumer, caplog):
+async def test_watch_function_http_failure(
+    mock_http_call, mock_start_consumer, mock_kafka_consumer, caplog
+):
     """Test that the _watch function handles HTTP call failures gracefully."""
     # Create a mock for the Kafka consumer and simulate message consumption
     kafka_instance = mock_kafka_consumer.return_value
@@ -129,8 +131,8 @@ async def test_watch_function_http_failure(mock_http_call, mock_try_start_consum
     # Mock consumer.stop() as an async function
     kafka_instance.stop = mock.AsyncMock()
 
-    # Mock _try_start_consumer to return True (successful connection)
-    mock_try_start_consumer.side_effect = [True]
+    # Mock _start_consumer to return True (successful connection)
+    mock_start_consumer.side_effect = [True]
 
     # Mock HTTP call to simulate a failure (e.g., a non-200 response)
     mock_http_call.side_effect = requests.exceptions.RequestException("HTTP call failed")
