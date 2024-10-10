@@ -12,12 +12,9 @@
 """  # noqa: E501
 
 import warnings
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
-from typing_extensions import Annotated
 
-from pydantic import Field, StrictStr
-from typing import Any, Dict, Optional
+from pydantic import Field, StrictFloat, StrictInt, StrictStr, validate_call
 from typing_extensions import Annotated
 
 from openapi_client_dlm.api_client import ApiClient, RequestSerialized
@@ -37,21 +34,29 @@ class IngestApi:
             api_client = ApiClient.get_default()
         self.api_client = api_client
 
-
     @validate_call
     def init_data_item_ingest_init_data_item_post(
         self,
-        item_name: Annotated[Optional[StrictStr], Field(description="the item_name, can be empty, but then json_data has to be specified.")] = None,
-        phase: Annotated[Optional[StrictStr], Field(description="the phase this item is set to (usually inherited from the storage)")] = None,
-        authorization: Annotated[Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")] = None,
+        item_name: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="the item_name, can be empty, but then json_data has to be specified."
+            ),
+        ] = None,
+        phase: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="the phase this item is set to (usually inherited from the storage)"
+            ),
+        ] = None,
+        authorization: Annotated[
+            Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
+        ] = None,
         body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -90,7 +95,7 @@ class IngestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._init_data_item_ingest_init_data_item_post_serialize(
             item_name=item_name,
@@ -100,38 +105,43 @@ class IngestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def init_data_item_ingest_init_data_item_post_with_http_info(
         self,
-        item_name: Annotated[Optional[StrictStr], Field(description="the item_name, can be empty, but then json_data has to be specified.")] = None,
-        phase: Annotated[Optional[StrictStr], Field(description="the phase this item is set to (usually inherited from the storage)")] = None,
-        authorization: Annotated[Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")] = None,
+        item_name: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="the item_name, can be empty, but then json_data has to be specified."
+            ),
+        ] = None,
+        phase: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="the phase this item is set to (usually inherited from the storage)"
+            ),
+        ] = None,
+        authorization: Annotated[
+            Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
+        ] = None,
         body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -170,7 +180,7 @@ class IngestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._init_data_item_ingest_init_data_item_post_serialize(
             item_name=item_name,
@@ -180,38 +190,43 @@ class IngestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def init_data_item_ingest_init_data_item_post_without_preload_content(
         self,
-        item_name: Annotated[Optional[StrictStr], Field(description="the item_name, can be empty, but then json_data has to be specified.")] = None,
-        phase: Annotated[Optional[StrictStr], Field(description="the phase this item is set to (usually inherited from the storage)")] = None,
-        authorization: Annotated[Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")] = None,
+        item_name: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="the item_name, can be empty, but then json_data has to be specified."
+            ),
+        ] = None,
+        phase: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="the phase this item is set to (usually inherited from the storage)"
+            ),
+        ] = None,
+        authorization: Annotated[
+            Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
+        ] = None,
         body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -250,7 +265,7 @@ class IngestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._init_data_item_ingest_init_data_item_post_serialize(
             item_name=item_name,
@@ -260,19 +275,15 @@ class IngestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _init_data_item_ingest_init_data_item_post_serialize(
         self,
@@ -288,8 +299,7 @@ class IngestApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -301,51 +311,41 @@ class IngestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-            
-            _query_params.append(('item_name', item_name))
-            
+
+            _query_params.append(("item_name", item_name))
+
         if phase is not None:
-            
-            _query_params.append(('phase', phase))
-            
+
+            _query_params.append(("phase", phase))
+
         # process the header parameters
         if authorization is not None:
-            _header_params['authorization'] = authorization
+            _header_params["authorization"] = authorization
         # process the form parameters
         # process the body parameter
         if body is not None:
             _body_params = body
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
+            _default_content_type = self.api_client.select_header_content_type(
+                ["application/json"]
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/ingest/init_data_item',
+            method="POST",
+            resource_path="/ingest/init_data_item",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -355,30 +355,40 @@ class IngestApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def register_data_item_ingest_register_data_item_post(
         self,
-        item_name: Annotated[StrictStr, Field(description="could be empty, in which case the first 1000 items are returned")],
-        uri: Annotated[Optional[StrictStr], Field(description="the access path to the payload.")] = None,
-        storage_name: Annotated[Optional[StrictStr], Field(description="the name of the configured storage volume (name or ID required)")] = None,
-        storage_id: Annotated[Optional[StrictStr], Field(description="the ID of the configured storage.")] = None,
-        item_format: Annotated[Optional[StrictStr], Field(description="format of the data item")] = None,
-        eb_id: Annotated[Optional[StrictStr], Field(description="execution block ID provided by the client")] = None,
-        authorization: Annotated[Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")] = None,
+        item_name: Annotated[
+            StrictStr,
+            Field(description="could be empty, in which case the first 1000 items are returned"),
+        ],
+        uri: Annotated[
+            Optional[StrictStr], Field(description="the access path to the payload.")
+        ] = None,
+        storage_name: Annotated[
+            Optional[StrictStr],
+            Field(description="the name of the configured storage volume (name or ID required)"),
+        ] = None,
+        storage_id: Annotated[
+            Optional[StrictStr], Field(description="the ID of the configured storage.")
+        ] = None,
+        item_format: Annotated[
+            Optional[StrictStr], Field(description="format of the data item")
+        ] = None,
+        eb_id: Annotated[
+            Optional[StrictStr], Field(description="execution block ID provided by the client")
+        ] = None,
+        authorization: Annotated[
+            Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
+        ] = None,
         body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -425,7 +435,7 @@ class IngestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._register_data_item_ingest_register_data_item_post_serialize(
             item_name=item_name,
@@ -439,42 +449,51 @@ class IngestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def register_data_item_ingest_register_data_item_post_with_http_info(
         self,
-        item_name: Annotated[StrictStr, Field(description="could be empty, in which case the first 1000 items are returned")],
-        uri: Annotated[Optional[StrictStr], Field(description="the access path to the payload.")] = None,
-        storage_name: Annotated[Optional[StrictStr], Field(description="the name of the configured storage volume (name or ID required)")] = None,
-        storage_id: Annotated[Optional[StrictStr], Field(description="the ID of the configured storage.")] = None,
-        item_format: Annotated[Optional[StrictStr], Field(description="format of the data item")] = None,
-        eb_id: Annotated[Optional[StrictStr], Field(description="execution block ID provided by the client")] = None,
-        authorization: Annotated[Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")] = None,
+        item_name: Annotated[
+            StrictStr,
+            Field(description="could be empty, in which case the first 1000 items are returned"),
+        ],
+        uri: Annotated[
+            Optional[StrictStr], Field(description="the access path to the payload.")
+        ] = None,
+        storage_name: Annotated[
+            Optional[StrictStr],
+            Field(description="the name of the configured storage volume (name or ID required)"),
+        ] = None,
+        storage_id: Annotated[
+            Optional[StrictStr], Field(description="the ID of the configured storage.")
+        ] = None,
+        item_format: Annotated[
+            Optional[StrictStr], Field(description="format of the data item")
+        ] = None,
+        eb_id: Annotated[
+            Optional[StrictStr], Field(description="execution block ID provided by the client")
+        ] = None,
+        authorization: Annotated[
+            Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
+        ] = None,
         body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -521,7 +540,7 @@ class IngestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._register_data_item_ingest_register_data_item_post_serialize(
             item_name=item_name,
@@ -535,42 +554,51 @@ class IngestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def register_data_item_ingest_register_data_item_post_without_preload_content(
         self,
-        item_name: Annotated[StrictStr, Field(description="could be empty, in which case the first 1000 items are returned")],
-        uri: Annotated[Optional[StrictStr], Field(description="the access path to the payload.")] = None,
-        storage_name: Annotated[Optional[StrictStr], Field(description="the name of the configured storage volume (name or ID required)")] = None,
-        storage_id: Annotated[Optional[StrictStr], Field(description="the ID of the configured storage.")] = None,
-        item_format: Annotated[Optional[StrictStr], Field(description="format of the data item")] = None,
-        eb_id: Annotated[Optional[StrictStr], Field(description="execution block ID provided by the client")] = None,
-        authorization: Annotated[Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")] = None,
+        item_name: Annotated[
+            StrictStr,
+            Field(description="could be empty, in which case the first 1000 items are returned"),
+        ],
+        uri: Annotated[
+            Optional[StrictStr], Field(description="the access path to the payload.")
+        ] = None,
+        storage_name: Annotated[
+            Optional[StrictStr],
+            Field(description="the name of the configured storage volume (name or ID required)"),
+        ] = None,
+        storage_id: Annotated[
+            Optional[StrictStr], Field(description="the ID of the configured storage.")
+        ] = None,
+        item_format: Annotated[
+            Optional[StrictStr], Field(description="format of the data item")
+        ] = None,
+        eb_id: Annotated[
+            Optional[StrictStr], Field(description="execution block ID provided by the client")
+        ] = None,
+        authorization: Annotated[
+            Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
+        ] = None,
         body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -617,7 +645,7 @@ class IngestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._register_data_item_ingest_register_data_item_post_serialize(
             item_name=item_name,
@@ -631,19 +659,15 @@ class IngestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _register_data_item_ingest_register_data_item_post_serialize(
         self,
@@ -663,8 +687,7 @@ class IngestApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -676,67 +699,57 @@ class IngestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-            
-            _query_params.append(('item_name', item_name))
-            
+
+            _query_params.append(("item_name", item_name))
+
         if uri is not None:
-            
-            _query_params.append(('uri', uri))
-            
+
+            _query_params.append(("uri", uri))
+
         if storage_name is not None:
-            
-            _query_params.append(('storage_name', storage_name))
-            
+
+            _query_params.append(("storage_name", storage_name))
+
         if storage_id is not None:
-            
-            _query_params.append(('storage_id', storage_id))
-            
+
+            _query_params.append(("storage_id", storage_id))
+
         if item_format is not None:
-            
-            _query_params.append(('item_format', item_format))
-            
+
+            _query_params.append(("item_format", item_format))
+
         if eb_id is not None:
-            
-            _query_params.append(('eb_id', eb_id))
-            
+
+            _query_params.append(("eb_id", eb_id))
+
         # process the header parameters
         if authorization is not None:
-            _header_params['authorization'] = authorization
+            _header_params["authorization"] = authorization
         # process the form parameters
         # process the body parameter
         if body is not None:
             _body_params = body
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
+            _default_content_type = self.api_client.select_header_content_type(
+                ["application/json"]
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/ingest/register_data_item',
+            method="POST",
+            resource_path="/ingest/register_data_item",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -746,7 +759,5 @@ class IngestApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-

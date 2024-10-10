@@ -31,7 +31,16 @@ Add tag field to all paths
 openapi-generator generate --generator-name python --api-package dlm_api -o openapi_client_dlm_project --package-name openapi_client_dlm --input-spec-root-directory specs
 ```
 
-Copy the generated source, docs, tests and README.md to this project.
+Copy the generated src, docs, tests and README.md to this project.
+
+Run the following to fix isort complaining during lint
+
+```sh
+isort --profile black --line-length 99 src/openapi_client_dlm tests/openapi_client_dlm
+black --exclude .+\.ipynb --line-length 99  src/openapi_client_dlm tests/openapi_client_dlm/
+```
+
+
 
 Original version of this
 

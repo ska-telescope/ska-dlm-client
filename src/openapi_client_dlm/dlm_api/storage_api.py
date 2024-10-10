@@ -12,12 +12,9 @@
 """  # noqa: E501
 
 import warnings
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
-from typing_extensions import Annotated
 
-from pydantic import Field, StrictInt, StrictStr
-from typing import Any, Optional
+from pydantic import Field, StrictFloat, StrictInt, StrictStr, validate_call
 from typing_extensions import Annotated
 
 from openapi_client_dlm.api_client import ApiClient, RequestSerialized
@@ -37,21 +34,30 @@ class StorageApi:
             api_client = ApiClient.get_default()
         self.api_client = api_client
 
-
     @validate_call
     def create_storage_config_storage_create_storage_config_post(
         self,
-        storage_id: Annotated[Optional[StrictStr], Field(description="the storage_id for which to create the entry.")] = None,
-        config: Annotated[Optional[StrictStr], Field(description="the configuration entry. For rclone this is s JSON formatted string")] = None,
-        storage_name: Annotated[Optional[StrictStr], Field(description="the name of the storage for which the config is provided.")] = None,
-        config_type: Annotated[Optional[StrictStr], Field(description="default is rclone, but could be something else in the future.")] = None,
+        storage_id: Annotated[
+            Optional[StrictStr], Field(description="the storage_id for which to create the entry.")
+        ] = None,
+        config: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="the configuration entry. For rclone this is s JSON formatted string"
+            ),
+        ] = None,
+        storage_name: Annotated[
+            Optional[StrictStr],
+            Field(description="the name of the storage for which the config is provided."),
+        ] = None,
+        config_type: Annotated[
+            Optional[StrictStr],
+            Field(description="default is rclone, but could be something else in the future."),
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -90,7 +96,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._create_storage_config_storage_create_storage_config_post_serialize(
             storage_id=storage_id,
@@ -100,38 +106,44 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def create_storage_config_storage_create_storage_config_post_with_http_info(
         self,
-        storage_id: Annotated[Optional[StrictStr], Field(description="the storage_id for which to create the entry.")] = None,
-        config: Annotated[Optional[StrictStr], Field(description="the configuration entry. For rclone this is s JSON formatted string")] = None,
-        storage_name: Annotated[Optional[StrictStr], Field(description="the name of the storage for which the config is provided.")] = None,
-        config_type: Annotated[Optional[StrictStr], Field(description="default is rclone, but could be something else in the future.")] = None,
+        storage_id: Annotated[
+            Optional[StrictStr], Field(description="the storage_id for which to create the entry.")
+        ] = None,
+        config: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="the configuration entry. For rclone this is s JSON formatted string"
+            ),
+        ] = None,
+        storage_name: Annotated[
+            Optional[StrictStr],
+            Field(description="the name of the storage for which the config is provided."),
+        ] = None,
+        config_type: Annotated[
+            Optional[StrictStr],
+            Field(description="default is rclone, but could be something else in the future."),
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -170,7 +182,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._create_storage_config_storage_create_storage_config_post_serialize(
             storage_id=storage_id,
@@ -180,38 +192,44 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def create_storage_config_storage_create_storage_config_post_without_preload_content(
         self,
-        storage_id: Annotated[Optional[StrictStr], Field(description="the storage_id for which to create the entry.")] = None,
-        config: Annotated[Optional[StrictStr], Field(description="the configuration entry. For rclone this is s JSON formatted string")] = None,
-        storage_name: Annotated[Optional[StrictStr], Field(description="the name of the storage for which the config is provided.")] = None,
-        config_type: Annotated[Optional[StrictStr], Field(description="default is rclone, but could be something else in the future.")] = None,
+        storage_id: Annotated[
+            Optional[StrictStr], Field(description="the storage_id for which to create the entry.")
+        ] = None,
+        config: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="the configuration entry. For rclone this is s JSON formatted string"
+            ),
+        ] = None,
+        storage_name: Annotated[
+            Optional[StrictStr],
+            Field(description="the name of the storage for which the config is provided."),
+        ] = None,
+        config_type: Annotated[
+            Optional[StrictStr],
+            Field(description="default is rclone, but could be something else in the future."),
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -250,7 +268,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._create_storage_config_storage_create_storage_config_post_serialize(
             storage_id=storage_id,
@@ -260,19 +278,15 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _create_storage_config_storage_create_storage_config_post_serialize(
         self,
@@ -288,8 +302,7 @@ class StorageApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -301,42 +314,35 @@ class StorageApi:
         # process the path parameters
         # process the query parameters
         if storage_id is not None:
-            
-            _query_params.append(('storage_id', storage_id))
-            
+
+            _query_params.append(("storage_id", storage_id))
+
         if config is not None:
-            
-            _query_params.append(('config', config))
-            
+
+            _query_params.append(("config", config))
+
         if storage_name is not None:
-            
-            _query_params.append(('storage_name', storage_name))
-            
+
+            _query_params.append(("storage_name", storage_name))
+
         if config_type is not None:
-            
-            _query_params.append(('config_type', config_type))
-            
+
+            _query_params.append(("config_type", config_type))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/storage/create_storage_config',
+            method="POST",
+            resource_path="/storage/create_storage_config",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -346,11 +352,8 @@ class StorageApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def init_location_storage_init_location_post(
@@ -363,10 +366,7 @@ class StorageApi:
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -407,7 +407,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._init_location_storage_init_location_post_serialize(
             location_name=location_name,
@@ -418,23 +418,19 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
-
 
     @validate_call
     def init_location_storage_init_location_post_with_http_info(
@@ -447,10 +443,7 @@ class StorageApi:
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -491,7 +484,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._init_location_storage_init_location_post_serialize(
             location_name=location_name,
@@ -502,23 +495,19 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
-
 
     @validate_call
     def init_location_storage_init_location_post_without_preload_content(
@@ -531,10 +520,7 @@ class StorageApi:
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -575,7 +561,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._init_location_storage_init_location_post_serialize(
             location_name=location_name,
@@ -586,19 +572,15 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _init_location_storage_init_location_post_serialize(
         self,
@@ -615,8 +597,7 @@ class StorageApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -628,46 +609,39 @@ class StorageApi:
         # process the path parameters
         # process the query parameters
         if location_name is not None:
-            
-            _query_params.append(('location_name', location_name))
-            
+
+            _query_params.append(("location_name", location_name))
+
         if location_type is not None:
-            
-            _query_params.append(('location_type', location_type))
-            
+
+            _query_params.append(("location_type", location_type))
+
         if location_country is not None:
-            
-            _query_params.append(('location_country', location_country))
-            
+
+            _query_params.append(("location_country", location_country))
+
         if location_city is not None:
-            
-            _query_params.append(('location_city', location_city))
-            
+
+            _query_params.append(("location_city", location_city))
+
         if location_facility is not None:
-            
-            _query_params.append(('location_facility', location_facility))
-            
+
+            _query_params.append(("location_facility", location_facility))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/storage/init_location',
+            method="POST",
+            resource_path="/storage/init_location",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -677,11 +651,8 @@ class StorageApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def init_storage_storage_init_storage_post(
@@ -690,17 +661,20 @@ class StorageApi:
         location_name: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
         location_id: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
         storage_type: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        storage_interface: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        storage_capacity: Annotated[Optional[StrictInt], Field(description="_description_")] = None,
-        storage_phase_level: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
+        storage_interface: Annotated[
+            Optional[StrictStr], Field(description="_description_")
+        ] = None,
+        storage_capacity: Annotated[
+            Optional[StrictInt], Field(description="_description_")
+        ] = None,
+        storage_phase_level: Annotated[
+            Optional[StrictStr], Field(description="_description_")
+        ] = None,
         json_data: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -747,7 +721,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._init_storage_storage_init_storage_post_serialize(
             storage_name=storage_name,
@@ -761,23 +735,19 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
-
 
     @validate_call
     def init_storage_storage_init_storage_post_with_http_info(
@@ -786,17 +756,20 @@ class StorageApi:
         location_name: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
         location_id: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
         storage_type: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        storage_interface: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        storage_capacity: Annotated[Optional[StrictInt], Field(description="_description_")] = None,
-        storage_phase_level: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
+        storage_interface: Annotated[
+            Optional[StrictStr], Field(description="_description_")
+        ] = None,
+        storage_capacity: Annotated[
+            Optional[StrictInt], Field(description="_description_")
+        ] = None,
+        storage_phase_level: Annotated[
+            Optional[StrictStr], Field(description="_description_")
+        ] = None,
         json_data: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -843,7 +816,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._init_storage_storage_init_storage_post_serialize(
             storage_name=storage_name,
@@ -857,23 +830,19 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
-
 
     @validate_call
     def init_storage_storage_init_storage_post_without_preload_content(
@@ -882,17 +851,20 @@ class StorageApi:
         location_name: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
         location_id: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
         storage_type: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        storage_interface: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        storage_capacity: Annotated[Optional[StrictInt], Field(description="_description_")] = None,
-        storage_phase_level: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
+        storage_interface: Annotated[
+            Optional[StrictStr], Field(description="_description_")
+        ] = None,
+        storage_capacity: Annotated[
+            Optional[StrictInt], Field(description="_description_")
+        ] = None,
+        storage_phase_level: Annotated[
+            Optional[StrictStr], Field(description="_description_")
+        ] = None,
         json_data: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -939,7 +911,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._init_storage_storage_init_storage_post_serialize(
             storage_name=storage_name,
@@ -953,19 +925,15 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _init_storage_storage_init_storage_post_serialize(
         self,
@@ -985,8 +953,7 @@ class StorageApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -998,58 +965,51 @@ class StorageApi:
         # process the path parameters
         # process the query parameters
         if storage_name is not None:
-            
-            _query_params.append(('storage_name', storage_name))
-            
+
+            _query_params.append(("storage_name", storage_name))
+
         if location_name is not None:
-            
-            _query_params.append(('location_name', location_name))
-            
+
+            _query_params.append(("location_name", location_name))
+
         if location_id is not None:
-            
-            _query_params.append(('location_id', location_id))
-            
+
+            _query_params.append(("location_id", location_id))
+
         if storage_type is not None:
-            
-            _query_params.append(('storage_type', storage_type))
-            
+
+            _query_params.append(("storage_type", storage_type))
+
         if storage_interface is not None:
-            
-            _query_params.append(('storage_interface', storage_interface))
-            
+
+            _query_params.append(("storage_interface", storage_interface))
+
         if storage_capacity is not None:
-            
-            _query_params.append(('storage_capacity', storage_capacity))
-            
+
+            _query_params.append(("storage_capacity", storage_capacity))
+
         if storage_phase_level is not None:
-            
-            _query_params.append(('storage_phase_level', storage_phase_level))
-            
+
+            _query_params.append(("storage_phase_level", storage_phase_level))
+
         if json_data is not None:
-            
-            _query_params.append(('json_data', json_data))
-            
+
+            _query_params.append(("json_data", json_data))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/storage/init_storage',
+            method="POST",
+            resource_path="/storage/init_storage",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1059,24 +1019,24 @@ class StorageApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def query_location_storage_query_location_get(
         self,
-        location_name: Annotated[Optional[StrictStr], Field(description="could be empty, in which case the first 1000 items are returned")] = None,
-        location_id: Annotated[Optional[StrictStr], Field(description="Return locations referred to by the location_id provided.")] = None,
+        location_name: Annotated[
+            Optional[StrictStr],
+            Field(description="could be empty, in which case the first 1000 items are returned"),
+        ] = None,
+        location_id: Annotated[
+            Optional[StrictStr],
+            Field(description="Return locations referred to by the location_id provided."),
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1111,7 +1071,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_location_storage_query_location_get_serialize(
             location_name=location_name,
@@ -1119,36 +1079,35 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def query_location_storage_query_location_get_with_http_info(
         self,
-        location_name: Annotated[Optional[StrictStr], Field(description="could be empty, in which case the first 1000 items are returned")] = None,
-        location_id: Annotated[Optional[StrictStr], Field(description="Return locations referred to by the location_id provided.")] = None,
+        location_name: Annotated[
+            Optional[StrictStr],
+            Field(description="could be empty, in which case the first 1000 items are returned"),
+        ] = None,
+        location_id: Annotated[
+            Optional[StrictStr],
+            Field(description="Return locations referred to by the location_id provided."),
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1183,7 +1142,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_location_storage_query_location_get_serialize(
             location_name=location_name,
@@ -1191,36 +1150,35 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def query_location_storage_query_location_get_without_preload_content(
         self,
-        location_name: Annotated[Optional[StrictStr], Field(description="could be empty, in which case the first 1000 items are returned")] = None,
-        location_id: Annotated[Optional[StrictStr], Field(description="Return locations referred to by the location_id provided.")] = None,
+        location_name: Annotated[
+            Optional[StrictStr],
+            Field(description="could be empty, in which case the first 1000 items are returned"),
+        ] = None,
+        location_id: Annotated[
+            Optional[StrictStr],
+            Field(description="Return locations referred to by the location_id provided."),
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1255,7 +1213,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_location_storage_query_location_get_serialize(
             location_name=location_name,
@@ -1263,19 +1221,15 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _query_location_storage_query_location_get_serialize(
         self,
@@ -1289,8 +1243,7 @@ class StorageApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -1302,34 +1255,27 @@ class StorageApi:
         # process the path parameters
         # process the query parameters
         if location_name is not None:
-            
-            _query_params.append(('location_name', location_name))
-            
+
+            _query_params.append(("location_name", location_name))
+
         if location_id is not None:
-            
-            _query_params.append(('location_id', location_id))
-            
+
+            _query_params.append(("location_id", location_id))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/storage/query_location',
+            method="GET",
+            resource_path="/storage/query_location",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1339,24 +1285,24 @@ class StorageApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def query_storage_storage_query_storage_get(
         self,
-        storage_name: Annotated[Optional[StrictStr], Field(description="could be empty, in which case the first 1000 items are returned")] = None,
-        storage_id: Annotated[Optional[StrictStr], Field(description="Return locations referred to by the location_id provided.")] = None,
+        storage_name: Annotated[
+            Optional[StrictStr],
+            Field(description="could be empty, in which case the first 1000 items are returned"),
+        ] = None,
+        storage_id: Annotated[
+            Optional[StrictStr],
+            Field(description="Return locations referred to by the location_id provided."),
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1391,7 +1337,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_storage_storage_query_storage_get_serialize(
             storage_name=storage_name,
@@ -1399,36 +1345,35 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def query_storage_storage_query_storage_get_with_http_info(
         self,
-        storage_name: Annotated[Optional[StrictStr], Field(description="could be empty, in which case the first 1000 items are returned")] = None,
-        storage_id: Annotated[Optional[StrictStr], Field(description="Return locations referred to by the location_id provided.")] = None,
+        storage_name: Annotated[
+            Optional[StrictStr],
+            Field(description="could be empty, in which case the first 1000 items are returned"),
+        ] = None,
+        storage_id: Annotated[
+            Optional[StrictStr],
+            Field(description="Return locations referred to by the location_id provided."),
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1463,7 +1408,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_storage_storage_query_storage_get_serialize(
             storage_name=storage_name,
@@ -1471,36 +1416,35 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def query_storage_storage_query_storage_get_without_preload_content(
         self,
-        storage_name: Annotated[Optional[StrictStr], Field(description="could be empty, in which case the first 1000 items are returned")] = None,
-        storage_id: Annotated[Optional[StrictStr], Field(description="Return locations referred to by the location_id provided.")] = None,
+        storage_name: Annotated[
+            Optional[StrictStr],
+            Field(description="could be empty, in which case the first 1000 items are returned"),
+        ] = None,
+        storage_id: Annotated[
+            Optional[StrictStr],
+            Field(description="Return locations referred to by the location_id provided."),
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1535,7 +1479,7 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_storage_storage_query_storage_get_serialize(
             storage_name=storage_name,
@@ -1543,19 +1487,15 @@ class StorageApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _query_storage_storage_query_storage_get_serialize(
         self,
@@ -1569,8 +1509,7 @@ class StorageApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -1582,34 +1521,27 @@ class StorageApi:
         # process the path parameters
         # process the query parameters
         if storage_name is not None:
-            
-            _query_params.append(('storage_name', storage_name))
-            
+
+            _query_params.append(("storage_name", storage_name))
+
         if storage_id is not None:
-            
-            _query_params.append(('storage_id', storage_id))
-            
+
+            _query_params.append(("storage_id", storage_id))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/storage/query_storage',
+            method="GET",
+            resource_path="/storage/query_storage",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1619,23 +1551,19 @@ class StorageApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def rclone_config_storage_rclone_config_post(
         self,
-        config: Annotated[StrictStr, Field(description="a json string containing the configuration")],
+        config: Annotated[
+            StrictStr, Field(description="a json string containing the configuration")
+        ],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1668,42 +1596,37 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._rclone_config_storage_rclone_config_post_serialize(
             config=config,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def rclone_config_storage_rclone_config_post_with_http_info(
         self,
-        config: Annotated[StrictStr, Field(description="a json string containing the configuration")],
+        config: Annotated[
+            StrictStr, Field(description="a json string containing the configuration")
+        ],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1736,42 +1659,37 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._rclone_config_storage_rclone_config_post_serialize(
             config=config,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def rclone_config_storage_rclone_config_post_without_preload_content(
         self,
-        config: Annotated[StrictStr, Field(description="a json string containing the configuration")],
+        config: Annotated[
+            StrictStr, Field(description="a json string containing the configuration")
+        ],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1804,26 +1722,22 @@ class StorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._rclone_config_storage_rclone_config_post_serialize(
             config=config,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _rclone_config_storage_rclone_config_post_serialize(
         self,
@@ -1836,8 +1750,7 @@ class StorageApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -1849,30 +1762,23 @@ class StorageApi:
         # process the path parameters
         # process the query parameters
         if config is not None:
-            
-            _query_params.append(('config', config))
-            
+
+            _query_params.append(("config", config))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/storage/rclone_config',
+            method="POST",
+            resource_path="/storage/rclone_config",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1882,7 +1788,5 @@ class StorageApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-

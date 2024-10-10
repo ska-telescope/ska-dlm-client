@@ -12,12 +12,9 @@
 """  # noqa: E501
 
 import warnings
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
-from typing_extensions import Annotated
 
-from pydantic import Field, StrictBool, StrictStr
-from typing import Any, Optional
+from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr, validate_call
 from typing_extensions import Annotated
 
 from openapi_client_dlm.api_client import ApiClient, RequestSerialized
@@ -37,21 +34,28 @@ class RequestApi:
             api_client = ApiClient.get_default()
         self.api_client = api_client
 
-
     @validate_call
     def query_data_item_request_query_data_item_get(
         self,
-        item_name: Annotated[Optional[StrictStr], Field(description="could be empty, in which case the first 1000 items are returned.")] = None,
-        oid: Annotated[Optional[StrictStr], Field(description="Return data_items referred to by the OID provided.")] = None,
-        uid: Annotated[Optional[StrictStr], Field(description="Return data_item referred to by the UID provided.")] = None,
-        params: Annotated[Optional[StrictStr], Field(description="specify the query parameters")] = None,
+        item_name: Annotated[
+            Optional[StrictStr],
+            Field(description="could be empty, in which case the first 1000 items are returned."),
+        ] = None,
+        oid: Annotated[
+            Optional[StrictStr],
+            Field(description="Return data_items referred to by the OID provided."),
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr],
+            Field(description="Return data_item referred to by the UID provided."),
+        ] = None,
+        params: Annotated[
+            Optional[StrictStr], Field(description="specify the query parameters")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -90,7 +94,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_data_item_request_query_data_item_get_serialize(
             item_name=item_name,
@@ -100,38 +104,42 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def query_data_item_request_query_data_item_get_with_http_info(
         self,
-        item_name: Annotated[Optional[StrictStr], Field(description="could be empty, in which case the first 1000 items are returned.")] = None,
-        oid: Annotated[Optional[StrictStr], Field(description="Return data_items referred to by the OID provided.")] = None,
-        uid: Annotated[Optional[StrictStr], Field(description="Return data_item referred to by the UID provided.")] = None,
-        params: Annotated[Optional[StrictStr], Field(description="specify the query parameters")] = None,
+        item_name: Annotated[
+            Optional[StrictStr],
+            Field(description="could be empty, in which case the first 1000 items are returned."),
+        ] = None,
+        oid: Annotated[
+            Optional[StrictStr],
+            Field(description="Return data_items referred to by the OID provided."),
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr],
+            Field(description="Return data_item referred to by the UID provided."),
+        ] = None,
+        params: Annotated[
+            Optional[StrictStr], Field(description="specify the query parameters")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -170,7 +178,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_data_item_request_query_data_item_get_serialize(
             item_name=item_name,
@@ -180,38 +188,42 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def query_data_item_request_query_data_item_get_without_preload_content(
         self,
-        item_name: Annotated[Optional[StrictStr], Field(description="could be empty, in which case the first 1000 items are returned.")] = None,
-        oid: Annotated[Optional[StrictStr], Field(description="Return data_items referred to by the OID provided.")] = None,
-        uid: Annotated[Optional[StrictStr], Field(description="Return data_item referred to by the UID provided.")] = None,
-        params: Annotated[Optional[StrictStr], Field(description="specify the query parameters")] = None,
+        item_name: Annotated[
+            Optional[StrictStr],
+            Field(description="could be empty, in which case the first 1000 items are returned."),
+        ] = None,
+        oid: Annotated[
+            Optional[StrictStr],
+            Field(description="Return data_items referred to by the OID provided."),
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr],
+            Field(description="Return data_item referred to by the UID provided."),
+        ] = None,
+        params: Annotated[
+            Optional[StrictStr], Field(description="specify the query parameters")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -250,7 +262,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_data_item_request_query_data_item_get_serialize(
             item_name=item_name,
@@ -260,19 +272,15 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _query_data_item_request_query_data_item_get_serialize(
         self,
@@ -288,8 +296,7 @@ class RequestApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -301,42 +308,35 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-            
-            _query_params.append(('item_name', item_name))
-            
+
+            _query_params.append(("item_name", item_name))
+
         if oid is not None:
-            
-            _query_params.append(('oid', oid))
-            
+
+            _query_params.append(("oid", oid))
+
         if uid is not None:
-            
-            _query_params.append(('uid', uid))
-            
+
+            _query_params.append(("uid", uid))
+
         if params is not None:
-            
-            _query_params.append(('params', params))
-            
+
+            _query_params.append(("params", params))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/request/query_data_item',
+            method="GET",
+            resource_path="/request/query_data_item",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -346,23 +346,19 @@ class RequestApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def query_deleted_request_query_deleted_get(
         self,
-        uid: Annotated[Optional[StrictStr], Field(description="The UID to be checked, optional.")] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="The UID to be checked, optional.")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -395,42 +391,37 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_deleted_request_query_deleted_get_serialize(
             uid=uid,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def query_deleted_request_query_deleted_get_with_http_info(
         self,
-        uid: Annotated[Optional[StrictStr], Field(description="The UID to be checked, optional.")] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="The UID to be checked, optional.")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -463,42 +454,37 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_deleted_request_query_deleted_get_serialize(
             uid=uid,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def query_deleted_request_query_deleted_get_without_preload_content(
         self,
-        uid: Annotated[Optional[StrictStr], Field(description="The UID to be checked, optional.")] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="The UID to be checked, optional.")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -531,26 +517,22 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_deleted_request_query_deleted_get_serialize(
             uid=uid,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _query_deleted_request_query_deleted_get_serialize(
         self,
@@ -563,8 +545,7 @@ class RequestApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -576,30 +557,23 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if uid is not None:
-            
-            _query_params.append(('uid', uid))
-            
+
+            _query_params.append(("uid", uid))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/request/query_deleted',
+            method="GET",
+            resource_path="/request/query_deleted",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -609,25 +583,23 @@ class RequestApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def query_exists_and_ready_request_query_exist_and_ready_get(
         self,
         item_name: Annotated[Optional[StrictStr], Field(description="optional item_name")] = None,
-        oid: Annotated[Optional[StrictStr], Field(description="the oid to be searched for")] = None,
-        uid: Annotated[Optional[StrictStr], Field(description="this returns only one storage_id")] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the oid to be searched for")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="this returns only one storage_id")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -664,7 +636,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_exists_and_ready_request_query_exist_and_ready_get_serialize(
             item_name=item_name,
@@ -673,37 +645,34 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def query_exists_and_ready_request_query_exist_and_ready_get_with_http_info(
         self,
         item_name: Annotated[Optional[StrictStr], Field(description="optional item_name")] = None,
-        oid: Annotated[Optional[StrictStr], Field(description="the oid to be searched for")] = None,
-        uid: Annotated[Optional[StrictStr], Field(description="this returns only one storage_id")] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the oid to be searched for")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="this returns only one storage_id")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -740,7 +709,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_exists_and_ready_request_query_exist_and_ready_get_serialize(
             item_name=item_name,
@@ -749,37 +718,34 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def query_exists_and_ready_request_query_exist_and_ready_get_without_preload_content(
         self,
         item_name: Annotated[Optional[StrictStr], Field(description="optional item_name")] = None,
-        oid: Annotated[Optional[StrictStr], Field(description="the oid to be searched for")] = None,
-        uid: Annotated[Optional[StrictStr], Field(description="this returns only one storage_id")] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the oid to be searched for")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="this returns only one storage_id")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -816,7 +782,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_exists_and_ready_request_query_exist_and_ready_get_serialize(
             item_name=item_name,
@@ -825,19 +791,15 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _query_exists_and_ready_request_query_exist_and_ready_get_serialize(
         self,
@@ -852,8 +814,7 @@ class RequestApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -865,38 +826,31 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-            
-            _query_params.append(('item_name', item_name))
-            
+
+            _query_params.append(("item_name", item_name))
+
         if oid is not None:
-            
-            _query_params.append(('oid', oid))
-            
+
+            _query_params.append(("oid", oid))
+
         if uid is not None:
-            
-            _query_params.append(('uid', uid))
-            
+
+            _query_params.append(("uid", uid))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/request/query_exist_and_ready',
+            method="GET",
+            resource_path="/request/query_exist_and_ready",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -906,26 +860,24 @@ class RequestApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def query_exists_request_query_exists_get(
         self,
         item_name: Annotated[Optional[StrictStr], Field(description="optional item_name")] = None,
-        oid: Annotated[Optional[StrictStr], Field(description="the oid to be searched for")] = None,
-        uid: Annotated[Optional[StrictStr], Field(description="this returns only one storage_id")] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the oid to be searched for")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="this returns only one storage_id")
+        ] = None,
         body: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -964,7 +916,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_exists_request_query_exists_get_serialize(
             item_name=item_name,
@@ -974,38 +926,35 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def query_exists_request_query_exists_get_with_http_info(
         self,
         item_name: Annotated[Optional[StrictStr], Field(description="optional item_name")] = None,
-        oid: Annotated[Optional[StrictStr], Field(description="the oid to be searched for")] = None,
-        uid: Annotated[Optional[StrictStr], Field(description="this returns only one storage_id")] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the oid to be searched for")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="this returns only one storage_id")
+        ] = None,
         body: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1044,7 +993,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_exists_request_query_exists_get_serialize(
             item_name=item_name,
@@ -1054,38 +1003,35 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def query_exists_request_query_exists_get_without_preload_content(
         self,
         item_name: Annotated[Optional[StrictStr], Field(description="optional item_name")] = None,
-        oid: Annotated[Optional[StrictStr], Field(description="the oid to be searched for")] = None,
-        uid: Annotated[Optional[StrictStr], Field(description="this returns only one storage_id")] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the oid to be searched for")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="this returns only one storage_id")
+        ] = None,
         body: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1124,7 +1070,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_exists_request_query_exists_get_serialize(
             item_name=item_name,
@@ -1134,19 +1080,15 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _query_exists_request_query_exists_get_serialize(
         self,
@@ -1162,8 +1104,7 @@ class RequestApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -1175,53 +1116,43 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-            
-            _query_params.append(('item_name', item_name))
-            
+
+            _query_params.append(("item_name", item_name))
+
         if oid is not None:
-            
-            _query_params.append(('oid', oid))
-            
+
+            _query_params.append(("oid", oid))
+
         if uid is not None:
-            
-            _query_params.append(('uid', uid))
-            
+
+            _query_params.append(("uid", uid))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
         if body is not None:
             _body_params = body
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
+            _default_content_type = self.api_client.select_header_content_type(
+                ["application/json"]
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/request/query_exists',
+            method="GET",
+            resource_path="/request/query_exists",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1231,23 +1162,19 @@ class RequestApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def query_expired_request_query_expired_get(
         self,
-        offset: Annotated[Optional[StrictStr], Field(description="optional offset for the query")] = None,
+        offset: Annotated[
+            Optional[StrictStr], Field(description="optional offset for the query")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1280,42 +1207,37 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_expired_request_query_expired_get_serialize(
             offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def query_expired_request_query_expired_get_with_http_info(
         self,
-        offset: Annotated[Optional[StrictStr], Field(description="optional offset for the query")] = None,
+        offset: Annotated[
+            Optional[StrictStr], Field(description="optional offset for the query")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1348,42 +1270,37 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_expired_request_query_expired_get_serialize(
             offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def query_expired_request_query_expired_get_without_preload_content(
         self,
-        offset: Annotated[Optional[StrictStr], Field(description="optional offset for the query")] = None,
+        offset: Annotated[
+            Optional[StrictStr], Field(description="optional offset for the query")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1416,26 +1333,22 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_expired_request_query_expired_get_serialize(
             offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _query_expired_request_query_expired_get_serialize(
         self,
@@ -1448,8 +1361,7 @@ class RequestApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -1461,30 +1373,23 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if offset is not None:
-            
-            _query_params.append(('offset', offset))
-            
+
+            _query_params.append(("offset", offset))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/request/query_expired',
+            method="GET",
+            resource_path="/request/query_expired",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1494,25 +1399,23 @@ class RequestApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def query_item_storage_request_query_item_storage_get(
         self,
         item_name: Annotated[Optional[StrictStr], Field(description="optional item_name")] = None,
-        oid: Annotated[Optional[StrictStr], Field(description="the oid to be searched for")] = None,
-        uid: Annotated[Optional[StrictStr], Field(description="this returns only one storage_id")] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the oid to be searched for")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="this returns only one storage_id")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1549,7 +1452,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_item_storage_request_query_item_storage_get_serialize(
             item_name=item_name,
@@ -1558,37 +1461,34 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def query_item_storage_request_query_item_storage_get_with_http_info(
         self,
         item_name: Annotated[Optional[StrictStr], Field(description="optional item_name")] = None,
-        oid: Annotated[Optional[StrictStr], Field(description="the oid to be searched for")] = None,
-        uid: Annotated[Optional[StrictStr], Field(description="this returns only one storage_id")] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the oid to be searched for")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="this returns only one storage_id")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1625,7 +1525,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_item_storage_request_query_item_storage_get_serialize(
             item_name=item_name,
@@ -1634,37 +1534,34 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def query_item_storage_request_query_item_storage_get_without_preload_content(
         self,
         item_name: Annotated[Optional[StrictStr], Field(description="optional item_name")] = None,
-        oid: Annotated[Optional[StrictStr], Field(description="the oid to be searched for")] = None,
-        uid: Annotated[Optional[StrictStr], Field(description="this returns only one storage_id")] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the oid to be searched for")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="this returns only one storage_id")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1701,7 +1598,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_item_storage_request_query_item_storage_get_serialize(
             item_name=item_name,
@@ -1710,19 +1607,15 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _query_item_storage_request_query_item_storage_get_serialize(
         self,
@@ -1737,8 +1630,7 @@ class RequestApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -1750,38 +1642,31 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-            
-            _query_params.append(('item_name', item_name))
-            
+
+            _query_params.append(("item_name", item_name))
+
         if oid is not None:
-            
-            _query_params.append(('oid', oid))
-            
+
+            _query_params.append(("oid", oid))
+
         if uid is not None:
-            
-            _query_params.append(('uid', uid))
-            
+
+            _query_params.append(("uid", uid))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/request/query_item_storage',
+            method="GET",
+            resource_path="/request/query_item_storage",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1791,24 +1676,20 @@ class RequestApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def query_new_request_query_new_get(
         self,
         check_date: Annotated[StrictStr, Field(description="the UTC starting date (exclusive)")],
-        uid: Annotated[Optional[StrictStr], Field(description="The UID to be checked, optional.")] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="The UID to be checked, optional.")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1843,7 +1724,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_new_request_query_new_get_serialize(
             check_date=check_date,
@@ -1851,36 +1732,31 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def query_new_request_query_new_get_with_http_info(
         self,
         check_date: Annotated[StrictStr, Field(description="the UTC starting date (exclusive)")],
-        uid: Annotated[Optional[StrictStr], Field(description="The UID to be checked, optional.")] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="The UID to be checked, optional.")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1915,7 +1791,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_new_request_query_new_get_serialize(
             check_date=check_date,
@@ -1923,36 +1799,31 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def query_new_request_query_new_get_without_preload_content(
         self,
         check_date: Annotated[StrictStr, Field(description="the UTC starting date (exclusive)")],
-        uid: Annotated[Optional[StrictStr], Field(description="The UID to be checked, optional.")] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="The UID to be checked, optional.")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1987,7 +1858,7 @@ class RequestApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._query_new_request_query_new_get_serialize(
             check_date=check_date,
@@ -1995,19 +1866,15 @@ class RequestApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+            "200": "object",
+            "422": "HTTPValidationError",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _query_new_request_query_new_get_serialize(
         self,
@@ -2021,8 +1888,7 @@ class RequestApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
@@ -2034,34 +1900,27 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if check_date is not None:
-            
-            _query_params.append(('check_date', check_date))
-            
+
+            _query_params.append(("check_date", check_date))
+
         if uid is not None:
-            
-            _query_params.append(('uid', uid))
-            
+
+            _query_params.append(("uid", uid))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-        ]
+        _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/request/query_new',
+            method="GET",
+            resource_path="/request/query_new",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2071,7 +1930,5 @@ class RequestApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
