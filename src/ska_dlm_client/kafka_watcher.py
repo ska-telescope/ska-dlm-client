@@ -36,7 +36,7 @@ def main():
 
 
 async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int = 5):
-    """Starts a Kafka consumer with multiple retries."""
+    """Start a Kafka consumer with multiple retries."""
     attempts = 0
     while attempts < max_retries:
         try:
