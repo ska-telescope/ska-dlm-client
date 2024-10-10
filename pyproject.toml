@@ -49,12 +49,18 @@ max-complexity = 10
 # E203 and W503 conflict with black
 ignore = ["E203", "W503"]
 
+# exlcude for auto generated code
+exclude = ["src/openapi_client_dlm", "tests/openapi_client_dlm"]
+
 [tool.pylint.messages_control]
 disable = [
     "duplicate-code",
     "fixme",
 ]
 enable = ["useless-suppression"]
+
+[tool.pylint.MASTER]
+ignore = "openapi_client_dlm"
 
 [tool.pylint.similarities]
 min-similarity-lines = 7
@@ -63,6 +69,3 @@ ignore-imports = "yes"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.black]
-exclude = 'src\/openapi_client_dlm\/.*|tests\/openapi_client_dlm\/.*\.py'
