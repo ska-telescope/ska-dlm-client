@@ -10,18 +10,10 @@ import pytest_asyncio
 import requests
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
-from src.ska_dlm_client.kafka_watcher import _watch
+from src.ska_dlm_client.kafka_watcher import watch
 
 KAFKA_HOST = "localhost:9092"
 TEST_TOPIC = "test-events"
-
-
-@dataclass
-class Args:
-    """Configuration class for Kafka server and topic."""
-
-    kafka_server = [KAFKA_HOST]
-    kafka_topic = [TEST_TOPIC]
 
 
 @pytest_asyncio.fixture(name="producer")
@@ -101,8 +93,7 @@ async def test_watch_function_success(mock_http_call, mock_start_consumer, mock_
     mock_http_call.return_value = asyncio.Future()
     mock_http_call.return_value.set_result(None)
 
-    args = Args()
-    await _watch(args)
+    await watch(servers=[KAFKA_HOST], topics=[TEST_TOPIC])
 
     # Assert that the HTTP call was made once
     mock_http_call.assert_called_once()
@@ -139,8 +130,7 @@ async def test_watch_function_http_failure(
 
     # Run the test and capture the logs
     with caplog.at_level("ERROR", logger="src.ska_dlm_client.kafka_watcher"):
-        args = Args()
-        await _watch(args)
+        await watch(servers=[KAFKA_HOST], topics=[TEST_TOPIC])
 
         # Check that the error log was captured
         assert len(caplog.records) > 0  # Ensure there's at least one log entry
