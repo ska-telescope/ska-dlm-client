@@ -14,7 +14,7 @@
 
 import unittest
 
-from dlm_api.request_api import RequestApi
+from openapi_client_dlm.dlm_api.request_api import RequestApi
 
 
 class TestRequestApi(unittest.TestCase):

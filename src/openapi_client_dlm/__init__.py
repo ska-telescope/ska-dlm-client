@@ -17,11 +17,11 @@
 __version__ = "1.0.0"
 
 # import apis into sdk package
-from dlm_api.gateway_api import GatewayApi
-from dlm_api.ingest_api import IngestApi
-from dlm_api.migration_api import MigrationApi
-from dlm_api.request_api import RequestApi
-from dlm_api.storage_api import StorageApi
+from openapi_client_dlm.dlm_api.gateway_api import GatewayApi
+from openapi_client_dlm.dlm_api.ingest_api import IngestApi
+from openapi_client_dlm.dlm_api.migration_api import MigrationApi
+from openapi_client_dlm.dlm_api.request_api import RequestApi
+from openapi_client_dlm.dlm_api.storage_api import StorageApi
 
 # import ApiClient
 from openapi_client_dlm.api_response import ApiResponse

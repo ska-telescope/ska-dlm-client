@@ -14,7 +14,7 @@
 
 import unittest
 
-from dlm_api.migration_api import MigrationApi
+from openapi_client_dlm.dlm_api.migration_api import MigrationApi
 
 
 class TestMigrationApi(unittest.TestCase):

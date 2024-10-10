@@ -14,7 +14,7 @@
 
 import unittest
 
-from dlm_api.ingest_api import IngestApi
+from openapi_client_dlm.dlm_api.ingest_api import IngestApi
 
 
 class TestIngestApi(unittest.TestCase):

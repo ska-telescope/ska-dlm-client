@@ -17,6 +17,8 @@ priority = "supplemental"
 
 [tool.poetry.dependencies]
 python = "^3.10"
+pydantic = "^2.9.2"
+python-dateutil = "^2.9.0.post0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"

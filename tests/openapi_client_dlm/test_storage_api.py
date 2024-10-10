@@ -14,7 +14,7 @@
 
 import unittest
 
-from dlm_api.storage_api import StorageApi
+from openapi_client_dlm.dlm_api.storage_api import StorageApi
 
 
 class TestStorageApi(unittest.TestCase):
