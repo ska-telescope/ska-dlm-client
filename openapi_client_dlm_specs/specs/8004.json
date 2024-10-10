@@ -1,0 +1,168 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "SKA-DLM: Migration Manager REST API",
+        "description": "The REST calls accepted by the SKA-DLM Migration Manager",
+        "license": {
+            "name": "BSD-3-Clause",
+            "identifier": "BSD-3-Clause"
+        },
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/migration/copy_data_item": {
+            "get": {
+                "summary": "Copy Data Item",
+                "tags": [
+                    "migration"
+                ],
+                "description": "Copy a data_item from source to destination.\n\nSteps\n(1) get the current storage_id(s) of the item\n(2) convert one(first) storage_id to a configured rclone backend\n(3) check whether item already exists on destination\n(4) initialize the new item with the same OID on the new storage\n(5) use the rclone copy command to copy it to the new location\n(6) make sure the copy was successful",
+                "operationId": "copy_data_item_migration_copy_data_item_get",
+                "parameters": [
+                    {
+                        "name": "item_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "data item name, when empty the first 1000 items are returned, by default \"\"",
+                            "default": "",
+                            "title": "Item Name"
+                        },
+                        "description": "data item name, when empty the first 1000 items are returned, by default \"\""
+                    },
+                    {
+                        "name": "oid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "object id, Return data_items referred to by the OID provided, by default \"\"",
+                            "default": "",
+                            "title": "Oid"
+                        },
+                        "description": "object id, Return data_items referred to by the OID provided, by default \"\""
+                    },
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "Return data_item referred to by the UID provided, by default \"\"",
+                            "default": "",
+                            "title": "Uid"
+                        },
+                        "description": "Return data_item referred to by the UID provided, by default \"\""
+                    },
+                    {
+                        "name": "destination_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the name of the destination storage volume, by default \"\"",
+                            "default": "",
+                            "title": "Destination Name"
+                        },
+                        "description": "the name of the destination storage volume, by default \"\""
+                    },
+                    {
+                        "name": "destination_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the destination storage, by default \"\"",
+                            "default": "",
+                            "title": "Destination Id"
+                        },
+                        "description": "the destination storage, by default \"\""
+                    },
+                    {
+                        "name": "path",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the destination path, by default \"\"",
+                            "default": "",
+                            "title": "Path"
+                        },
+                        "description": "the destination path, by default \"\""
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}

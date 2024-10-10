@@ -1,0 +1,516 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "SKA-DLM: Request Manager REST API",
+        "description": "The REST calls accepted by the SKA-DLM Request Manager",
+        "license": {
+            "name": "BSD-3-Clause",
+            "identifier": "BSD-3-Clause"
+        },
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/request/query_data_item": {
+            "get": {
+                "summary": "Query Data Item",
+                "tags": [
+                    "request"
+                ],
+                "description": "Query a new data_item by at least specifying an item_name.",
+                "operationId": "query_data_item_request_query_data_item_get",
+                "parameters": [
+                    {
+                        "name": "item_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "could be empty, in which case the first 1000 items are returned.",
+                            "default": "",
+                            "title": "Item Name"
+                        },
+                        "description": "could be empty, in which case the first 1000 items are returned."
+                    },
+                    {
+                        "name": "oid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "Return data_items referred to by the OID provided.",
+                            "default": "",
+                            "title": "Oid"
+                        },
+                        "description": "Return data_items referred to by the OID provided."
+                    },
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "Return data_item referred to by the UID provided.",
+                            "default": "",
+                            "title": "Uid"
+                        },
+                        "description": "Return data_item referred to by the UID provided."
+                    },
+                    {
+                        "name": "params",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "specify the query parameters",
+                            "title": "Params"
+                        },
+                        "description": "specify the query parameters"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/query_expired": {
+            "get": {
+                "summary": "Query Expired",
+                "tags": [
+                    "request"
+                ],
+                "description": "Query for all expired data_items using the uid_expiration timestamp.",
+                "operationId": "query_expired_request_query_expired_get",
+                "parameters": [
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "format": "duration"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "optional offset for the query",
+                            "title": "Offset"
+                        },
+                        "description": "optional offset for the query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/query_deleted": {
+            "get": {
+                "summary": "Query Deleted",
+                "tags": [
+                    "request"
+                ],
+                "description": "Query for all deleted data_items using the deleted state.",
+                "operationId": "query_deleted_request_query_deleted_get",
+                "parameters": [
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "The UID to be checked, optional.",
+                            "default": "",
+                            "title": "Uid"
+                        },
+                        "description": "The UID to be checked, optional."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/query_new": {
+            "get": {
+                "summary": "Query New",
+                "tags": [
+                    "request"
+                ],
+                "description": "Query for all data_items newer than the date provided.",
+                "operationId": "query_new_request_query_new_get",
+                "parameters": [
+                    {
+                        "name": "check_date",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "the UTC starting date (exclusive)",
+                            "title": "Check Date"
+                        },
+                        "description": "the UTC starting date (exclusive)"
+                    },
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "The UID to be checked, optional.",
+                            "default": "",
+                            "title": "Uid"
+                        },
+                        "description": "The UID to be checked, optional."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/query_exists": {
+            "get": {
+                "summary": "Query Exists",
+                "tags": [
+                    "request"
+                ],
+                "description": "Query to check for existence of a data_item.",
+                "operationId": "query_exists_request_query_exists_get",
+                "parameters": [
+                    {
+                        "name": "item_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "optional item_name",
+                            "default": "",
+                            "title": "Item Name"
+                        },
+                        "description": "optional item_name"
+                    },
+                    {
+                        "name": "oid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the oid to be searched for",
+                            "default": "",
+                            "title": "Oid"
+                        },
+                        "description": "the oid to be searched for"
+                    },
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "this returns only one storage_id",
+                            "default": "",
+                            "title": "Uid"
+                        },
+                        "description": "this returns only one storage_id"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "boolean",
+                                "description": "whether the item must be in ready state.",
+                                "default": false,
+                                "title": "Ready"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/query_exist_and_ready": {
+            "get": {
+                "summary": "Query Exists And Ready",
+                "tags": [
+                    "request"
+                ],
+                "description": "Check whether a data_item exists and is in ready state.",
+                "operationId": "query_exists_and_ready_request_query_exist_and_ready_get",
+                "parameters": [
+                    {
+                        "name": "item_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "optional item_name",
+                            "default": "",
+                            "title": "Item Name"
+                        },
+                        "description": "optional item_name"
+                    },
+                    {
+                        "name": "oid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the oid to be searched for",
+                            "default": "",
+                            "title": "Oid"
+                        },
+                        "description": "the oid to be searched for"
+                    },
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "this returns only one storage_id",
+                            "default": "",
+                            "title": "Uid"
+                        },
+                        "description": "this returns only one storage_id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/query_item_storage": {
+            "get": {
+                "summary": "Query Item Storage",
+                "tags": [
+                    "request"
+                ],
+                "description": "Query for the storage_ids of all backends holding a copy of a data_item.\n\nEither an item_name or a OID have to be provided.",
+                "operationId": "query_item_storage_request_query_item_storage_get",
+                "parameters": [
+                    {
+                        "name": "item_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "optional item_name",
+                            "default": "",
+                            "title": "Item Name"
+                        },
+                        "description": "optional item_name"
+                    },
+                    {
+                        "name": "oid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the oid to be searched for",
+                            "default": "",
+                            "title": "Oid"
+                        },
+                        "description": "the oid to be searched for"
+                    },
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "this returns only one storage_id",
+                            "default": "",
+                            "title": "Uid"
+                        },
+                        "description": "this returns only one storage_id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}

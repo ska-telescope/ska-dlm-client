@@ -1,0 +1,509 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "SKA-DLM: Storage Manager REST API",
+        "description": "The REST calls accepted by the SKA-DLM Storage Manager",
+        "license": {
+            "name": "BSD-3-Clause",
+            "identifier": "BSD-3-Clause"
+        },
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/storage/query_location": {
+            "get": {
+                "summary": "Query Location",
+                "tags": [
+                    "storage"
+                ],
+                "description": "Query a location by at least specifying an location_name.",
+                "operationId": "query_location_storage_query_location_get",
+                "parameters": [
+                    {
+                        "name": "location_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "could be empty, in which case the first 1000 items are returned",
+                            "default": "",
+                            "title": "Location Name"
+                        },
+                        "description": "could be empty, in which case the first 1000 items are returned"
+                    },
+                    {
+                        "name": "location_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "Return locations referred to by the location_id provided.",
+                            "default": "",
+                            "title": "Location Id"
+                        },
+                        "description": "Return locations referred to by the location_id provided."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/storage/init_storage": {
+            "post": {
+                "summary": "Init Storage",
+                "tags": [
+                    "storage"
+                ],
+                "description": "Intialize a new storage by at least specifying an item_name.",
+                "operationId": "init_storage_storage_init_storage_post",
+                "parameters": [
+                    {
+                        "name": "storage_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "_description_",
+                            "default": "",
+                            "title": "Storage Name"
+                        },
+                        "description": "_description_"
+                    },
+                    {
+                        "name": "location_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "_description_",
+                            "default": "",
+                            "title": "Location Name"
+                        },
+                        "description": "_description_"
+                    },
+                    {
+                        "name": "location_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "_description_",
+                            "default": "",
+                            "title": "Location Id"
+                        },
+                        "description": "_description_"
+                    },
+                    {
+                        "name": "storage_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "_description_",
+                            "default": "",
+                            "title": "Storage Type"
+                        },
+                        "description": "_description_"
+                    },
+                    {
+                        "name": "storage_interface",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "_description_",
+                            "default": "",
+                            "title": "Storage Interface"
+                        },
+                        "description": "_description_"
+                    },
+                    {
+                        "name": "storage_capacity",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "description": "_description_",
+                            "default": -1,
+                            "title": "Storage Capacity"
+                        },
+                        "description": "_description_"
+                    },
+                    {
+                        "name": "storage_phase_level",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "_description_",
+                            "default": "GAS",
+                            "title": "Storage Phase Level"
+                        },
+                        "description": "_description_"
+                    },
+                    {
+                        "name": "json_data",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "_description_",
+                            "default": "",
+                            "title": "Json Data"
+                        },
+                        "description": "_description_"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/storage/create_storage_config": {
+            "post": {
+                "summary": "Create Storage Config",
+                "tags": [
+                    "storage"
+                ],
+                "description": "Create a new record in the storage_config table for a storage with the given id.",
+                "operationId": "create_storage_config_storage_create_storage_config_post",
+                "parameters": [
+                    {
+                        "name": "storage_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the storage_id for which to create the entry.",
+                            "default": "",
+                            "title": "Storage Id"
+                        },
+                        "description": "the storage_id for which to create the entry."
+                    },
+                    {
+                        "name": "config",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the configuration entry. For rclone this is s JSON formatted string",
+                            "default": "",
+                            "title": "Config"
+                        },
+                        "description": "the configuration entry. For rclone this is s JSON formatted string"
+                    },
+                    {
+                        "name": "storage_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the name of the storage for which the config is provided.",
+                            "default": "",
+                            "title": "Storage Name"
+                        },
+                        "description": "the name of the storage for which the config is provided."
+                    },
+                    {
+                        "name": "config_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "default is rclone, but could be something else in the future.",
+                            "default": "rclone",
+                            "title": "Config Type"
+                        },
+                        "description": "default is rclone, but could be something else in the future."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/storage/rclone_config": {
+            "post": {
+                "summary": "Rclone Config",
+                "tags": [
+                    "storage"
+                ],
+                "description": "Create a new rclone backend configuration entry on the rclone server.",
+                "operationId": "rclone_config_storage_rclone_config_post",
+                "parameters": [
+                    {
+                        "name": "config",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "a json string containing the configuration",
+                            "title": "Config"
+                        },
+                        "description": "a json string containing the configuration"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/storage/init_location": {
+            "post": {
+                "summary": "Init Location",
+                "tags": [
+                    "storage"
+                ],
+                "description": "Initialize a new location for a storage by specifying the location_name or location_id.",
+                "operationId": "init_location_storage_init_location_post",
+                "parameters": [
+                    {
+                        "name": "location_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "title": "Location Name"
+                        }
+                    },
+                    {
+                        "name": "location_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "title": "Location Type"
+                        }
+                    },
+                    {
+                        "name": "location_country",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "title": "Location Country"
+                        }
+                    },
+                    {
+                        "name": "location_city",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "title": "Location City"
+                        }
+                    },
+                    {
+                        "name": "location_facility",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "title": "Location Facility"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/storage/query_storage": {
+            "get": {
+                "summary": "Query Storage",
+                "tags": [
+                    "storage"
+                ],
+                "description": "Query a storage by at least specifying a storage_name.",
+                "operationId": "query_storage_storage_query_storage_get",
+                "parameters": [
+                    {
+                        "name": "storage_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "could be empty, in which case the first 1000 items are returned",
+                            "default": "",
+                            "title": "Storage Name"
+                        },
+                        "description": "could be empty, in which case the first 1000 items are returned"
+                    },
+                    {
+                        "name": "storage_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "Return locations referred to by the location_id provided.",
+                            "default": "",
+                            "title": "Storage Id"
+                        },
+                        "description": "Return locations referred to by the location_id provided."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}

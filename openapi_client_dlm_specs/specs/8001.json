@@ -1,0 +1,308 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "SKA-DLM: Ingest Manager REST API",
+        "description": "The REST calls accepted by the SKA-DLM Ingest Manager",
+        "license": {
+            "name": "BSD-3-Clause",
+            "identifier": "BSD-3-Clause"
+        },
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/ingest/init_data_item": {
+            "post": {
+                "summary": "Init Data Item",
+                "tags": [
+                    "ingest"
+                ],
+                "description": "Intialize a new data_item by at least specifying an item_name.",
+                "operationId": "init_data_item_ingest_init_data_item_post",
+                "parameters": [
+                    {
+                        "name": "item_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the item_name, can be empty, but then json_data has to be specified.",
+                            "default": "",
+                            "title": "Item Name"
+                        },
+                        "description": "the item_name, can be empty, but then json_data has to be specified."
+                    },
+                    {
+                        "name": "phase",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the phase this item is set to (usually inherited from the storage)",
+                            "default": "GAS",
+                            "title": "Phase"
+                        },
+                        "description": "the phase this item is set to (usually inherited from the storage)"
+                    },
+                    {
+                        "name": "authorization",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Validated Bearer token with UserInfo",
+                            "title": "Authorization"
+                        },
+                        "description": "Validated Bearer token with UserInfo"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "anyOf": [
+                                    {
+                                        "type": "object"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "description": "provides the ability to specify all values.",
+                                "title": "Json Data"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ingest/register_data_item": {
+            "post": {
+                "summary": "Register Data Item",
+                "tags": [
+                    "ingest"
+                ],
+                "description": "Ingest a data_item (register function is an alias).\n\nThis high level function is a combination of init_data_item, set_uri and set_state(READY).\nIt also checks whether a data_item is already registered on the requested storage.\n\n(1) check whether requested storage is known and accessible\n(2) check whether item is accessible/exists on that storage\n(3) check whether item is already registered on that storage\n(4) initialize the new item with the same OID on the new storage\n(5) set state to READY\n(6) generate metadata\n(7) notify the data dashboard",
+                "operationId": "register_data_item_ingest_register_data_item_post",
+                "parameters": [
+                    {
+                        "name": "item_name",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "could be empty, in which case the first 1000 items are returned",
+                            "title": "Item Name"
+                        },
+                        "description": "could be empty, in which case the first 1000 items are returned"
+                    },
+                    {
+                        "name": "uri",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the access path to the payload.",
+                            "default": "",
+                            "title": "Uri"
+                        },
+                        "description": "the access path to the payload."
+                    },
+                    {
+                        "name": "storage_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the name of the configured storage volume (name or ID required)",
+                            "default": "",
+                            "title": "Storage Name"
+                        },
+                        "description": "the name of the configured storage volume (name or ID required)"
+                    },
+                    {
+                        "name": "storage_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the ID of the configured storage.",
+                            "default": "",
+                            "title": "Storage Id"
+                        },
+                        "description": "the ID of the configured storage."
+                    },
+                    {
+                        "name": "item_format",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "format of the data item",
+                            "default": "unknown",
+                            "title": "Item Format"
+                        },
+                        "description": "format of the data item"
+                    },
+                    {
+                        "name": "eb_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "execution block ID provided by the client",
+                            "title": "Eb Id"
+                        },
+                        "description": "execution block ID provided by the client"
+                    },
+                    {
+                        "name": "authorization",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Validated Bearer token with UserInfo",
+                            "title": "Authorization"
+                        },
+                        "description": "Validated Bearer token with UserInfo"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "anyOf": [
+                                    {
+                                        "type": "object"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "description": "metadata provided by the client",
+                                "title": "Metadata"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}
