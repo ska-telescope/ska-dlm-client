@@ -51,7 +51,7 @@ async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int 
 
 async def post_dlm_data_item(data):
     """Stub HTTP POST call to DLM."""
-    # Use requests_mock to simulate an HTTP call
+    # Use requests library to simulate an HTTP call
     response = requests.post("http://dlm/api", json=data, timeout=5)
     logger.info("Mock HTTP call completed with status code: %d", response.status_code)
     logger.info("Response content: %s", response.json())
