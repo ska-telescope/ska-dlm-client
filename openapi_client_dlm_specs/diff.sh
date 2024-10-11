@@ -1,11 +1,11 @@
 #!/bin/bash
-echo Do diff on 8000
-diff 8000.json specs/8000.json
-echo \\nDo diff on 8001
-diff 8001.json specs/8001.json
-echo \\nDo diff on 8002
-diff 8002.json specs/8002.json
-echo \\nDo diff on 8003
-diff 8003.json specs/8003.json
-echo \\nDo diff on 8004
-diff 8004.json specs/8004.json
+echo Do diff on gateway_spec
+diff gateway_spec.json specs/gateway_spec.json
+echo \\nDo diff on ingest_spec
+diff ingest_spec.json specs/ingest_spec.json
+echo \\nDo diff on request_spec
+diff request_spec.json specs/request_spec.json
+echo \\nDo diff on storage_spec
+diff storage_spec.json specs/storage_spec.json
+echo \\nDo diff on migration_spec
+diff migration_spec.json specs/migration_spec.json

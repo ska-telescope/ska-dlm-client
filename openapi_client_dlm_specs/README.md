@@ -4,11 +4,11 @@ To generate openapi-client code first ensure DLM services are running and access
 Next copy the json spec files.
 
 ```sh
-curl -H "Accept: application/json" -X GET http://localhost:8000/openapi.json -o specs/8000.json
-curl -H "Accept: application/json" -X GET http://localhost:8001/openapi.json -o specs/8001.json
-curl -H "Accept: application/json" -X GET http://localhost:8002/openapi.json -o specs/8002.json
-curl -H "Accept: application/json" -X GET http://localhost:8003/openapi.json -o specs/8003.json
-curl -H "Accept: application/json" -X GET http://localhost:8004/openapi.json -o specs/8004.json
+curl -H "Accept: application/json" -X GET http://localhost:8000/openapi.json -o specs/gateway_spec.json
+curl -H "Accept: application/json" -X GET http://localhost:8001/openapi.json -o specs/ingest_spec.json
+curl -H "Accept: application/json" -X GET http://localhost:8002/openapi.json -o specs/request_spec.json
+curl -H "Accept: application/json" -X GET http://localhost:8003/openapi.json -o specs/storage_spec.json
+curl -H "Accept: application/json" -X GET http://localhost:8004/openapi.json -o specs/migration_spec.json
 ```
 
 and copy into "specs" directory for passing to openapi-generator
@@ -39,14 +39,3 @@ Run the following to fix isort complaining during lint
 isort --profile black --line-length 99 src/openapi_client_dlm tests/openapi_client_dlm
 black --exclude .+\.ipynb --line-length 99  src/openapi_client_dlm tests/openapi_client_dlm/
 ```
-
-
-
-Original version of this
-
-```sh
-openapi-generator generate --generator-name python-pydantic-v1 -i dlm.json
-```
-dlm.json was retrieved from the DLM REST api
-
-http://127.0.0.1:3000/openapi.json
