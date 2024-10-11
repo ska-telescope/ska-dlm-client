@@ -1,3 +1,7 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "ska-dlm-client"
 version = "0.0.1"
@@ -19,7 +23,7 @@ priority = "supplemental"
 python = "^3.10"
 aiokafka = "0.10.0"
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.group.test.dependencies]
 black = "^24.8.0"
 flake8 = "^7.1.1"
 isort = "^5.12.0"
@@ -43,14 +47,11 @@ sphinx-autodoc-typehints = ">=1.23.0"
 addopts = "-v"
 
 [tool.flake8]
-docstring-style = "sphinx"
+docstring-style = "google"
 rst-directives = "literalinclude"
-rst-roles = ["py:attr", "py:class", "py:const", "py:exc", "py:func", "py:meth", "py:mod"]
-enable = "DAR104"
+ignore = ['F401', 'W503']
 max-complexity = 10
-
-# E203 and W503 conflict with black
-ignore = ["E203", "W503"]
+max-line-length = 180
 
 [tool.pylint.messages_control]
 disable = [
@@ -59,10 +60,15 @@ disable = [
 ]
 enable = ["useless-suppression"]
 
+[tool.isort]
+line_length = 99
+
+[tool.black]
+line-length = 99
+
+[tool.pylint.format]
+max-line-length = 99
+
 [tool.pylint.similarities]
 min-similarity-lines = 7
 ignore-imports = "yes"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

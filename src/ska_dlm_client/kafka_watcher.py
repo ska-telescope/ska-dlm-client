@@ -7,7 +7,6 @@ import logging
 
 import aiokafka
 import requests
-import requests_mock
 
 logging.basicConfig(level=logging.INFO)
 
@@ -31,8 +30,7 @@ def main():
     )
 
     args = parser.parse_args()
-
-    asyncio.run(_watch(args))
+    asyncio.run(watch(args.kafka_server, args.kafka_topics))
 
 
 async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int = 5):
@@ -46,30 +44,31 @@ async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int 
             attempts += 1
             if attempts >= max_retries:
                 raise aiokafka.errors.KafkaError(
-                    "Failed to connect to Kafka after max retries"
+                    f"Failed to connect to Kafka after {max_retries} retries"
                 ) from e
-            await asyncio.sleep(1)  # Use await for proper async sleep
-    return False  # Should never reach here if max_retries is handled correctly
+            await asyncio.sleep(1)
 
 
-async def mock_http_call(data):
-    """Stub function to simulate an HTTP POST call to DLM."""
+async def post_dlm_data_item(data):
+    """Stub HTTP POST call to DLM."""
     # Use requests_mock to simulate an HTTP call
-    with requests_mock.Mocker() as m:
-        m.post("http://dlm/api", json={"success": True})
-
-        response = requests.post("http://dlm/api", json=data, timeout=5)
-
-        logger.info("Mock HTTP call completed with status code: %d", response.status_code)
-        logger.info("Response content: %s", response.json())
+    response = requests.post("http://dlm/api", json=data, timeout=5)
+    logger.info("Mock HTTP call completed with status code: %d", response.status_code)
+    logger.info("Response content: %s", response.json())
 
 
-async def _watch(args):
-    """Start watching the given Kafka topic."""
-    logger.debug("Connecting to Kafka server(s): %s", ", ".join(args.kafka_server))
-    logger.info("Watching %s topic(s) for dataproducts to process", ", ".join(args.kafka_topic))
+async def watch(servers: list[str], topics: list[str]):
+    """
+    Asynchronously consumes data product, create events from data queues, and notifies DLM.
 
-    consumer = aiokafka.AIOKafkaConsumer(*args.kafka_topic, bootstrap_servers=args.kafka_server)
+    Args:
+        servers (list[str]): Data queue servers.
+        topics (list[str]): Data queue topics.
+    """
+    logger.debug("Connecting to Kafka server(s): %s", ", ".join(servers))
+    logger.info("Watching %s topic(s) for dataproducts to process", ", ".join(topics))
+
+    consumer = aiokafka.AIOKafkaConsumer(*topics, bootstrap_servers=servers)
 
     # Attempt to start the consumer once
     await _start_consumer(consumer)
@@ -81,10 +80,10 @@ async def _watch(args):
                 logger.info("Consuming JSON message: %s", data)
 
                 # Call the HTTP function (to be handled separately)
-                await mock_http_call(data)
+                await post_dlm_data_item(data)
 
             except requests.exceptions.RequestException as e:
-                logger.error("HTTP call failed: %s", e)
+                logger.error("Notifying DLM failed: %s", e)
 
             except json.JSONDecodeError:
                 logger.warning(
@@ -96,5 +95,5 @@ async def _watch(args):
 
 
 if __name__ == "__main__":
-    # NOTE: we call main() here, and then let main() call _watch()
+    # NOTE: we call main() here, and then let main() call watch()
     main()

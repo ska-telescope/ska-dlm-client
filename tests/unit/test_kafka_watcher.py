@@ -2,26 +2,20 @@
 
 import asyncio
 import json
-from dataclasses import dataclass
 from unittest import mock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import pytest_asyncio
+import pytest_mock
 import requests
+import requests_mock as rm
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
-from src.ska_dlm_client.kafka_watcher import _watch
+from src.ska_dlm_client.kafka_watcher import watch
 
 KAFKA_HOST = "localhost:9092"
 TEST_TOPIC = "test-events"
-
-
-@dataclass
-class Args:
-    """Configuration class for Kafka server and topic."""
-
-    kafka_server = [KAFKA_HOST]
-    kafka_topic = [TEST_TOPIC]
 
 
 @pytest_asyncio.fixture(name="producer")
@@ -79,78 +73,62 @@ async def receive_messages(consumer: AIOKafkaConsumer, max_num_messages: int) ->
             return messages
 
 
-@pytest.mark.asyncio
-@mock.patch("aiokafka.AIOKafkaConsumer")
-@mock.patch("src.ska_dlm_client.kafka_watcher._start_consumer")
-@mock.patch("src.ska_dlm_client.kafka_watcher.mock_http_call")  # Mock the HTTP call
-async def test_watch_function_success(mock_http_call, mock_start_consumer, mock_kafka_consumer):
-    """Test that the _watch function correctly handles a successful HTTP call."""
-    # Create a mock for the Kafka consumer and simulate message consumption
-    kafka_instance = mock_kafka_consumer.return_value
-    kafka_instance.__aiter__.return_value = [
+@pytest.fixture(name="mock_kafka_consumer")
+def mock_kafka_consumer_fixture(mocker: pytest_mock.MockerFixture):
+    """Create a mock for the Kafka consumer and simulate a single message."""
+    mock_kafka_consumer = mocker.patch("aiokafka.AIOKafkaConsumer")
+    mock_kafka_consumer_instance = mock_kafka_consumer.return_value
+    mock_kafka_consumer_instance.start = AsyncMock()
+    mock_kafka_consumer_instance.stop = AsyncMock()
+    mock_kafka_consumer_instance.__aiter__.return_value = [
         mock.Mock(value=json.dumps({"key": "value"}).encode("utf-8"))
     ]
+    yield mock_kafka_consumer_instance
 
-    # Mock consumer.stop() as an async function
-    kafka_instance.stop = mock.AsyncMock()
 
+@pytest.mark.asyncio
+async def test_watch_post_success(requests_mock: rm.Mocker, mock_kafka_consumer: MagicMock):
+    """Test that the watch function correctly handles a successful HTTP call."""
     # Mock _start_consumer to return False first, then True to simulate retry logic
-    mock_start_consumer.side_effect = [False, True]
+    mock_kafka_consumer.start.side_effect = [False, True]
 
     # Mock HTTP call to simulate a 200 response
-    mock_http_call.return_value = asyncio.Future()
-    mock_http_call.return_value.set_result(None)
-
-    args = Args()
-    await _watch(args)
+    requests_mock.post("http://dlm/api", json={"success": True})
+    await watch(servers=[KAFKA_HOST], topics=[TEST_TOPIC])
 
     # Assert that the HTTP call was made once
-    mock_http_call.assert_called_once()
+    assert requests_mock.call_count == 1
 
-    # Ensure it was called with the expected data
-    mock_http_call.assert_called_with({"key": "value"})
+    # Assert the expected data was posted
+    assert requests_mock.request_history[0].json() == {"key": "value"}
 
     # Assert that consumer.stop() was called
-    kafka_instance.stop.assert_called_once()
+    mock_kafka_consumer.stop.assert_called_once()
 
 
 @pytest.mark.asyncio
-@mock.patch("aiokafka.AIOKafkaConsumer")
-@mock.patch("src.ska_dlm_client.kafka_watcher._start_consumer")
-@mock.patch("src.ska_dlm_client.kafka_watcher.mock_http_call")  # Mock the HTTP call
-async def test_watch_function_http_failure(
-    mock_http_call, mock_start_consumer, mock_kafka_consumer, caplog
+async def test_watch_http_failure(
+    requests_mock: rm.Mocker,
+    mock_kafka_consumer: MagicMock,
+    caplog: pytest.LogCaptureFixture,
 ):
-    """Test that the _watch function handles HTTP call failures gracefully."""
-    # Create a mock for the Kafka consumer and simulate message consumption
-    kafka_instance = mock_kafka_consumer.return_value
-    kafka_instance.__aiter__.return_value = [
-        mock.Mock(value=json.dumps({"key": "value"}).encode("utf-8"))
-    ]
-
-    # Mock consumer.stop() as an async function
-    kafka_instance.stop = mock.AsyncMock()
-
-    # Mock _start_consumer to return True (successful connection)
-    mock_start_consumer.side_effect = [True]
-
-    # Mock HTTP call to simulate a failure (e.g., a non-200 response)
-    mock_http_call.side_effect = requests.exceptions.RequestException("HTTP call failed")
-
+    """Test watch function handles HTTP call failures gracefully."""
     # Run the test and capture the logs
-    with caplog.at_level("ERROR", logger="src.ska_dlm_client.kafka_watcher"):
-        args = Args()
-        await _watch(args)
+    with caplog.at_level("ERROR", logger="ska_dlm_client.kafka_watcher"):
+        requests_mock.post(
+            "http://dlm/api", exc=requests.exceptions.RequestException("HTTP call failed")
+        )
+        await watch(servers=[KAFKA_HOST], topics=[TEST_TOPIC])
 
         # Check that the error log was captured
         assert len(caplog.records) > 0  # Ensure there's at least one log entry
         assert "HTTP call failed" in caplog.text  # Check if the error message is present
 
     # Assert that the HTTP call was attempted
-    mock_http_call.assert_called_once()
+    assert requests_mock.call_count == 1
 
     # Ensure it was called with the expected data
-    mock_http_call.assert_called_with({"key": "value"})
+    assert requests_mock.request_history[0].json() == {"key": "value"}
 
     # Assert that consumer.stop() was called even on failure
-    kafka_instance.stop.assert_called_once()
+    mock_kafka_consumer.stop.assert_called_once()
