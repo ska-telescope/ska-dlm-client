@@ -88,7 +88,7 @@ def mock_kafka_consumer_fixture(mocker: pytest_mock.MockerFixture):
 
 @pytest.mark.asyncio
 async def test_watch_post_success(requests_mock: rm.Mocker, mock_kafka_consumer: MagicMock):
-    """Test that the _watch function correctly handles a successful HTTP call."""
+    """Test that the watch function correctly handles a successful HTTP call."""
     # Mock _start_consumer to return False first, then True to simulate retry logic
     mock_kafka_consumer.start.side_effect = [False, True]
 

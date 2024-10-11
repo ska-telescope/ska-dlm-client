@@ -44,7 +44,7 @@ async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int 
             attempts += 1
             if attempts >= max_retries:
                 raise aiokafka.errors.KafkaError(
-                    "Failed to connect to Kafka after max retries"
+                    f"Failed to connect to Kafka after {max_retries} retries"
                 ) from e
             await asyncio.sleep(1)
 
@@ -59,7 +59,7 @@ async def post_dlm_data_item(data):
 
 async def watch(servers: list[str], topics: list[str]):
     """
-    Asynchronously consumes data product create events from data queues and notifies DLM.
+    Asynchronously consumes data product, create events from data queues, and notifies DLM.
 
     Args:
         servers (list[str]): Data queue servers.
@@ -95,5 +95,5 @@ async def watch(servers: list[str], topics: list[str]):
 
 
 if __name__ == "__main__":
-    # NOTE: we call main() here, and then let main() call _watch()
+    # NOTE: we call main() here, and then let main() call watch()
     main()
