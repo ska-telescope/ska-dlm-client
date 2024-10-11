@@ -7,7 +7,6 @@ import logging
 
 import aiokafka
 import requests
-import requests_mock
 
 logging.basicConfig(level=logging.INFO)
 
@@ -50,16 +49,12 @@ async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int 
             await asyncio.sleep(1)
 
 
-async def mock_http_call(data):
-    """Stub function to simulate an HTTP POST call to DLM."""
+async def post_dlm_data_item(data):
+    """Stub HTTP POST call to DLM."""
     # Use requests_mock to simulate an HTTP call
-    with requests_mock.Mocker() as m:
-        m.post("http://dlm/api", json={"success": True})
-
-        response = requests.post("http://dlm/api", json=data, timeout=5)
-
-        logger.info("Mock HTTP call completed with status code: %d", response.status_code)
-        logger.info("Response content: %s", response.json())
+    response = requests.post("http://dlm/api", json=data, timeout=5)
+    logger.info("Mock HTTP call completed with status code: %d", response.status_code)
+    logger.info("Response content: %s", response.json())
 
 
 async def watch(servers: list[str], topics: list[str]):
@@ -85,7 +80,7 @@ async def watch(servers: list[str], topics: list[str]):
                 logger.info("Consuming JSON message: %s", data)
 
                 # Call the HTTP function (to be handled separately)
-                await mock_http_call(data)
+                await post_dlm_data_item(data)
 
             except requests.exceptions.RequestException as e:
                 logger.error("Notifying DLM failed: %s", e)

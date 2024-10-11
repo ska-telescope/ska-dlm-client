@@ -48,8 +48,7 @@ addopts = "-v"
 
 [tool.flake8]
 docstring-style = "google"
-# rst-directives = "literalinclude"
-# rst-roles = ["py:attr", "py:class", "py:const", "py:exc", "py:func", "py:meth", "py:mod"]
+rst-directives = "literalinclude"
 ignore = ['F401', 'W503']
 max-complexity = 10
 max-line-length = 180
