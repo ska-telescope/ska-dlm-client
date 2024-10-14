@@ -1,3 +1,23 @@
+# Generate openapi client code from DLM services spec
+
+Start DLM services so that can be access as http://localhot:800[0-4]/....
+
+From the openapi_client_dlm_specs directory run the generate_open_api_specs.py with the
+output specs directory name.
+
+```sh
+cd openapi_client_dlm_specs
+sh generatoe_code.sh
+```
+
+From here make python-test and python-lint should both pass.
+
+It will still to necessary to manually update the ska_dlm_client project README.md file
+with the contents from the openapi_client_dlm_project.
+
+
+
+# Original version
 
 To generate openapi-client code first ensure DLM services are running and accessible locally.
 

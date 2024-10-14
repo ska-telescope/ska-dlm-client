@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client_dlm.models.http_validation_error import HTTPValidationError
+from ska_dlm_client.openapi.models.http_validation_error import HTTPValidationError
 
 
 class TestHTTPValidationError(unittest.TestCase):
@@ -37,7 +37,7 @@ class TestHTTPValidationError(unittest.TestCase):
         if include_optional:
             return HTTPValidationError(
                 detail = [
-                    openapi_client_dlm.models.validation_error.ValidationError(
+                    ska_dlm_client.openapi.models.validation_error.ValidationError(
                         loc = [
                             null
                             ], 

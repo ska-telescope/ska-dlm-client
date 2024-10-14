@@ -19,19 +19,21 @@ import pprint
 import re  # noqa: F401
 from typing import Any, ClassVar, Dict, List, Optional, Set
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, StrictStr
 from typing_extensions import Self
 
-from openapi_client_dlm.models.validation_error import ValidationError
+from ska_dlm_client.openapi.models.validation_error_loc_inner import ValidationErrorLocInner
 
 
-class HTTPValidationError(BaseModel):
+class ValidationError(BaseModel):
     """
-    HTTPValidationError
+    ValidationError
     """  # noqa: E501
 
-    detail: Optional[List[ValidationError]] = None
-    __properties: ClassVar[List[str]] = ["detail"]
+    loc: List[ValidationErrorLocInner]
+    msg: StrictStr
+    type: StrictStr
+    __properties: ClassVar[List[str]] = ["loc", "msg", "type"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,7 +52,7 @@ class HTTPValidationError(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of HTTPValidationError from a JSON string"""
+        """Create an instance of ValidationError from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -70,18 +72,18 @@ class HTTPValidationError(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in detail (list)
+        # override the default output from pydantic by calling `to_dict()` of each item in loc (list)
         _items = []
-        if self.detail:
-            for _item_detail in self.detail:
-                if _item_detail:
-                    _items.append(_item_detail.to_dict())
-            _dict["detail"] = _items
+        if self.loc:
+            for _item_loc in self.loc:
+                if _item_loc:
+                    _items.append(_item_loc.to_dict())
+            _dict["loc"] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of HTTPValidationError from a dict"""
+        """Create an instance of ValidationError from a dict"""
         if obj is None:
             return None
 
@@ -90,11 +92,13 @@ class HTTPValidationError(BaseModel):
 
         _obj = cls.model_validate(
             {
-                "detail": (
-                    [ValidationError.from_dict(_item) for _item in obj["detail"]]
-                    if obj.get("detail") is not None
+                "loc": (
+                    [ValidationErrorLocInner.from_dict(_item) for _item in obj["loc"]]
+                    if obj.get("loc") is not None
                     else None
-                )
+                ),
+                "msg": obj.get("msg"),
+                "type": obj.get("type"),
             }
         )
         return _obj

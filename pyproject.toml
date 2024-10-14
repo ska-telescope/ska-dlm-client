@@ -50,7 +50,7 @@ max-complexity = 10
 ignore = ["E203", "W503"]
 
 # exlcude for auto generated code
-exclude = ["src/openapi_client_dlm", "tests/openapi_client_dlm"]
+exclude = ["src/ska_dlm_client/openapi", "tests/openapi"]
 
 [tool.pylint.messages_control]
 disable = [
@@ -60,7 +60,7 @@ disable = [
 enable = ["useless-suppression"]
 
 [tool.pylint.MASTER]
-ignore = "openapi_client_dlm"
+ignore = "openapi"
 
 [tool.pylint.similarities]
 min-similarity-lines = 7

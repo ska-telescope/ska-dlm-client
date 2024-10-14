@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client_dlm.models.validation_error_loc_inner import ValidationErrorLocInner
+from ska_dlm_client.openapi.models.validation_error_loc_inner import ValidationErrorLocInner
 
 
 class TestValidationErrorLocInner(unittest.TestCase):

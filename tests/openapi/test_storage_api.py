@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client_dlm.dlm_api.storage_api import StorageApi
+from ska_dlm_client.openapi.dlm_api.storage_api import StorageApi
 
 
 class TestStorageApi(unittest.TestCase):

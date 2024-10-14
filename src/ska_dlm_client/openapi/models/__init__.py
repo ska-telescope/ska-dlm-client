@@ -14,6 +14,6 @@
 
 
 # import models into model package
-from openapi_client_dlm.models.http_validation_error import HTTPValidationError
-from openapi_client_dlm.models.validation_error import ValidationError
-from openapi_client_dlm.models.validation_error_loc_inner import ValidationErrorLocInner
+from ska_dlm_client.openapi.models.http_validation_error import HTTPValidationError
+from ska_dlm_client.openapi.models.validation_error import ValidationError
+from ska_dlm_client.openapi.models.validation_error_loc_inner import ValidationErrorLocInner

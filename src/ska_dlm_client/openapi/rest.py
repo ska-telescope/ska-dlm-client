@@ -19,7 +19,7 @@ import ssl
 
 import urllib3
 
-from openapi_client_dlm.exceptions import ApiException, ApiValueError
+from ska_dlm_client.openapi.exceptions import ApiException, ApiValueError
 
 SUPPORTED_SOCKS_PROXIES = {"socks5", "socks5h", "socks4", "socks4a"}
 RESTResponseType = urllib3.HTTPResponse

@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client_dlm.dlm_api.gateway_api import GatewayApi
+from ska_dlm_client.openapi.dlm_api.gateway_api import GatewayApi
 
 
 class TestGatewayApi(unittest.TestCase):

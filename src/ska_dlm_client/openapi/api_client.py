@@ -26,12 +26,12 @@ from urllib.parse import quote
 from dateutil.parser import parse
 from pydantic import SecretStr
 
-import openapi_client_dlm.models
-from openapi_client_dlm import rest
-from openapi_client_dlm.api_response import ApiResponse
-from openapi_client_dlm.api_response import T as ApiResponseT
-from openapi_client_dlm.configuration import Configuration
-from openapi_client_dlm.exceptions import (
+import ska_dlm_client.openapi.models
+from ska_dlm_client.openapi import rest
+from ska_dlm_client.openapi.api_response import ApiResponse
+from ska_dlm_client.openapi.api_response import T as ApiResponseT
+from ska_dlm_client.openapi.configuration import Configuration
+from ska_dlm_client.openapi.exceptions import (
     ApiException,
     ApiValueError,
     BadRequestException,
@@ -423,7 +423,7 @@ class ApiClient:
             if klass in self.NATIVE_TYPES_MAPPING:
                 klass = self.NATIVE_TYPES_MAPPING[klass]
             else:
-                klass = getattr(openapi_client_dlm.models, klass)
+                klass = getattr(ska_dlm_client.openapi.models, klass)
 
         if klass in self.PRIMITIVE_TYPES:
             return self.__deserialize_primitive(data, klass)

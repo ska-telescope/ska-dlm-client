@@ -17,9 +17,9 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from pydantic import Field, StrictFloat, StrictInt, StrictStr, validate_call
 from typing_extensions import Annotated
 
-from openapi_client_dlm.api_client import ApiClient, RequestSerialized
-from openapi_client_dlm.api_response import ApiResponse
-from openapi_client_dlm.rest import RESTResponseType
+from ska_dlm_client.openapi.api_client import ApiClient, RequestSerialized
+from ska_dlm_client.openapi.api_response import ApiResponse
+from ska_dlm_client.openapi.rest import RESTResponseType
 
 
 class IngestApi:

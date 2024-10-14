@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client_dlm.models.validation_error import ValidationError
+from ska_dlm_client.openapi.models.validation_error import ValidationError
 
 
 class TestValidationError(unittest.TestCase):
