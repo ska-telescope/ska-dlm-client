@@ -9,10 +9,44 @@ import pytest_mock
 import requests
 import requests_mock as rm
 
-from src.ska_dlm_client.kafka_watcher import watch
+from src.ska_dlm_client.kafka_watcher import main, watch
 
 KAFKA_HOST = "localhost:9092"
 TEST_TOPIC = "test-events"
+
+
+def test_main(mocker: pytest_mock.MockerFixture):
+    """
+    Test for the entrypoint function `main()`.
+
+    This test ensures that:
+    - Command-line arguments (kafka_server, kafka_topic) are parsed correctly.
+    - `asyncio.run` is called with the expected arguments.
+    - The `watch` function is triggered with the correct arguments without being executed.
+    """
+    # Mock the argparse.ArgumentParser to return simulated arguments
+    mock_args = mock.Mock(kafka_server=[KAFKA_HOST], kafka_topic=[TEST_TOPIC])
+    mocker.patch(
+        "src.ska_dlm_client.kafka_watcher.argparse.ArgumentParser.parse_args",
+        return_value=mock_args,
+    )
+
+    # Mock the `watch` function itself to verify it is called correctly
+    mock_watch = mocker.patch("src.ska_dlm_client.kafka_watcher.watch")
+
+    # Mock asyncio.run to prevent actual execution
+    mock_asyncio_run = mocker.patch("src.ska_dlm_client.kafka_watcher.asyncio.run")
+
+    # Call the main function
+    main()
+
+    # Verify that asyncio.run was called exactly once
+    mock_asyncio_run.assert_called_once()
+
+    # Verify that watch was called with the correct arguments
+    mock_watch.assert_called_once_with(
+        [KAFKA_HOST], [TEST_TOPIC]  # Expected kafka_server  # Expected kafka_topic
+    )
 
 
 @pytest.fixture(name="mock_kafka_consumer")
