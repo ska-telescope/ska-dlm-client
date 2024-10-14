@@ -30,7 +30,7 @@ def main():
     )
 
     args = parser.parse_args()
-    asyncio.run(watch(args.kafka_server, args.kafka_topics))
+    asyncio.run(watch(args.kafka_server, args.kafka_topic))
 
 
 async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int = 5):
