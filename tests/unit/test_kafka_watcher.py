@@ -9,7 +9,7 @@ import pytest_mock
 import requests
 import requests_mock as rm
 
-from src.ska_dlm_client.kafka_watcher import watch, main
+from src.ska_dlm_client.kafka_watcher import main, watch
 
 KAFKA_HOST = "localhost:9092"
 TEST_TOPIC = "test-events"
