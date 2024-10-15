@@ -13,6 +13,8 @@ The documentation for this project, including how to get started with it, can be
 
 ## Features
 
+* make openapi-code-from-local-dlm
+
 * TODO
 
 

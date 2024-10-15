@@ -2,6 +2,7 @@
 import argparse
 import io
 import json
+import logging
 import os
 import requests
 
@@ -18,6 +19,12 @@ OPENAPI_SPECS = {
     }
 OPENAPI_SPEC_EXTENSION = "_spec.json"
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+)
+
 def stream_from_url(url):
     try:
         # Make a GET request to the URL
@@ -29,7 +36,7 @@ def stream_from_url(url):
 
         return stream
     except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
+        logging.error(f"An error occurred: {e}")
         return None
 
 
@@ -64,24 +71,27 @@ def main():
 
     # Access the output_directory argument
     output_directory = args.output_directory
-    print(f"The directory name provided is: {output_directory}")
+    logging.info(f"The directory name provided is: {output_directory}")
 
 
     # Create the directory
     try:
         os.mkdir(output_directory)
-        print(f"Directory '{output_directory}' created successfully.")
+        logging.info(f"Directory '{output_directory}' created successfully.")
     except FileExistsError:
-        print(f"Directory '{output_directory}' already exists.")
-        print(f"Any files of the same name will be over written.")
+        logging.warn(f"Directory '{output_directory}' already exists.")
+        logging.warn(f"Any files of the same name will be over written.")
 
     for service_key in OPENAPI_SPECS:
         service_value = OPENAPI_SPECS[service_key]
         OPENAPI_SPEC_URL = f"{OPENAPI_HOST_URL}:{service_value}/{OPENAPI_URL_JSON_PATH}"
-        print(f"{service_key}:{service_value},{OPENAPI_SPEC_URL}")
+        logging.info(f"{service_key}:{service_value},{OPENAPI_SPEC_URL}")
 
         url_stream = stream_from_url(OPENAPI_SPEC_URL)
-        new_field_spec = [ service_key ]
+        if url_stream is None:
+            logging.error(f"Failed to open connection to DLM service, cannot retrieve specs.")
+            exit(1)
+        new_field_spec = [service_key]
         add_field_to_openapi_spec(service_key, url_stream, output_directory, new_field_spec)
 
 if __name__ == "__main__":
