@@ -16,12 +16,15 @@ The documentation for this project, including how to get started with it, can be
 * TODO
 
 
-## OpenAPI Generated Code
+## OpenAPI Generated Client
 
-A make target has been created to (re)generate the OpenAPI Python code based on specs from the DLM services.
+```ska_dlm_client.openapi``` is an OpenAPI generated RESTful python client for accessing DLM services.
 
-* make openapi-code-from-local-dlm
+See [README-OPENAPI.md](README-OPENAPI.md) for further information.
 
-NOTE: Start the DLM services so that they can be accessed as http://localhot:800[0-4]/....
+### Contributing
 
-See [README-OPENAPI.md](README-OPENAPI.md) for documentation relating to the OpenAPI generated code.
+The OpenAPI generated client can be regenerated using exported OpenAPI specs from [ska-data-lifecycle](https://gitlab.com/ska-telescope/ska-data-lifecycle):
+
+* Start the DLM services such that they can be accessed from `http://localhost`
+* run `make openapi-code-from-local-dlm`

@@ -20,6 +20,9 @@ echo "\ncleaning up src, tests and docs area of ska_dlm_client for new version o
 rm -rf ../src/ska_dlm_client/openapi/ ../tests/openapi/ ../docs/openapi/
 mkdir ../docs/openapi ../tests/openapi
 
+echo "\nReplace line in README.md"
+sed -i.bak "s|pip install git+https://github.com/GIT_USER_ID/GIT_REPO_ID.git|pip install git+https://gitlab.com/ska-telescope/ska-dlm-client.git|g" openapi_client_dlm_project/README.md
+
 echo "\nmoving over code to ska_dlm_client project"
 mv openapi_client_dlm_project/ska_dlm_client/openapi ../src/ska_dlm_client/
 mv openapi_client_dlm_project/docs/* ../docs/openapi/

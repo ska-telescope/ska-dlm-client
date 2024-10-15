@@ -52,7 +52,7 @@ ignore = ['F401', 'W503']
 max-complexity = 10
 max-line-length = 180
 
-# exlcude for auto generated code
+# exclude for auto generated code
 exclude = ["src/ska_dlm_client/openapi", "tests/openapi"]
 
 [tool.pylint.messages_control]
