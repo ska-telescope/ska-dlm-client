@@ -22,6 +22,7 @@ mkdir ../docs/openapi ../tests/openapi
 
 echo "\nReplace line in README.md"
 sed -i.bak "s|pip install git+https://github.com/GIT_USER_ID/GIT_REPO_ID.git|pip install git+https://gitlab.com/ska-telescope/ska-dlm-client.git|g" openapi_client_dlm_project/README.md
+sed -i.bak "s|## Documentation [fF]or|##|g" openapi_client_dlm_project/README.md
 
 echo "\nmoving over code to ska_dlm_client project"
 mv openapi_client_dlm_project/README.md openapi_client_dlm_project/ska_dlm_client/openapi/

@@ -78,7 +78,7 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
 ```
 
-## Documentation for API Endpoints
+## API Endpoints
 
 All URIs are relative to *http://localhost:8080*
 
@@ -109,7 +109,7 @@ Class | Method | HTTP request | Description
 *StorageApi* | [**rclone_config_storage_rclone_config_post**](docs/StorageApi.md#rclone_config_storage_rclone_config_post) | **POST** /storage/rclone_config | Rclone Config
 
 
-## Documentation For Models
+## Models
 
  - [HTTPValidationError](docs/HTTPValidationError.md)
  - [ValidationError](docs/ValidationError.md)
@@ -117,7 +117,7 @@ Class | Method | HTTP request | Description
 
 
 <a id="documentation-for-authorization"></a>
-## Documentation For Authorization
+## Authorization
 
 Endpoints do not require authorization.
 
