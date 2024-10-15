@@ -24,10 +24,9 @@ echo "\nmoving over code to ska_dlm_client project"
 mv openapi_client_dlm_project/ska_dlm_client/openapi ../src/ska_dlm_client/
 mv openapi_client_dlm_project/docs/* ../docs/openapi/
 mv openapi_client_dlm_project/test/* ../tests/openapi/
+mv openapi_client_dlm_project/README.md ../README-OPENAPI.md
 cd ..
 
 echo "\nnow running isort and black to fix code \(to some extent\!\) for linting"
 isort --profile black --line-length 99 src/ska_dlm_client/openapi/ tests/openapi/
 black --exclude .+\.ipynb --line-length 99  src/ska_dlm_client/openapi/ tests/openapi/
-
-echo "\nREMEMBER TO UPDATE README.md MANUALLY"
