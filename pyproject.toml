@@ -1,7 +1,3 @@
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
 [tool.poetry]
 name = "ska-dlm-client"
 version = "0.0.1"
@@ -22,6 +18,9 @@ priority = "supplemental"
 [tool.poetry.dependencies]
 python = "^3.10"
 aiokafka = "0.10.0"
+pydantic = "^2.9.2"
+python-dateutil = "^2.9.0.post0"
+docconvert = "^2.1.0"
 
 [tool.poetry.group.test.dependencies]
 black = "^24.8.0"
@@ -53,12 +52,18 @@ ignore = ['F401', 'W503']
 max-complexity = 10
 max-line-length = 180
 
+# exclude for auto generated code
+exclude = ["src/ska_dlm_client/openapi", "tests/openapi"]
+
 [tool.pylint.messages_control]
 disable = [
     "duplicate-code",
     "fixme",
 ]
 enable = ["useless-suppression"]
+
+[tool.pylint.MASTER]
+ignore = "openapi"
 
 [tool.isort]
 line_length = 99

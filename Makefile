@@ -20,11 +20,14 @@ docs-pre-build:
 	poetry config virtualenvs.create false
 	poetry install --no-root --only docs
 
-.PHONY: docs-pre-build
+.PHONY: docs-pre-build openapi-code-from-local-dlm
 
-docker-compose-up:
+docker-compose-up: ## Bring up test services in docker
 	$(DOCKER_COMPOSE) --file tests/test-services.docker-compose.yml up --detach --wait
 
-docker-compose-down:
+docker-compose-down: ## Shut down test services in docker previously started with docker-compose-up
 	$(DOCKER_COMPOSE) --file tests/test-services.docker-compose.yml down
 
+openapi-code-from-local-dlm: ## Use the connection to DLM services to retrieve and generate OpenAPI code
+	@echo "Using the connection to DLM services to retrieve and generate OpenAPI code"
+	cd openapi_client_dlm_specs && sh generate_code.sh

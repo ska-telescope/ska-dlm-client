@@ -14,3 +14,17 @@ The documentation for this project, including how to get started with it, can be
 ## Features
 
 * TODO
+
+
+## OpenAPI Generated Client
+
+```ska_dlm_client.openapi``` is an OpenAPI generated RESTful python client for accessing DLM services.
+
+See [OpenAPI README.md](src/ska_dlm_client/openapi/README.md) for further information.
+
+### Contributing
+
+The OpenAPI generated client can be regenerated using exported OpenAPI specs from [ska-data-lifecycle](https://gitlab.com/ska-telescope/ska-data-lifecycle):
+
+* Start the DLM services such that they can be accessed from `http://localhost`
+* run `make openapi-code-from-local-dlm`
