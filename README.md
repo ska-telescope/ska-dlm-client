@@ -20,7 +20,7 @@ The documentation for this project, including how to get started with it, can be
 
 ```ska_dlm_client.openapi``` is an OpenAPI generated RESTful python client for accessing DLM services.
 
-See [README-OPENAPI.md](README-OPENAPI.md) for further information.
+See [OpenAPI README.md](src/ska_dlm_client/openapi/README.md) for further information.
 
 ### Contributing
 
