@@ -43,6 +43,7 @@ sphinx = ">=7.2.0"
 ska-ser-sphinx-theme = ">=0.1.1"
 sphinx-autodoc-typehints = ">=1.23.0"
 python-benedict = "^0.34.0"
+pyyaml = "^6.0.2"
 
 [tool.pytest.ini_options]
 addopts = "-v"
