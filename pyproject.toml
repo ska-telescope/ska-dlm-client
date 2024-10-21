@@ -22,7 +22,6 @@ pydantic = "^2.9.2"
 python-dateutil = "^2.9.0.post0"
 docconvert = "^2.1.0"
 benedict = "^0.3.2"
-pyyaml = "^6.0.2"
 
 [tool.poetry.group.test.dependencies]
 black = "^24.8.0"
@@ -43,6 +42,7 @@ pytest-mock = "^3.14.0"
 sphinx = ">=7.2.0"
 ska-ser-sphinx-theme = ">=0.1.1"
 sphinx-autodoc-typehints = ">=1.23.0"
+benedict = "^0.3.2"
 
 [tool.pytest.ini_options]
 addopts = "-v"
