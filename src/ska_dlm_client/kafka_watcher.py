@@ -8,6 +8,8 @@ import logging
 import aiokafka
 import requests
 
+from . import CONFIG
+
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
@@ -52,7 +54,7 @@ async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int 
 async def post_dlm_data_item(data):
     """Stub HTTP POST call to DLM."""
     # Use requests library to simulate an HTTP call
-    response = requests.post("http://dlm/api", json=data, timeout=5)
+    response = requests.post(CONFIG.DLM.url, json=data, timeout=5)
     logger.info("Mock HTTP call completed with status code: %d", response.status_code)
     logger.info("Response content: %s", response.json())
 
