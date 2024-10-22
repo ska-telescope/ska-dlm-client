@@ -1,0 +1,21 @@
+# Default values for the SKA DLM Client.
+# This is a YAML-formatted file.
+
+auth_token: "Replace this with the authorization token"
+
+location:
+  name: "MyLocationName"
+  type: "MyLocationType"
+  country: "MyLocationCountry"
+  city: "MyLocationCity"
+  facility: "MyLocationFacility"
+
+storage:
+  name: "MyStorageName"
+  type: "disk"
+  interface: "posix"
+  capacity: 100000000,
+  phase_level: "GAS"
+
+DLM:
+  url: "http://dlm/api"

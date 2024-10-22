@@ -11,9 +11,45 @@ The documentation for this project, including how to get started with it, can be
 
 * [ska-dlm-client documentation](https://developer.skatelescope.org/projects/ska-dlm-client/en/latest/index.html "SKA Developer Portal: ska-dlm-client documentation")
 
-## Features
+## Execution Modes
 
-* TODO
+The SKA DLM client can run in two modes:
+
+* Kafka Watcher: where the client is triggered by incoming kafka messages on a specified topic
+* File System Monitor: where the client is triggered by the creation of a file in a specified directory
+
+In both cases, once triggered, the SKA DLM client proceeds to ingest the new data product into a DLM service.
+
+## Configuration
+
+Use the ```src/ska_dlm_client/config.yaml``` file to specify the configuration of the ska-dlm-client. For example:
+
+* the URLs of the DLM (Data Lifecycle Management) service and DPD (Data Product Dashboard) service
+* the Authentication Token used to access the DLM and DPD services
+* the name (and additional details) of the location and storage on which the ska-dlm-client will be run
+
+Here is an example of the config YAML, but defer to the version in the repository for the latest format and attributes:
+
+```yaml
+auth_token: "Replace this with the authorization token"
+
+location:
+  name: "MyLocationName"
+  type: "MyLocationType"
+  country: "MyLocationCountry"
+  city: "MyLocationCity"
+  facility: "MyLocationFacility"
+
+storage:
+  name: "MyStorageName"
+  type: "disk"
+  interface: "posix"
+  capacity: 100000000,
+  phase_level: "GAS"
+
+DLM:
+  url: "http://dlm/api"
+```
 
 
 ## OpenAPI Generated Client

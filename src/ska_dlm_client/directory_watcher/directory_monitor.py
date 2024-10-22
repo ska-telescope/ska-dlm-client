@@ -11,12 +11,15 @@ from ska_dlm_client.openapi import configuration, api_client
 from ska_dlm_client.openapi.dlm_api import ingest_api, storage_api
 
 from configuration_details import DLMConfiguration, WatchConfiguration
-from directory_watcher_entry import DirectoryWatcherEntry
+from directory_watcher_entry import DirectoryWatcherEntry, DirectoryWatcherEntries
 
 logger = logging.getLogger(__name__)
 ingest_configuration = configuration.Configuration(host=DLMConfiguration.INGEST_URL)
 storage_configuration = configuration.Configuration(host=DLMConfiguration.STORAGE_URL)
-directory_watcher_entries: list[DirectoryWatcherEntry]
+directory_watcher_entries = DirectoryWatcherEntries(
+    entries_file=(WatchConfiguration.WATCHER_STATUS_FULL_FILENAME),
+    reload_from_cache=WatchConfiguration.RELOAD_WATCHER_STATUS_FILE
+)
 
 class InternalState(Enum):
     IN_QUEUE = 0
