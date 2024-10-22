@@ -1,9 +1,21 @@
-from enum import Enum
 import asyncio
+import json
+import logging
+import time
+from enum import Enum
 from pathlib import Path, PosixPath
-from watchfiles import awatch, Change
 from typing import Set
+from watchfiles import awatch, Change
 
+from ska_dlm_client.openapi import configuration, api_client
+from ska_dlm_client.openapi.dlm_api import ingest_api, storage_api
+
+from configuration_details import DLMConfiguration, WatchConfiguration
+
+logger = logging.getLogger(__name__)
+ingest_configuration = configuration.Configuration(host=DLMConfiguration.INGEST_URL)
+storage_configuration = configuration.Configuration(host=DLMConfiguration.STORAGE_URL)
+directory_watcher_entries: list[DirectoryWatcherEntry]
 
 class InternalState(Enum):
     IN_QUEUE = 0
@@ -17,6 +29,19 @@ class PathType(Enum):
     DIRECTORY = 1
     MEASUREMENT_SET = 2
 
+
+class DirectoryWatcherEntry():
+    def __init__(self,
+                 file_or_directory: PosixPath,
+                 dlm_storage_id: str,
+                 dlm_registration_id: str | None,
+                 time_registered: float):
+        directory_entry = file_or_directory
+        dlm_storage_id = dlm_storage_id
+        dlm_regsitration_id = dlm_registration_id
+        time_registered = time_registered
+
+
 def supportPathType(path: Path) -> bool:
     pass
 
@@ -27,26 +52,70 @@ def followSymLink(path: Path) -> Path:
         path.is_file()
 
 
+def registerEntry(entry_path: Path):
+    full_path = entry_path.resolve()
+    is_measurement_set = False
+    if entry_path.is_dir() and \
+        entry_path.as_posix().endswith(DLMConfiguration.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX):
+        is_measurement_set = True
+    with api_client.ApiClient(ingest_configuration) as the_api_client:
+        api_ingest = ingest_api.IngestApi(the_api_client)
+        response = api_ingest.register_data_item_ingest_register_data_item_post(
+            item_name="",
+            uri=full_path,
+            storage_name=None,
+            storage_id="needed",
+            item_format=None,
+            eb_id= "needed????",
+            authorization="bearer token",
+            body="what is this meant to be ???"
+        )
+    # TODO: decode JSON response
+    json.dumps(response)
+    dlm_registration_id = ""
+    time_registered = time.time()
+
+    directory_watcher_entry = DirectoryWatcherEntry(file_or_directory=full_path,
+                                                    dlm_storage_id=WatchConfiguration.STORAGE_ID_FOR_REGISTRATION,
+                                                    dlm_registration_id=dlm_registration_id,
+                                                    time_registered=time_registered)
+
 def doSomethingWithNewEntry(entry: tuple[Change, str]):
     print("in do something " + entry.__str__())
-    p = Path(entry[1])
-    print(p)
+    entry_path = Path(entry[1])
+    print(entry_path)
 #    pp = PosixPath(entry[1])
 #    print(pp)
+    if entry[0] is Change.added:
+        registerEntry(entry_path)
     if entry[0] is not Change.deleted:
-        p = p.resolve()
-        if p.exists():
-            stat = p.stat()
+        path = entry_path.resolve()
+        if path.exists():
+            stat = path.stat()
             print(stat)
         else:
-            print("Cannot find resolved path " + p.__str__())
+            print("Cannot find resolved path " + path.__str__())
+
+
+def load_or_instantiate_directory_entries():
+    watcher_status_file = (f"{WatchConfiguration.DIRECTORY_TO_WATCH}/"
+                           f"{WatchConfiguration.WATCHER_STATUS_FILENAME})")
 
 
 async def main():
-    async for changes in awatch('/Users/00077990/watcher'): # type: Set[tuple[Change, str]]
+    async for changes in awatch(watch_directory): # type: Set[tuple[Change, str]]
         for change in changes:
             print("in main " + change.__str__())
             doSomethingWithNewEntry(change)
 
+
+#with api_client.ApiClient(storage_configuration) as api_client:
+#    api_storage = storage_api.StorageApi(api_client)
+#with api_client.ApiClient(ingest_configuration) as api_client:
+#    api_ingest = ingest_api.IngestApi(api_client)
+
+
+watch_directory = WatchConfiguration.DIRECTORY_TO_WATCH
+dlm_storage_id = WatchConfiguration.STORAGE_ID_FOR_REGISTRATION
 
 asyncio.run(main(), debug=None)

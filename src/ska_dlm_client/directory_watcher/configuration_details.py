@@ -1,6 +1,7 @@
 # This is expected to be replaced based on what final deployment looks like.
+import sys
 
-class dlm_configuration:
+class DLMConfiguration:
     SERVER = "http://localhost"
     DLM_ENTRY_POINTS = {
         "gateway":   8000,
@@ -9,7 +10,15 @@ class dlm_configuration:
         "storage":   8003,
         "migration": 8004
     }
+    GATEWAY_URL = f"{SERVER}:{DLM_ENTRY_POINTS['gateway']}"
+    INGEST_URL = f"{SERVER}:{DLM_ENTRY_POINTS['ingest']}"
+    REQUEST_URL = f"{SERVER}:{DLM_ENTRY_POINTS['request']}"
+    STORAGE_URL = f"{SERVER}:{DLM_ENTRY_POINTS['storage']}"
+    MIGRATION_URL = f"{SERVER}:{DLM_ENTRY_POINTS['migration']}"
+    DIRECTORY_IS_MEASUREMENT_SET_SUFFIX = ".ms"
 
-class watcher_configuration:
-    DIRECTORY_TO_WATCH = "a"
+class WatchConfiguration:
+    DIRECTORY_TO_WATCH = "/Users/00077990/yanda/pi24/watch_dir"
     STORAGE_ID_FOR_REGISTRATION = "b"
+    DELETE_DIR_ENTRIES_REGISTERED_SECS_AGO = 3600
+    WATCHER_STATUS_FILENAME = f"{sys.modules[__name__]}.run"
