@@ -11,6 +11,7 @@ from ska_dlm_client.openapi import configuration, api_client
 from ska_dlm_client.openapi.dlm_api import ingest_api, storage_api
 
 from configuration_details import DLMConfiguration, WatchConfiguration
+from directory_watcher_entry import DirectoryWatcherEntry
 
 logger = logging.getLogger(__name__)
 ingest_configuration = configuration.Configuration(host=DLMConfiguration.INGEST_URL)
@@ -23,23 +24,10 @@ class InternalState(Enum):
     INGESTED = 2
     BAD = 3
 
-
 class PathType(Enum):
     FILE = 0
     DIRECTORY = 1
     MEASUREMENT_SET = 2
-
-
-class DirectoryWatcherEntry():
-    def __init__(self,
-                 file_or_directory: PosixPath,
-                 dlm_storage_id: str,
-                 dlm_registration_id: str | None,
-                 time_registered: float):
-        directory_entry = file_or_directory
-        dlm_storage_id = dlm_storage_id
-        dlm_regsitration_id = dlm_registration_id
-        time_registered = time_registered
 
 
 def supportPathType(path: Path) -> bool:
@@ -79,6 +67,8 @@ def registerEntry(entry_path: Path):
                                                     dlm_storage_id=WatchConfiguration.STORAGE_ID_FOR_REGISTRATION,
                                                     dlm_registration_id=dlm_registration_id,
                                                     time_registered=time_registered)
+    directory_watcher_entries.append(directory_watcher_entry)
+
 
 def doSomethingWithNewEntry(entry: tuple[Change, str]):
     print("in do something " + entry.__str__())
