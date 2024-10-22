@@ -1,11 +1,11 @@
-#
+"""Application to watch a directory for changes and send to DLM."""
+
 import asyncio
 import json
 import logging
 import time
 from enum import Enum
 from pathlib import Path
-from typing import Set
 
 from watchfiles import Change, awatch
 
@@ -30,6 +30,8 @@ directory_watcher_entries = DirectoryWatcherEntries(
 
 
 class InternalState(Enum):
+    """The internal state for each entry."""
+
     IN_QUEUE = 0
     INGESTING = 1
     INGESTED = 2
@@ -37,28 +39,33 @@ class InternalState(Enum):
 
 
 class PathType(Enum):
+    """What does the entry path represent."""
+
     FILE = 0
     DIRECTORY = 1
     MEASUREMENT_SET = 2
 
 
-def supportPathType(path: Path) -> bool:
-    pass
+# def support_path_type(path: Path) -> bool:
+#    """Is the given path supported."""
+#    pass
 
 
-def followSymLink(path: Path) -> Path:
+def follow_sym_link(path: Path) -> Path:
+    """Return the real path after following the sysmlink."""
     if path.is_symlink():
         path.is_dir()
         path.is_file()
 
 
-def registerEntry(entry_path: Path):
+def register_entry(entry_path: Path):
+    """Register the given entry_path."""
     full_path = entry_path.resolve()
-    is_measurement_set = False
-    if entry_path.is_dir() and entry_path.as_posix().endswith(
-        DLMConfiguration.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
-    ):
-        is_measurement_set = True
+    # is_measurement_set = False
+    # if entry_path.is_dir() and entry_path.as_posix().endswith(
+    #     DLMConfiguration.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
+    # ):
+    #     is_measurement_set = True
     with api_client.ApiClient(ingest_configuration) as the_api_client:
         api_ingest = ingest_api.IngestApi(the_api_client)
         response = api_ingest.register_data_item_ingest_register_data_item_post(
@@ -85,35 +92,30 @@ def registerEntry(entry_path: Path):
     directory_watcher_entries.append(directory_watcher_entry)
 
 
-def doSomethingWithNewEntry(entry: tuple[Change, str]):
-    print("in do something " + entry.__str__())
+def do_something_with_new_entry(entry: tuple[Change, str]):
+    """TODO: Test function currently."""
+    print("in do something " + entry)
     entry_path = Path(entry[1])
     print(entry_path)
     #    pp = PosixPath(entry[1])
     #    print(pp)
     if entry[0] is Change.added:
-        registerEntry(entry_path)
+        register_entry(entry_path)
     if entry[0] is not Change.deleted:
         path = entry_path.resolve()
         if path.exists():
             stat = path.stat()
             print(stat)
         else:
-            print("Cannot find resolved path " + path.__str__())
-
-
-def load_or_instantiate_directory_entries():
-    watcher_status_file = (
-        f"{WatchConfiguration.DIRECTORY_TO_WATCH}/"
-        f"{WatchConfiguration.WATCHER_STATUS_FILENAME})"
-    )
+            print("Cannot find resolved path " + path)
 
 
 async def main():
-    async for changes in awatch(watch_directory):  # type: Set[tuple[Change, str]]
+    """Start watching the given directory."""
+    async for changes in awatch(WATCH_DIRECTORY):  # type: Set[tuple[Change, str]]
         for change in changes:
-            print("in main " + change.__str__())
-            doSomethingWithNewEntry(change)
+            print("in main " + change)
+            do_something_with_new_entry(change)
 
 
 # with api_client.ApiClient(storage_configuration) as api_client:
@@ -122,7 +124,7 @@ async def main():
 #    api_ingest = ingest_api.IngestApi(api_client)
 
 
-watch_directory = WatchConfiguration.DIRECTORY_TO_WATCH
-dlm_storage_id = WatchConfiguration.STORAGE_ID_FOR_REGISTRATION
+WATCH_DIRECTORY = WatchConfiguration.DIRECTORY_TO_WATCH
+DLM_STORAGE_ID = WatchConfiguration.STORAGE_ID_FOR_REGISTRATION
 
 asyncio.run(main(), debug=None)

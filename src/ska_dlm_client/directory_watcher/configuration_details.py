@@ -1,8 +1,11 @@
-# This is expected to be replaced based on what final deployment looks like.
+"""This is expected to be replaced based on what final deployment looks like."""
+
 import sys
 
 
-class DLMConfiguration:
+class DLMConfiguration:  # pylint: disable=too-few-public-methods
+    """Configuration of the DLM."""
+
     SERVER = "http://localhost"
     DLM_ENTRY_POINTS = {
         "gateway": 8000,
@@ -19,7 +22,9 @@ class DLMConfiguration:
     DIRECTORY_IS_MEASUREMENT_SET_SUFFIX = ".ms"
 
 
-class WatchConfiguration:
+class WatchConfiguration:  # pylint: disable=too-few-public-methods
+    """Configuration of the watcher."""
+
     DIRECTORY_TO_WATCH = "/Users/00077990/yanda/pi24/watch_dir"
     STORAGE_ID_FOR_REGISTRATION = "b"
     DELETE_DIR_ENTRIES_REGISTERED_SECS_AGO = 3600

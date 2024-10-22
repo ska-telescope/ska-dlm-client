@@ -1,6 +1,5 @@
-#
-# Example/test code for OpenAPI integration
-#
+"""Example/test code for OpenAPI integration."""
+
 from ska_dlm_client.openapi import api_client, configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
 
@@ -13,11 +12,13 @@ migration_configuration = configuration.Configuration(host="http://localhost:800
 with api_client.ApiClient(storage_configuration) as api_client:
     # api_request = request_api.RequestApi(api_client)
     api_storage = storage_api.StorageApi(api_client)
-    #    default = api_default.register_data_item_ingest_register_data_item_post(item_name="mark_test1")
+    # default = api_default.register_data_item_ingest_register_data_item_post(
+    # item_name="mark_test1")
     #    print()
     #    print(default)
 
-    # default = api_default.query_new_request_query_new_get(check_date='Wed, 25 Sep 2024 00:39:31 GMT')
+    # default = api_default.query_new_request_query_new_get(
+    # check_date='Wed, 25 Sep 2024 00:39:31 GMT')
     storage = api_storage.query_location_storage_query_location_get()
     print()
     print(storage)
