@@ -13,7 +13,7 @@ __version__ = "0.0.1"
 DLM_CLIENT_LIB_DIR = Path(__file__).parent
 """The library install path of dlm-client."""
 
-DLM_CLIENT_HOME = Path.home() / ".dlm/"
+DLM_CLIENT_HOME = Path.home() / ".dlm_client/"
 """The configuration path of dlm-client."""
 
 
