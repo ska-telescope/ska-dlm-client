@@ -70,7 +70,7 @@ async def test_watch_post_success(requests_mock: rm.Mocker, mock_kafka_consumer:
 
     # Mock HTTP call to simulate a 200 response
     requests_mock.post("http://dlm/api", json={"success": True})
-    await watch(servers=[KAFKA_HOST], topics=[TEST_TOPIC])
+    await watch(servers=[KAFKA_HOST], topics=[TEST_TOPIC], session=None, storage_id=None)
 
     # Assert that the HTTP call was made once
     assert requests_mock.call_count == 1
@@ -94,7 +94,7 @@ async def test_watch_http_failure(
         requests_mock.post(
             "http://dlm/api", exc=requests.exceptions.RequestException("HTTP call failed")
         )
-        await watch(servers=[KAFKA_HOST], topics=[TEST_TOPIC])
+        await watch(servers=[KAFKA_HOST], topics=[TEST_TOPIC], session=None, storage_id=None)
 
         # Check that the error log was captured
         assert len(caplog.records) > 0  # Ensure there's at least one log entry
