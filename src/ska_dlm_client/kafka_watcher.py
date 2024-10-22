@@ -15,7 +15,6 @@ from . import CONFIG, ska_dlm_client
 # from ska_dlm_client.openapi import api_client, configuration
 # from ska_dlm_client.openapi.dlm_api import request_api, storage_api, gateway_api
 
-
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)

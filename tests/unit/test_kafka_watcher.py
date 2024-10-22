@@ -9,6 +9,7 @@ import pytest_mock
 import requests
 import requests_mock as rm
 
+from src.ska_dlm_client import CONFIG
 from src.ska_dlm_client.kafka_watcher import main, watch
 
 KAFKA_HOST = "localhost:9092"
@@ -69,7 +70,7 @@ async def test_watch_post_success(requests_mock: rm.Mocker, mock_kafka_consumer:
     mock_kafka_consumer.start.side_effect = [False, True]
 
     # Mock HTTP call to simulate a 200 response
-    requests_mock.post("http://dlm/api", json={"success": True})
+    requests_mock.post(CONFIG.DLM.url, json={"success": True})
     await watch(servers=[KAFKA_HOST], topics=[TEST_TOPIC], session=None, storage_id=None)
 
     # Assert that the HTTP call was made once
@@ -92,7 +93,7 @@ async def test_watch_http_failure(
     # Run the test and capture the logs
     with caplog.at_level("ERROR", logger="ska_dlm_client.kafka_watcher"):
         requests_mock.post(
-            "http://dlm/api", exc=requests.exceptions.RequestException("HTTP call failed")
+            CONFIG.DLM.url, exc=requests.exceptions.RequestException("HTTP call failed")
         )
         await watch(servers=[KAFKA_HOST], topics=[TEST_TOPIC], session=None, storage_id=None)
 
