@@ -189,12 +189,6 @@ async def main():
             do_something_with_new_entry(change)
 
 
-# with api_client.ApiClient(storage_configuration) as api_client:
-#    api_storage = storage_api.StorageApi(api_client)
-# with api_client.ApiClient(ingest_configuration) as api_client:
-#    api_ingest = ingest_api.IngestApi(api_client)
-
-
 WATCH_DIRECTORY = WatchConfiguration.DIRECTORY_TO_WATCH
 
 # TODO: It would be expected that the following config would already be
