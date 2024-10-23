@@ -4,7 +4,7 @@ import sys
 
 
 class DLMConfiguration:  # pylint: disable=too-few-public-methods
-    """Configuration of the DLM."""
+    """Configuration of the DLM, to be replaced in the future."""
 
     SERVER = "http://localhost"
     DLM_ENTRY_POINTS = {
@@ -23,11 +23,20 @@ class DLMConfiguration:  # pylint: disable=too-few-public-methods
 
 
 class WatchConfiguration:  # pylint: disable=too-few-public-methods
-    """Configuration of the watcher."""
+    """Configuration of the watcher, to be replaced in the future."""
 
     DIRECTORY_TO_WATCH = "/Users/00077990/yanda/pi24/watch_dir"
-    STORAGE_ID_FOR_REGISTRATION = "b"
+    STORAGE_NAME_FOR_REGISTRATION = "b"
     DELETE_DIR_ENTRIES_REGISTERED_SECS_AGO = 3600
     WATCHER_STATUS_FILENAME = f"{sys.modules[__name__]}.run"
     WATCHER_STATUS_FULL_FILENAME = f"{DIRECTORY_TO_WATCH}/{WATCHER_STATUS_FILENAME})"
     RELOAD_WATCHER_STATUS_FILE = True
+    # These should not be required in final system
+    LOCATION_NAME = "ThisDLMClientLocationName"
+    LOCATION_TYPE = "ThisDLMClientLocation"
+    LOCATION_COUNTRY = "Australia"
+    LOCATION_CITY = "Marksville"
+    LOCATION_FACILITY = "ICRAR"
+    STORAGE_NAME = "data"
+    STORAGE_TYPE = "disk"
+    STORAGE_CONFIG = '{"name":"data","type":"local", "parameters":{}}'

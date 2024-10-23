@@ -28,7 +28,7 @@ class DirectoryWatcherEntries(list):
         """Init the class."""
         self.directory_watcher_entries = [DirectoryWatcherEntry]
         self.entries_file = entries_file
-        if reload_from_cache:
+        if not reload_from_cache:
             self.read_from_file()
 
     def append(self, entry: DirectoryWatcherEntry):
