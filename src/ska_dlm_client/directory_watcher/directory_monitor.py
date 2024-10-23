@@ -177,6 +177,7 @@ def test_ingest_item():
             uri=the_path,
             storage_name=WatchConfiguration.STORAGE_NAME,
             storage_id=storage_id,
+            eb_id=WatchConfiguration.EB_ID
         )
         logger.info("register_data_item_response: %s", response)
 

@@ -40,3 +40,4 @@ class WatchConfiguration:  # pylint: disable=too-few-public-methods
     STORAGE_NAME = "data"
     STORAGE_TYPE = "disk"
     STORAGE_CONFIG = '{"name":"data","type":"local", "parameters":{}}'
+    EB_ID = "test_eb_id"
