@@ -1,7 +1,14 @@
 # Default values for the SKA DLM Client.
 # This is a YAML-formatted file.
 
-auth_token: "Replace this with the authorization token"
+auth_token: ""
+
+dlm:
+  gateway_url: "http://localhost:8000"
+  ingest_url: "http://localhost:8001"
+  request_url: "http://localhost:8002"
+  storage_url: "http://localhost:8003"
+  migration_url: "http://localhost:8004"
 
 location:
   name: "MyLocationName"
@@ -14,8 +21,22 @@ storage:
   name: "MyStorageName"
   type: "disk"
   interface: "posix"
-  capacity: 100000000,
+  capacity: 100000000
   phase_level: "GAS"
 
-DLM:
-  url: "http://dlm/api"
+# the rclone config for DLM to access the location of the data items
+config: '{"name":"data","type":"local","parameters":{}}'
+
+#config:
+#  name: "MyDisk2"
+#  type": "local"
+#  parameters:
+
+#config:
+#  name: "acacia"
+#  type: "s3"
+#  parameters:
+#    access_key_id: ""
+#    endpoint: "https://projects.pawsey.org.au"
+#    provider: "Ceph"
+#    secret_access_key: ""

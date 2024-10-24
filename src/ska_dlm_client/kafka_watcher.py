@@ -36,13 +36,9 @@ def main():
         help="The Kafka topic(s) to watch",
     )
 
-    # check that a auth_token was found in CONFIG
-    if CONFIG.auth_token == "":
-        logger.error("No auth_token set in config.yaml. Unable to ingest data items")
-        sys.exit(1)
-
     # begin a session with the DLM
-    session, storage_id = ska_dlm_client.init_dlm_session()
+    session = asyncio.run(ska_dlm_client.init_dlm_session())
+    storage_id = asyncio.run(ska_dlm_client.init_dlm_storage(session))
 
     # start watching for kafka messages
     args = parser.parse_args()
