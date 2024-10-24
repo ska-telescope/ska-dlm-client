@@ -1,9 +1,10 @@
 """This is expected to be replaced based on what final deployment looks like."""
 
-import sys
+import dataclasses
 
 
-class DLMConfiguration:  # pylint: disable=too-few-public-methods
+@dataclasses.dataclass
+class DLMConfiguration:
     """Configuration of the DLM, to be replaced in the future."""
 
     SERVER = "http://localhost"
@@ -22,13 +23,14 @@ class DLMConfiguration:  # pylint: disable=too-few-public-methods
     DIRECTORY_IS_MEASUREMENT_SET_SUFFIX = ".ms"
 
 
-class WatchConfiguration:  # pylint: disable=too-few-public-methods
+@dataclasses.dataclass
+class WatchConfiguration:
     """Configuration of the watcher, to be replaced in the future."""
 
     DIRECTORY_TO_WATCH = "/Users/00077990/yanda/pi24/watch_dir"
     STORAGE_NAME_FOR_REGISTRATION = "b"
     DELETE_DIR_ENTRIES_REGISTERED_SECS_AGO = 3600
-    WATCHER_STATUS_FILENAME = f"{sys.modules[__name__]}.run"
+    WATCHER_STATUS_FILENAME = ".directory_watcher_status.run"
     WATCHER_STATUS_FULL_FILENAME = f"{DIRECTORY_TO_WATCH}/{WATCHER_STATUS_FILENAME})"
     RELOAD_WATCHER_STATUS_FILE = True
     # These should not be required in final system

@@ -1,7 +1,6 @@
 """Application to watch a directory for changes and send to DLM."""
 
 import asyncio
-import json
 import logging
 import time
 from enum import Enum
@@ -29,7 +28,7 @@ logger = logging.getLogger(__name__)
 ingest_configuration = configuration.Configuration(host=DLMConfiguration.INGEST_URL)
 storage_configuration = configuration.Configuration(host=DLMConfiguration.STORAGE_URL)
 directory_watcher_entries = DirectoryWatcherEntries(
-    entries_file=(WatchConfiguration.WATCHER_STATUS_FULL_FILENAME),
+    entries_file=WatchConfiguration.WATCHER_STATUS_FULL_FILENAME,
     reload_from_cache=WatchConfiguration.RELOAD_WATCHER_STATUS_FILE,
 )
 
@@ -58,9 +57,8 @@ def follow_sym_link(path: Path) -> Path:
         path.is_file()
 
 
-def register_entry(entry_path: Path, relative_path: str):
+def register_entry(relative_path: str):
     """Register the given entry_path."""
-    full_path = entry_path.resolve()
     # is_measurement_set = False
     # if entry_path.is_dir() and entry_path.as_posix().endswith(
     #     DLMConfiguration.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
@@ -76,29 +74,33 @@ def register_entry(entry_path: Path, relative_path: str):
             eb_id=WatchConfiguration.EB_ID,
         )
     # TODO: decode JSON response
-    json.dumps(response)
-    dlm_registration_id = ""
+    dlm_registration_id = response
     time_registered = time.time()
 
     directory_watcher_entry = DirectoryWatcherEntry(
-        file_or_directory=full_path,
+        file_or_directory=relative_path,
         dlm_storage_id=storage_id,
         dlm_registration_id=dlm_registration_id,
         time_registered=time_registered,
     )
-    directory_watcher_entries.append(directory_watcher_entry)
+    directory_watcher_entries.add(directory_watcher_entry)
+    directory_watcher_entries.save_to_file()
 
 
 def do_something_with_new_entry(entry: tuple[Change, str]):
     """TODO: Test function currently."""
     logger.info("in do something %s", entry)
+    full_path = entry[1]
     relative_path = entry[1].replace(f"{WATCH_DIRECTORY}/", "")
+    # We need to ignore any updates/changes on the cache file
+    if WatchConfiguration.WATCHER_STATUS_FULL_FILENAME == full_path:
+        return
     entry_path = Path(relative_path)
     logger.info(entry_path)
     #    pp = PosixPath(entry[1])
     #    print(pp)
     if entry[0] is Change.added:
-        register_entry(entry_path, relative_path)
+        register_entry(relative_path=relative_path)
     if entry[0] is not Change.deleted:
         path = entry_path.resolve()
         if path.exists():
