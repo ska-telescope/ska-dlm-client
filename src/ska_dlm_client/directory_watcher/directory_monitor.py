@@ -3,7 +3,8 @@
 import asyncio
 import logging
 import time
-from enum import Enum
+from os import listdir
+from os.path import isdir, isfile, islink
 from pathlib import Path
 
 from watchfiles import Change, awatch
@@ -33,23 +34,6 @@ directory_watcher_entries = DirectoryWatcherEntries(
 )
 
 
-class InternalState(Enum):
-    """The internal state for each entry."""
-
-    IN_QUEUE = 0
-    INGESTING = 1
-    INGESTED = 2
-    BAD = 3
-
-
-class PathType(Enum):
-    """What does the entry path represent."""
-
-    FILE = 0
-    DIRECTORY = 1
-    MEASUREMENT_SET = 2
-
-
 def follow_sym_link(path: Path) -> Path:
     """Return the real path after following the sysmlink."""
     if path.is_symlink():
@@ -59,11 +43,6 @@ def follow_sym_link(path: Path) -> Path:
 
 def register_entry(relative_path: str):
     """Register the given entry_path."""
-    # is_measurement_set = False
-    # if entry_path.is_dir() and entry_path.as_posix().endswith(
-    #     DLMConfiguration.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
-    # ):
-    #     is_measurement_set = True
     with api_client.ApiClient(ingest_configuration) as ingest_api_client:
         api_ingest = ingest_api.IngestApi(ingest_api_client)
         response = api_ingest.register_data_item_ingest_register_data_item_post(
@@ -85,29 +64,47 @@ def register_entry(relative_path: str):
     )
     directory_watcher_entries.add(directory_watcher_entry)
     directory_watcher_entries.save_to_file()
+    logger.info("entry %s added.", relative_path)
 
 
-def do_something_with_new_entry(entry: tuple[Change, str]):
+def add_path(full_path: str, relative_path: str):
+    """Add the given relative_path to the DLM."""
+    logger.info("in add_path with %s and %s", full_path, relative_path)
+    if isfile(full_path):
+        logger.info("entry is file")
+        register_entry(relative_path=relative_path)
+    elif isdir(full_path):
+        logger.info("entry is directory")
+        if relative_path.endswith(DLMConfiguration.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX):
+            # if a measurement set then just add directory
+            register_entry(relative_path=relative_path)
+        else:
+            # otherwise add each file or directory
+            dir_entries = listdir(full_path)
+            for dir_entry in dir_entries:
+                new_full_path = f"{full_path}/{dir_entry}"
+                new_relative_path = f"{relative_path}/{dir_entry}"
+                add_path(full_path=new_full_path, relative_path=new_relative_path)
+    else:
+        if islink(full_path):
+            error_text = f"Symbolic links are currently not supported: {relative_path}"
+        else:
+            error_text = f"Unspported file/directory entry type: {relative_path}"
+        logging.error(error_text)
+        raise RuntimeError(error_text)
+
+
+def process_directory_entry_change(entry: tuple[Change, str]):
     """TODO: Test function currently."""
-    logger.info("in do something %s", entry)
+    logger.info("in do process_directory_entry_change %s", entry)
+    change_type = entry[0]
     full_path = entry[1]
-    relative_path = entry[1].replace(f"{WATCH_DIRECTORY}/", "")
-    # We need to ignore any updates/changes on the cache file
+    relative_path = full_path.replace(f"{WATCH_DIRECTORY}/", "")
     if WatchConfiguration.WATCHER_STATUS_FULL_FILENAME == full_path:
         return
-    entry_path = Path(relative_path)
-    logger.info(entry_path)
-    #    pp = PosixPath(entry[1])
-    #    print(pp)
-    if entry[0] is Change.added:
-        register_entry(relative_path=relative_path)
-    if entry[0] is not Change.deleted:
-        path = entry_path.resolve()
-        if path.exists():
-            stat = path.stat()
-            logger.info(stat)
-        else:
-            logger.info("Cannot find resolved path %s", path)
+    if change_type is Change.added:
+        add_path(full_path=full_path, relative_path=relative_path)
+    # TODO: Change.deleted Change.modified mayh need support
 
 
 async def main():
@@ -115,7 +112,7 @@ async def main():
     async for changes in awatch(WATCH_DIRECTORY):  # type: Set[tuple[Change, str]]
         for change in changes:
             logger.info("in main %s", change)
-            do_something_with_new_entry(change)
+            process_directory_entry_change(change)
 
 
 WATCH_DIRECTORY = WatchConfiguration.DIRECTORY_TO_WATCH
