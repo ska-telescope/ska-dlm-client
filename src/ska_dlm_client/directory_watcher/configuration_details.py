@@ -2,6 +2,11 @@
 
 import dataclasses
 
+from ska_dlm_client.directory_watcher.config import Config
+from ska_dlm_client.openapi import configuration
+
+CONFIG = Config()
+
 
 @dataclasses.dataclass
 class DLMConfiguration:
@@ -30,9 +35,9 @@ class WatchConfiguration:
     DIRECTORY_TO_WATCH = "/Users/00077990/yanda/pi24/watch_dir"
     STORAGE_NAME_FOR_REGISTRATION = "b"
     DELETE_DIR_ENTRIES_REGISTERED_SECS_AGO = 3600
-    WATCHER_STATUS_FILENAME = ".directory_watcher_status.run"
-    WATCHER_STATUS_FULL_FILENAME = f"{DIRECTORY_TO_WATCH}/{WATCHER_STATUS_FILENAME})"
-    RELOAD_WATCHER_STATUS_FILE = True
+    STATUS_FILE_FILENAME = ".directory_watcher_status.run"
+    STATUS_FILE_FULL_FILENAME = f"{DIRECTORY_TO_WATCH}/{STATUS_FILE_FILENAME})"
+    RELOAD_STATUS_FILE = True
     # These should not be required in final system
     LOCATION_NAME = "ThisDLMClientLocationName"
     LOCATION_TYPE = "ThisDLMClientLocation"
@@ -43,3 +48,19 @@ class WatchConfiguration:
     STORAGE_TYPE = "disk"
     STORAGE_CONFIG = '{"name":"data","type":"local", "parameters":{}}'
     EB_ID = "test_eb_id"
+
+
+def get_config() -> Config:
+    """Build the configuration."""
+    print(CONFIG)
+    # if CONFIG.directory_to_watch is not None:
+    # return CONFIG
+
+    CONFIG.directory_to_watch = WatchConfiguration.DIRECTORY_TO_WATCH
+    CONFIG.status_file_full_filename = WatchConfiguration.STATUS_FILE_FULL_FILENAME
+    CONFIG.reload_status_file = WatchConfiguration.RELOAD_STATUS_FILE
+    CONFIG.ingest_url = DLMConfiguration.INGEST_URL
+    CONFIG.storage_url = DLMConfiguration.STORAGE_URL
+    CONFIG.ingest_configuration = configuration.Configuration(host=DLMConfiguration.INGEST_URL)
+    CONFIG.storage_configuration = configuration.Configuration(host=DLMConfiguration.STORAGE_URL)
+    return CONFIG
