@@ -76,18 +76,21 @@ async def init_dlm_storage(session: Session):
         # get the storage id
         storage_id = storage.json()[0]["storage_id"]
 
-    # TODO: check if a storage config is already known to DLM
-    # params = {"storage_id": storage_id}
+    # check if a storage config is already known to DLM
+    params = {"storage_id": storage_id}
+    config = session.get(f"{CONFIG.dlm.storage_url}/storage/get_storage_config", params=params, timeout=60)
+    logger.info("Query Storage Config: %s", config.json())
 
     # supply a rclone config for this storage, if it doesn’t already exist
-    params = {
-        "storage_id": storage_id,
-        "config": CONFIG.config
-    }
-    config = session.post(
-        f"{CONFIG.dlm.storage_url}/storage/create_storage_config", params=params, timeout=60
-    )
-    logger.info("Create Storage Config: %s", config.json())
+    if len(config.json()) == 0:
+        params = {
+            "storage_id": storage_id,
+            "config": CONFIG.config
+        }
+        config = session.post(
+            f"{CONFIG.dlm.storage_url}/storage/create_storage_config", params=params, timeout=60
+        )
+        logger.info("Create Storage Config: %s", config.json())
 
     return storage_id
 
