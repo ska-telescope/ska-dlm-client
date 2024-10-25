@@ -2,7 +2,7 @@
 
 import logging
 import time
-from os import listdir, walk
+from os import listdir
 from os.path import isdir, isfile, islink
 from pathlib import Path
 

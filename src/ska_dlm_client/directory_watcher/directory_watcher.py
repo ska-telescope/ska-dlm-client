@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-import os
 
 from watchfiles import Change, awatch
 
@@ -50,10 +49,10 @@ storage_id = init_storage_for_testing(
 )
 config.storage_id = storage_id
 registration_processor = init(config)
-for root, dirs, files in os.walk(
-    top="/Users/00077990/yanda/pi24/ska-dlm-client/docs/src", topdown=True
-):
-    print(f"root: {root}, dirs: {dirs}, files: {files}")
+# for root, dirs, files in os.walk(
+#     top="/Users/00077990/yanda/pi24/ska-dlm-client/docs/src", topdown=True
+# ):
+#     print(f"root: {root}, dirs: {dirs}, files: {files}")
 # test_ingest_item()
 
 if __name__ == "__main__":
