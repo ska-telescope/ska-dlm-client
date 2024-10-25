@@ -19,7 +19,7 @@ class DirectoryWatcherEntry:
     """An individual entry."""
 
     file_or_directory: str
-    dlm_storage_id: str
+    dlm_storage_name: str
     dlm_registration_id: str
     time_registered: float
 

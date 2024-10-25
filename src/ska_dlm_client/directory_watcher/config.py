@@ -11,6 +11,7 @@ class Config:  # pylint: disable=too-few-public-methods
     status_file_full_filename: str
     reload_status_file: bool
     ingest_url: str
+    storage_name: str
     storage_url: str
     ingest_configuration: Configuration
     storage_configuration: Configuration

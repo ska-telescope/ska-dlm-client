@@ -36,7 +36,7 @@ class WatchConfiguration:
     STORAGE_NAME_FOR_REGISTRATION = "b"
     DELETE_DIR_ENTRIES_REGISTERED_SECS_AGO = 3600
     STATUS_FILE_FILENAME = ".directory_watcher_status.run"
-    STATUS_FILE_FULL_FILENAME = f"{DIRECTORY_TO_WATCH}/{STATUS_FILE_FILENAME})"
+    STATUS_FILE_FULL_FILENAME = f"{DIRECTORY_TO_WATCH}/{STATUS_FILE_FILENAME}"
     RELOAD_STATUS_FILE = True
     # These should not be required in final system
     LOCATION_NAME = "ThisDLMClientLocationName"
@@ -46,7 +46,7 @@ class WatchConfiguration:
     LOCATION_FACILITY = "ICRAR"
     STORAGE_NAME = "data"
     STORAGE_TYPE = "disk"
-    STORAGE_CONFIG = '{"name":"data","type":"local", "parameters":{}}'
+    STORAGE_CONFIG = {"name":"data","type":"local", "parameters":{}}
     EB_ID = "test_eb_id"
 
 
@@ -61,6 +61,7 @@ def get_config() -> Config:
     CONFIG.reload_status_file = WatchConfiguration.RELOAD_STATUS_FILE
     CONFIG.ingest_url = DLMConfiguration.INGEST_URL
     CONFIG.storage_url = DLMConfiguration.STORAGE_URL
+    CONFIG.storage_name = WatchConfiguration.STORAGE_NAME
     CONFIG.ingest_configuration = configuration.Configuration(host=DLMConfiguration.INGEST_URL)
     CONFIG.storage_configuration = configuration.Configuration(host=DLMConfiguration.STORAGE_URL)
     return CONFIG

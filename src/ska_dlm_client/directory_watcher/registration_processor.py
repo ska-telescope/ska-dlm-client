@@ -17,6 +17,7 @@ from ska_dlm_client.directory_watcher.directory_watcher_entries import (
 )
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.dlm_api import ingest_api
+from ska_dlm_client.openapi.exceptions import OpenApiException
 
 logger = logging.getLogger(__name__)
 
@@ -39,20 +40,24 @@ class RegistrationProcessor:
         """Register the given entry_path."""
         with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
-            response = api_ingest.register_data_item_ingest_register_data_item_post(
-                item_name=relative_path,
-                uri=relative_path,
-                storage_name=WatchConfiguration.STORAGE_NAME,
-                storage_id=self._config.storage_id,
-                eb_id=WatchConfiguration.EB_ID,
-            )
+            try:
+                response = api_ingest.register_data_item_ingest_register_data_item_post(
+                    item_name=relative_path,
+                    uri=relative_path,
+                    storage_name=self._config.storage_name,
+                    eb_id=WatchConfiguration.EB_ID,
+                )
+            except OpenApiException as err:
+                logger.error(f"Exception caught during register_data_item\n\t{err}")
+                return
+
         # TODO: decode JSON response
-        dlm_registration_id = response
+        dlm_registration_id = response.__str__()
         time_registered = time.time()
 
         directory_watcher_entry = DirectoryWatcherEntry(
             file_or_directory=relative_path,
-            dlm_storage_id=self._config.storage_id,
+            dlm_storage_name=self._config.storage_name,
             dlm_registration_id=dlm_registration_id,
             time_registered=time_registered,
         )
@@ -84,7 +89,7 @@ class RegistrationProcessor:
             else:
                 error_text = f"Unspported file/directory entry type: {relative_path}"
             logging.error(error_text)
-            raise RuntimeError(error_text)
+            # TODO: Do we throw this or just log here, raise RuntimeError(error_text)
 
     def set_config(self, config: Config):
         """Setter for config."""

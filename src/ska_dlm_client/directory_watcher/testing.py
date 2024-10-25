@@ -64,7 +64,10 @@ def init_storage_for_testing(storage_configuration: configuration, the_location_
 
         # Setup the storage config
         response = api_storage.create_storage_config_storage_create_storage_config_post(
-            storage_id=the_storage_id, config=WatchConfiguration.STORAGE_CONFIG
+            body=WatchConfiguration.STORAGE_CONFIG,
+            storage_id=the_storage_id,
+            storage_name=WatchConfiguration.STORAGE_NAME,
+            config_type="rclone",
         )
         storage_config_id = response
         logger.info("storage_config_id: %s", storage_config_id)
