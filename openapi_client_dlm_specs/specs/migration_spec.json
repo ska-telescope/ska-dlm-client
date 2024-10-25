@@ -11,13 +11,13 @@
     },
     "paths": {
         "/migration/copy_data_item": {
-            "get": {
+            "post": {
                 "summary": "Copy Data Item",
                 "tags": [
                     "migration"
                 ],
                 "description": "Copy a data_item from source to destination.\n\nSteps\n(1) get the current storage_id(s) of the item\n(2) convert one(first) storage_id to a configured rclone backend\n(3) check whether item already exists on destination\n(4) initialize the new item with the same OID on the new storage\n(5) use the rclone copy command to copy it to the new location\n(6) make sure the copy was successful",
-                "operationId": "copy_data_item_migration_copy_data_item_get",
+                "operationId": "copy_data_item_migration_copy_data_item_post",
                 "parameters": [
                     {
                         "name": "item_name",

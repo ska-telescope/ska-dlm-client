@@ -93,7 +93,7 @@ Class | Method | HTTP request | Description
 *GatewayApi* | [**token_by_username_password_token_by_username_password_get**](docs/GatewayApi.md#token_by_username_password_token_by_username_password_get) | **GET** /token_by_username_password | Token By Username Password
 *IngestApi* | [**init_data_item_ingest_init_data_item_post**](docs/IngestApi.md#init_data_item_ingest_init_data_item_post) | **POST** /ingest/init_data_item | Init Data Item
 *IngestApi* | [**register_data_item_ingest_register_data_item_post**](docs/IngestApi.md#register_data_item_ingest_register_data_item_post) | **POST** /ingest/register_data_item | Register Data Item
-*MigrationApi* | [**copy_data_item_migration_copy_data_item_get**](docs/MigrationApi.md#copy_data_item_migration_copy_data_item_get) | **GET** /migration/copy_data_item | Copy Data Item
+*MigrationApi* | [**copy_data_item_migration_copy_data_item_post**](docs/MigrationApi.md#copy_data_item_migration_copy_data_item_post) | **POST** /migration/copy_data_item | Copy Data Item
 *RequestApi* | [**query_data_item_request_query_data_item_get**](docs/RequestApi.md#query_data_item_request_query_data_item_get) | **GET** /request/query_data_item | Query Data Item
 *RequestApi* | [**query_deleted_request_query_deleted_get**](docs/RequestApi.md#query_deleted_request_query_deleted_get) | **GET** /request/query_deleted | Query Deleted
 *RequestApi* | [**query_exists_and_ready_request_query_exist_and_ready_get**](docs/RequestApi.md#query_exists_and_ready_request_query_exist_and_ready_get) | **GET** /request/query_exist_and_ready | Query Exists And Ready
@@ -102,6 +102,7 @@ Class | Method | HTTP request | Description
 *RequestApi* | [**query_item_storage_request_query_item_storage_get**](docs/RequestApi.md#query_item_storage_request_query_item_storage_get) | **GET** /request/query_item_storage | Query Item Storage
 *RequestApi* | [**query_new_request_query_new_get**](docs/RequestApi.md#query_new_request_query_new_get) | **GET** /request/query_new | Query New
 *StorageApi* | [**create_storage_config_storage_create_storage_config_post**](docs/StorageApi.md#create_storage_config_storage_create_storage_config_post) | **POST** /storage/create_storage_config | Create Storage Config
+*StorageApi* | [**get_storage_config_storage_get_storage_config_get**](docs/StorageApi.md#get_storage_config_storage_get_storage_config_get) | **GET** /storage/get_storage_config | Get Storage Config
 *StorageApi* | [**init_location_storage_init_location_post**](docs/StorageApi.md#init_location_storage_init_location_post) | **POST** /storage/init_location | Init Location
 *StorageApi* | [**init_storage_storage_init_storage_post**](docs/StorageApi.md#init_storage_storage_init_storage_post) | **POST** /storage/init_storage | Init Storage
 *StorageApi* | [**query_location_storage_query_location_get**](docs/StorageApi.md#query_location_storage_query_location_get) | **GET** /storage/query_location | Query Location
