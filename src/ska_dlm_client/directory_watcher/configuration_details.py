@@ -39,14 +39,19 @@ class WatchConfiguration:
     STATUS_FILE_FULL_FILENAME = f"{DIRECTORY_TO_WATCH}/{STATUS_FILE_FILENAME}"
     RELOAD_STATUS_FILE = True
     # These should not be required in final system
+
+
+@dataclasses.dataclass
+class WatcherTestConfiguration:
+    """Configuration required during integration testing."""
     LOCATION_NAME = "ThisDLMClientLocationName"
     LOCATION_TYPE = "ThisDLMClientLocation"
     LOCATION_COUNTRY = "Australia"
     LOCATION_CITY = "Marksville"
     LOCATION_FACILITY = "ICRAR"
+    STORAGE_CONFIG = {"name":"data","type":"local", "parameters":{}}
     STORAGE_NAME = "data"
     STORAGE_TYPE = "disk"
-    STORAGE_CONFIG = {"name":"data","type":"local", "parameters":{}}
     EB_ID = "test_eb_id"
 
 
