@@ -58,6 +58,20 @@ DLM:
 
 See [OpenAPI README.md](src/ska_dlm_client/openapi/README.md) for further information.
 
+### Version
+
+As openapi-generator was not installed via poetry the version used is shown here.
+
+installation via brew with package details
+```sh
+$ openapi-generator --version
+openapi-generator-cli 7.8.0
+  commit : 6bdc452
+  built  : -999999999-01-01T00:00:00+18:00
+  source : https://github.com/openapitools/openapi-generator
+  docs   : https://openapi-generator.tech/
+```
+
 ### Contributing
 
 The OpenAPI generated client can be regenerated using exported OpenAPI specs from [ska-data-lifecycle](https://gitlab.com/ska-telescope/ska-data-lifecycle):

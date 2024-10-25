@@ -10,9 +10,7 @@ T = TypeVar("T")
 
 
 class ApiResponse(BaseModel, Generic[T]):
-    """
-    API response object
-    """
+    """API response object"""
 
     status_code: StrictInt = Field(description="HTTP status code")
     headers: Optional[Mapping[str, str]] = Field(None, description="HTTP headers")

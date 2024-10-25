@@ -1,4 +1,14 @@
 #!/bin/bash
+#
+# fail the script if a command fails
+set -e
+
+handle_error() {
+    echo "An error occurred on line $1"
+    exit 1
+}
+trap 'handle_error $LINENO' ERR
+
 echo "\nremoving old directories"
 rm -rf specs openapi_client_dlm_project
 
@@ -14,7 +24,7 @@ rm -rf openapi_client_dlm_project/ska_dlm_client/openapi/ska_dlm_client
 
 echo "\nfixing docstrings"
 docconvert --in-place -i rest -o numpy openapi_client_dlm_project/ska_dlm_client/openapi/
-docconvert --in-place -i rest -o numpy openapi_client_dlm_project/test/openapi/
+docconvert --in-place -i rest -o numpy openapi_client_dlm_project/test/
 
 echo "\ncleaning up src, tests and docs area of ska_dlm_client for new version of openapi generated code"
 rm -rf ../src/ska_dlm_client/openapi/ ../tests/openapi/ ../docs/openapi/
