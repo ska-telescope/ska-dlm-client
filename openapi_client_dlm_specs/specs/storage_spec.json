@@ -216,18 +216,6 @@
                         "description": "the storage_id for which to create the entry."
                     },
                     {
-                        "name": "config",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "description": "the configuration entry. For rclone this is s JSON formatted string",
-                            "default": "",
-                            "title": "Config"
-                        },
-                        "description": "the configuration entry. For rclone this is s JSON formatted string"
-                    },
-                    {
                         "name": "storage_name",
                         "in": "query",
                         "required": false,
@@ -250,6 +238,86 @@
                             "title": "Config Type"
                         },
                         "description": "default is rclone, but could be something else in the future."
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "the configuration entry. For rclone this is a JSON formatted string",
+                                "title": "Config"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/storage/get_storage_config": {
+            "get": {
+                "summary": "Get Storage Config",
+                "tags": [
+                    "storage"
+                ],
+                "description": "Get the storage configuration entry for a particular storage backend.",
+                "operationId": "get_storage_config_storage_get_storage_config_get",
+                "parameters": [
+                    {
+                        "name": "storage_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the storage id, by default \"\"",
+                            "default": "",
+                            "title": "Storage Id"
+                        },
+                        "description": "the storage id, by default \"\""
+                    },
+                    {
+                        "name": "storage_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the name of the storage volume, by default \"\"",
+                            "default": "",
+                            "title": "Storage Name"
+                        },
+                        "description": "the name of the storage volume, by default \"\""
+                    },
+                    {
+                        "name": "config_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "query only the specified type, by default \"rclone\"",
+                            "default": "rclone",
+                            "title": "Config Type"
+                        },
+                        "description": "query only the specified type, by default \"rclone\""
                     }
                 ],
                 "responses": {
@@ -282,19 +350,18 @@
                 ],
                 "description": "Create a new rclone backend configuration entry on the rclone server.",
                 "operationId": "rclone_config_storage_rclone_config_post",
-                "parameters": [
-                    {
-                        "name": "config",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "description": "a json string containing the configuration",
-                            "title": "Config"
-                        },
-                        "description": "a json string containing the configuration"
-                    }
-                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "title": "Config",
+                                "description": "a json string containing the configuration"
+                            }
+                        }
+                    },
+                    "required": true
+                },
                 "responses": {
                     "200": {
                         "description": "Successful Response",

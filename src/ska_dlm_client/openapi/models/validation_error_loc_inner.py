@@ -35,9 +35,7 @@ VALIDATIONERRORLOCINNER_ANY_OF_SCHEMAS = ["int", "str"]
 
 
 class ValidationErrorLocInner(BaseModel):
-    """
-    ValidationErrorLocInner
-    """
+    """ValidationErrorLocInner"""
 
     # data type: str
     anyof_schema_1_validator: Optional[StrictStr] = None

@@ -52,12 +52,16 @@ class ApiClient:
     the methods and models for each application are generated from the OpenAPI
     templates.
 
-    :param configuration: .Configuration object for this client
-    :param header_name: a header to pass when making calls to the API.
-    :param header_value: a header value to pass when making calls to
-        the API.
-    :param cookie: a cookie to include in the header when making calls
-        to the API
+    Parameters
+    ----------
+    configuration
+        .Configuration object for this client
+    header_name
+        a header to pass when making calls to the API.
+    header_value
+        a header value to pass when making calls to the API.
+    cookie
+        a cookie to include in the header when making calls to the API
     """
 
     PRIMITIVE_TYPES = (float, bool, bytes, str, int)
@@ -119,7 +123,10 @@ class ApiClient:
         object of ApiClient class or returns a copy of default
         ApiClient.
 
-        :return: The ApiClient object.
+        Returns
+        -------
+        unknown
+            The ApiClient object.
         """
         if cls._default is None:
             cls._default = ApiClient()
@@ -131,7 +138,10 @@ class ApiClient:
 
         It stores default ApiClient.
 
-        :param default: object of ApiClient.
+        Parameters
+        ----------
+        default
+            object of ApiClient.
         """
         cls._default = default
 
@@ -151,25 +161,39 @@ class ApiClient:
         _request_auth=None,
     ) -> RequestSerialized:
         """Builds the HTTP request params needed by the request.
-        :param method: Method to call.
-        :param resource_path: Path to method endpoint.
-        :param path_params: Path parameters in the url.
-        :param query_params: Query parameters in the url.
-        :param header_params: Header parameters to be
-            placed in the request header.
-        :param body: Request body.
-        :param post_params dict: Request post form parameters,
-            for `application/x-www-form-urlencoded`, `multipart/form-data`.
-        :param auth_settings list: Auth Settings names for the request.
-        :param files dict: key -> filename, value -> filepath,
-            for `multipart/form-data`.
-        :param collection_formats: dict of collection formats for path, query,
-            header, and post parameters.
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the authentication
-                              in the spec for a single request.
-        :return: tuple of form (path, http_method, query_params, header_params,
-            body, post_params, files)
+
+        Parameters
+        ----------
+        method
+            Method to call.
+        resource_path
+            Path to method endpoint.
+        path_params
+            Path parameters in the url.
+        query_params
+            Query parameters in the url.
+        header_params
+            Header parameters to be placed in the request header.
+        body
+            Request body.
+        dict : files
+            key -> filename, value -> filepath, for `multipart/form-
+            data`.
+        list : auth_settings
+            Auth Settings names for the request.
+        collection_formats
+            dict of collection formats for path, query, header, and post
+            parameters.
+        _request_auth
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+
+        Returns
+        -------
+        unknown
+            tuple of form (path, http_method, query_params,
+            header_params, body, post_params, files)
         """
 
         config = self.configuration
@@ -235,15 +259,27 @@ class ApiClient:
         self, method, url, header_params=None, body=None, post_params=None, _request_timeout=None
     ) -> rest.RESTResponse:
         """Makes the HTTP request (synchronous)
-        :param method: Method to call.
-        :param url: Path to method endpoint.
-        :param header_params: Header parameters to be
-            placed in the request header.
-        :param body: Request body.
-        :param post_params dict: Request post form parameters,
-            for `application/x-www-form-urlencoded`, `multipart/form-data`.
-        :param _request_timeout: timeout setting for this request.
-        :return: RESTResponse
+
+        Parameters
+        ----------
+        method
+            Method to call.
+        url
+            Path to method endpoint.
+        header_params
+            Header parameters to be placed in the request header.
+        body
+            Request body.
+        dict : post_params
+            Request post form parameters, for `application/x-www-form-
+            urlencoded`, `multipart/form-data`.
+        _request_timeout
+            timeout setting for this request.
+
+        Returns
+        -------
+        unknown
+            RESTResponse
         """
 
         try:
@@ -268,9 +304,18 @@ class ApiClient:
         response_types_map: Optional[Dict[str, ApiResponseT]] = None,
     ) -> ApiResponse[ApiResponseT]:
         """Deserializes response into an object.
-        :param response_data: RESTResponse object to be deserialized.
-        :param response_types_map: dict of response types.
-        :return: ApiResponse
+
+        Parameters
+        ----------
+        response_data
+            RESTResponse object to be deserialized.
+        response_types_map
+            dict of response types.
+
+        Returns
+        -------
+        unknown
+            ApiResponse
         """
 
         msg = "RESTResponse.read() must be called before passing it to response_deserialize()"
@@ -329,8 +374,15 @@ class ApiClient:
         If obj is dict, return the dict.
         If obj is OpenAPI model, return the properties dict.
 
-        :param obj: The data to serialize.
-        :return: The serialized form of data.
+        Parameters
+        ----------
+        obj
+            The data to serialize.
+
+        Returns
+        -------
+        unknown
+            The serialized form of data.
         """
         if obj is None:
             return None
@@ -367,12 +419,20 @@ class ApiClient:
     def deserialize(self, response_text: str, response_type: str, content_type: Optional[str]):
         """Deserializes response into an object.
 
-        :param response: RESTResponse object to be deserialized.
-        :param response_type: class literal for
-            deserialized object, or string of class name.
-        :param content_type: content type of response.
+        Parameters
+        ----------
+        response
+            RESTResponse object to be deserialized.
+        response_type
+            class literal for deserialized object, or string of class
+            name.
+        content_type
+            content type of response.
 
-        :return: deserialized object.
+        Returns
+        -------
+        unknown
+            deserialized object.
         """
 
         # fetch data from response object
@@ -398,10 +458,17 @@ class ApiClient:
     def __deserialize(self, data, klass):
         """Deserializes dict, list, str into an object.
 
-        :param data: dict, list or str.
-        :param klass: class literal, or string of class name.
+        Parameters
+        ----------
+        data
+            dict, list or str.
+        klass
+            class literal, or string of class name.
 
-        :return: object.
+        Returns
+        -------
+        unknown
+            object.
         """
         if data is None:
             return None
@@ -443,9 +510,17 @@ class ApiClient:
     def parameters_to_tuples(self, params, collection_formats):
         """Get parameters as list of tuples, formatting collections.
 
-        :param params: Parameters as dict or list of two-tuples
-        :param dict collection_formats: Parameter collection formats
-        :return: Parameters as list of tuples, collections formatted
+        Parameters
+        ----------
+        params
+            Parameters as dict or list of two-tuples
+        collection_formats : dict
+            Parameter collection formats
+
+        Returns
+        -------
+        unknown
+            Parameters as list of tuples, collections formatted
         """
         new_params: List[Tuple[str, str]] = []
         if collection_formats is None:
@@ -472,9 +547,17 @@ class ApiClient:
     def parameters_to_url_query(self, params, collection_formats):
         """Get parameters as list of tuples, formatting collections.
 
-        :param params: Parameters as dict or list of two-tuples
-        :param dict collection_formats: Parameter collection formats
-        :return: URL query string (e.g. a=Hello%20World&b=123)
+        Parameters
+        ----------
+        params
+            Parameters as dict or list of two-tuples
+        collection_formats : dict
+            Parameter collection formats
+
+        Returns
+        -------
+        unknown
+            URL query string (e.g. a=Hello%20World&b=123)
         """
         new_params: List[Tuple[str, str]] = []
         if collection_formats is None:
@@ -509,8 +592,15 @@ class ApiClient:
     def files_parameters(self, files: Dict[str, Union[str, bytes]]):
         """Builds form parameters.
 
-        :param files: File parameters.
-        :return: Form parameters with files.
+        Parameters
+        ----------
+        files
+            File parameters.
+
+        Returns
+        -------
+        unknown
+            Form parameters with files.
         """
         params = []
         for k, v in files.items():
@@ -530,8 +620,15 @@ class ApiClient:
     def select_header_accept(self, accepts: List[str]) -> Optional[str]:
         """Returns `Accept` based on an array of accepts provided.
 
-        :param accepts: List of headers.
-        :return: Accept (e.g. application/json).
+        Parameters
+        ----------
+        accepts
+            List of headers.
+
+        Returns
+        -------
+        unknown
+            Accept (e.g. application/json).
         """
         if not accepts:
             return None
@@ -545,8 +642,15 @@ class ApiClient:
     def select_header_content_type(self, content_types):
         """Returns `Content-Type` based on an array of content_types provided.
 
-        :param content_types: List of content-types.
-        :return: Content-Type (e.g. application/json).
+        Parameters
+        ----------
+        content_types
+            List of content-types.
+
+        Returns
+        -------
+        unknown
+            Content-Type (e.g. application/json).
         """
         if not content_types:
             return None
@@ -562,15 +666,23 @@ class ApiClient:
     ) -> None:
         """Updates header and query params based on authentication setting.
 
-        :param headers: Header parameters dict to be updated.
-        :param queries: Query parameters tuple list to be updated.
-        :param auth_settings: Authentication setting identifiers list.
+        Parameters
+        ----------
+        headers
+            Header parameters dict to be updated.
+        queries
+            Query parameters tuple list to be updated.
+        auth_settings
+            Authentication setting identifiers list.
+        request_auth
+            if set, the provided settings will override the token in the
+            configuration.
+
+
         :resource_path: A string representation of the HTTP request resource path.
         :method: A string representation of the HTTP request method.
         :body: A object representing the body of the HTTP request.
         The object type is the return value of sanitize_for_serialization().
-        :param request_auth: if set, the provided settings will
-                             override the token in the configuration.
         """
         if not auth_settings:
             return
@@ -590,13 +702,20 @@ class ApiClient:
     ) -> None:
         """Updates the request parameters based on a single auth_setting
 
-        :param headers: Header parameters dict to be updated.
-        :param queries: Query parameters tuple list to be updated.
+        Parameters
+        ----------
+        headers
+            Header parameters dict to be updated.
+        queries
+            Query parameters tuple list to be updated.
+        auth_setting
+            auth settings for the endpoint
+
+
         :resource_path: A string representation of the HTTP request resource path.
         :method: A string representation of the HTTP request method.
         :body: A object representing the body of the HTTP request.
         The object type is the return value of sanitize_for_serialization().
-        :param auth_setting: auth settings for the endpoint
         """
         if auth_setting["in"] == "cookie":
             headers["Cookie"] = auth_setting["value"]
@@ -617,8 +736,15 @@ class ApiClient:
         handle file downloading
         save response body into a tmp file and return the instance
 
-        :param response:  RESTResponse.
-        :return: file path.
+        Parameters
+        ----------
+        response
+            RESTResponse.
+
+        Returns
+        -------
+        unknown
+            file path.
         """
         fd, path = tempfile.mkstemp(dir=self.configuration.temp_folder_path)
         os.close(fd)
@@ -639,10 +765,17 @@ class ApiClient:
     def __deserialize_primitive(self, data, klass):
         """Deserializes string to primitive type.
 
-        :param data: str.
-        :param klass: class literal.
+        Parameters
+        ----------
+        data
+            str.
+        klass
+            class literal.
 
-        :return: int, long, float, str, bool.
+        Returns
+        -------
+        unknown
+            int, long, float, str, bool.
         """
         try:
             return klass(data)
@@ -654,15 +787,25 @@ class ApiClient:
     def __deserialize_object(self, value):
         """Return an original value.
 
-        :return: object.
+        Returns
+        -------
+        unknown
+            object.
         """
         return value
 
     def __deserialize_date(self, string):
         """Deserializes string to date.
 
-        :param string: str.
-        :return: date.
+        Parameters
+        ----------
+        string
+            str.
+
+        Returns
+        -------
+        unknown
+            date.
         """
         try:
             return parse(string).date()
@@ -678,8 +821,15 @@ class ApiClient:
 
         The string should be in iso8601 datetime format.
 
-        :param string: str.
-        :return: datetime.
+        Parameters
+        ----------
+        string
+            str.
+
+        Returns
+        -------
+        unknown
+            datetime.
         """
         try:
             return parse(string)
@@ -693,9 +843,17 @@ class ApiClient:
     def __deserialize_enum(self, data, klass):
         """Deserializes primitive type to enum.
 
-        :param data: primitive type.
-        :param klass: class literal.
-        :return: enum value.
+        Parameters
+        ----------
+        data
+            primitive type.
+        klass
+            class literal.
+
+        Returns
+        -------
+        unknown
+            enum value.
         """
         try:
             return klass(data)
@@ -707,9 +865,17 @@ class ApiClient:
     def __deserialize_model(self, data, klass):
         """Deserializes list or dict to model.
 
-        :param data: dict, list.
-        :param klass: class literal.
-        :return: model object.
+        Parameters
+        ----------
+        data
+            dict, list.
+        klass
+            class literal.
+
+        Returns
+        -------
+        unknown
+            model object.
         """
 
         return klass.from_dict(data)

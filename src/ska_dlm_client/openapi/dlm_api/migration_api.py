@@ -35,7 +35,7 @@ class MigrationApi:
         self.api_client = api_client
 
     @validate_call
-    def copy_data_item_migration_copy_data_item_get(
+    def copy_data_item_migration_copy_data_item_post(
         self,
         item_name: Annotated[
             Optional[StrictStr],
@@ -120,7 +120,7 @@ class MigrationApi:
         """
         # noqa: E501
 
-        _param = self._copy_data_item_migration_copy_data_item_get_serialize(
+        _param = self._copy_data_item_migration_copy_data_item_post_serialize(
             item_name=item_name,
             oid=oid,
             uid=uid,
@@ -145,7 +145,7 @@ class MigrationApi:
         ).data
 
     @validate_call
-    def copy_data_item_migration_copy_data_item_get_with_http_info(
+    def copy_data_item_migration_copy_data_item_post_with_http_info(
         self,
         item_name: Annotated[
             Optional[StrictStr],
@@ -230,7 +230,7 @@ class MigrationApi:
         """
         # noqa: E501
 
-        _param = self._copy_data_item_migration_copy_data_item_get_serialize(
+        _param = self._copy_data_item_migration_copy_data_item_post_serialize(
             item_name=item_name,
             oid=oid,
             uid=uid,
@@ -255,7 +255,7 @@ class MigrationApi:
         )
 
     @validate_call
-    def copy_data_item_migration_copy_data_item_get_without_preload_content(
+    def copy_data_item_migration_copy_data_item_post_without_preload_content(
         self,
         item_name: Annotated[
             Optional[StrictStr],
@@ -340,7 +340,7 @@ class MigrationApi:
         """
         # noqa: E501
 
-        _param = self._copy_data_item_migration_copy_data_item_get_serialize(
+        _param = self._copy_data_item_migration_copy_data_item_post_serialize(
             item_name=item_name,
             oid=oid,
             uid=uid,
@@ -360,7 +360,7 @@ class MigrationApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _copy_data_item_migration_copy_data_item_get_serialize(
+    def _copy_data_item_migration_copy_data_item_post_serialize(
         self,
         item_name,
         oid,
@@ -423,7 +423,7 @@ class MigrationApi:
         _auth_settings: List[str] = []
 
         return self.api_client.param_serialize(
-            method="GET",
+            method="POST",
             resource_path="/migration/copy_data_item",
             path_params=_path_params,
             query_params=_query_params,

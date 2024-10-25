@@ -39,34 +39,47 @@ JSON_SCHEMA_VALIDATION_KEYWORDS = {
 class Configuration:
     """This class contains various settings of the API client.
 
-    :param host: Base url.
+    Parameters
+    ----------
+    host
+        Base url.
+    api_key
+        Dict to store API key(s). Each entry in the dict specifies an
+        API key. The dict key is the name of the security scheme in the
+        OAS specification. The dict value is the API key secret.
+    api_key_prefix
+        Dict to store API prefix (e.g. Bearer). The dict key is the name
+        of the security scheme in the OAS specification. The dict value
+        is an API key prefix when generating the auth data.
+    username
+        Username for HTTP basic authentication.
+    password
+        Password for HTTP basic authentication.
+    access_token
+        Access token.
+    server_index
+        Index to servers configuration.
+    server_variables
+        Mapping with string values to replace variables in templated
+        server configuration. The validation of enums is performed for
+        variables with defined enum values before.
+    server_operation_index
+        Mapping from operation ID to an index to server configuration.
+    server_operation_variables
+        Mapping from operation ID to a mapping with string values to
+        replace variables in templated server configuration. The
+        validation of enums is performed for variables with defined enum
+        values before.
+    ssl_ca_cert
+        str - the path to a file of concatenated CA certificates in PEM
+        format.
+    retries
+        Number of retries for API requests.
+
+
     :param ignore_operation_servers
       Boolean to ignore operation servers for the API client.
       Config will use `host` as the base url regardless of the operation servers.
-    :param api_key: Dict to store API key(s).
-      Each entry in the dict specifies an API key.
-      The dict key is the name of the security scheme in the OAS specification.
-      The dict value is the API key secret.
-    :param api_key_prefix: Dict to store API prefix (e.g. Bearer).
-      The dict key is the name of the security scheme in the OAS specification.
-      The dict value is an API key prefix when generating the auth data.
-    :param username: Username for HTTP basic authentication.
-    :param password: Password for HTTP basic authentication.
-    :param access_token: Access token.
-    :param server_index: Index to servers configuration.
-    :param server_variables: Mapping with string values to replace variables in
-      templated server configuration. The validation of enums is performed for
-      variables with defined enum values before.
-    :param server_operation_index: Mapping from operation ID to an index to server
-      configuration.
-    :param server_operation_variables: Mapping from operation ID to a mapping with
-      string values to replace variables in templated server configuration.
-      The validation of enums is performed for variables with defined enum
-      values before.
-    :param ssl_ca_cert: str - the path to a file of concatenated CA certificates
-      in PEM format.
-    :param retries: Number of retries for API requests.
-
     """
 
     _default = None
@@ -91,22 +104,17 @@ class Configuration:
     ) -> None:
         """Constructor"""
         self._base_path = "http://localhost:8080" if host is None else host
-        """Default Base url
-        """
+        """Default Base url"""
         self.server_index = 0 if server_index is None and host is None else server_index
         self.server_operation_index = server_operation_index or {}
-        """Default server index
-        """
+        """Default server index"""
         self.server_variables = server_variables or {}
         self.server_operation_variables = server_operation_variables or {}
-        """Default server variables
-        """
+        """Default server variables"""
         self.ignore_operation_servers = ignore_operation_servers
-        """Ignore operation servers
-        """
+        """Ignore operation servers"""
         self.temp_folder_path = None
-        """Temp file folder for downloading files
-        """
+        """Temp file folder for downloading files"""
         # Authentication Settings
         self.api_key = {}
         if api_key:
@@ -119,34 +127,26 @@ class Configuration:
         """dict to store API prefix (e.g. Bearer)
         """
         self.refresh_api_key_hook = None
-        """function hook to refresh API key if expired
-        """
+        """function hook to refresh API key if expired"""
         self.username = username
-        """Username for HTTP basic authentication
-        """
+        """Username for HTTP basic authentication"""
         self.password = password
-        """Password for HTTP basic authentication
-        """
+        """Password for HTTP basic authentication"""
         self.access_token = access_token
-        """Access token
-        """
+        """Access token"""
         self.logger = {}
-        """Logging Settings
-        """
+        """Logging Settings"""
         self.logger["package_logger"] = logging.getLogger("ska_dlm_client.openapi")
         self.logger["urllib3_logger"] = logging.getLogger("urllib3")
         self.logger_format = "%(asctime)s %(levelname)s %(message)s"
-        """Log format
-        """
+        """Log format"""
         self.logger_stream_handler = None
-        """Log stream handler
-        """
+        """Log stream handler"""
         self.logger_file_handler: Optional[FileHandler] = None
         """Log file handler
         """
         self.logger_file = None
-        """Debug file location
-        """
+        """Debug file location"""
         if debug is not None:
             self.debug = debug
         else:
@@ -160,17 +160,13 @@ class Configuration:
            from https server.
         """
         self.ssl_ca_cert = ssl_ca_cert
-        """Set this to customize the certificate file to verify the peer.
-        """
+        """Set this to customize the certificate file to verify the peer."""
         self.cert_file = None
-        """client certificate file
-        """
+        """client certificate file"""
         self.key_file = None
-        """client key file
-        """
+        """client key file"""
         self.assert_hostname = None
-        """Set this to True/False to enable/disable SSL hostname verification.
-        """
+        """Set this to True/False to enable/disable SSL hostname verification."""
         self.tls_server_name = None
         """SSL/TLS Server Name Indication (SNI)
            Set this to the SNI value expected by the server.
@@ -188,28 +184,22 @@ class Configuration:
         """Proxy URL
         """
         self.proxy_headers = None
-        """Proxy headers
-        """
+        """Proxy headers"""
         self.safe_chars_for_path_param = ""
-        """Safe chars for path_param
-        """
+        """Safe chars for path_param"""
         self.retries = retries
-        """Adding retries to override urllib3 default value 3
-        """
+        """Adding retries to override urllib3 default value 3"""
         # Enable client side validation
         self.client_side_validation = True
 
         self.socket_options = None
-        """Options to pass down to the underlying urllib3 socket
-        """
+        """Options to pass down to the underlying urllib3 socket"""
 
         self.datetime_format = "%Y-%m-%dT%H:%M:%S.%f%z"
-        """datetime format
-        """
+        """datetime format"""
 
         self.date_format = "%Y-%m-%d"
-        """date format
-        """
+        """date format"""
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -235,7 +225,10 @@ class Configuration:
         It stores default configuration, which can be
         returned by get_default_copy method.
 
-        :param default: object of Configuration
+        Parameters
+        ----------
+        default
+            object of Configuration
         """
         cls._default = default
 
@@ -245,7 +238,10 @@ class Configuration:
 
         Deprecated. Please use `get_default` instead.
 
-        :return: The configuration object.
+        Returns
+        -------
+        unknown
+            The configuration object.
         """
         return cls.get_default()
 
@@ -257,7 +253,10 @@ class Configuration:
         object of Configuration class or returns a copy of default
         configuration.
 
-        :return: The configuration object.
+        Returns
+        -------
+        unknown
+            The configuration object.
         """
         if cls._default is None:
             cls._default = Configuration()
@@ -270,7 +269,12 @@ class Configuration:
         If the logger_file is None, then add stream handler and remove file
         handler. Otherwise, add file handler and remove stream handler.
 
-        :param value: The logger_file path.
+        Parameters
+        ----------
+        value
+            The logger_file path.
+
+
         :type: str
         """
         return self.__logger_file
@@ -282,7 +286,12 @@ class Configuration:
         If the logger_file is None, then add stream handler and remove file
         handler. Otherwise, add file handler and remove stream handler.
 
-        :param value: The logger_file path.
+        Parameters
+        ----------
+        value
+            The logger_file path.
+
+
         :type: str
         """
         self.__logger_file = value
@@ -298,7 +307,12 @@ class Configuration:
     def debug(self):
         """Debug status
 
-        :param value: The debug status, True or False.
+        Parameters
+        ----------
+        value
+            The debug status, True or False.
+
+
         :type: bool
         """
         return self.__debug
@@ -307,7 +321,12 @@ class Configuration:
     def debug(self, value):
         """Debug status
 
-        :param value: The debug status, True or False.
+        Parameters
+        ----------
+        value
+            The debug status, True or False.
+
+
         :type: bool
         """
         self.__debug = value
@@ -331,7 +350,12 @@ class Configuration:
 
         The logger_formatter will be updated when sets logger_format.
 
-        :param value: The format string.
+        Parameters
+        ----------
+        value
+            The format string.
+
+
         :type: str
         """
         return self.__logger_format
@@ -342,7 +366,12 @@ class Configuration:
 
         The logger_formatter will be updated when sets logger_format.
 
-        :param value: The format string.
+        Parameters
+        ----------
+        value
+            The format string.
+
+
         :type: str
         """
         self.__logger_format = value
@@ -351,9 +380,17 @@ class Configuration:
     def get_api_key_with_prefix(self, identifier, alias=None):
         """Gets API key (with prefix if set).
 
-        :param identifier: The identifier of apiKey.
-        :param alias: The alternative identifier of apiKey.
-        :return: The token for api key authentication.
+        Parameters
+        ----------
+        identifier
+            The identifier of apiKey.
+        alias
+            The alternative identifier of apiKey.
+
+        Returns
+        -------
+        unknown
+            The token for api key authentication.
         """
         if self.refresh_api_key_hook is not None:
             self.refresh_api_key_hook(self)
@@ -368,7 +405,10 @@ class Configuration:
     def get_basic_auth_token(self):
         """Gets HTTP basic authentication header (string).
 
-        :return: The token for basic HTTP authentication.
+        Returns
+        -------
+        unknown
+            The token for basic HTTP authentication.
         """
         username = ""
         if self.username is not None:
@@ -381,7 +421,10 @@ class Configuration:
     def auth_settings(self):
         """Gets Auth Settings dict for api client.
 
-        :return: The Auth Settings information dict.
+        Returns
+        -------
+        unknown
+            The Auth Settings information dict.
         """
         auth = {}
         return auth
@@ -389,7 +432,10 @@ class Configuration:
     def to_debug_report(self):
         """Gets the essential information for debugging.
 
-        :return: The report for debugging.
+        Returns
+        -------
+        unknown
+            The report for debugging.
         """
         return (
             "Python SDK Debug Report:\n"
@@ -402,7 +448,10 @@ class Configuration:
     def get_host_settings(self):
         """Gets an array of host settings
 
-        :return: An array of host settings
+        Returns
+        -------
+        unknown
+            An array of host settings
         """
         return [
             {
@@ -413,10 +462,20 @@ class Configuration:
 
     def get_host_from_settings(self, index, variables=None, servers=None):
         """Gets host URL based on the index and variables
-        :param index: array index of the host settings
-        :param variables: hash of variable and the corresponding value
-        :param servers: an array of host settings or None
-        :return: URL based on host settings
+
+        Parameters
+        ----------
+        index
+            array index of the host settings
+        variables
+            hash of variable and the corresponding value
+        servers
+            an array of host settings or None
+
+        Returns
+        -------
+        unknown
+            URL based on host settings
         """
         if index is None:
             return self._base_path
