@@ -42,7 +42,11 @@ config = get_config()
 # TODO: It would be expected that the following config would already be
 # completed in prod but leaving in place for now.
 location_id = init_location_for_testing(config.storage_configuration)
-storage_id = init_storage_for_testing(config.storage_configuration, the_location_id=location_id)
+storage_id = init_storage_for_testing(
+    storage_name=config.storage_name,
+    storage_configuration=config.storage_configuration,
+    the_location_id=location_id,
+)
 config.storage_id = storage_id
 registration_processor = init(config)
 # test_ingest_item()

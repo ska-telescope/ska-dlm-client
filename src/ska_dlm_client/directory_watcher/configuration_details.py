@@ -38,21 +38,22 @@ class WatchConfiguration:
     STATUS_FILE_FILENAME = ".directory_watcher_status.run"
     STATUS_FILE_FULL_FILENAME = f"{DIRECTORY_TO_WATCH}/{STATUS_FILE_FILENAME}"
     RELOAD_STATUS_FILE = True
+    STORAGE_NAME = "data"
+    EB_ID = "test_eb_id"
     # These should not be required in final system
 
 
 @dataclasses.dataclass
 class WatcherTestConfiguration:
     """Configuration required during integration testing."""
+
     LOCATION_NAME = "ThisDLMClientLocationName"
     LOCATION_TYPE = "ThisDLMClientLocation"
     LOCATION_COUNTRY = "Australia"
     LOCATION_CITY = "Marksville"
     LOCATION_FACILITY = "ICRAR"
-    STORAGE_CONFIG = {"name":"data","type":"local", "parameters":{}}
-    STORAGE_NAME = "data"
+    STORAGE_CONFIG = {"name": "data", "type": "local", "parameters": {}}
     STORAGE_TYPE = "disk"
-    EB_ID = "test_eb_id"
 
 
 def get_config() -> Config:

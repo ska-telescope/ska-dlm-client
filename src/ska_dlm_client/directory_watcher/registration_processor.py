@@ -48,11 +48,11 @@ class RegistrationProcessor:
                     eb_id=WatchConfiguration.EB_ID,
                 )
             except OpenApiException as err:
-                logger.error(f"Exception caught during register_data_item\n\t{err}")
+                logger.error("Exception caught during register_data_item\n\t%s", err)
                 return
 
         # TODO: decode JSON response
-        dlm_registration_id = response.__str__()
+        dlm_registration_id = response
         time_registered = time.time()
 
         directory_watcher_entry = DirectoryWatcherEntry(
