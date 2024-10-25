@@ -33,6 +33,13 @@ class TestStorageApi(unittest.TestCase):
         """
         pass
 
+    def test_get_storage_config_storage_get_storage_config_get(self) -> None:
+        """Test case for get_storage_config_storage_get_storage_config_get
+
+        Get Storage Config
+        """
+        pass
+
     def test_init_location_storage_init_location_post(self) -> None:
         """Test case for init_location_storage_init_location_post
 

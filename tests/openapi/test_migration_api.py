@@ -26,8 +26,8 @@ class TestMigrationApi(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
-    def test_copy_data_item_migration_copy_data_item_get(self) -> None:
-        """Test case for copy_data_item_migration_copy_data_item_get
+    def test_copy_data_item_migration_copy_data_item_post(self) -> None:
+        """Test case for copy_data_item_migration_copy_data_item_post
 
         Copy Data Item
         """
