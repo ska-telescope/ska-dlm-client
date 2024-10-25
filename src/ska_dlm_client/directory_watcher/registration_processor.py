@@ -2,7 +2,7 @@
 
 import logging
 import time
-from os import listdir
+from os import listdir, walk
 from os.path import isdir, isfile, islink
 from pathlib import Path
 
@@ -48,7 +48,8 @@ class RegistrationProcessor:
                     eb_id=WatchConfiguration.EB_ID,
                 )
             except OpenApiException as err:
-                logger.error("Exception caught during register_data_item\n\t%s", err)
+                logger.error("OpenApiException caught during register_data_item\n%s", err)
+                logger.error("Ignoring and continueing.....")
                 return
 
         # TODO: decode JSON response
