@@ -82,7 +82,7 @@ def init_storage_for_testing(
     return the_storage_id
 
 
-def test_ingest_item(
+def do_test_ingest_item(
     storage_name: str, eb_id: str, ingest_configuration: configuration, storage_id: str
 ):
     """Test ingesting a single item."""
@@ -118,8 +118,6 @@ if __name__ == "__main__":
         storage_name=WatchConfiguration.STORAGE_NAME,
         server_url=DLMConfiguration.SERVER,
         reload_status_file=False,
-        ingest_service_name="ingest",
-        storage_service_name="storage",
         ingest_service_port=DLMConfiguration.DLM_ENTRY_POINTS["ingest"],
         storage_service_port=DLMConfiguration.DLM_ENTRY_POINTS["storage"],
         status_file_full_filename=WatchConfiguration.STATUS_FILE_FILENAME,

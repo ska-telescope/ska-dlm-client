@@ -30,11 +30,11 @@ class DirectoryWatcherEntries:
     directory_watcher_entries: [DirectoryWatcherEntry]
     entries_file: str
 
-    def __init__(self, entries_file: str, reload_from_cache: bool):
+    def __init__(self, entries_file: str, reload_from_status_file: bool):
         """Init the class."""
         self.directory_watcher_entries = []
         self.entries_file = entries_file
-        if not reload_from_cache:
+        if reload_from_status_file:
             self.read_from_file()
 
     def add(self, entry: DirectoryWatcherEntry):

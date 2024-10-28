@@ -78,20 +78,6 @@ def process_args():
         help="xxxxxxxxxxxxxxxxxxxxxx",
     )
     parser.add_argument(
-        "--ingest_service_name",
-        type=str,
-        required=False,
-        const=ska_dlm_client.directory_watcher.config.INGEST_SERVICE_NAME,
-        help="",
-    )
-    parser.add_argument(
-        "--storage_service_name",
-        type=str,
-        required=False,
-        const=ska_dlm_client.directory_watcher.config.STORAGE_SERVICE_NAME,
-        help="",
-    )
-    parser.add_argument(
         "--ingest_service_port",
         type=int,
         required=False,
@@ -114,8 +100,6 @@ def process_args():
         storage_name=args.storage_name,
         server_url=args.server_url,
         reload_status_file=args.reload_status_file,
-        ingest_service_name=args.ingest_service_name,
-        storage_service_name=args.storage_service_name,
         ingest_service_port=args.ingest_service_port,
         storage_service_port=args.storage_service_port,
         status_file_full_filename=args.status_file_full_filename,

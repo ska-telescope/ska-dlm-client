@@ -1,14 +1,15 @@
 """Class to hold the configuration used by the directory_watcher package."""
 
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntries
+from ska_dlm_client.directory_watcher.integration_tests.configuration_details import (
+    DLMConfiguration,
+)
 from ska_dlm_client.openapi import configuration
 from ska_dlm_client.openapi.configuration import Configuration
 
 STATUS_FILE_FILENAME = ".directory_watcher_status.run"
-INGEST_SERVICE_NAME = "ingest"
-STORAGE_SERVICE_NAME = "storage"
-INGEST_SERVICE_PORT = 8001
-STORAGE_SERVICE_PORT = 8003
+INGEST_SERVICE_PORT = DLMConfiguration.DLM_ENTRY_POINTS["ingest"]
+STORAGE_SERVICE_PORT = DLMConfiguration.DLM_ENTRY_POINTS["storage"]
 
 
 class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instance-attributes
@@ -30,8 +31,6 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         storage_name: str,
         server_url: str,
         reload_status_file: bool = True,
-        ingest_service_name: str = INGEST_SERVICE_NAME,
-        storage_service_name: str = STORAGE_SERVICE_NAME,
         ingest_service_port: int = INGEST_SERVICE_PORT,
         storage_service_port: int = STORAGE_SERVICE_PORT,
         status_file_full_filename: str = "",
@@ -45,10 +44,11 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         )
         self.reload_status_file = reload_status_file
         self.storage_name = storage_name
-        self.ingest_url = f"{server_url}:{ingest_service_port[ingest_service_name]}"
-        self.storage_url = f"{server_url}:{storage_service_port[storage_service_name]}"
+        self.ingest_url = f"{server_url}:{ingest_service_port}"
+        self.storage_url = f"{server_url}:{storage_service_port}"
         self.ingest_configuration = configuration.Configuration(host=self.ingest_url)
         self.storage_configuration = configuration.Configuration(host=self.storage_url)
         self.directory_watcher_entries = DirectoryWatcherEntries(
-            entries_file=self.status_file_full_filename, reload_from_cache=self.reload_status_file
+            entries_file=self.status_file_full_filename,
+            reload_from_status_file=self.reload_status_file,
         )
