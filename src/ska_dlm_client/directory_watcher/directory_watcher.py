@@ -74,21 +74,28 @@ def process_args():
         "--reload_status_file",
         type=bool,
         required=False,
-        const=True,
+        default=True,
         help="xxxxxxxxxxxxxxxxxxxxxx",
     )
     parser.add_argument(
         "--ingest_service_port",
         type=int,
         required=False,
-        const=ska_dlm_client.directory_watcher.config.INGEST_SERVICE_PORT,
+        default=ska_dlm_client.directory_watcher.config.INGEST_SERVICE_PORT,
         help="",
     )
     parser.add_argument(
         "--storage_service_port",
         type=int,
         required=False,
-        const=ska_dlm_client.directory_watcher.config.STORAGE_SERVICE_PORT,
+        default=ska_dlm_client.directory_watcher.config.STORAGE_SERVICE_PORT,
+        help="",
+    )
+    parser.add_argument(
+        "--status_file_filename",
+        type=str,
+        required=False,
+        default=ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME,
         help="",
     )
 
@@ -96,13 +103,13 @@ def process_args():
     args = parser.parse_args()
 
     return Config(
-        directory_to_watch=args.directory_to_watch(),
+        directory_to_watch=args.directory_to_watch,
         storage_name=args.storage_name,
         server_url=args.server_url,
         reload_status_file=args.reload_status_file,
         ingest_service_port=args.ingest_service_port,
         storage_service_port=args.storage_service_port,
-        status_file_full_filename=args.status_file_full_filename,
+        status_file_full_filename=f"{args.directory_to_watch}/{args.status_file_filename}",
     )
 
 

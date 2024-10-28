@@ -120,7 +120,7 @@ if __name__ == "__main__":
         reload_status_file=False,
         ingest_service_port=DLMConfiguration.DLM_ENTRY_POINTS["ingest"],
         storage_service_port=DLMConfiguration.DLM_ENTRY_POINTS["storage"],
-        status_file_full_filename=WatchConfiguration.STATUS_FILE_FILENAME,
+        status_file_full_filename=WatchConfiguration.STATUS_FILE_FULL_FILENAME,
     )
     setup_testing(testing_config=config)
 
