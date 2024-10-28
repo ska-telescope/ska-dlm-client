@@ -6,7 +6,7 @@ import sys
 
 from ska_dlm_client.directory_watcher.config import Config
 from ska_dlm_client.directory_watcher.directory_watcher import DirectoryWatcher
-from ska_dlm_client.directory_watcher.integration_tests.configuration_details import (
+from ska_dlm_client.directory_watcher.integration_tests.testing_configuration_details import (
     DLMConfiguration,
     WatchConfiguration,
     WatcherTestConfiguration,
@@ -117,6 +117,7 @@ if __name__ == "__main__":
         directory_to_watch=WatchConfiguration.DIRECTORY_TO_WATCH,
         storage_name=WatchConfiguration.STORAGE_NAME,
         server_url=DLMConfiguration.SERVER,
+        execution_block_id=WatchConfiguration.EB_ID,
         reload_status_file=False,
         ingest_service_port=DLMConfiguration.DLM_ENTRY_POINTS["ingest"],
         storage_service_port=DLMConfiguration.DLM_ENTRY_POINTS["storage"],

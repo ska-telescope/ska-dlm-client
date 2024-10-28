@@ -6,12 +6,9 @@ from os import listdir
 from os.path import isdir, isfile, islink
 from pathlib import Path
 
+import ska_dlm_client.directory_watcher.config
 from ska_dlm_client.directory_watcher.config import Config
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntry
-from ska_dlm_client.directory_watcher.integration_tests.configuration_details import (
-    DLMConfiguration,
-    WatchConfiguration,
-)
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.dlm_api import ingest_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
@@ -47,7 +44,7 @@ class RegistrationProcessor:
                     item_name=relative_path,
                     uri=relative_path,
                     storage_name=self._config.storage_name,
-                    eb_id=WatchConfiguration.EB_ID,
+                    eb_id=self._config.execution_block_id,
                 )
             except OpenApiException as err:
                 logger.error("OpenApiException caught during register_data_item\n%s", err)
@@ -76,7 +73,9 @@ class RegistrationProcessor:
             self._register_entry(relative_path=relative_path)
         elif isdir(full_path):
             logger.info("entry is directory")
-            if relative_path.endswith(DLMConfiguration.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX):
+            if relative_path.endswith(
+                ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
+            ):
                 # if a measurement set then just add directory
                 self._register_entry(relative_path=relative_path)
             else:

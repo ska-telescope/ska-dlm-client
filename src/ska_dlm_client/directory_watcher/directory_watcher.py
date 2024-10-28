@@ -44,8 +44,8 @@ class DirectoryWatcher:
                 self.process_directory_entry_change(change)
 
 
-def process_args():
-    """Collect up all command line parameters."""
+def create_parser() -> argparse.ArgumentParser:
+    """Define a parser for all the command line parameters."""
     parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
 
     # Adding optional argument.
@@ -71,10 +71,17 @@ def process_args():
         help="Server URL excluding any service name and port.",
     )
     parser.add_argument(
+        "-e",
+        "--execution_block_id",
+        type=str,
+        required=True,
+        help="Execution block ID to be stored as part of the metadata.",
+    )
+    parser.add_argument(
         "--reload_status_file",
         type=bool,
         required=False,
-        default=True,
+        default=False,
         help="xxxxxxxxxxxxxxxxxxxxxx",
     )
     parser.add_argument(
@@ -98,14 +105,16 @@ def process_args():
         default=ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME,
         help="",
     )
+    return parser
 
-    # Read arguments from command line
-    args = parser.parse_args()
 
+def process_args(args: argparse.Namespace) -> Config:
+    """Collect up all command line parameters and return a Config."""
     return Config(
         directory_to_watch=args.directory_to_watch,
         storage_name=args.storage_name,
         server_url=args.server_url,
+        execution_block_id=args.execution_block_id,
         reload_status_file=args.reload_status_file,
         ingest_service_port=args.ingest_service_port,
         storage_service_port=args.storage_service_port,
@@ -113,8 +122,14 @@ def process_args():
     )
 
 
+def setup_directory_watcher() -> DirectoryWatcher:
+    """Perform setup tasks required to run the directory watcher."""
+    parser = create_parser()
+    config = process_args(args=parser.parse_args())
+    registration_processor = RegistrationProcessor(config)
+    return DirectoryWatcher(config, registration_processor)
+
+
 if __name__ == "__main__":
-    main_config = process_args()
-    registration_processor = RegistrationProcessor(main_config)
-    directory_watcher = DirectoryWatcher(main_config, registration_processor)
+    directory_watcher = setup_directory_watcher()
     asyncio.run(directory_watcher.start(), debug=None)

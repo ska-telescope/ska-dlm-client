@@ -1,7 +1,7 @@
 """Class to hold the configuration used by the directory_watcher package."""
 
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntries
-from ska_dlm_client.directory_watcher.integration_tests.configuration_details import (
+from ska_dlm_client.directory_watcher.integration_tests.testing_configuration_details import (
     DLMConfiguration,
 )
 from ska_dlm_client.openapi import configuration
@@ -10,6 +10,7 @@ from ska_dlm_client.openapi.configuration import Configuration
 STATUS_FILE_FILENAME = ".directory_watcher_status.run"
 INGEST_SERVICE_PORT = DLMConfiguration.DLM_ENTRY_POINTS["ingest"]
 STORAGE_SERVICE_PORT = DLMConfiguration.DLM_ENTRY_POINTS["storage"]
+DIRECTORY_IS_MEASUREMENT_SET_SUFFIX = ".ms"
 
 
 class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instance-attributes
@@ -21,6 +22,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
     storage_name: str
     ingest_url: str
     storage_url: str
+    execution_block_id: str
     ingest_configuration: Configuration
     storage_configuration: Configuration
     directory_watcher_entries: DirectoryWatcherEntries
@@ -30,7 +32,8 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         directory_to_watch: str,
         storage_name: str,
         server_url: str,
-        reload_status_file: bool = True,
+        execution_block_id: str,
+        reload_status_file: bool = False,
         ingest_service_port: int = INGEST_SERVICE_PORT,
         storage_service_port: int = STORAGE_SERVICE_PORT,
         status_file_full_filename: str = "",
@@ -44,6 +47,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         )
         self.reload_status_file = reload_status_file
         self.storage_name = storage_name
+        self.execution_block_id = execution_block_id
         self.ingest_url = f"{server_url}:{ingest_service_port}"
         self.storage_url = f"{server_url}:{storage_service_port}"
         self.ingest_configuration = configuration.Configuration(host=self.ingest_url)
