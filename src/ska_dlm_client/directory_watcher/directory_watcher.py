@@ -1,59 +1,129 @@
 """Application to watch a directory for changes and send to DLM."""
 
+import argparse
 import asyncio
 import logging
 
 from watchfiles import Change, awatch
 
-from ska_dlm_client.directory_watcher.configuration_details import get_config
-from ska_dlm_client.directory_watcher.registration_processor import init
-from ska_dlm_client.directory_watcher.testing import (
-    init_location_for_testing,
-    init_storage_for_testing,
-)
+import ska_dlm_client.directory_watcher.config
+from ska_dlm_client.directory_watcher.config import Config
+from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def process_directory_entry_change(entry: tuple[Change, str]):
-    """TODO: Test function currently."""
-    logger.info("in do process_directory_entry_change %s", entry)
-    change_type = entry[0]
-    full_path = entry[1]
-    relative_path = full_path.replace(f"{config.directory_to_watch}/", "")
-    if config.status_file_full_filename == full_path:
-        return
-    if change_type is Change.added:
-        registration_processor.add_path(full_path=full_path, relative_path=relative_path)
-    # TODO: Change.deleted Change.modified mayh need support
+class DirectoryWatcher:
+    """Class for the running of the directory_watcher."""
+
+    def __init__(self, config: Config, watcher_registration_processor: RegistrationProcessor):
+        """Initialise with the given Config."""
+        self._config = config
+        self._registration_processor = watcher_registration_processor
+
+    def process_directory_entry_change(self, entry: tuple[Change, str]):
+        """TODO: Test function currently."""
+        logger.info("in do process_directory_entry_change %s", entry)
+        change_type = entry[0]
+        full_path = entry[1]
+        relative_path = full_path.replace(f"{self._config.directory_to_watch}/", "")
+        if self._config.status_file_full_filename == full_path:
+            return
+        if change_type is Change.added:
+            self._registration_processor.add_path(full_path=full_path, relative_path=relative_path)
+        # TODO: Change.deleted Change.modified mayh need support
+
+    async def start(self):
+        """Start watching the given directory."""
+        async for changes in awatch(
+            self._config.directory_to_watch
+        ):  # type: Set[tuple[Change, str]]
+            for change in changes:
+                logger.info("in main %s", change)
+                self.process_directory_entry_change(change)
 
 
-async def main():
-    """Start watching the given directory."""
-    async for changes in awatch(config.directory_to_watch):  # type: Set[tuple[Change, str]]
-        for change in changes:
-            logger.info("in main %s", change)
-            process_directory_entry_change(change)
+def process_args():
+    """Collect up all command line parameters."""
+    parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
 
+    # Adding optional argument.
+    parser.add_argument(
+        "-d",
+        "--directory_to_watch",
+        type=str,
+        required=True,
+        help="Full path to directory to watch.",
+    )
+    parser.add_argument(
+        "-n",
+        "--storage_name",
+        type=str,
+        required=True,
+        help="The name by which the DLM system know the storage as.",
+    )
+    parser.add_argument(
+        "-s",
+        "--server_url",
+        type=str,
+        required=True,
+        help="Server URL excluding any service name and port.",
+    )
+    parser.add_argument(
+        "--reload_status_file",
+        type=bool,
+        required=False,
+        const=True,
+        help="xxxxxxxxxxxxxxxxxxxxxx",
+    )
+    parser.add_argument(
+        "--ingest_service_name",
+        type=str,
+        required=False,
+        const=ska_dlm_client.directory_watcher.config.INGEST_SERVICE_NAME,
+        help="",
+    )
+    parser.add_argument(
+        "--storage_service_name",
+        type=str,
+        required=False,
+        const=ska_dlm_client.directory_watcher.config.STORAGE_SERVICE_NAME,
+        help="",
+    )
+    parser.add_argument(
+        "--ingest_service_port",
+        type=int,
+        required=False,
+        const=ska_dlm_client.directory_watcher.config.INGEST_SERVICE_PORT,
+        help="",
+    )
+    parser.add_argument(
+        "--storage_service_port",
+        type=int,
+        required=False,
+        const=ska_dlm_client.directory_watcher.config.STORAGE_SERVICE_PORT,
+        help="",
+    )
 
-config = get_config()
+    # Read arguments from command line
+    args = parser.parse_args()
 
-# TODO: It would be expected that the following config would already be
-# completed in prod but leaving in place for now.
-location_id = init_location_for_testing(config.storage_configuration)
-storage_id = init_storage_for_testing(
-    storage_name=config.storage_name,
-    storage_configuration=config.storage_configuration,
-    the_location_id=location_id,
-)
-config.storage_id = storage_id
-registration_processor = init(config)
-# for root, dirs, files in os.walk(
-#     top="/Users/00077990/yanda/pi24/ska-dlm-client/docs/src", topdown=True
-# ):
-#     print(f"root: {root}, dirs: {dirs}, files: {files}")
-# test_ingest_item()
+    return Config(
+        directory_to_watch=args.directory_to_watch(),
+        storage_name=args.storage_name,
+        server_url=args.server_url,
+        reload_status_file=args.reload_status_file,
+        ingest_service_name=args.ingest_service_name,
+        storage_service_name=args.storage_service_name,
+        ingest_service_port=args.ingest_service_port,
+        storage_service_port=args.storage_service_port,
+        status_file_full_filename=args.status_file_full_filename,
+    )
+
 
 if __name__ == "__main__":
-    asyncio.run(main(), debug=None)
+    main_config = process_args()
+    registration_processor = RegistrationProcessor(main_config)
+    directory_watcher = DirectoryWatcher(main_config, registration_processor)
+    asyncio.run(directory_watcher.start(), debug=None)

@@ -2,11 +2,6 @@
 
 import dataclasses
 
-from ska_dlm_client.directory_watcher.config import Config
-from ska_dlm_client.openapi import configuration
-
-CONFIG = Config()
-
 
 @dataclasses.dataclass
 class DLMConfiguration:
@@ -54,20 +49,3 @@ class WatcherTestConfiguration:
     LOCATION_FACILITY = "ICRAR"
     STORAGE_CONFIG = {"name": "data", "type": "local", "parameters": {}}
     STORAGE_TYPE = "disk"
-
-
-def get_config() -> Config:
-    """Build the configuration."""
-    print(CONFIG)
-    # if CONFIG.directory_to_watch is not None:
-    # return CONFIG
-
-    CONFIG.directory_to_watch = WatchConfiguration.DIRECTORY_TO_WATCH
-    CONFIG.status_file_full_filename = WatchConfiguration.STATUS_FILE_FULL_FILENAME
-    CONFIG.reload_status_file = WatchConfiguration.RELOAD_STATUS_FILE
-    CONFIG.ingest_url = DLMConfiguration.INGEST_URL
-    CONFIG.storage_url = DLMConfiguration.STORAGE_URL
-    CONFIG.storage_name = WatchConfiguration.STORAGE_NAME
-    CONFIG.ingest_configuration = configuration.Configuration(host=DLMConfiguration.INGEST_URL)
-    CONFIG.storage_configuration = configuration.Configuration(host=DLMConfiguration.STORAGE_URL)
-    return CONFIG

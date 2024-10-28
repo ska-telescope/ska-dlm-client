@@ -1,9 +1,17 @@
-"""Code related to testing of watcher."""
+"""Integration test the directory_watch against an actual DLM."""
 
+import asyncio
 import logging
 import sys
 
-from ska_dlm_client.directory_watcher.configuration_details import WatcherTestConfiguration
+from ska_dlm_client.directory_watcher.config import Config
+from ska_dlm_client.directory_watcher.directory_watcher import DirectoryWatcher
+from ska_dlm_client.directory_watcher.integration_tests.configuration_details import (
+    DLMConfiguration,
+    WatchConfiguration,
+    WatcherTestConfiguration,
+)
+from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
 from ska_dlm_client.openapi import api_client, configuration
 from ska_dlm_client.openapi.dlm_api import ingest_api, storage_api
 
@@ -89,3 +97,35 @@ def test_ingest_item(
             eb_id=eb_id,
         )
         logger.info("register_data_item_response: %s", response)
+
+
+def setup_testing(testing_config: Config):
+    """Complete configuration of the environment."""
+    # TODO: It would be expected that the following config would already be
+    # completed in prod but leaving in place for now.
+    location_id = init_location_for_testing(testing_config.storage_configuration)
+    storage_id = init_storage_for_testing(
+        storage_name=testing_config.storage_name,
+        storage_configuration=testing_config.storage_configuration,
+        the_location_id=location_id,
+    )
+    logger.info("location id %s and storage id %s", location_id, storage_id)
+
+
+if __name__ == "__main__":
+    config = Config(
+        directory_to_watch=WatchConfiguration.DIRECTORY_TO_WATCH,
+        storage_name=WatchConfiguration.STORAGE_NAME,
+        server_url=DLMConfiguration.SERVER,
+        reload_status_file=False,
+        ingest_service_name="ingest",
+        storage_service_name="storage",
+        ingest_service_port=DLMConfiguration.DLM_ENTRY_POINTS["ingest"],
+        storage_service_port=DLMConfiguration.DLM_ENTRY_POINTS["storage"],
+        status_file_full_filename=WatchConfiguration.STATUS_FILE_FILENAME,
+    )
+    setup_testing(testing_config=config)
+
+    registration_processor = RegistrationProcessor(config)
+    directory_watcher = DirectoryWatcher(config, registration_processor)
+    asyncio.run(directory_watcher.start(), debug=None)

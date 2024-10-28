@@ -7,13 +7,10 @@ from os.path import isdir, isfile, islink
 from pathlib import Path
 
 from ska_dlm_client.directory_watcher.config import Config
-from ska_dlm_client.directory_watcher.configuration_details import (
+from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntry
+from ska_dlm_client.directory_watcher.integration_tests.configuration_details import (
     DLMConfiguration,
     WatchConfiguration,
-)
-from ska_dlm_client.directory_watcher.directory_watcher_entries import (
-    DirectoryWatcherEntries,
-    DirectoryWatcherEntry,
 )
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.dlm_api import ingest_api
@@ -27,8 +24,13 @@ class RegistrationProcessor:
 
     _config: Config
 
-    def __init__(self):
+    def __init__(self, config: Config):
         """Nothing to current currently init."""
+        self._config = config
+
+    def set_config(self, config: Config):
+        """Set/reset the config."""
+        self._config = config
 
     def _follow_sym_link(self, path: Path) -> Path:
         """Return the real path after following the sysmlink."""
@@ -91,20 +93,3 @@ class RegistrationProcessor:
                 error_text = f"Unspported file/directory entry type: {relative_path}"
             logging.error(error_text)
             # TODO: Do we throw this or just log here, raise RuntimeError(error_text)
-
-    def set_config(self, config: Config):
-        """Setter for config."""
-        self._config = config
-
-
-registration_processor = RegistrationProcessor()
-
-
-def init(config: Config) -> RegistrationProcessor:
-    """Init the module."""
-    config.directory_watcher_entries = DirectoryWatcherEntries(
-        entries_file=config.status_file_full_filename,
-        reload_from_cache=config.reload_status_file,
-    )
-    registration_processor.set_config(config)
-    return registration_processor
