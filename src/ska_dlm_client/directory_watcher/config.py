@@ -25,7 +25,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
     storage_configuration: Configuration
     directory_watcher_entries: DirectoryWatcherEntries
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments, disable=too-many-positional-arguments
         self,
         directory_to_watch: str,
         storage_name: str,
