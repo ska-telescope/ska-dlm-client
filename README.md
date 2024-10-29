@@ -11,6 +11,27 @@ The documentation for this project, including how to get started with it, can be
 
 * [ska-dlm-client documentation](https://developer.skatelescope.org/projects/ska-dlm-client/en/latest/index.html "SKA Developer Portal: ska-dlm-client documentation")
 
+## Directory Watcher
+
+The directory_watcher will watch a given directory and add the file or directory to the DLM.
+
+As parameters the directory_watcher requires
+- A directory to watch
+- The storage name to use for registering the files
+- The URL to the DLM server
+- The execution block id to use for registering the files
+
+```sh
+$ directory_watcher
+usage: directory_watcher [-h] -d DIRECTORY_TO_WATCH -n STORAGE_NAME -s SERVER_URL -e EXECUTION_BLOCK_ID
+[--reload_status_file RELOAD_STATUS_FILE]
+[--ingest_service_port INGEST_SERVICE_PORT]
+[--storage_service_port STORAGE_SERVICE_PORT]
+[--status_file_filename STATUS_FILE_FILENAME]
+```
+
+The additional parameters can be given for greater configuration.
+
 ## Execution Modes
 
 The SKA DLM client can run in two modes:

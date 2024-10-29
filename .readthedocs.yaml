@@ -5,9 +5,9 @@ build:
     python: "3.10"
   jobs:
     post_create_environment:
-      - pip install "poetry==1.5.1"
-      - poetry config virtualenvs.create false
+      - pip install poetry==1.8.2
     post_install:
-      - poetry install --no-root --only docs
+      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH poetry install --only main,docs
+
 sphinx:
   configuration: docs/src/conf.py
