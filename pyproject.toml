@@ -23,6 +23,7 @@ python-dateutil = "^2.9.0.post0"
 docconvert = "^2.1.0"
 python-benedict = "^0.34.0"
 watchfiles = "^0.24.0"
+pyyaml = "^6.0.2"
 
 [tool.poetry.group.test.dependencies]
 black = "^24.8.0"

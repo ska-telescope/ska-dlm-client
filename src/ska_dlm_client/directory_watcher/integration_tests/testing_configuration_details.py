@@ -8,18 +8,18 @@ class DLMConfiguration:
     """Configuration of the DLM, to be replaced in the future."""
 
     SERVER = "http://localhost"
-    DLM_ENTRY_POINTS = {
+    DLM_SERVICE_PORTS = {
         "gateway": 8000,
         "ingest": 8001,
         "request": 8002,
         "storage": 8003,
         "migration": 8004,
     }
-    GATEWAY_URL = f"{SERVER}:{DLM_ENTRY_POINTS['gateway']}"
-    INGEST_URL = f"{SERVER}:{DLM_ENTRY_POINTS['ingest']}"
-    REQUEST_URL = f"{SERVER}:{DLM_ENTRY_POINTS['request']}"
-    STORAGE_URL = f"{SERVER}:{DLM_ENTRY_POINTS['storage']}"
-    MIGRATION_URL = f"{SERVER}:{DLM_ENTRY_POINTS['migration']}"
+    GATEWAY_URL = f"{SERVER}:{DLM_SERVICE_PORTS['gateway']}"
+    INGEST_URL = f"{SERVER}:{DLM_SERVICE_PORTS['ingest']}"
+    REQUEST_URL = f"{SERVER}:{DLM_SERVICE_PORTS['request']}"
+    STORAGE_URL = f"{SERVER}:{DLM_SERVICE_PORTS['storage']}"
+    MIGRATION_URL = f"{SERVER}:{DLM_SERVICE_PORTS['migration']}"
     DIRECTORY_IS_MEASUREMENT_SET_SUFFIX = ".ms"
 
 

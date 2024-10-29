@@ -8,8 +8,8 @@ from ska_dlm_client.openapi import configuration
 from ska_dlm_client.openapi.configuration import Configuration
 
 STATUS_FILE_FILENAME = ".directory_watcher_status.run"
-INGEST_SERVICE_PORT = DLMConfiguration.DLM_ENTRY_POINTS["ingest"]
-STORAGE_SERVICE_PORT = DLMConfiguration.DLM_ENTRY_POINTS["storage"]
+INGEST_SERVICE_PORT = DLMConfiguration.DLM_SERVICE_PORTS["ingest"]
+STORAGE_SERVICE_PORT = DLMConfiguration.DLM_SERVICE_PORTS["storage"]
 DIRECTORY_IS_MEASUREMENT_SET_SUFFIX = ".ms"
 
 
@@ -56,3 +56,16 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
             entries_file=self.status_file_full_filename,
             reload_from_status_file=self.reload_status_file,
         )
+
+    def __str__(self):
+        """Create a string from this class."""
+        return (f"directory_to_watch {self.directory_to_watch}\n"
+                f"status_file_full_filename {self.status_file_full_filename}\n"
+                f"reload_status_file {self.reload_status_file}\n"
+                f"storage_name {self.storage_name}\n"
+                f"ingest_url {self.ingest_url}\n"
+                f"storage_url {self.storage_url}\n"
+                f"execution_block_id {self.execution_block_id}\n"
+                f"ingest_configuration {self.ingest_configuration}\n"
+                f"storage_configuration {self.storage_configuration}\n"
+                f"directory_watcher_entries {self.directory_watcher_entries}\n")

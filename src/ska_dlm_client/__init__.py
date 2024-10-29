@@ -17,17 +17,21 @@ DLM_CLIENT_HOME = Path.home() / ".dlm_client/"
 """The configuration path of dlm-client."""
 
 
-def read_config(user_config_file: Path = DLM_CLIENT_HOME / "config.yaml") -> benedict:
+def read_config(user_config_file: Path = DLM_CLIENT_HOME / "config.yaml") -> benedict | None:
     """Read the config file and return the config dictionary."""
     if not user_config_file.exists():
         # create the default user config in DLM_CLIENT_HOME if it does not already exist
         print(f"DLM client config file {user_config_file} not found - creating and using default")
         user_config_file.parent.mkdir(exist_ok=True)
         default_user_config_file = DLM_CLIENT_LIB_DIR / "config.yaml"
-        shutil.copy(default_user_config_file, user_config_file)
+        if Path(default_user_config_file).exists():
+            shutil.copy(default_user_config_file, user_config_file)
+        else:
+            print(f"Default DLM client config file {default_user_config_file} does not exit, ignoring.")
+            return benedict()
 
     with open(user_config_file, "r", encoding="utf-8") as file:
-        return benedict(yaml.safe_load(file))
+        return None
 
 
 CONFIG = read_config()

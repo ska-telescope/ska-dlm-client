@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import logging
+from typing import Set
 
 from watchfiles import Change, awatch
 
@@ -36,6 +37,8 @@ class DirectoryWatcher:
 
     async def start(self):
         """Start watching the given directory."""
+        logger.info("starting to watch %s", self._config.directory_to_watch)
+        logger.info("with config parameters %s", self._config)
         async for changes in awatch(
             self._config.directory_to_watch
         ):  # type: Set[tuple[Change, str]]

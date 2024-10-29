@@ -119,8 +119,8 @@ if __name__ == "__main__":
         server_url=DLMConfiguration.SERVER,
         execution_block_id=WatchConfiguration.EB_ID,
         reload_status_file=False,
-        ingest_service_port=DLMConfiguration.DLM_ENTRY_POINTS["ingest"],
-        storage_service_port=DLMConfiguration.DLM_ENTRY_POINTS["storage"],
+        ingest_service_port=DLMConfiguration.DLM_SERVICE_PORTS["ingest"],
+        storage_service_port=DLMConfiguration.DLM_SERVICE_PORTS["storage"],
         status_file_full_filename=WatchConfiguration.STATUS_FILE_FULL_FILENAME,
     )
     setup_testing(testing_config=config)
