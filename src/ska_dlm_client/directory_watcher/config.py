@@ -59,13 +59,15 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
 
     def __str__(self):
         """Create a string from this class."""
-        return (f"directory_to_watch {self.directory_to_watch}\n"
-                f"status_file_full_filename {self.status_file_full_filename}\n"
-                f"reload_status_file {self.reload_status_file}\n"
-                f"storage_name {self.storage_name}\n"
-                f"ingest_url {self.ingest_url}\n"
-                f"storage_url {self.storage_url}\n"
-                f"execution_block_id {self.execution_block_id}\n"
-                f"ingest_configuration {self.ingest_configuration}\n"
-                f"storage_configuration {self.storage_configuration}\n"
-                f"directory_watcher_entries {self.directory_watcher_entries}\n")
+        return (
+            f"directory_to_watch {self.directory_to_watch}\n"
+            f"status_file_full_filename {self.status_file_full_filename}\n"
+            f"reload_status_file {self.reload_status_file}\n"
+            f"storage_name {self.storage_name}\n"
+            f"ingest_url {self.ingest_url}\n"
+            f"storage_url {self.storage_url}\n"
+            f"execution_block_id {self.execution_block_id}\n"
+            f"ingest_configuration {self.ingest_configuration}\n"
+            f"storage_configuration {self.storage_configuration}\n"
+            f"directory_watcher_entries {self.directory_watcher_entries}\n"
+        )

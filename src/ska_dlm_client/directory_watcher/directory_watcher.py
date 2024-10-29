@@ -3,7 +3,6 @@
 import argparse
 import asyncio
 import logging
-from typing import Set
 
 from watchfiles import Change, awatch
 
