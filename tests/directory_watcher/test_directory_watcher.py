@@ -83,9 +83,12 @@ class TestDirectoryWatcher(unittest.IsolatedAsyncioTestCase):
         directory_watcher = DirectoryWatcher(self.config, registration_processor)
         a_temp_file = tempfile.mktemp(dir=self.the_watch_dir)
         asyncio.create_task(directory_watcher.start())
+        # Now let the directory_watcher start and listen on given directory
         await asyncio.sleep(2)
+        # Add a file to the watcher directory
         with open(a_temp_file, "w", encoding="utf-8") as the_file:
             the_file.write("nothing string")
+        # Wait again now to allow the watcher to process the added file
         await asyncio.sleep(2)
         a_temp_file_relative_path = a_temp_file.replace(f"{self.the_watch_dir}/", "")
         # On MacOS the system messes with the path by adding a /private
