@@ -84,7 +84,7 @@ def create_parser() -> argparse.ArgumentParser:
         type=bool,
         required=False,
         default=False,
-        help="xxxxxxxxxxxxxxxxxxxxxx",
+        help="Reload the status file that already exists in the watch directory.",
     )
     parser.add_argument(
         "--ingest_service_port",

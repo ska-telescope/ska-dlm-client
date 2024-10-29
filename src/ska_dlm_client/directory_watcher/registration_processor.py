@@ -66,7 +66,15 @@ class RegistrationProcessor:
         logger.info("entry %s added.", relative_path)
 
     def add_path(self, full_path: str, relative_path: str):
-        """Add the given relative_path to the DLM."""
+        """Add the given relative_path to the DLM.
+
+        If full_path is a file, a single file will be registered with the DLM.
+        If full_path is a directory, and it is an MS, then ingest a single data
+        item for the whole directory.
+        If full_path is a directory, and it is NOT an MS, then recursively ingest
+        all files and subdirectories
+        If full_path is a symlink, then not currently supported.
+        """
         logger.info("in add_path with %s and %s", full_path, relative_path)
         if isfile(full_path):
             logger.info("entry is file")
