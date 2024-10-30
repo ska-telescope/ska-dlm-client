@@ -132,6 +132,11 @@ def setup_directory_watcher() -> DirectoryWatcher:
     return DirectoryWatcher(config, registration_processor)
 
 
-if __name__ == "__main__":
+def main():
+    """Start the directory watcher application."""
     directory_watcher = setup_directory_watcher()
     asyncio.run(directory_watcher.start(), debug=None)
+
+
+if __name__ == "__main__":
+    main()

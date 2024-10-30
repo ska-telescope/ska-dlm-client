@@ -6,6 +6,9 @@ authors = ["Mark Boulton <mark.boulton@uwa.edu.au>"]
 license= "BSD-3-Clause"
 readme = "README.md"
 
+[tool.poetry.scripts]
+directory_watcher = "ska_dlm_client.directory_watcher.directory_watcher:main"
+
 [[tool.poetry.source]]
 name = 'skao'
 url = 'https://artefact.skao.int/repository/pypi-internal/simple'
