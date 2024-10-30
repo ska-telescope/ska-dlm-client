@@ -21,7 +21,6 @@ class TestDirectoryWatcher(unittest.IsolatedAsyncioTestCase):
 
     STORAGE_NAME = "data"
     SERVER_URL = "http://localhost"
-    EXECUTION_BLOCK_ID = "exe_blk_id_0001"
 
     add_path_successful = False
 
@@ -37,8 +36,6 @@ class TestDirectoryWatcher(unittest.IsolatedAsyncioTestCase):
                 self.STORAGE_NAME,
                 "-s",
                 self.SERVER_URL,
-                "-e",
-                self.EXECUTION_BLOCK_ID,
             ]
         )
         self.config = process_args(args=self.parsed)
@@ -52,7 +49,6 @@ class TestDirectoryWatcher(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.parsed.directory_to_watch, self.the_watch_dir)
         self.assertEqual(self.parsed.storage_name, self.STORAGE_NAME)
         self.assertEqual(self.parsed.server_url, self.SERVER_URL)
-        self.assertEqual(self.parsed.execution_block_id, self.EXECUTION_BLOCK_ID)
         self.assertEqual(self.parsed.reload_status_file, False)
         self.assertEqual(self.parsed.ingest_service_port, 8001)
         self.assertEqual(self.parsed.storage_service_port, 8003)
@@ -72,7 +68,6 @@ class TestDirectoryWatcher(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.config.storage_name, self.STORAGE_NAME)
         self.assertEqual(self.config.ingest_url, f"{self.SERVER_URL}:8001")
         self.assertEqual(self.config.storage_url, f"{self.SERVER_URL}:8003")
-        self.assertEqual(self.config.execution_block_id, self.EXECUTION_BLOCK_ID)
         self.assertIsInstance(self.config.ingest_configuration, Configuration)
         self.assertIsInstance(self.config.storage_configuration, Configuration)
         self.assertIsInstance(self.config.directory_watcher_entries, DirectoryWatcherEntries)

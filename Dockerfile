@@ -1,4 +1,4 @@
-ARG PYTHON_VERSION=3.10
+ARG PYTHON_VERSION=3.12
 
 FROM python:${PYTHON_VERSION} AS buildenv
 ARG POETRY_VERSION=1.8.2
@@ -29,4 +29,4 @@ USER ska-dlm
 COPY --from=buildenv /app/.venv /app/.venv/
 ENV PATH="/app/.venv/bin:${PATH}"
 
-CMD ["/bin/bash"]
+CMD ["python3 -m ska_dlm_client.directory_watcher.directory_watcher"]

@@ -117,7 +117,6 @@ if __name__ == "__main__":
         directory_to_watch=WatchConfiguration.DIRECTORY_TO_WATCH,
         storage_name=WatchConfiguration.STORAGE_NAME,
         server_url=DLMConfiguration.SERVER,
-        execution_block_id=WatchConfiguration.EB_ID,
         reload_status_file=False,
         ingest_service_port=DLMConfiguration.DLM_SERVICE_PORTS["ingest"],
         storage_service_port=DLMConfiguration.DLM_SERVICE_PORTS["storage"],

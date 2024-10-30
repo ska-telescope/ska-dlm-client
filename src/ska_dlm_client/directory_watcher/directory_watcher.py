@@ -73,13 +73,6 @@ def create_parser() -> argparse.ArgumentParser:
         help="Server URL excluding any service name and port.",
     )
     parser.add_argument(
-        "-e",
-        "--execution_block_id",
-        type=str,
-        required=True,
-        help="Execution block ID to be stored as part of the metadata.",
-    )
-    parser.add_argument(
         "--reload_status_file",
         type=bool,
         required=False,
@@ -116,7 +109,6 @@ def process_args(args: argparse.Namespace) -> Config:
         directory_to_watch=args.directory_to_watch,
         storage_name=args.storage_name,
         server_url=args.server_url,
-        execution_block_id=args.execution_block_id,
         reload_status_file=args.reload_status_file,
         ingest_service_port=args.ingest_service_port,
         storage_service_port=args.storage_service_port,

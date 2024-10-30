@@ -20,6 +20,9 @@ include:
     file: 'gitlab-ci/includes/release.gitlab-ci.yml'
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
+    # Build and push the docker image
+  - project: 'ska-telescope/templates-repository'
+    file: 'gitlab-ci/includes/oci-image.gitlab-ci.yml'
 
 python-test:
   services:

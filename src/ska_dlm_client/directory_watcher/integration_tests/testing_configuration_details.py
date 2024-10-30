@@ -34,7 +34,6 @@ class WatchConfiguration:
     STATUS_FILE_FULL_FILENAME = f"{DIRECTORY_TO_WATCH}/{STATUS_FILE_FILENAME}"
     RELOAD_STATUS_FILE = True
     STORAGE_NAME = "data"
-    EB_ID = "eb-test-20241029-00001"
     # These should not be required in final system
 
 

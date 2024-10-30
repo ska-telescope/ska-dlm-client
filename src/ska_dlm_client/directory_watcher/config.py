@@ -22,7 +22,6 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
     storage_name: str
     ingest_url: str
     storage_url: str
-    execution_block_id: str
     ingest_configuration: Configuration
     storage_configuration: Configuration
     directory_watcher_entries: DirectoryWatcherEntries
@@ -32,7 +31,6 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         directory_to_watch: str,
         storage_name: str,
         server_url: str,
-        execution_block_id: str,
         reload_status_file: bool = False,
         ingest_service_port: int = INGEST_SERVICE_PORT,
         storage_service_port: int = STORAGE_SERVICE_PORT,
@@ -47,7 +45,6 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         )
         self.reload_status_file = reload_status_file
         self.storage_name = storage_name
-        self.execution_block_id = execution_block_id
         self.ingest_url = f"{server_url}:{ingest_service_port}"
         self.storage_url = f"{server_url}:{storage_service_port}"
         self.ingest_configuration = configuration.Configuration(host=self.ingest_url)
@@ -66,7 +63,6 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
             f"storage_name {self.storage_name}\n"
             f"ingest_url {self.ingest_url}\n"
             f"storage_url {self.storage_url}\n"
-            f"execution_block_id {self.execution_block_id}\n"
             f"ingest_configuration {self.ingest_configuration}\n"
             f"storage_configuration {self.storage_configuration}\n"
             f"directory_watcher_entries {self.directory_watcher_entries}\n"
