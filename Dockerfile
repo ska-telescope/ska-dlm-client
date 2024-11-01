@@ -19,7 +19,7 @@ FROM python:${PYTHON_VERSION}-slim AS dlm_runtime
 
 RUN apt-get update && apt-get install -y rclone
 
-# # Best practice not to run as root
+# Best practice not to run as root
 RUN useradd ska-dlm
 RUN mkdir /home/ska-dlm
 RUN chown -R ska-dlm /home/ska-dlm
@@ -29,4 +29,5 @@ USER ska-dlm
 COPY --from=buildenv /app/.venv /app/.venv/
 ENV PATH="/app/.venv/bin:${PATH}"
 
-CMD ["python3 -m ska_dlm_client.directory_watcher.directory_watcher"]
+##ENTRYPOINT ["python3", "-m", "ska_dlm_client.directory_watcher.directory_watcher"]
+CMD ["python3", "-m", "ska_dlm_client.directory_watcher.directory_watcher"]
