@@ -1,0 +1,21 @@
+system: dlm
+
+# Global parameters
+global:
+  storageClass: nfss1
+  development: true
+  dataProduct:
+    pvc:
+      name: test-pvc
+
+nameOverride: ""
+fullnameOverride: ""
+
+# DLM
+directory_watcher:
+  component: directory-watcher
+  subsystem: data-lifecycle-management
+  image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client
+  version: "0.1.0"
+  imagePullPolicy: Always
+  replicas: 1

@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ska-dlm-client.fullname" . }}-directory-watcher
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ska-dlm-client.directory-watcher.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.directory_watcher.replicas }}
+  selector:
+    matchLabels:
+      component: {{ .Values.directory_watcher.component }}
+      subsystem: {{ .Values.directory_watcher.subsystem }}
+  template:
+    metadata:
+      labels:
+        {{- include "ska-dlm-client.directory-watcher.labels" . | indent 8 }}
+    spec:
+      containers:
+      - name: directory-watcher
+        image: {{ .Values.directory_watcher.image}}:{{ .Values.directory_watcher.version }}
+        imagePullPolicy: {{ .Values.directory_watcher.imagePullPolicy }}
+        command:
+        - python3
+        - -m
+        - ska_dlm_client.directory_watcher.directory_watcher
+        - -d
+        - /data
+        - -n
+        - data
+        - -s
+        - http://localhost
+        readinessProbe:
+          tcpSocket:
+            port: probe-port
+          periodSeconds: 5
+          initialDelaySeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: probe-port
+          periodSeconds: 5
+          initialDelaySeconds: 5
+        volumeMounts:
+        - name: dlm-configmap
+          mountPath: "/home/ska-dlm/.dlm"
+          readOnly: true
+        - name: data-product-storage
+          mountPath: /data
+      volumes:
+      - name: dlm-configmap
+        configMap:
+          name: {{ include "ska-dlm-client.fullname" . }}-configmap
+      - name: data-product-storage
+        persistentVolumeClaim:
+          claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
