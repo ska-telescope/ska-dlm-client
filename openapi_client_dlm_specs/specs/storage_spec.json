@@ -2,7 +2,7 @@
     "openapi": "3.1.0",
     "info": {
         "title": "SKA-DLM: Storage Manager REST API",
-        "description": "The REST calls accepted by the SKA-DLM Storage Manager",
+        "description": "REST interface of the SKA-DLM Storage Manager",
         "license": {
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
@@ -78,26 +78,35 @@
                     {
                         "name": "storage_name",
                         "in": "query",
-                        "required": false,
+                        "required": true,
                         "schema": {
                             "type": "string",
-                            "description": "_description_",
-                            "default": "",
+                            "description": "An organisation or owner name for the storage.",
                             "title": "Storage Name"
                         },
-                        "description": "_description_"
+                        "description": "An organisation or owner name for the storage."
                     },
                     {
-                        "name": "location_name",
+                        "name": "storage_type",
                         "in": "query",
-                        "required": false,
+                        "required": true,
                         "schema": {
                             "type": "string",
-                            "description": "_description_",
-                            "default": "",
-                            "title": "Location Name"
+                            "description": "high level type of the storage, e.g. \"disk\", \"s3\"",
+                            "title": "Storage Type"
                         },
-                        "description": "_description_"
+                        "description": "high level type of the storage, e.g. \"disk\", \"s3\""
+                    },
+                    {
+                        "name": "storage_interface",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "storage interface for rclone access, e.g. \"posix\", \"s3\"",
+                            "title": "Storage Interface"
+                        },
+                        "description": "storage interface for rclone access, e.g. \"posix\", \"s3\""
                     },
                     {
                         "name": "location_id",
@@ -105,35 +114,23 @@
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "description": "_description_",
+                            "description": "a dlm registered location id",
                             "default": "",
                             "title": "Location Id"
                         },
-                        "description": "_description_"
+                        "description": "a dlm registered location id"
                     },
                     {
-                        "name": "storage_type",
+                        "name": "location_name",
                         "in": "query",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "description": "_description_",
+                            "description": "a dlm registered location name",
                             "default": "",
-                            "title": "Storage Type"
+                            "title": "Location Name"
                         },
-                        "description": "_description_"
-                    },
-                    {
-                        "name": "storage_interface",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "description": "_description_",
-                            "default": "",
-                            "title": "Storage Interface"
-                        },
-                        "description": "_description_"
+                        "description": "a dlm registered location name"
                     },
                     {
                         "name": "storage_capacity",
@@ -141,11 +138,11 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "description": "_description_",
+                            "description": "reserved storage capacity in bytes",
                             "default": -1,
                             "title": "Storage Capacity"
                         },
-                        "description": "_description_"
+                        "description": "reserved storage capacity in bytes"
                     },
                     {
                         "name": "storage_phase_level",
@@ -153,11 +150,11 @@
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "description": "_description_",
+                            "description": "one of \"GAS\", \"LIQUID\", \"SOLID\"",
                             "default": "GAS",
                             "title": "Storage Phase Level"
                         },
-                        "description": "_description_"
+                        "description": "one of \"GAS\", \"LIQUID\", \"SOLID\""
                     },
                     {
                         "name": "json_data",
@@ -165,11 +162,11 @@
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "description": "_description_",
+                            "description": "extra rclone values such as secrets required for connection",
                             "default": "",
                             "title": "Json Data"
                         },
-                        "description": "_description_"
+                        "description": "extra rclone values such as secrets required for connection"
                     }
                 ],
                 "responses": {
@@ -390,28 +387,30 @@
                 "tags": [
                     "storage"
                 ],
-                "description": "Initialize a new location for a storage by specifying the location_name or location_id.",
+                "description": "Initialize a new storage location.",
                 "operationId": "init_location_storage_init_location_post",
                 "parameters": [
                     {
                         "name": "location_name",
                         "in": "query",
-                        "required": false,
+                        "required": true,
                         "schema": {
                             "type": "string",
-                            "default": "",
+                            "description": "the orgization or owner's name managing the storage location.",
                             "title": "Location Name"
-                        }
+                        },
+                        "description": "the orgization or owner's name managing the storage location."
                     },
                     {
                         "name": "location_type",
                         "in": "query",
-                        "required": false,
+                        "required": true,
                         "schema": {
                             "type": "string",
-                            "default": "",
+                            "description": "the location type, e.g. \"server\"",
                             "title": "Location Type"
-                        }
+                        },
+                        "description": "the location type, e.g. \"server\""
                     },
                     {
                         "name": "location_country",
@@ -419,9 +418,11 @@
                         "required": false,
                         "schema": {
                             "type": "string",
+                            "description": "the location country name",
                             "default": "",
                             "title": "Location Country"
-                        }
+                        },
+                        "description": "the location country name"
                     },
                     {
                         "name": "location_city",
@@ -429,9 +430,11 @@
                         "required": false,
                         "schema": {
                             "type": "string",
+                            "description": "the location city name",
                             "default": "",
                             "title": "Location City"
-                        }
+                        },
+                        "description": "the location city name"
                     },
                     {
                         "name": "location_facility",
@@ -439,9 +442,11 @@
                         "required": false,
                         "schema": {
                             "type": "string",
+                            "description": "the location facility name",
                             "default": "",
                             "title": "Location Facility"
-                        }
+                        },
+                        "description": "the location facility name"
                     }
                 ],
                 "responses": {
