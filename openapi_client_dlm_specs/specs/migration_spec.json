@@ -2,7 +2,7 @@
     "openapi": "3.1.0",
     "info": {
         "title": "SKA-DLM: Migration Manager REST API",
-        "description": "The REST calls accepted by the SKA-DLM Migration Manager",
+        "description": "REST interface of the SKA-DLM Migration Manager",
         "license": {
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
