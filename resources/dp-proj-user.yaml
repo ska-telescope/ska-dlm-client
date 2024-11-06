@@ -1,0 +1,7 @@
+global:
+  dataProduct:
+    pvc:
+      name: shared
+
+ska_dlm:
+  fullname: "ska-dlm-dev"

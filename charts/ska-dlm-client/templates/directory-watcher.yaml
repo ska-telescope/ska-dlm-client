@@ -29,9 +29,9 @@ spec:
         - -n
         - data
         - -s
-        - "http://{{ include "ska-dlm.fullname" . }}-ingest.{{ .Release.Namespace }}.svc.cluster.local"
+        - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}.svc.cluster.local"
         - --test_init_storage_url
-        - "http://{{ include "ska-dlm.fullname" . }}-storage.{{ .Release.Namespace }}.svc.cluster.local"
+        - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}.svc.cluster.local"
         - "--ingest_service_port"
         - "80"
         - "--storage_service_port"

@@ -11,6 +11,9 @@ global:
 nameOverride: ""
 fullnameOverride: ""
 
+ska_dlm:
+  fullname: "ska-dlm"
+
 # DLM
 directory_watcher:
   component: directory-watcher

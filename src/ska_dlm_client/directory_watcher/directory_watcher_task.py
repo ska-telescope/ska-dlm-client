@@ -35,7 +35,7 @@ class DirectoryWatcher:
         logger.info("starting to watch %s", self._config.directory_to_watch)
         logger.info("with config parameters %s", self._config)
         async for changes in awatch(
-            self._config.directory_to_watch
+            self._config.directory_to_watch, recursive=False
         ):  # type: Set[tuple[Change, str]]
             for change in changes:
                 logger.info("in main %s", change)
