@@ -33,6 +33,7 @@ def init_location_for_testing(storage_configuration: configuration) -> str:
             sys.exit(1)
         if len(response) == 1:
             the_location_id = response[0]["location_id"]
+            logger.info("location_id already exists in DLM")
         else:
             response = api_storage.init_location_storage_init_location_post(
                 location_name=WatcherTestConfiguration.LOCATION_NAME,
@@ -60,6 +61,7 @@ def init_storage_for_testing(
             sys.exit(1)
         if len(response) == 1:
             the_storage_id = response[0]["storage_id"]
+            logger.info("storage_id already exists in DLM")
         else:
             response = api_storage.init_storage_storage_init_storage_post(
                 storage_name=storage_name,
@@ -71,7 +73,7 @@ def init_storage_for_testing(
             the_storage_id = response
         logger.info("storage_id: %s", the_storage_id)
 
-        # Setup the storage config
+        # Setup the storage config. Doesn't matter if it has been set before.
         response = api_storage.create_storage_config_storage_create_storage_config_post(
             body=WatcherTestConfiguration.STORAGE_CONFIG,
             storage_id=the_storage_id,
@@ -83,9 +85,7 @@ def init_storage_for_testing(
     return the_storage_id
 
 
-def do_test_ingest_item(
-    storage_name: str, eb_id: str, ingest_configuration: configuration, storage_id: str
-):
+def do_test_ingest_item(storage_name: str, ingest_configuration: configuration, storage_id: str):
     """Test ingesting a single item."""
     with api_client.ApiClient(ingest_configuration) as the_api_client:
         api_ingest = ingest_api.IngestApi(the_api_client)
@@ -95,7 +95,6 @@ def do_test_ingest_item(
             uri=the_path,
             storage_name=storage_name,
             storage_id=storage_id,
-            eb_id=eb_id,
         )
         logger.info("register_data_item_response: %s", response)
 
