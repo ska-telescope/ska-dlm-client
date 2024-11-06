@@ -5,8 +5,8 @@ import logging
 import sys
 
 from ska_dlm_client.directory_watcher.config import Config
-from ska_dlm_client.directory_watcher.directory_watcher import DirectoryWatcher
-from ska_dlm_client.directory_watcher.integration_tests.testing_configuration_details import (
+from ska_dlm_client.directory_watcher.directory_watcher_task import DirectoryWatcher
+from ska_dlm_client.directory_watcher.integration_tests.test_configuration_details import (
     DLMConfiguration,
     WatchConfiguration,
     WatcherTestConfiguration,
@@ -63,9 +63,10 @@ def init_storage_for_testing(
         else:
             response = api_storage.init_storage_storage_init_storage_post(
                 storage_name=storage_name,
-                location_name=WatcherTestConfiguration.LOCATION_NAME,
-                location_id=the_location_id,
                 storage_type=WatcherTestConfiguration.STORAGE_TYPE,
+                storage_interface="posix",
+                location_id=the_location_id,
+                location_name=WatcherTestConfiguration.LOCATION_NAME,
             )
             the_storage_id = response
         logger.info("storage_id: %s", the_storage_id)
@@ -103,6 +104,7 @@ def setup_testing(testing_config: Config):
     """Complete configuration of the environment."""
     # TODO: It would be expected that the following config would already be
     # completed in prod but leaving in place for now.
+    logger.info("Testing setup with config parameters %s", testing_config)
     location_id = init_location_for_testing(testing_config.storage_configuration)
     storage_id = init_storage_for_testing(
         storage_name=testing_config.storage_name,

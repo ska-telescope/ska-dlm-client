@@ -4,46 +4,16 @@ import argparse
 import asyncio
 import logging
 
-from watchfiles import Change, awatch
-
 import ska_dlm_client.directory_watcher.config
 from ska_dlm_client.directory_watcher.config import Config
+from ska_dlm_client.directory_watcher.directory_watcher_task import DirectoryWatcher
+from ska_dlm_client.directory_watcher.integration_tests.test_directory_watcher_integration import (
+    setup_testing,
+)
 from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
-
-
-class DirectoryWatcher:
-    """Class for the running of the directory_watcher."""
-
-    def __init__(self, config: Config, watcher_registration_processor: RegistrationProcessor):
-        """Initialise with the given Config."""
-        self._config = config
-        self._registration_processor = watcher_registration_processor
-
-    def process_directory_entry_change(self, entry: tuple[Change, str]):
-        """TODO: Test function currently."""
-        logger.info("in do process_directory_entry_change %s", entry)
-        change_type = entry[0]
-        full_path = entry[1]
-        relative_path = full_path.replace(f"{self._config.directory_to_watch}/", "")
-        if self._config.status_file_full_filename == full_path:
-            return
-        if change_type is Change.added:
-            self._registration_processor.add_path(full_path=full_path, relative_path=relative_path)
-        # TODO: Change.deleted Change.modified mayh need support
-
-    async def start(self):
-        """Start watching the given directory."""
-        logger.info("starting to watch %s", self._config.directory_to_watch)
-        logger.info("with config parameters %s", self._config)
-        async for changes in awatch(
-            self._config.directory_to_watch
-        ):  # type: Set[tuple[Change, str]]
-            for change in changes:
-                logger.info("in main %s", change)
-                self.process_directory_entry_change(change)
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -100,12 +70,27 @@ def create_parser() -> argparse.ArgumentParser:
         default=ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME,
         help="",
     )
+    parser.add_argument(
+        "--test_init",
+        type=bool,
+        action=argparse.BooleanOptionalAction,
+        required=False,
+        default=False,
+        help="",
+    )
+    parser.add_argument(
+        "--test_init_storage_url",
+        type=str,
+        required=False,
+        default=ska_dlm_client.directory_watcher.config.DEFAULT_STORAGE_SERVER,
+        help="Storage server URL excluding any service name and port. Only used for test_init",
+    )
     return parser
 
 
 def process_args(args: argparse.Namespace) -> Config:
     """Collect up all command line parameters and return a Config."""
-    return Config(
+    config = Config(
         directory_to_watch=args.directory_to_watch,
         storage_name=args.storage_name,
         server_url=args.server_url,
@@ -113,7 +98,11 @@ def process_args(args: argparse.Namespace) -> Config:
         ingest_service_port=args.ingest_service_port,
         storage_service_port=args.storage_service_port,
         status_file_full_filename=f"{args.directory_to_watch}/{args.status_file_filename}",
+        storage_server=args.test_init_storage_url,
     )
+    if args.test_init:
+        setup_testing(config)
+    return config
 
 
 def setup_directory_watcher() -> DirectoryWatcher:

@@ -29,17 +29,7 @@ spec:
         - -n
         - data
         - -s
-        - http://localhost
-        readinessProbe:
-          tcpSocket:
-            port: probe-port
-          periodSeconds: 5
-          initialDelaySeconds: 5
-        livenessProbe:
-          tcpSocket:
-            port: probe-port
-          periodSeconds: 5
-          initialDelaySeconds: 5
+        - http://10.244.0.101
         volumeMounts:
         - name: dlm-configmap
           mountPath: "/home/ska-dlm/.dlm"

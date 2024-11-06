@@ -1,7 +1,7 @@
 """Class to hold the configuration used by the directory_watcher package."""
 
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntries
-from ska_dlm_client.directory_watcher.integration_tests.testing_configuration_details import (
+from ska_dlm_client.directory_watcher.integration_tests.test_configuration_details import (
     DLMConfiguration,
 )
 from ska_dlm_client.openapi import configuration
@@ -10,6 +10,7 @@ from ska_dlm_client.openapi.configuration import Configuration
 STATUS_FILE_FILENAME = ".directory_watcher_status.run"
 INGEST_SERVICE_PORT = DLMConfiguration.DLM_SERVICE_PORTS["ingest"]
 STORAGE_SERVICE_PORT = DLMConfiguration.DLM_SERVICE_PORTS["storage"]
+DEFAULT_STORAGE_SERVER = DLMConfiguration.SERVER
 DIRECTORY_IS_MEASUREMENT_SET_SUFFIX = ".ms"
 
 
@@ -35,6 +36,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         ingest_service_port: int = INGEST_SERVICE_PORT,
         storage_service_port: int = STORAGE_SERVICE_PORT,
         status_file_full_filename: str = "",
+        storage_server: str = DEFAULT_STORAGE_SERVER,
     ):
         """Init the values required for correct operation of directory_watcher."""
         self.directory_to_watch = directory_to_watch
@@ -46,7 +48,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         self.reload_status_file = reload_status_file
         self.storage_name = storage_name
         self.ingest_url = f"{server_url}:{ingest_service_port}"
-        self.storage_url = f"{server_url}:{storage_service_port}"
+        self.storage_url = f"{storage_server}:{storage_service_port}"
         self.ingest_configuration = configuration.Configuration(host=self.ingest_url)
         self.storage_configuration = configuration.Configuration(host=self.storage_url)
         self.directory_watcher_entries = DirectoryWatcherEntries(
