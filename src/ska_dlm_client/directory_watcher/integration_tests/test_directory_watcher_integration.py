@@ -64,7 +64,7 @@ def init_storage_for_testing(
             response = api_storage.init_storage_storage_init_storage_post(
                 storage_name=storage_name,
                 storage_type=WatcherTestConfiguration.STORAGE_TYPE,
-                storage_interface="posix",
+                storage_interface=WatcherTestConfiguration.STORAGE_INTERFACE,
                 location_id=the_location_id,
                 location_name=WatcherTestConfiguration.LOCATION_NAME,
             )
