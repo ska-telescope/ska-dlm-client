@@ -29,7 +29,10 @@ spec:
         - -n
         - data
         - -s
-        - http://10.244.0.101
+        - http://10.244.0.125
+        - --test_init_storage_url
+        - http://10.244.0.118
+        - --test_init
         volumeMounts:
         - name: dlm-configmap
           mountPath: "/home/ska-dlm/.dlm"
