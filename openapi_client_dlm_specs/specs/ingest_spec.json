@@ -2,7 +2,7 @@
     "openapi": "3.1.0",
     "info": {
         "title": "SKA-DLM: Ingest Manager REST API",
-        "description": "The REST calls accepted by the SKA-DLM Ingest Manager",
+        "description": "REST interface of the SKA-DLM Ingest Manager",
         "license": {
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"

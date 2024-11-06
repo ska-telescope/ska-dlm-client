@@ -160,11 +160,11 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **init_location_storage_init_location_post**
-> object init_location_storage_init_location_post(location_name=location_name, location_type=location_type, location_country=location_country, location_city=location_city, location_facility=location_facility)
+> object init_location_storage_init_location_post(location_name, location_type, location_country=location_country, location_city=location_city, location_facility=location_facility)
 
 Init Location
 
-Initialize a new location for a storage by specifying the location_name or location_id.
+Initialize a new storage location.
 
 ### Example
 
@@ -185,15 +185,15 @@ configuration = ska_dlm_client.openapi.Configuration(
 with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = ska_dlm_client.openapi.StorageApi(api_client)
-    location_name = '' # str |  (optional) (default to '')
-    location_type = '' # str |  (optional) (default to '')
-    location_country = '' # str |  (optional) (default to '')
-    location_city = '' # str |  (optional) (default to '')
-    location_facility = '' # str |  (optional) (default to '')
+    location_name = 'location_name_example' # str | the orgization or owner's name managing the storage location.
+    location_type = 'location_type_example' # str | the location type, e.g. \"server\"
+    location_country = '' # str | the location country name (optional) (default to '')
+    location_city = '' # str | the location city name (optional) (default to '')
+    location_facility = '' # str | the location facility name (optional) (default to '')
 
     try:
         # Init Location
-        api_response = api_instance.init_location_storage_init_location_post(location_name=location_name, location_type=location_type, location_country=location_country, location_city=location_city, location_facility=location_facility)
+        api_response = api_instance.init_location_storage_init_location_post(location_name, location_type, location_country=location_country, location_city=location_city, location_facility=location_facility)
         print("The response of StorageApi->init_location_storage_init_location_post:\n")
         pprint(api_response)
     except Exception as e:
@@ -207,11 +207,11 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **location_name** | **str**|  | [optional] [default to &#39;&#39;]
- **location_type** | **str**|  | [optional] [default to &#39;&#39;]
- **location_country** | **str**|  | [optional] [default to &#39;&#39;]
- **location_city** | **str**|  | [optional] [default to &#39;&#39;]
- **location_facility** | **str**|  | [optional] [default to &#39;&#39;]
+ **location_name** | **str**| the orgization or owner&#39;s name managing the storage location. | 
+ **location_type** | **str**| the location type, e.g. \&quot;server\&quot; | 
+ **location_country** | **str**| the location country name | [optional] [default to &#39;&#39;]
+ **location_city** | **str**| the location city name | [optional] [default to &#39;&#39;]
+ **location_facility** | **str**| the location facility name | [optional] [default to &#39;&#39;]
 
 ### Return type
 
@@ -236,7 +236,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **init_storage_storage_init_storage_post**
-> object init_storage_storage_init_storage_post(storage_name=storage_name, location_name=location_name, location_id=location_id, storage_type=storage_type, storage_interface=storage_interface, storage_capacity=storage_capacity, storage_phase_level=storage_phase_level, json_data=json_data)
+> object init_storage_storage_init_storage_post(storage_name, storage_type, storage_interface, location_id=location_id, location_name=location_name, storage_capacity=storage_capacity, storage_phase_level=storage_phase_level, json_data=json_data)
 
 Init Storage
 
@@ -261,18 +261,18 @@ configuration = ska_dlm_client.openapi.Configuration(
 with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = ska_dlm_client.openapi.StorageApi(api_client)
-    storage_name = '' # str | _description_ (optional) (default to '')
-    location_name = '' # str | _description_ (optional) (default to '')
-    location_id = '' # str | _description_ (optional) (default to '')
-    storage_type = '' # str | _description_ (optional) (default to '')
-    storage_interface = '' # str | _description_ (optional) (default to '')
-    storage_capacity = -1 # int | _description_ (optional) (default to -1)
-    storage_phase_level = 'GAS' # str | _description_ (optional) (default to 'GAS')
-    json_data = '' # str | _description_ (optional) (default to '')
+    storage_name = 'storage_name_example' # str | An organisation or owner name for the storage.
+    storage_type = 'storage_type_example' # str | high level type of the storage, e.g. \"disk\", \"s3\"
+    storage_interface = 'storage_interface_example' # str | storage interface for rclone access, e.g. \"posix\", \"s3\"
+    location_id = '' # str | a dlm registered location id (optional) (default to '')
+    location_name = '' # str | a dlm registered location name (optional) (default to '')
+    storage_capacity = -1 # int | reserved storage capacity in bytes (optional) (default to -1)
+    storage_phase_level = 'GAS' # str | one of \"GAS\", \"LIQUID\", \"SOLID\" (optional) (default to 'GAS')
+    json_data = '' # str | extra rclone values such as secrets required for connection (optional) (default to '')
 
     try:
         # Init Storage
-        api_response = api_instance.init_storage_storage_init_storage_post(storage_name=storage_name, location_name=location_name, location_id=location_id, storage_type=storage_type, storage_interface=storage_interface, storage_capacity=storage_capacity, storage_phase_level=storage_phase_level, json_data=json_data)
+        api_response = api_instance.init_storage_storage_init_storage_post(storage_name, storage_type, storage_interface, location_id=location_id, location_name=location_name, storage_capacity=storage_capacity, storage_phase_level=storage_phase_level, json_data=json_data)
         print("The response of StorageApi->init_storage_storage_init_storage_post:\n")
         pprint(api_response)
     except Exception as e:
@@ -286,14 +286,14 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **storage_name** | **str**| _description_ | [optional] [default to &#39;&#39;]
- **location_name** | **str**| _description_ | [optional] [default to &#39;&#39;]
- **location_id** | **str**| _description_ | [optional] [default to &#39;&#39;]
- **storage_type** | **str**| _description_ | [optional] [default to &#39;&#39;]
- **storage_interface** | **str**| _description_ | [optional] [default to &#39;&#39;]
- **storage_capacity** | **int**| _description_ | [optional] [default to -1]
- **storage_phase_level** | **str**| _description_ | [optional] [default to &#39;GAS&#39;]
- **json_data** | **str**| _description_ | [optional] [default to &#39;&#39;]
+ **storage_name** | **str**| An organisation or owner name for the storage. | 
+ **storage_type** | **str**| high level type of the storage, e.g. \&quot;disk\&quot;, \&quot;s3\&quot; | 
+ **storage_interface** | **str**| storage interface for rclone access, e.g. \&quot;posix\&quot;, \&quot;s3\&quot; | 
+ **location_id** | **str**| a dlm registered location id | [optional] [default to &#39;&#39;]
+ **location_name** | **str**| a dlm registered location name | [optional] [default to &#39;&#39;]
+ **storage_capacity** | **int**| reserved storage capacity in bytes | [optional] [default to -1]
+ **storage_phase_level** | **str**| one of \&quot;GAS\&quot;, \&quot;LIQUID\&quot;, \&quot;SOLID\&quot; | [optional] [default to &#39;GAS&#39;]
+ **json_data** | **str**| extra rclone values such as secrets required for connection | [optional] [default to &#39;&#39;]
 
 ### Return type
 

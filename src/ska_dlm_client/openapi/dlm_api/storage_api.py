@@ -314,7 +314,7 @@ class StorageApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
@@ -630,7 +630,7 @@ class StorageApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
@@ -676,11 +676,20 @@ class StorageApi:
     @validate_call
     def init_location_storage_init_location_post(
         self,
-        location_name: Optional[StrictStr] = None,
-        location_type: Optional[StrictStr] = None,
-        location_country: Optional[StrictStr] = None,
-        location_city: Optional[StrictStr] = None,
-        location_facility: Optional[StrictStr] = None,
+        location_name: Annotated[
+            StrictStr,
+            Field(description="the orgization or owner's name managing the storage location."),
+        ],
+        location_type: Annotated[StrictStr, Field(description='the location type, e.g. "server"')],
+        location_country: Annotated[
+            Optional[StrictStr], Field(description="the location country name")
+        ] = None,
+        location_city: Annotated[
+            Optional[StrictStr], Field(description="the location city name")
+        ] = None,
+        location_facility: Annotated[
+            Optional[StrictStr], Field(description="the location facility name")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -693,15 +702,21 @@ class StorageApi:
     ) -> object:
         """Init Location
 
-        Initialize a new location for a storage by specifying the location_name or location_id.
+        Initialize a new storage location.
 
         Parameters
         ----------
         location_name : str
+            the orgization or owner's name managing the storage
+            location. (required)
         location_type : str
+            the location type, e.g. \"server\" (required)
         location_country : str
+            the location country name
         location_city : str
+            the location city name
         location_facility : str
+            the location facility name
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -754,11 +769,20 @@ class StorageApi:
     @validate_call
     def init_location_storage_init_location_post_with_http_info(
         self,
-        location_name: Optional[StrictStr] = None,
-        location_type: Optional[StrictStr] = None,
-        location_country: Optional[StrictStr] = None,
-        location_city: Optional[StrictStr] = None,
-        location_facility: Optional[StrictStr] = None,
+        location_name: Annotated[
+            StrictStr,
+            Field(description="the orgization or owner's name managing the storage location."),
+        ],
+        location_type: Annotated[StrictStr, Field(description='the location type, e.g. "server"')],
+        location_country: Annotated[
+            Optional[StrictStr], Field(description="the location country name")
+        ] = None,
+        location_city: Annotated[
+            Optional[StrictStr], Field(description="the location city name")
+        ] = None,
+        location_facility: Annotated[
+            Optional[StrictStr], Field(description="the location facility name")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -771,15 +795,21 @@ class StorageApi:
     ) -> ApiResponse[object]:
         """Init Location
 
-        Initialize a new location for a storage by specifying the location_name or location_id.
+        Initialize a new storage location.
 
         Parameters
         ----------
         location_name : str
+            the orgization or owner's name managing the storage
+            location. (required)
         location_type : str
+            the location type, e.g. \"server\" (required)
         location_country : str
+            the location country name
         location_city : str
+            the location city name
         location_facility : str
+            the location facility name
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -832,11 +862,20 @@ class StorageApi:
     @validate_call
     def init_location_storage_init_location_post_without_preload_content(
         self,
-        location_name: Optional[StrictStr] = None,
-        location_type: Optional[StrictStr] = None,
-        location_country: Optional[StrictStr] = None,
-        location_city: Optional[StrictStr] = None,
-        location_facility: Optional[StrictStr] = None,
+        location_name: Annotated[
+            StrictStr,
+            Field(description="the orgization or owner's name managing the storage location."),
+        ],
+        location_type: Annotated[StrictStr, Field(description='the location type, e.g. "server"')],
+        location_country: Annotated[
+            Optional[StrictStr], Field(description="the location country name")
+        ] = None,
+        location_city: Annotated[
+            Optional[StrictStr], Field(description="the location city name")
+        ] = None,
+        location_facility: Annotated[
+            Optional[StrictStr], Field(description="the location facility name")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -849,15 +888,21 @@ class StorageApi:
     ) -> RESTResponseType:
         """Init Location
 
-        Initialize a new location for a storage by specifying the location_name or location_id.
+        Initialize a new storage location.
 
         Parameters
         ----------
         location_name : str
+            the orgization or owner's name managing the storage
+            location. (required)
         location_type : str
+            the location type, e.g. \"server\" (required)
         location_country : str
+            the location country name
         location_city : str
+            the location city name
         location_facility : str
+            the location facility name
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -924,7 +969,7 @@ class StorageApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
@@ -978,20 +1023,31 @@ class StorageApi:
     @validate_call
     def init_storage_storage_init_storage_post(
         self,
-        storage_name: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        location_name: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        location_id: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        storage_type: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
+        storage_name: Annotated[
+            StrictStr, Field(description="An organisation or owner name for the storage.")
+        ],
+        storage_type: Annotated[
+            StrictStr, Field(description='high level type of the storage, e.g. "disk", "s3"')
+        ],
         storage_interface: Annotated[
-            Optional[StrictStr], Field(description="_description_")
+            StrictStr, Field(description='storage interface for rclone access, e.g. "posix", "s3"')
+        ],
+        location_id: Annotated[
+            Optional[StrictStr], Field(description="a dlm registered location id")
+        ] = None,
+        location_name: Annotated[
+            Optional[StrictStr], Field(description="a dlm registered location name")
         ] = None,
         storage_capacity: Annotated[
-            Optional[StrictInt], Field(description="_description_")
+            Optional[StrictInt], Field(description="reserved storage capacity in bytes")
         ] = None,
         storage_phase_level: Annotated[
-            Optional[StrictStr], Field(description="_description_")
+            Optional[StrictStr], Field(description='one of "GAS", "LIQUID", "SOLID"')
         ] = None,
-        json_data: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
+        json_data: Annotated[
+            Optional[StrictStr],
+            Field(description="extra rclone values such as secrets required for connection"),
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1009,21 +1065,23 @@ class StorageApi:
         Parameters
         ----------
         storage_name : str
-            _description_
-        location_name : str
-            _description_
-        location_id : str
-            _description_
+            An organisation or owner name for the storage. (required)
         storage_type : str
-            _description_
+            high level type of the storage, e.g. \"disk\", \"s3\"
+            (required)
         storage_interface : str
-            _description_
+            storage interface for rclone access, e.g. \"posix\", \"s3\"
+            (required)
+        location_id : str
+            a dlm registered location id
+        location_name : str
+            a dlm registered location name
         storage_capacity : int
-            _description_
+            reserved storage capacity in bytes
         storage_phase_level : str
-            _description_
+            one of \"GAS\", \"LIQUID\", \"SOLID\"
         json_data : str
-            _description_
+            extra rclone values such as secrets required for connection
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -1052,10 +1110,10 @@ class StorageApi:
 
         _param = self._init_storage_storage_init_storage_post_serialize(
             storage_name=storage_name,
-            location_name=location_name,
-            location_id=location_id,
             storage_type=storage_type,
             storage_interface=storage_interface,
+            location_id=location_id,
+            location_name=location_name,
             storage_capacity=storage_capacity,
             storage_phase_level=storage_phase_level,
             json_data=json_data,
@@ -1079,20 +1137,31 @@ class StorageApi:
     @validate_call
     def init_storage_storage_init_storage_post_with_http_info(
         self,
-        storage_name: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        location_name: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        location_id: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        storage_type: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
+        storage_name: Annotated[
+            StrictStr, Field(description="An organisation or owner name for the storage.")
+        ],
+        storage_type: Annotated[
+            StrictStr, Field(description='high level type of the storage, e.g. "disk", "s3"')
+        ],
         storage_interface: Annotated[
-            Optional[StrictStr], Field(description="_description_")
+            StrictStr, Field(description='storage interface for rclone access, e.g. "posix", "s3"')
+        ],
+        location_id: Annotated[
+            Optional[StrictStr], Field(description="a dlm registered location id")
+        ] = None,
+        location_name: Annotated[
+            Optional[StrictStr], Field(description="a dlm registered location name")
         ] = None,
         storage_capacity: Annotated[
-            Optional[StrictInt], Field(description="_description_")
+            Optional[StrictInt], Field(description="reserved storage capacity in bytes")
         ] = None,
         storage_phase_level: Annotated[
-            Optional[StrictStr], Field(description="_description_")
+            Optional[StrictStr], Field(description='one of "GAS", "LIQUID", "SOLID"')
         ] = None,
-        json_data: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
+        json_data: Annotated[
+            Optional[StrictStr],
+            Field(description="extra rclone values such as secrets required for connection"),
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1110,21 +1179,23 @@ class StorageApi:
         Parameters
         ----------
         storage_name : str
-            _description_
-        location_name : str
-            _description_
-        location_id : str
-            _description_
+            An organisation or owner name for the storage. (required)
         storage_type : str
-            _description_
+            high level type of the storage, e.g. \"disk\", \"s3\"
+            (required)
         storage_interface : str
-            _description_
+            storage interface for rclone access, e.g. \"posix\", \"s3\"
+            (required)
+        location_id : str
+            a dlm registered location id
+        location_name : str
+            a dlm registered location name
         storage_capacity : int
-            _description_
+            reserved storage capacity in bytes
         storage_phase_level : str
-            _description_
+            one of \"GAS\", \"LIQUID\", \"SOLID\"
         json_data : str
-            _description_
+            extra rclone values such as secrets required for connection
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -1153,10 +1224,10 @@ class StorageApi:
 
         _param = self._init_storage_storage_init_storage_post_serialize(
             storage_name=storage_name,
-            location_name=location_name,
-            location_id=location_id,
             storage_type=storage_type,
             storage_interface=storage_interface,
+            location_id=location_id,
+            location_name=location_name,
             storage_capacity=storage_capacity,
             storage_phase_level=storage_phase_level,
             json_data=json_data,
@@ -1180,20 +1251,31 @@ class StorageApi:
     @validate_call
     def init_storage_storage_init_storage_post_without_preload_content(
         self,
-        storage_name: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        location_name: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        location_id: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
-        storage_type: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
+        storage_name: Annotated[
+            StrictStr, Field(description="An organisation or owner name for the storage.")
+        ],
+        storage_type: Annotated[
+            StrictStr, Field(description='high level type of the storage, e.g. "disk", "s3"')
+        ],
         storage_interface: Annotated[
-            Optional[StrictStr], Field(description="_description_")
+            StrictStr, Field(description='storage interface for rclone access, e.g. "posix", "s3"')
+        ],
+        location_id: Annotated[
+            Optional[StrictStr], Field(description="a dlm registered location id")
+        ] = None,
+        location_name: Annotated[
+            Optional[StrictStr], Field(description="a dlm registered location name")
         ] = None,
         storage_capacity: Annotated[
-            Optional[StrictInt], Field(description="_description_")
+            Optional[StrictInt], Field(description="reserved storage capacity in bytes")
         ] = None,
         storage_phase_level: Annotated[
-            Optional[StrictStr], Field(description="_description_")
+            Optional[StrictStr], Field(description='one of "GAS", "LIQUID", "SOLID"')
         ] = None,
-        json_data: Annotated[Optional[StrictStr], Field(description="_description_")] = None,
+        json_data: Annotated[
+            Optional[StrictStr],
+            Field(description="extra rclone values such as secrets required for connection"),
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1211,21 +1293,23 @@ class StorageApi:
         Parameters
         ----------
         storage_name : str
-            _description_
-        location_name : str
-            _description_
-        location_id : str
-            _description_
+            An organisation or owner name for the storage. (required)
         storage_type : str
-            _description_
+            high level type of the storage, e.g. \"disk\", \"s3\"
+            (required)
         storage_interface : str
-            _description_
+            storage interface for rclone access, e.g. \"posix\", \"s3\"
+            (required)
+        location_id : str
+            a dlm registered location id
+        location_name : str
+            a dlm registered location name
         storage_capacity : int
-            _description_
+            reserved storage capacity in bytes
         storage_phase_level : str
-            _description_
+            one of \"GAS\", \"LIQUID\", \"SOLID\"
         json_data : str
-            _description_
+            extra rclone values such as secrets required for connection
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -1254,10 +1338,10 @@ class StorageApi:
 
         _param = self._init_storage_storage_init_storage_post_serialize(
             storage_name=storage_name,
-            location_name=location_name,
-            location_id=location_id,
             storage_type=storage_type,
             storage_interface=storage_interface,
+            location_id=location_id,
+            location_name=location_name,
             storage_capacity=storage_capacity,
             storage_phase_level=storage_phase_level,
             json_data=json_data,
@@ -1277,10 +1361,10 @@ class StorageApi:
     def _init_storage_storage_init_storage_post_serialize(
         self,
         storage_name,
-        location_name,
-        location_id,
         storage_type,
         storage_interface,
+        location_id,
+        location_name,
         storage_capacity,
         storage_phase_level,
         json_data,
@@ -1298,7 +1382,7 @@ class StorageApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
@@ -1307,14 +1391,6 @@ class StorageApi:
 
             _query_params.append(("storage_name", storage_name))
 
-        if location_name is not None:
-
-            _query_params.append(("location_name", location_name))
-
-        if location_id is not None:
-
-            _query_params.append(("location_id", location_id))
-
         if storage_type is not None:
 
             _query_params.append(("storage_type", storage_type))
@@ -1322,6 +1398,14 @@ class StorageApi:
         if storage_interface is not None:
 
             _query_params.append(("storage_interface", storage_interface))
+
+        if location_id is not None:
+
+            _query_params.append(("location_id", location_id))
+
+        if location_name is not None:
+
+            _query_params.append(("location_name", location_name))
 
         if storage_capacity is not None:
 
@@ -1609,7 +1693,7 @@ class StorageApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
@@ -1896,7 +1980,7 @@ class StorageApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
@@ -2149,7 +2233,7 @@ class StorageApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes]] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
