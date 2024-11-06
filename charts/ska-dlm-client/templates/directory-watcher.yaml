@@ -29,9 +29,13 @@ spec:
         - -n
         - data
         - -s
-        - http://10.244.0.125
+        - "http://{{ include "ska-dlm.fullname" . }}-ingest.{{ .Release.Namespace }}.svc.cluster.local"
         - --test_init_storage_url
-        - http://10.244.0.118
+        - "http://{{ include "ska-dlm.fullname" . }}-storage.{{ .Release.Namespace }}.svc.cluster.local"
+        - "--ingest_service_port"
+        - "80"
+        - "--storage_service_port"
+        - "80"
         - --test_init
         volumeMounts:
         - name: dlm-configmap
@@ -39,6 +43,7 @@ spec:
           readOnly: true
         - name: data-product-storage
           mountPath: /data
+      dnsPolicy: ClusterFirstWithHostNet
       volumes:
       - name: dlm-configmap
         configMap:
