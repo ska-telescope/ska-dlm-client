@@ -19,7 +19,8 @@ spec:
       containers:
       - name: directory-watcher
         image: {{ .Values.directory_watcher.image}}:{{ .Values.directory_watcher.version }}
-        imagePullPolicy: {{ .Values.directory_watcher.imagePullPolicy }}
+        # imagePullPolicy: {{ .Values.directory_watcher.imagePullPolicy }}
+        imagePullPolicy: Always
         command:
         - python3
         - -m
