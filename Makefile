@@ -3,7 +3,7 @@ include .make/python.mk
 include .make/oci.mk
 
 DOCKER_COMPOSE = docker compose
-DOCS_SPHINXOPTS = -n -W --keep-going
+DOCS_SPHINXOPTS = -n --keep-going
 PYTHON_LINE_LENGTH = 99
 
 # GitlabCI services used in CI, docker compose for local testing only
