@@ -24,12 +24,6 @@ include:
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/oci-image.gitlab-ci.yml'
 
-docs-build:
-  extends:
-    docs-build:
-  rules:
-    allow_failure: true
-
 python-test:
   services:
     # Keep in sync with tests/test-services.docker-compose.yml
