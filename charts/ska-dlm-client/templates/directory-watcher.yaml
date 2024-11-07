@@ -21,9 +21,7 @@ spec:
         image: {{ .Values.directory_watcher.image}}:{{ .Values.directory_watcher.version }}
         imagePullPolicy: {{ .Values.directory_watcher.imagePullPolicy }}
         command:
-        - python3
-        - -m
-        - ska_dlm_client.directory_watcher.directory_watcher
+        - directory_watcher
         - -d
         - /data
         - -n
@@ -32,11 +30,11 @@ spec:
         - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}.svc.cluster.local"
         - --test_init_storage_url
         - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}.svc.cluster.local"
-        - "--ingest_service_port"
+        - "--ingest-service-port"
         - "80"
-        - "--storage_service_port"
+        - "--storage-service-port"
         - "80"
-        - --test_init
+        - --test-init
         volumeMounts:
         - name: dlm-configmap
           mountPath: "/home/ska-dlm/.dlm"

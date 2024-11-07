@@ -16,4 +16,6 @@
   make k8s-dep-build
   ```
 
-*Refer to DLM README.md for more information on starting/running the DLM services.
+Refer to
+[ska-data-lifecycle documentation](https://gitlab.com/ska-telescope/ska-data-lifecycle/-/blob/main/charts/ska-dlm/README.md)
+for more information on starting/running the DLM services.

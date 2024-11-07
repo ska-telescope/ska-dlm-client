@@ -23,55 +23,55 @@ def create_parser() -> argparse.ArgumentParser:
     # Adding optional argument.
     parser.add_argument(
         "-d",
-        "--directory_to_watch",
+        "--directory-to-watch",
         type=str,
         required=True,
         help="Full path to directory to watch.",
     )
     parser.add_argument(
         "-n",
-        "--storage_name",
+        "--storage-name",
         type=str,
         required=True,
         help="The name by which the DLM system know the storage as.",
     )
     parser.add_argument(
         "-s",
-        "--server_url",
+        "--server-url",
         type=str,
         required=True,
         help="Server URL excluding any service name and port.",
     )
     parser.add_argument(
-        "--reload_status_file",
+        "--reload-status-file",
         type=bool,
         required=False,
         default=False,
         help="Reload the status file that already exists in the watch directory.",
     )
     parser.add_argument(
-        "--ingest_service_port",
+        "--ingest-service-port",
         type=int,
         required=False,
         default=ska_dlm_client.directory_watcher.config.INGEST_SERVICE_PORT,
         help="",
     )
     parser.add_argument(
-        "--storage_service_port",
+        "--storage-service-port",
         type=int,
         required=False,
         default=ska_dlm_client.directory_watcher.config.STORAGE_SERVICE_PORT,
         help="",
     )
     parser.add_argument(
-        "--status_file_filename",
+        "--status-file-filename",
         type=str,
         required=False,
         default=ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME,
         help="",
     )
     parser.add_argument(
-        "--test_init",
+        "--test-init",
         type=bool,
         action=argparse.BooleanOptionalAction,
         required=False,
@@ -79,7 +79,7 @@ def create_parser() -> argparse.ArgumentParser:
         help="",
     )
     parser.add_argument(
-        "--test_init_storage_url",
+        "--test-init-storage-url",
         type=str,
         required=False,
         default=ska_dlm_client.directory_watcher.config.DEFAULT_STORAGE_SERVER,
