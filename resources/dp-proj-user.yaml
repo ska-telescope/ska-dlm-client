@@ -1,3 +1,4 @@
+# values required when testing in private namespace on DP cluster
 global:
   dataProduct:
     pvc:

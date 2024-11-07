@@ -23,25 +23,33 @@ As parameters the directory_watcher requires
 
 ```sh
 $ directory_watcher
-usage: directory_watcher [-h] -d DIRECTORY_TO_WATCH -n STORAGE_NAME -s SERVER_URL -e EXECUTION_BLOCK_ID
-[--reload_status_file RELOAD_STATUS_FILE]
-[--ingest_service_port INGEST_SERVICE_PORT]
-[--storage_service_port STORAGE_SERVICE_PORT]
-[--status_file_filename STATUS_FILE_FILENAME]
+usage: directory_watcher [-h] -d DIRECTORY_TO_WATCH -n STORAGE_NAME -s SERVER_URL
+                         [--reload_status_file RELOAD_STATUS_FILE]
+                         [--ingest_service_port INGEST_SERVICE_PORT]
+                         [--storage_service_port STORAGE_SERVICE_PORT]
+                         [--status_file_filename STATUS_FILE_FILENAME]
+                         [--test_init | --no-test_init]
+                         [--test_init_storage_url TEST_INIT_STORAGE_URL]
 ```
 
 The additional parameters can be given for greater configuration.
+
+NOTE: --test_init and --test_init_storage_url are ONLY used to configure a predefined
+location and storage config plus create the given storage name.
 
 ## Execution Modes
 
 The SKA DLM client can run in two modes:
 
 * Kafka Watcher: where the client is triggered by incoming kafka messages on a specified topic
-* File System Monitor: where the client is triggered by the creation of a file in a specified directory
+* File System Watcher: where the client is triggered by the creation of a file in a specified directory
 
-In both cases, once triggered, the SKA DLM client proceeds to ingest the new data product into a DLM service.
+In both cases, once triggered, the SKA DLM client proceeds to ingest (register) the new data product
+into a DLM service.
 
 ## Configuration
+
+*Work in progress*
 
 Use the ```src/ska_dlm_client/config.yaml``` file to specify the configuration of the ska-dlm-client. For example:
 

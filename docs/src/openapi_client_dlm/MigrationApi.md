@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost:8080*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**copy_data_item_migration_copy_data_item_get**](MigrationApi.md#copy_data_item_migration_copy_data_item_get) | **GET** /migration/copy_data_item | Copy Data Item
+[**copy_data_item_migration_copy_data_item_post**](MigrationApi.md#copy_data_item_migration_copy_data_item_post) | **POST** /migration/copy_data_item | Copy Data Item
 
 
-# **copy_data_item_migration_copy_data_item_get**
-> object copy_data_item_migration_copy_data_item_get(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path)
+# **copy_data_item_migration_copy_data_item_post**
+> object copy_data_item_migration_copy_data_item_post(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path)
 
 Copy Data Item
 
@@ -42,11 +42,11 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
     try:
         # Copy Data Item
-        api_response = api_instance.copy_data_item_migration_copy_data_item_get(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path)
-        print("The response of MigrationApi->copy_data_item_migration_copy_data_item_get:\n")
+        api_response = api_instance.copy_data_item_migration_copy_data_item_post(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path)
+        print("The response of MigrationApi->copy_data_item_migration_copy_data_item_post:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling MigrationApi->copy_data_item_migration_copy_data_item_get: %s\n" % e)
+        print("Exception when calling MigrationApi->copy_data_item_migration_copy_data_item_post: %s\n" % e)
 ```
 
 
