@@ -49,11 +49,11 @@ system: {{ .Values.system }}
 {{- end }}
 
 {{/*
-Ingest labels
+Directory watcher labels
 */}}
 {{- define "ska-dlm-client.directory-watcher.labels" }}
 {{- include "ska-dlm-client.labels" . }}
 component: {{ .Values.directory_watcher.component }}
 subsystem: {{ .Values.directory_watcher.subsystem }}
 intent: production
-{{- end }}
+{- end }}

@@ -29,5 +29,4 @@ USER ska-dlm
 COPY --from=buildenv /app/.venv /app/.venv/
 ENV PATH="/app/.venv/bin:${PATH}"
 
-##ENTRYPOINT ["python3", "-m", "ska_dlm_client.directory_watcher.directory_watcher"]
 CMD ["python3", "-m", "ska_dlm_client.directory_watcher.directory_watcher"]
