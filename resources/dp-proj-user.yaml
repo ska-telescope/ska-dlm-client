@@ -3,5 +3,8 @@ global:
     pvc:
       name: shared
 
+directory_watcher:
+  version: "0.1.0-dev.ca3e96a47"
+
 ska_dlm:
   fullname: "ska-dlm-dev"
