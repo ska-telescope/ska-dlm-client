@@ -34,7 +34,9 @@ class DirectoryWatcher:
         """Start watching the given directory."""
         logger.info("with config parameters %s", self._config)
         logger.info("starting to watch %s", self._config.directory_to_watch)
-        logger.info("NOTE: watchfiles.awatch has recursive=False, in case this matters in the futuer.")
+        logger.info(
+            "NOTE: watchfiles.awatch has recursive=False, in case this matters in the futuer."
+        )
         async for changes in awatch(
             self._config.directory_to_watch, recursive=False
         ):  # type: Set[tuple[Change, str]]
