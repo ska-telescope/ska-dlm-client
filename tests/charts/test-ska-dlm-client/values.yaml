@@ -1,0 +1,14 @@
+system: dlm
+
+nameOverride: ""
+fullnameOverride: ""
+
+ska_dlm:
+  fullname: "ska-dlm"
+
+# Definite directory watcher details for use in deployment
+directory_watcher:
+  image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client
+  version: "0.1.0"
+  imagePullPolicy: Always
+  replicas: 1
