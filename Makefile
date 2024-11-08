@@ -1,8 +1,11 @@
 include .make/base.mk
 include .make/python.mk
 include .make/oci.mk
+include .make/k8s.mk
+include .make/helm.mk
 
 DOCKER_COMPOSE = docker compose
+# NOTE: removed the -W option from SPHINXOPTS due to warnings from code generated docs.
 DOCS_SPHINXOPTS = -n --keep-going
 PYTHON_LINE_LENGTH = 99
 

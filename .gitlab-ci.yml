@@ -32,6 +32,14 @@ include:
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
 
+    # K8s steps
+  - project: 'ska-telescope/templates-repository'
+    file: gitlab-ci/includes/k8s.gitlab-ci.yml
+
+    # Helm charts
+  - project: 'ska-telescope/templates-repository'
+    file: gitlab-ci/includes/helm-chart.gitlab-ci.yml
+
 python-test:
   services:
     # Keep in sync with tests/test-services.docker-compose.yml
