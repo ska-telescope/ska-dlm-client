@@ -3,7 +3,7 @@ apiVersion: v2
 name: test-ska-dlm-client
 version: 0.1.0
 appVersion: 0.1.0
-description: SKA DLM Client
+description: SKA DLM Client setup test for DLM
 home: https://developer.skao.int/projects/
 sources:
 - https://gitlab.com/ska-telescope/ska-dlm-client
