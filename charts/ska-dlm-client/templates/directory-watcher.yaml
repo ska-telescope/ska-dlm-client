@@ -22,19 +22,16 @@ spec:
         imagePullPolicy: {{ .Values.directory_watcher.imagePullPolicy }}
         command:
         - directory_watcher
-        - -d
-        - /data
-        - -n
-        - data
-        - -s
-        - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}.svc.cluster.local"
-        - --test_init_storage_url
-        - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}.svc.cluster.local"
-        - "--ingest-service-port"
-        - "80"
-        - "--storage-service-port"
-        - "80"
-        - --test-init
+        - "--directory-to-watch"
+        - {{ .Values.directory_watcher.directo_to_watch }}
+        - "--storage-name"
+        - {{ .Values.directory_watcher.storage_name }}
+        - "--ingrest-server-url"
+        - {{- if eq .Values.directory_watcher.ingest_server_url "" }}
+        - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.directory_watcher.ingest_service_port }}"
+        - {{- else }}
+        - {{ .Values.directory_watcher.ingest_server_url }}
+        - {{- end }}
         volumeMounts:
         - name: dlm-configmap
           mountPath: "/home/ska-dlm/.dlm"

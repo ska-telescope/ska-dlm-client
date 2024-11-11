@@ -22,3 +22,8 @@ directory_watcher:
   version: "0.1.0"
   imagePullPolicy: Always
   replicas: 1
+  directo_to_watch: /data
+  storage_name: data
+  ingest_service_port: 80
+  ingest_server_url: ""
+
