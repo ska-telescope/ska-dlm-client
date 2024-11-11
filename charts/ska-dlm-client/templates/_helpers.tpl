@@ -56,4 +56,4 @@ Directory watcher labels
 component: {{ .Values.directory_watcher.component }}
 subsystem: {{ .Values.directory_watcher.subsystem }}
 intent: production
-{- end }}
+{{- end }}

@@ -27,7 +27,6 @@ docconvert = "^2.1.0"
 python-benedict = "^0.34.0"
 watchfiles = "^0.24.0"
 pyyaml = "^6.0.2"
-myst-parser = "^4.0.0"
 
 [tool.poetry.group.test.dependencies]
 black = "^24.8.0"
@@ -50,7 +49,6 @@ ska-ser-sphinx-theme = ">=0.1.1"
 sphinx-autodoc-typehints = ">=1.23.0"
 python-benedict = "^0.34.0"
 pyyaml = "^6.0.2"
-myst_parser = "^4.0.0"
 
 [tool.pytest.ini_options]
 addopts = "-v"

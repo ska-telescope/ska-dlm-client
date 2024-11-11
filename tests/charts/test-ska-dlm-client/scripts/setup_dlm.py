@@ -6,7 +6,7 @@ import logging
 import sys
 
 from ska_dlm_client.openapi import api_client, configuration
-from ska_dlm_client.openapi.dlm_api import ingest_api, storage_api
+from ska_dlm_client.openapi.dlm_api import storage_api
 
 logger = logging.getLogger(__name__)
 
@@ -120,17 +120,10 @@ def create_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "-s",
-        "--storage-url",
+        "--storage-server-url",
         type=str,
         required=True,
-        help="Storage service URL, excluding any service name and port.",
-    )
-    parser.add_argument(
-        "-p",
-        "--storage-service-port",
-        type=int,
-        required=True,
-        help="Storage service port",
+        help="Storage service URL.",
     )
     return parser
 
@@ -139,12 +132,8 @@ def main():
     """Start the integration/developer setup test application."""
     parser = create_parser()
     args = parser.parse_args()
-    storage_name = args.storage_name
-    storage_base_url = args.storage_url
-    storage_service_port = args.storage_service_port
-    storage_url = f"{storage_base_url}:{storage_service_port}"
-    storage_configuration = configuration.Configuration(host=storage_url)
-    setup_testing(storage_name, storage_configuration)
+    storage_configuration = configuration.Configuration(host=args.storage_server_url)
+    setup_testing(args.storage_name, storage_configuration)
 
 
 if __name__ == "__main__":

@@ -5,13 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "test-ska-dlm-client.directory-watcher.labels" . | indent 4 }}
-  annotations:
-    # This is what defines this resource as a hook. Without this line, the
-    # job is considered part of the release.
-    "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "-5"
 spec:
-  ttlSecondsAfterFinished: 300
   template:
     metadata:
       name: {{ include "test-ska-dlm-client.fullname" . }}-setup-dlm
@@ -23,11 +17,18 @@ spec:
       - name: setup-dlm
         image: {{ .Values.directory_watcher.image}}:{{ .Values.directory_watcher.version }}
         imagePullPolicy: {{ .Values.directory_watcher.imagePullPolicy }}
+        volumeMounts:
+          - name: test-configmap
+            mountPath: "/data"
+            readOnly: true
         command:
         - python3
-        - {{.Files.Get "scripts/setup-dlm.py" }}
-        - "--storage_url"
-        - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}.svc.cluster.local"
-        - "--storage-service-port"
-        - "80"
-
+        - /data/setup_dlm.py
+        - "--storage-name"
+        - "data"
+        - "--storage-server-url"
+        - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}.svc.cluster.local:80"
+      volumes:
+        - name: test-configmap
+          configMap:
+            name: {{ include "test-ska-dlm-client.fullname" . }}-configmap
