@@ -7,9 +7,6 @@ import logging
 import ska_dlm_client.directory_watcher.config
 from ska_dlm_client.directory_watcher.config import Config
 from ska_dlm_client.directory_watcher.directory_watcher_task import DirectoryWatcher
-from ska_dlm_client.directory_watcher.integration_tests.test_directory_watcher_integration import (
-    setup_testing,
-)
 from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -29,18 +26,18 @@ def create_parser() -> argparse.ArgumentParser:
         help="Full path to directory to watch.",
     )
     parser.add_argument(
+        "-i",
+        "--ingest-server-url",
+        type=str,
+        required=True,
+        help="Ingest server URL including the service port.",
+    )
+    parser.add_argument(
         "-n",
         "--storage-name",
         type=str,
         required=True,
         help="The name by which the DLM system know the storage as.",
-    )
-    parser.add_argument(
-        "-s",
-        "--server-url",
-        type=str,
-        required=True,
-        help="Server URL excluding any service name and port.",
     )
     parser.add_argument(
         "--reload-status-file",
@@ -50,20 +47,6 @@ def create_parser() -> argparse.ArgumentParser:
         help="Reload the status file that already exists in the watch directory.",
     )
     parser.add_argument(
-        "--ingest-service-port",
-        type=int,
-        required=False,
-        default=ska_dlm_client.directory_watcher.config.INGEST_SERVICE_PORT,
-        help="",
-    )
-    parser.add_argument(
-        "--storage-service-port",
-        type=int,
-        required=False,
-        default=ska_dlm_client.directory_watcher.config.STORAGE_SERVICE_PORT,
-        help="",
-    )
-    parser.add_argument(
         "--status-file-filename",
         type=str,
         required=False,
@@ -71,19 +54,11 @@ def create_parser() -> argparse.ArgumentParser:
         help="",
     )
     parser.add_argument(
-        "--test-init",
+        "--use-status-file",
         type=bool,
-        action=argparse.BooleanOptionalAction,
         required=False,
         default=False,
-        help="",
-    )
-    parser.add_argument(
-        "--test-init-storage-url",
-        type=str,
-        required=False,
-        default=ska_dlm_client.directory_watcher.config.DEFAULT_STORAGE_SERVER,
-        help="Storage server URL excluding any service name and port. Only used for test_init",
+        help="Use the status file, default is NOT to use, this may change in a future release.",
     )
     return parser
 
@@ -92,16 +67,12 @@ def process_args(args: argparse.Namespace) -> Config:
     """Collect up all command line parameters and return a Config."""
     config = Config(
         directory_to_watch=args.directory_to_watch,
+        ingest_server_url=args.ingest_server_url,
         storage_name=args.storage_name,
-        server_url=args.server_url,
         reload_status_file=args.reload_status_file,
-        ingest_service_port=args.ingest_service_port,
-        storage_service_port=args.storage_service_port,
         status_file_full_filename=f"{args.directory_to_watch}/{args.status_file_filename}",
-        storage_server=args.test_init_storage_url,
+        use_status_file=args.use_status_file,
     )
-    if args.test_init:
-        setup_testing(config)
     return config
 
 
