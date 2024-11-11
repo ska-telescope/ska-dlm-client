@@ -2,7 +2,6 @@
 import os
 import sys
 
-
 sys.path.insert(0, os.path.abspath("../../src"))
 
 project = "ska-dlm-client"
@@ -14,19 +13,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_typehints",
-    "myst_parser",
 ]
-
-# The suffix(es) of source filenames.
-# You can specify multiple suffix as a list of string:
-#
-#source_suffix = {
-#    '.rst': 'restructuredtext',
-#    '.txt': 'markdown',
-#    '.md': 'markdown',
-#}
-source_suffix = ['.rst', '.md']
-
 
 exclude_patterns = []
 
