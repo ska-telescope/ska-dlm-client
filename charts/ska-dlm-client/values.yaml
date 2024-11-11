@@ -25,5 +25,3 @@ directory_watcher:
   directo_to_watch: /data
   storage_name: data
   ingest_service_port: 80
-  ingest_server_url: ""
-
