@@ -5,7 +5,7 @@ global:
       name: shared
 
 directory_watcher:
-  version: "0.1.0-dev.ca3e96a47"
+  version: "0.1.0-dev.c9154d74e"
 
 ska_dlm:
   fullname: "ska-dlm-dev"

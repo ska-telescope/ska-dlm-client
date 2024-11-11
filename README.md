@@ -23,13 +23,10 @@ As parameters the directory_watcher requires
 
 ```sh
 $ directory_watcher
-usage: directory_watcher [-h] -d DIRECTORY_TO_WATCH -n STORAGE_NAME -s SERVER_URL
-                         [--reload_status_file RELOAD_STATUS_FILE]
-                         [--ingest_service_port INGEST_SERVICE_PORT]
-                         [--storage_service_port STORAGE_SERVICE_PORT]
-                         [--status_file_filename STATUS_FILE_FILENAME]
-                         [--test_init | --no-test_init]
-                         [--test_init_storage_url TEST_INIT_STORAGE_URL]
+usage: directory_watcher [-h] -d DIRECTORY_TO_WATCH -i INGEST_SERVER_URL -n STORAGE_NAME
+                         [--reload-status-file RELOAD_STATUS_FILE]
+                         [--status-file-filename STATUS_FILE_FILENAME]
+                         [--use-status-file USE_STATUS_FILE]
 ```
 
 The additional parameters can be given for greater configuration.
@@ -81,13 +78,28 @@ DLM:
 ```
 
 
-## OpenAPI Generated Client
+# Testing
+
+In order to configure DLM with some basic configs so that further testing can be carried out it is necessary
+to install the helm test-ska-dlm-clint chart and then run the helm test.
+
+```sh
+helm install -f resources/dp-proj-user.yaml test-ska-dlm-client tests/charts/test-ska-dlm-client/
+helm test test-ska-dlm-client
+helm uninstall test-ska-dlm-client
+```
+
+NOTE: It is expected that the smae resources/dp-proj-user.yaml values file can be used for both this test setup
+and the directory-watcher deployment.
+
+
+# OpenAPI Generated Client
 
 ```ska_dlm_client.openapi``` is an OpenAPI generated RESTful python client for accessing DLM services.
 
 See [OpenAPI README.md](src/ska_dlm_client/openapi/README.md) for further information.
 
-### Version
+## Version
 
 As openapi-generator was not installed via poetry the version used is shown here.
 
@@ -101,7 +113,7 @@ openapi-generator-cli 7.9.0
   docs   : https://openapi-generator.tech/
 ```
 
-### Contributing
+## Contributing
 
 The OpenAPI generated client can be regenerated using exported OpenAPI specs from [ska-data-lifecycle](https://gitlab.com/ska-telescope/ska-data-lifecycle):
 

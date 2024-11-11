@@ -8,6 +8,7 @@ import sys
 from ska_dlm_client.openapi import api_client, configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -34,13 +35,13 @@ def init_location_for_testing(storage_configuration: configuration) -> str:
         response = api_storage.query_location_storage_query_location_get(
             location_name=_WatcherTestConfiguration.LOCATION_NAME
         )
-        logger.info("query_location_response: %s", response)
+        logger.info("query_location response: %s", response)
         if not isinstance(response, list):
             logger.error("Unexpected response from query_location_storage")
             sys.exit(1)
         if len(response) == 1:
             the_location_id = response[0]["location_id"]
-            logger.info("location_id already exists in DLM")
+            logger.info("location already exists in DLM")
         else:
             response = api_storage.init_location_storage_init_location_post(
                 location_name=_WatcherTestConfiguration.LOCATION_NAME,
@@ -50,6 +51,7 @@ def init_location_for_testing(storage_configuration: configuration) -> str:
                 location_facility=_WatcherTestConfiguration.LOCATION_FACILITY,
             )
             the_location_id = response
+            logger.info("location created in DLM")
         logger.info("location_id: %s", the_location_id)
     return the_location_id
 
@@ -63,6 +65,7 @@ def init_storage_for_testing(
         api_storage = storage_api.StorageApi(the_api_client)
         # Get the storage_id
         response = api_storage.query_storage_storage_query_storage_get(storage_name=storage_name)
+        logger.info("query_storage response: %s", response)
         if not isinstance(response, list):
             logger.error("Unexpected response from query_storage_storage")
             sys.exit(1)
@@ -78,6 +81,7 @@ def init_storage_for_testing(
                 location_name=_WatcherTestConfiguration.LOCATION_NAME,
             )
             the_storage_id = response
+            logger.info("Storage created in DLM")
         logger.info("storage_id: %s", the_storage_id)
 
         # Setup the storage config. Doesn't matter if it has been set before.
