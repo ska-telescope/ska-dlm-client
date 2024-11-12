@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ska-dlm-client"
-version = "0.0.1"
+version = "0.1.0"
 description = "Client(s) for the SKA Data Lifecycle Manager"
 authors = ["Mark Boulton <mark.boulton@uwa.edu.au>"]
 license= "BSD-3-Clause"
