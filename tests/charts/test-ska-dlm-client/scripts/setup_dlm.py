@@ -1,39 +1,46 @@
-"""Application to configure the DLM for integration/developer testing scenarios."""
+"""Application to configure the DLM for integration/developer testing scenarios.
+
+This code will create a basic configuration within DLM that can be used for further client
+testing across various k8s clusters or configurations.
+
+The usage expected is
+helm install -f resources/dp-proj-user.yaml test-ska-dlm-client tests/charts/test-ska-dlm-client/
+helm test test-ska-dlm-client
+helm uninstall test-ska-dlm-client
+
+NOTE: it is expected that the same values file can be used between this and the ska-dlm-client.
+
+"""
 
 import argparse
-import dataclasses
 import logging
 import sys
 
-from ska_dlm_client.openapi import api_client, configuration
+from ska_dlm_client.openapi import api_client
+from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+# Constants that can be used for testing.
+LOCATION_NAME = "ThisDLMClientLocationName"
+LOCATION_TYPE = "ThisDLMClientLocation"
+LOCATION_COUNTRY = "Australia"
+LOCATION_CITY = "Marksville"
+LOCATION_FACILITY = "ICRAR"
+STORAGE_CONFIG = {"name": "data", "type": "local", "parameters": {}}
+STORAGE_INTERFACE = "posix"
+STORAGE_TYPE = "disk"
 
-@dataclasses.dataclass
-class _WatcherTestConfiguration:
-    """Configuration required during integration testing."""
-
-    LOCATION_NAME = "ThisDLMClientLocationName"
-    LOCATION_TYPE = "ThisDLMClientLocation"
-    LOCATION_COUNTRY = "Australia"
-    LOCATION_CITY = "Marksville"
-    LOCATION_FACILITY = "ICRAR"
-    STORAGE_CONFIG = {"name": "data", "type": "local", "parameters": {}}
-    STORAGE_INTERFACE = "posix"
-    STORAGE_TYPE = "disk"
-
-
-def init_location_for_testing(storage_configuration: configuration) -> str:
+def init_location_for_testing(storage_configuration: Configuration) -> str:
     """Perform location initialisation to be used when testing."""
     with api_client.ApiClient(storage_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
 
         # get the location_id
         response = api_storage.query_location_storage_query_location_get(
-            location_name=_WatcherTestConfiguration.LOCATION_NAME
+            location_name=LOCATION_NAME
         )
         logger.info("query_location response: %s", response)
         if not isinstance(response, list):
@@ -44,11 +51,11 @@ def init_location_for_testing(storage_configuration: configuration) -> str:
             logger.info("location already exists in DLM")
         else:
             response = api_storage.init_location_storage_init_location_post(
-                location_name=_WatcherTestConfiguration.LOCATION_NAME,
-                location_type=_WatcherTestConfiguration.LOCATION_TYPE,
-                location_country=_WatcherTestConfiguration.LOCATION_COUNTRY,
-                location_city=_WatcherTestConfiguration.LOCATION_CITY,
-                location_facility=_WatcherTestConfiguration.LOCATION_FACILITY,
+                location_name=LOCATION_NAME,
+                location_type=LOCATION_TYPE,
+                location_country=LOCATION_COUNTRY,
+                location_city=LOCATION_CITY,
+                location_facility=LOCATION_FACILITY,
             )
             the_location_id = response
             logger.info("location created in DLM")
@@ -57,7 +64,7 @@ def init_location_for_testing(storage_configuration: configuration) -> str:
 
 
 def init_storage_for_testing(
-    storage_name: str, storage_configuration: configuration, the_location_id: str
+    storage_name: str, storage_configuration: Configuration, the_location_id: str
 ) -> str:
     """Perform storge initialisation to be used when testing."""
     assert the_location_id is not None
@@ -75,10 +82,10 @@ def init_storage_for_testing(
         else:
             response = api_storage.init_storage_storage_init_storage_post(
                 storage_name=storage_name,
-                storage_type=_WatcherTestConfiguration.STORAGE_TYPE,
-                storage_interface=_WatcherTestConfiguration.STORAGE_INTERFACE,
+                storage_type=STORAGE_TYPE,
+                storage_interface=STORAGE_INTERFACE,
                 location_id=the_location_id,
-                location_name=_WatcherTestConfiguration.LOCATION_NAME,
+                location_name=LOCATION_NAME,
             )
             the_storage_id = response
             logger.info("Storage created in DLM")
@@ -86,7 +93,7 @@ def init_storage_for_testing(
 
         # Setup the storage config. Doesn't matter if it has been set before.
         response = api_storage.create_storage_config_storage_create_storage_config_post(
-            body=_WatcherTestConfiguration.STORAGE_CONFIG,
+            body=STORAGE_CONFIG,
             storage_id=the_storage_id,
             storage_name=storage_name,
             config_type="rclone",
@@ -96,7 +103,7 @@ def init_storage_for_testing(
     return the_storage_id
 
 
-def setup_testing(storage_name: str, storage_configuration: configuration.Configuration):
+def setup_testing(storage_name: str, storage_configuration: Configuration):
     """Complete configuration of the environment."""
     # TODO: It would be expected that the following config would already be
     # completed in prod but leaving in place for now.
@@ -136,7 +143,7 @@ def main():
     """Start the integration/developer setup test application."""
     parser = create_parser()
     args = parser.parse_args()
-    storage_configuration = configuration.Configuration(host=args.storage_server_url)
+    storage_configuration = Configuration(host=args.storage_server_url)
     setup_testing(args.storage_name, storage_configuration)
 
 

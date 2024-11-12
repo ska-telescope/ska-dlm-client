@@ -21,9 +21,7 @@ spec:
         image: {{ .Values.directory_watcher.image}}:{{ .Values.directory_watcher.version }}
         imagePullPolicy: {{ .Values.directory_watcher.imagePullPolicy }}
         command:
-        - python3
-        - -m
-        - ska_dlm_client.directory_watcher.directory_watcher
+        - dlm-directory_watcher
         - "--directory-to-watch"
         - {{ .Values.directory_watcher.directo_to_watch }}
         - "--storage-name"

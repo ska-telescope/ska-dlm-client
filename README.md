@@ -80,17 +80,11 @@ DLM:
 
 # Testing
 
-In order to configure DLM with some basic configs so that further testing can be carried out it is necessary
-to install the helm test-ska-dlm-clint chart and then run the helm test.
+To run automated tests
 
 ```sh
-helm install -f resources/dp-proj-user.yaml test-ska-dlm-client tests/charts/test-ska-dlm-client/
-helm test test-ska-dlm-client
-helm uninstall test-ska-dlm-client
+make python-test
 ```
-
-NOTE: It is expected that the smae resources/dp-proj-user.yaml values file can be used for both this test setup
-and the directory-watcher deployment.
 
 
 # OpenAPI Generated Client
