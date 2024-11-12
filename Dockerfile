@@ -9,7 +9,7 @@ WORKDIR /app
 # Cache main dependencies
 COPY pyproject.toml poetry.lock ./
 RUN poetry config virtualenvs.in-project true \
-    && poetry install --only main
+    && poetry install --only main --no-root
 
 COPY ./ ./
 RUN . .venv/bin/activate \
