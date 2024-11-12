@@ -18,7 +18,7 @@ ska_dlm:
 directory_watcher:
   component: directory-watcher
   subsystem: data-lifecycle-management
-  image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client
+  image: harbor.skao.int/production/ska-dlm-client
   version: "0.1.0"
   imagePullPolicy: Always
   replicas: 1
