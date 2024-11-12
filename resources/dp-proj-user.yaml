@@ -5,7 +5,8 @@ global:
       name: shared
 
 directory_watcher:
-  version: "0.1.0-dev.c9702f646"
+  image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
+  version: "0.1.0-dev.c6b5dc9e7"
 
 ska_dlm:
   fullname: "ska-dlm-dev"

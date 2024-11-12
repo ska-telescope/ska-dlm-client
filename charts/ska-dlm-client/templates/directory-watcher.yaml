@@ -21,7 +21,7 @@ spec:
         image: {{ .Values.directory_watcher.image}}:{{ .Values.directory_watcher.version }}
         imagePullPolicy: {{ .Values.directory_watcher.imagePullPolicy }}
         command:
-        - dlm-directory_watcher
+        - dlm-directory-watcher
         - "--directory-to-watch"
         - {{ .Values.directory_watcher.directo_to_watch }}
         - "--storage-name"

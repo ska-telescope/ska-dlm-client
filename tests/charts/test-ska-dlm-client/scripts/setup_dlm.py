@@ -33,6 +33,7 @@ STORAGE_CONFIG = {"name": "data", "type": "local", "parameters": {}}
 STORAGE_INTERFACE = "posix"
 STORAGE_TYPE = "disk"
 
+
 def init_location_for_testing(storage_configuration: Configuration) -> str:
     """Perform location initialisation to be used when testing."""
     with api_client.ApiClient(storage_configuration) as the_api_client:
