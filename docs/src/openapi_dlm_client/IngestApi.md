@@ -13,7 +13,7 @@ Method | HTTP request | Description
 
 Init Data Item
 
-Intialize a new data_item by at least specifying an item_name.
+Initialize a new data_item by at least specifying an item_name.
 
 ### Example
 

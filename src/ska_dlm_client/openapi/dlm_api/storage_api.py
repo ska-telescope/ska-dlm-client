@@ -1044,10 +1044,7 @@ class StorageApi:
         storage_phase_level: Annotated[
             Optional[StrictStr], Field(description='one of "GAS", "LIQUID", "SOLID"')
         ] = None,
-        json_data: Annotated[
-            Optional[StrictStr],
-            Field(description="extra rclone values such as secrets required for connection"),
-        ] = None,
+        body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1060,7 +1057,7 @@ class StorageApi:
     ) -> object:
         """Init Storage
 
-        Intialize a new storage by at least specifying an item_name.
+        Intialize a new storage by at least specifying a storage_name.
 
         Parameters
         ----------
@@ -1080,8 +1077,7 @@ class StorageApi:
             reserved storage capacity in bytes
         storage_phase_level : str
             one of \"GAS\", \"LIQUID\", \"SOLID\"
-        json_data : str
-            extra rclone values such as secrets required for connection
+        body : object
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -1116,7 +1112,7 @@ class StorageApi:
             location_name=location_name,
             storage_capacity=storage_capacity,
             storage_phase_level=storage_phase_level,
-            json_data=json_data,
+            body=body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1158,10 +1154,7 @@ class StorageApi:
         storage_phase_level: Annotated[
             Optional[StrictStr], Field(description='one of "GAS", "LIQUID", "SOLID"')
         ] = None,
-        json_data: Annotated[
-            Optional[StrictStr],
-            Field(description="extra rclone values such as secrets required for connection"),
-        ] = None,
+        body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1174,7 +1167,7 @@ class StorageApi:
     ) -> ApiResponse[object]:
         """Init Storage
 
-        Intialize a new storage by at least specifying an item_name.
+        Intialize a new storage by at least specifying a storage_name.
 
         Parameters
         ----------
@@ -1194,8 +1187,7 @@ class StorageApi:
             reserved storage capacity in bytes
         storage_phase_level : str
             one of \"GAS\", \"LIQUID\", \"SOLID\"
-        json_data : str
-            extra rclone values such as secrets required for connection
+        body : object
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -1230,7 +1222,7 @@ class StorageApi:
             location_name=location_name,
             storage_capacity=storage_capacity,
             storage_phase_level=storage_phase_level,
-            json_data=json_data,
+            body=body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1272,10 +1264,7 @@ class StorageApi:
         storage_phase_level: Annotated[
             Optional[StrictStr], Field(description='one of "GAS", "LIQUID", "SOLID"')
         ] = None,
-        json_data: Annotated[
-            Optional[StrictStr],
-            Field(description="extra rclone values such as secrets required for connection"),
-        ] = None,
+        body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1288,7 +1277,7 @@ class StorageApi:
     ) -> RESTResponseType:
         """Init Storage
 
-        Intialize a new storage by at least specifying an item_name.
+        Intialize a new storage by at least specifying a storage_name.
 
         Parameters
         ----------
@@ -1308,8 +1297,7 @@ class StorageApi:
             reserved storage capacity in bytes
         storage_phase_level : str
             one of \"GAS\", \"LIQUID\", \"SOLID\"
-        json_data : str
-            extra rclone values such as secrets required for connection
+        body : object
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -1344,7 +1332,7 @@ class StorageApi:
             location_name=location_name,
             storage_capacity=storage_capacity,
             storage_phase_level=storage_phase_level,
-            json_data=json_data,
+            body=body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1367,7 +1355,7 @@ class StorageApi:
         location_name,
         storage_capacity,
         storage_phase_level,
-        json_data,
+        body,
         _request_auth,
         _content_type,
         _headers,
@@ -1415,17 +1403,25 @@ class StorageApi:
 
             _query_params.append(("storage_phase_level", storage_phase_level))
 
-        if json_data is not None:
-
-            _query_params.append(("json_data", json_data))
-
         # process the header parameters
         # process the form parameters
         # process the body parameter
+        if body is not None:
+            _body_params = body
 
         # set the HTTP header `Accept`
         if "Accept" not in _header_params:
             _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params["Content-Type"] = _content_type
+        else:
+            _default_content_type = self.api_client.select_header_content_type(
+                ["application/json"]
+            )
+            if _default_content_type is not None:
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
         _auth_settings: List[str] = []
@@ -1468,7 +1464,7 @@ class StorageApi:
     ) -> object:
         """Query Location
 
-        Query a location by at least specifying an location_name.
+        Query a location by at least specifying a location_name.
 
         Parameters
         ----------
@@ -1546,7 +1542,7 @@ class StorageApi:
     ) -> ApiResponse[object]:
         """Query Location
 
-        Query a location by at least specifying an location_name.
+        Query a location by at least specifying a location_name.
 
         Parameters
         ----------
@@ -1624,7 +1620,7 @@ class StorageApi:
     ) -> RESTResponseType:
         """Query Location
 
-        Query a location by at least specifying an location_name.
+        Query a location by at least specifying a location_name.
 
         Parameters
         ----------

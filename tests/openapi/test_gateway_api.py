@@ -33,13 +33,6 @@ class TestGatewayApi(unittest.TestCase):
         """
         pass
 
-    def test_end_session_end_session_post(self) -> None:
-        """Test case for end_session_end_session_post
-
-        End Session
-        """
-        pass
-
     def test_has_scope_scope_get(self) -> None:
         """Test case for has_scope_scope_get
 
@@ -51,13 +44,6 @@ class TestGatewayApi(unittest.TestCase):
         """Test case for heartbeat_heartbeat_get
 
         Heartbeat
-        """
-        pass
-
-    def test_session_start_session_post(self) -> None:
-        """Test case for session_start_session_post
-
-        Session
         """
         pass
 

@@ -65,7 +65,7 @@ class IngestApi:
     ) -> object:
         """Init Data Item
 
-        Intialize a new data_item by at least specifying an item_name.
+        Initialize a new data_item by at least specifying an item_name.
 
         Parameters
         ----------
@@ -157,7 +157,7 @@ class IngestApi:
     ) -> ApiResponse[object]:
         """Init Data Item
 
-        Intialize a new data_item by at least specifying an item_name.
+        Initialize a new data_item by at least specifying an item_name.
 
         Parameters
         ----------
@@ -249,7 +249,7 @@ class IngestApi:
     ) -> RESTResponseType:
         """Init Data Item
 
-        Intialize a new data_item by at least specifying an item_name.
+        Initialize a new data_item by at least specifying an item_name.
 
         Parameters
         ----------

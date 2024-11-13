@@ -45,46 +45,6 @@
                 }
             }
         },
-        "/start_session": {
-            "post": {
-                "summary": "Session",
-                "tags": [
-                    "gateway"
-                ],
-                "description": "Start client session with cookies",
-                "operationId": "session_start_session_post",
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/end_session": {
-            "post": {
-                "summary": "End Session",
-                "tags": [
-                    "gateway"
-                ],
-                "description": "End client session",
-                "operationId": "end_session_end_session_post",
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/heartbeat": {
             "get": {
                 "summary": "Heartbeat",
