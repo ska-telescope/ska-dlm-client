@@ -87,6 +87,39 @@ make python-test
 ```
 
 
+# Helm Charts
+
+## Deployment
+
+An example deployment of the ska-dlm-client directory watcher would look like
+
+```sh
+helm install -f resources/dp-proj-user.yaml ska-dlm-client charts/ska-dlm-client
+```
+
+This will deploy to the currently configured cluster and namespace.
+
+NOTE: More production specific values (values files) will be added in a future release.
+
+
+## Testing
+
+A helm chart has been created for testing ```tests/charts/test-ska-dlm-client.```
+
+The test chart is used to configure an existing DLM instance running in the same cluster
+namespace. Additional tests are planned to be developed and ticket YAN-1910 has been created
+to track this.
+
+The usage expected is
+```sh
+helm install -f resources/dp-proj-user.yaml test-ska-dlm-client tests/charts/test-ska-dlm-client/
+helm test test-ska-dlm-client
+helm uninstall test-ska-dlm-client
+```
+
+NOTE: it is expected that the same values file can be used between this test and the ska-dlm-client.
+
+
 # OpenAPI Generated Client
 
 ```ska_dlm_client.openapi``` is an OpenAPI generated RESTful python client for accessing DLM services.
