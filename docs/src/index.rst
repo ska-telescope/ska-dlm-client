@@ -5,6 +5,7 @@ Welcome to ska-dlm-client's documentation!
    :maxdepth: 1
    :caption: Contents:
 
+   openapi_readme.md
    api/index
 
 

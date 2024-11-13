@@ -5,10 +5,8 @@ All URIs are relative to *http://localhost:8080*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**auth_callback_auth_callback_get**](GatewayApi.md#auth_callback_auth_callback_get) | **GET** /auth_callback | Auth Callback
-[**end_session_end_session_post**](GatewayApi.md#end_session_end_session_post) | **POST** /end_session | End Session
 [**has_scope_scope_get**](GatewayApi.md#has_scope_scope_get) | **GET** /scope | Has Scope
 [**heartbeat_heartbeat_get**](GatewayApi.md#heartbeat_heartbeat_get) | **GET** /heartbeat | Heartbeat
-[**session_start_session_post**](GatewayApi.md#session_start_session_post) | **POST** /start_session | Session
 [**token_by_auth_flow_token_by_auth_flow_get**](GatewayApi.md#token_by_auth_flow_token_by_auth_flow_get) | **GET** /token_by_auth_flow | Token By Auth Flow
 [**token_by_username_password_token_by_username_password_get**](GatewayApi.md#token_by_username_password_token_by_username_password_get) | **GET** /token_by_username_password | Token By Username Password
 
@@ -47,69 +45,6 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
         pprint(api_response)
     except Exception as e:
         print("Exception when calling GatewayApi->auth_callback_auth_callback_get: %s\n" % e)
-```
-
-
-
-### Parameters
-
-This endpoint does not need any parameter.
-
-### Return type
-
-**object**
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-### HTTP response details
-
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-**200** | Successful Response |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **end_session_end_session_post**
-> object end_session_end_session_post()
-
-End Session
-
-End client session
-
-### Example
-
-
-```python
-import ska_dlm_client.openapi
-from ska_dlm_client.openapi.rest import ApiException
-from pprint import pprint
-
-# Defining the host is optional and defaults to http://localhost:8080
-# See configuration.py for a list of all supported configuration parameters.
-configuration = ska_dlm_client.openapi.Configuration(
-    host = "http://localhost:8080"
-)
-
-
-# Enter a context with an instance of the API client
-with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
-    # Create an instance of the API class
-    api_instance = ska_dlm_client.openapi.GatewayApi(api_client)
-
-    try:
-        # End Session
-        api_response = api_instance.end_session_end_session_post()
-        print("The response of GatewayApi->end_session_end_session_post:\n")
-        pprint(api_response)
-    except Exception as e:
-        print("Exception when calling GatewayApi->end_session_end_session_post: %s\n" % e)
 ```
 
 
@@ -243,69 +178,6 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
         pprint(api_response)
     except Exception as e:
         print("Exception when calling GatewayApi->heartbeat_heartbeat_get: %s\n" % e)
-```
-
-
-
-### Parameters
-
-This endpoint does not need any parameter.
-
-### Return type
-
-**object**
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-### HTTP response details
-
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-**200** | Successful Response |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **session_start_session_post**
-> object session_start_session_post()
-
-Session
-
-Start client session with cookies
-
-### Example
-
-
-```python
-import ska_dlm_client.openapi
-from ska_dlm_client.openapi.rest import ApiException
-from pprint import pprint
-
-# Defining the host is optional and defaults to http://localhost:8080
-# See configuration.py for a list of all supported configuration parameters.
-configuration = ska_dlm_client.openapi.Configuration(
-    host = "http://localhost:8080"
-)
-
-
-# Enter a context with an instance of the API client
-with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
-    # Create an instance of the API class
-    api_instance = ska_dlm_client.openapi.GatewayApi(api_client)
-
-    try:
-        # Session
-        api_response = api_instance.session_start_session_post()
-        print("The response of GatewayApi->session_start_session_post:\n")
-        pprint(api_response)
-    except Exception as e:
-        print("Exception when calling GatewayApi->session_start_session_post: %s\n" % e)
 ```
 
 

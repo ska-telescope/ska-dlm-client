@@ -27,17 +27,19 @@ docconvert --in-place -i rest -o numpy openapi_client_dlm_project/ska_dlm_client
 docconvert --in-place -i rest -o numpy openapi_client_dlm_project/test/
 
 echo "\ncleaning up src, tests and docs area of ska_dlm_client for new version of openapi generated code"
-rm -rf ../src/ska_dlm_client/openapi/ ../tests/openapi/ ../docs/openapi/
-mkdir ../docs/openapi ../tests/openapi
+rm -rf ../src/ska_dlm_client/openapi/ ../tests/openapi/ ../docs/src/openapi_dlm_client/
+mkdir ../docs/src/openapi_dlm_client ../tests/openapi
 
 echo "\nReplace line in README.md"
 sed -i.bak "s|pip install git+https://github.com/GIT_USER_ID/GIT_REPO_ID.git|pip install git+https://gitlab.com/ska-telescope/ska-dlm-client.git|g" openapi_client_dlm_project/README.md
 sed -i.bak "s|## Documentation [fF]or|##|g" openapi_client_dlm_project/README.md
+# The following fixes the path to the linked service API docs.
+sed -i.bak "s|docs/|openapi_dlm_client/|g" openapi_client_dlm_project/README.md
 
 echo "\nmoving over code to ska_dlm_client project"
-mv openapi_client_dlm_project/README.md openapi_client_dlm_project/ska_dlm_client/openapi/
+mv openapi_client_dlm_project/README.md ../docs/src/openapi_readme.md
 mv openapi_client_dlm_project/ska_dlm_client/openapi ../src/ska_dlm_client/
-mv openapi_client_dlm_project/docs/* ../docs/openapi/
+mv openapi_client_dlm_project/docs/* ../docs/src/openapi_dlm_client/
 mv openapi_client_dlm_project/test/* ../tests/openapi/
 cd ..
 

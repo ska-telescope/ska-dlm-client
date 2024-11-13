@@ -16,7 +16,7 @@
                 "tags": [
                     "storage"
                 ],
-                "description": "Query a location by at least specifying an location_name.",
+                "description": "Query a location by at least specifying a location_name.",
                 "operationId": "query_location_storage_query_location_get",
                 "parameters": [
                     {
@@ -72,7 +72,7 @@
                 "tags": [
                     "storage"
                 ],
-                "description": "Intialize a new storage by at least specifying an item_name.",
+                "description": "Intialize a new storage by at least specifying a storage_name.",
                 "operationId": "init_storage_storage_init_storage_post",
                 "parameters": [
                     {
@@ -155,20 +155,26 @@
                             "title": "Storage Phase Level"
                         },
                         "description": "one of \"GAS\", \"LIQUID\", \"SOLID\""
-                    },
-                    {
-                        "name": "json_data",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "description": "extra rclone values such as secrets required for connection",
-                            "default": "",
-                            "title": "Json Data"
-                        },
-                        "description": "extra rclone values such as secrets required for connection"
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "anyOf": [
+                                    {
+                                        "type": "object"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "description": "extra rclone values such as secrets required for connection",
+                                "title": "Json Data"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Successful Response",

@@ -16,7 +16,7 @@
                 "tags": [
                     "ingest"
                 ],
-                "description": "Intialize a new data_item by at least specifying an item_name.",
+                "description": "Initialize a new data_item by at least specifying an item_name.",
                 "operationId": "init_data_item_ingest_init_data_item_post",
                 "parameters": [
                     {
