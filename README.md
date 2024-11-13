@@ -23,25 +23,30 @@ As parameters the directory_watcher requires
 
 ```sh
 $ directory_watcher
-usage: directory_watcher [-h] -d DIRECTORY_TO_WATCH -n STORAGE_NAME -s SERVER_URL -e EXECUTION_BLOCK_ID
-[--reload_status_file RELOAD_STATUS_FILE]
-[--ingest_service_port INGEST_SERVICE_PORT]
-[--storage_service_port STORAGE_SERVICE_PORT]
-[--status_file_filename STATUS_FILE_FILENAME]
+usage: directory_watcher [-h] -d DIRECTORY_TO_WATCH -i INGEST_SERVER_URL -n STORAGE_NAME
+                         [--reload-status-file RELOAD_STATUS_FILE]
+                         [--status-file-filename STATUS_FILE_FILENAME]
+                         [--use-status-file USE_STATUS_FILE]
 ```
 
 The additional parameters can be given for greater configuration.
+
+NOTE: --test_init and --test_init_storage_url are ONLY used to configure a predefined
+location and storage config plus create the given storage name.
 
 ## Execution Modes
 
 The SKA DLM client can run in two modes:
 
 * Kafka Watcher: where the client is triggered by incoming kafka messages on a specified topic
-* File System Monitor: where the client is triggered by the creation of a file in a specified directory
+* File System Watcher: where the client is triggered by the creation of a file in a specified directory
 
-In both cases, once triggered, the SKA DLM client proceeds to ingest the new data product into a DLM service.
+In both cases, once triggered, the SKA DLM client proceeds to ingest (register) the new data product
+into a DLM service.
 
 ## Configuration
+
+*Work in progress*
 
 Use the ```src/ska_dlm_client/config.yaml``` file to specify the configuration of the ska-dlm-client. For example:
 
@@ -73,13 +78,55 @@ DLM:
 ```
 
 
-## OpenAPI Generated Client
+# Testing
+
+To run automated tests
+
+```sh
+make python-test
+```
+
+
+# Helm Charts
+
+## Deployment
+
+An example deployment of the ska-dlm-client directory watcher would look like
+
+```sh
+helm install -f resources/dp-proj-user.yaml ska-dlm-client charts/ska-dlm-client
+```
+
+This will deploy to the currently configured cluster and namespace.
+
+NOTE: More production specific values (values files) will be added in a future release.
+
+
+## Testing
+
+A helm chart has been created for testing ```tests/charts/test-ska-dlm-client.```
+
+The test chart is used to configure an existing DLM instance running in the same cluster
+namespace. Additional tests are planned to be developed and ticket YAN-1910 has been created
+to track this.
+
+The usage expected is
+```sh
+helm install -f resources/dp-proj-user.yaml test-ska-dlm-client tests/charts/test-ska-dlm-client/
+helm test test-ska-dlm-client
+helm uninstall test-ska-dlm-client
+```
+
+NOTE: it is expected that the same values file can be used between this test and the ska-dlm-client.
+
+
+# OpenAPI Generated Client
 
 ```ska_dlm_client.openapi``` is an OpenAPI generated RESTful python client for accessing DLM services.
 
 See [OpenAPI README.md](src/ska_dlm_client/openapi/README.md) for further information.
 
-### Version
+## Version
 
 As openapi-generator was not installed via poetry the version used is shown here.
 
@@ -93,7 +140,7 @@ openapi-generator-cli 7.9.0
   docs   : https://openapi-generator.tech/
 ```
 
-### Contributing
+## Contributing
 
 The OpenAPI generated client can be regenerated using exported OpenAPI specs from [ska-data-lifecycle](https://gitlab.com/ska-telescope/ska-data-lifecycle):
 

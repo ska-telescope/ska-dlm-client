@@ -1,13 +1,20 @@
+[build-system]
+requires = ["poetry>=1.8.2"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "ska-dlm-client"
-version = "0.0.1"
+version = "0.1.0"
 description = "Client(s) for the SKA Data Lifecycle Manager"
 authors = ["Mark Boulton <mark.boulton@uwa.edu.au>"]
+repository = "https://gitlab.com/ska-telescope/ska-dlm-client"
+documentation = "https://developer.skao.int/projects/ska-dlm-client/en/latest/"
 license= "BSD-3-Clause"
 readme = "README.md"
+packages = [{include="ska_dlm_client", from="src"}]
 
 [tool.poetry.scripts]
-directory_watcher = "ska_dlm_client.directory_watcher.directory_watcher:main"
+dlm-directory-watcher = "ska_dlm_client.directory_watcher.directory_watcher:main"
 
 [[tool.poetry.source]]
 name = 'skao'

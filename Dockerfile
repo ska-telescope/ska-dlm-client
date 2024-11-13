@@ -1,4 +1,4 @@
-ARG PYTHON_VERSION=3.10
+ARG PYTHON_VERSION=3.12
 
 FROM python:${PYTHON_VERSION} AS buildenv
 ARG POETRY_VERSION=1.8.2
@@ -19,7 +19,7 @@ FROM python:${PYTHON_VERSION}-slim AS dlm_runtime
 
 RUN apt-get update && apt-get install -y rclone
 
-# # Best practice not to run as root
+# Best practice not to run as root
 RUN useradd ska-dlm
 RUN mkdir /home/ska-dlm
 RUN chown -R ska-dlm /home/ska-dlm
@@ -29,4 +29,4 @@ USER ska-dlm
 COPY --from=buildenv /app/.venv /app/.venv/
 ENV PATH="/app/.venv/bin:${PATH}"
 
-CMD ["/bin/bash"]
+CMD ["directory_watcher"]
