@@ -8,7 +8,7 @@ import requests
 
 TAG_FIELD = "tags"
 HTTP_METHODS = ['get', 'post']  # The HTTP methods you want to modify
-OPENAPI_HOST_URL = "http://192.168.64.15"
+OPENAPI_HOST_URL = "http://localhost"
 OPENAPI_URL_JSON_PATH = "openapi.json"
 OPENAPI_SPECS = {
     "gateway":   8000,
