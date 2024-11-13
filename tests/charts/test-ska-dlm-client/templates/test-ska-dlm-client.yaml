@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "test-ska-dlm-client.fullname" . }}-setup-dlm
+  labels:
+    {{- include "test-ska-dlm-client.directory-watcher.labels" . | indent 8 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  restartPolicy: Never
+  containers:
+  - name: setup-dlm
+    image: {{ .Values.directory_watcher.image}}:{{ .Values.directory_watcher.version }}
+    imagePullPolicy: {{ .Values.directory_watcher.imagePullPolicy }}
+    volumeMounts:
+      - name: test-configmap
+        mountPath: "/data"
+        readOnly: true
+    command:
+    - python3
+    - /data/setup_dlm.py
+    - "--storage-name"
+    - "data"
+    - "--storage-server-url"
+    - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}.svc.cluster.local:80"
+  volumes:
+    - name: test-configmap
+      configMap:
+        name: {{ include "test-ska-dlm-client.fullname" . }}-configmap

@@ -44,7 +44,6 @@ class RegistrationProcessor:
                     item_name=relative_path,
                     uri=relative_path,
                     storage_name=self._config.storage_name,
-                    eb_id=self._config.execution_block_id,
                 )
             except OpenApiException as err:
                 logger.error("OpenApiException caught during register_data_item\n%s", err)

@@ -1,0 +1,22 @@
+# https://helm.sh/docs/developing_charts/
+apiVersion: v2
+name: test-ska-dlm-client
+version: 0.1.0
+appVersion: 0.1.0
+description: SKA DLM Client setup test for DLM
+home: https://developer.skao.int/projects/
+sources:
+- https://gitlab.com/ska-telescope/ska-dlm-client
+maintainers:
+- name: Mark Boulton
+  email: mark.boulton@icrar.org
+- name: Callan Gray
+  email: callan.gray@icrar.org
+- name: Dave Pallot
+  email: dave.pallot@icrar.org
+- name: Nadia Steyn
+  email: nadia.steyn@icrar.org
+- name: James Strauss
+  email: james.strauss@icrar.org
+- name: Andreas Wicenec
+  email: andreas.wicenec@icrar.org

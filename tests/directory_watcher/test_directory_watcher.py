@@ -20,8 +20,7 @@ class TestDirectoryWatcher(unittest.IsolatedAsyncioTestCase):
     """DirectoryWatcher unit test stubs."""
 
     STORAGE_NAME = "data"
-    SERVER_URL = "http://localhost"
-    EXECUTION_BLOCK_ID = "exe_blk_id_0001"
+    INGREST_SERVER_URL = "http://localhost:8001"
 
     add_path_successful = False
 
@@ -31,14 +30,12 @@ class TestDirectoryWatcher(unittest.IsolatedAsyncioTestCase):
         self.parser = create_parser()
         self.parsed = self.parser.parse_args(
             [
-                "-d",
+                "--directory-to-watch",
                 self.the_watch_dir,
-                "-n",
+                "--ingest-server-url",
+                self.INGREST_SERVER_URL,
+                "--storage-name",
                 self.STORAGE_NAME,
-                "-s",
-                self.SERVER_URL,
-                "-e",
-                self.EXECUTION_BLOCK_ID,
             ]
         )
         self.config = process_args(args=self.parsed)
@@ -50,32 +47,28 @@ class TestDirectoryWatcher(unittest.IsolatedAsyncioTestCase):
     def test_process_args(self) -> None:
         """Test case for init_data_item_ingest_init_data_item_post."""
         self.assertEqual(self.parsed.directory_to_watch, self.the_watch_dir)
+        self.assertEqual(self.parsed.ingest_server_url, self.INGREST_SERVER_URL)
         self.assertEqual(self.parsed.storage_name, self.STORAGE_NAME)
-        self.assertEqual(self.parsed.server_url, self.SERVER_URL)
-        self.assertEqual(self.parsed.execution_block_id, self.EXECUTION_BLOCK_ID)
         self.assertEqual(self.parsed.reload_status_file, False)
-        self.assertEqual(self.parsed.ingest_service_port, 8001)
-        self.assertEqual(self.parsed.storage_service_port, 8003)
         self.assertEqual(
             self.parsed.status_file_filename,
             ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME,
         )
+        self.assertEqual(self.parsed.use_status_file, False)
 
     def test_config_generation(self) -> None:
         """Test the correct config is generated from the command line args."""
         self.assertEqual(self.config.directory_to_watch, self.the_watch_dir)
+        self.assertEqual(self.config.ingest_server_url, self.INGREST_SERVER_URL)
+        self.assertEqual(self.config.storage_name, self.STORAGE_NAME)
+        self.assertEqual(self.config.reload_status_file, False)
         self.assertEqual(
             self.config.status_file_full_filename,
             f"{self.the_watch_dir}/{ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME}",
         )
-        self.assertEqual(self.config.reload_status_file, False)
-        self.assertEqual(self.config.storage_name, self.STORAGE_NAME)
-        self.assertEqual(self.config.ingest_url, f"{self.SERVER_URL}:8001")
-        self.assertEqual(self.config.storage_url, f"{self.SERVER_URL}:8003")
-        self.assertEqual(self.config.execution_block_id, self.EXECUTION_BLOCK_ID)
-        self.assertIsInstance(self.config.ingest_configuration, Configuration)
-        self.assertIsInstance(self.config.storage_configuration, Configuration)
+        self.assertEqual(self.config.use_status_file, False)
         self.assertIsInstance(self.config.directory_watcher_entries, DirectoryWatcherEntries)
+        self.assertIsInstance(self.config.ingest_configuration, Configuration)
 
     async def test_process_directory_entry_change(self) -> None:
         """Test case for process_directory_entry_change."""

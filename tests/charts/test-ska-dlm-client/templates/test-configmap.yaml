@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "test-ska-dlm-client.fullname" . }}-configmap
+  namespace: {{ .Release.Namespace }}
+data:
+  setup_dlm.py: |-
+{{ .Files.Get "scripts/setup_dlm.py" | indent 4 }}

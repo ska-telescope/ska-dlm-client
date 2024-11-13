@@ -1,6 +1,8 @@
 include .make/base.mk
 include .make/python.mk
 include .make/oci.mk
+include .make/k8s.mk
+include .make/helm.mk
 
 DOCKER_COMPOSE = docker compose
 # NOTE: removed the -W option from SPHINXOPTS due to warnings from code generated docs.
@@ -28,6 +30,10 @@ docker-compose-up: ## Bring up test services in docker
 
 docker-compose-down: ## Shut down test services in docker previously started with docker-compose-up
 	$(DOCKER_COMPOSE) --file tests/test-services.docker-compose.yml down
+
+oci-build-dlm_directory_watcher:
+	make oci-build OCI_IMAGE=ska-dlm-client-directory_watcher \
+	OCI_IMAGE_FILE_PATH=tests/Dockerfile-dlm_directory_watcher
 
 openapi-code-from-local-dlm: ## Use the connection to DLM services to retrieve and generate OpenAPI code
 	@echo "Using the connection to DLM services to retrieve and generate OpenAPI code"
