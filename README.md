@@ -86,6 +86,12 @@ To run automated tests
 make python-test
 ```
 
+# Data Product Metadata
+
+Metadata can now be loaded and execution block id extracted.
+
+This is based on [ADR-55 Definition of metadata for data management at AA0.5](https://confluence.skatelescope.org/display/SWSI/ADR-55+Definition+of+metadata+for+data+management+at+AA0.5).
+
 
 # Helm Charts
 
