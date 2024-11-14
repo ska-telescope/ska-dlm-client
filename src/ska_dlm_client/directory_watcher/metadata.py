@@ -1,6 +1,7 @@
 """Class to handle various operations related to metadata for data items/products.
 
-Refer to https://confluence.skatelescope.org/display/SWSI/ADR-55+Definition+of+metadata+for+data+management+at+AA0.5
+Refer to https://confluence.skatelescope.org/display/SWSI/\
+ADR-55+Definition+of+metadata+for+data+management+at+AA0.5
 for additional details.
 
 """
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class DataProductMetadata:
-    """Class handling metadata for data item(s)"""
+    """Class handling metadata for data item(s)."""
 
     metadata_file_path: Path
     dp_metadata: dict
@@ -27,16 +28,16 @@ class DataProductMetadata:
         if metadata_file_path.exists():
             self.metadata_file_path = metadata_file_path
         else:
-            raise FileNotFoundError("The metadata file %s does not exist.", metadata_file_path)
-        self._load_metadata()
+            raise FileNotFoundError(f"The metadata file {metadata_file_path} does not exist.")
+        self.load_metadata()
 
-    def _load_metadata(self):
+    def load_metadata(self):
         """Read in the metadata file."""
         with open(self.metadata_file_path, "r", encoding="utf-8") as file:
             self.dp_metadata = benedict(yaml.safe_load(file))
 
     def get_execution_block_id(self):
-        """Returns the executin block as describe in the metadata file.
+        """Return the executin block as defined in the metadata file.
 
         Returns
         -------

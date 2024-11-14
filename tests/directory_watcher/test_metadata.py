@@ -1,10 +1,10 @@
 """Metadata related tests."""
 
 import os
-
-import pytest
 from pathlib import Path
 from shutil import copytree
+
+import pytest
 
 from ska_dlm_client.directory_watcher import config
 from ska_dlm_client.directory_watcher.metadata import DataProductMetadata
@@ -32,4 +32,4 @@ def test_data_product_metadata(tmp_path):
 
     dpm_file = f"{tmp_path}/invalid-{config.METADATA_FILENAME}"
     dpm = DataProductMetadata(Path(dpm_file))
-    assert dpm.get_execution_block_id() == None
+    assert dpm.get_execution_block_id() is None
