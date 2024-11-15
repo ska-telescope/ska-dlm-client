@@ -88,7 +88,7 @@ make python-test
 
 # Data Product Metadata
 
-Metadata can now be loaded and execution block id extracted.
+Metadata can now be loaded and the "execution block" attribute extracted.
 
 This is based on [ADR-55 Definition of metadata for data management at AA0.5](https://confluence.skatelescope.org/display/SWSI/ADR-55+Definition+of+metadata+for+data+management+at+AA0.5).
 

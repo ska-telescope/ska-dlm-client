@@ -1,7 +1,6 @@
 """Metadata related tests."""
 
 import os
-from pathlib import Path
 from shutil import copytree
 
 import pytest
@@ -24,12 +23,10 @@ def datadir(tmp_path, request):
 def test_data_product_metadata(tmp_path):
     """Test the DataProductMetadata class."""
     with pytest.raises(FileNotFoundError):
-        DataProductMetadata(Path(f"{tmp_path}/a-dummy-file"))
+        DataProductMetadata(f"{tmp_path}/a-dummy-file")
 
-    dpm_file = f"{tmp_path}/{config.METADATA_FILENAME}"
-    dpm = DataProductMetadata(Path(dpm_file))
-    assert dpm.get_execution_block_id() == "eb-m001-20191031-12345"
+    dpm = DataProductMetadata(f"{tmp_path}/{config.METADATA_FILENAME}")
+    assert dpm.get_execution_block_value() == "eb-m001-20191031-12345"
 
-    dpm_file = f"{tmp_path}/invalid-{config.METADATA_FILENAME}"
-    dpm = DataProductMetadata(Path(dpm_file))
-    assert dpm.get_execution_block_id() is None
+    dpm = DataProductMetadata(f"{tmp_path}/invalid-{config.METADATA_FILENAME}")
+    assert dpm.get_execution_block_value() is None
