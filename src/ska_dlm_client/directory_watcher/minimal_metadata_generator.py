@@ -92,6 +92,9 @@ def minimal_metadata_generator(dataproduct_path: str) -> MetaData:
     This function is intended to build a minimal MetaData from a single file or from a
     directory of files.
 
+    MetaData is returned as the caller is likely calling this as the real file representing
+    MetaData is not available.
+
     No metadata file will be physically created it is just returned as a MetaData object.
 
     The fields of the MetaData that are filled include:
