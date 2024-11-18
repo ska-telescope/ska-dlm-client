@@ -1,13 +1,4 @@
-"""Class to handle various operations related to metadata for data items/products.
-
-Refer to https://confluence.skatelescope.org/display/SWSI/\
-ADR-55+Definition+of+metadata+for+data+management+at+AA0.5
-for additional details.
-
-This is similar to https://gitlab.com/ska-telescope/sdp/ska-sdp-dataproduct-metadata
-but is SDP specific hence it is not the preferred option here.
-
-"""
+"""Class to handle various operations related to metadata for data items/products."""
 
 import logging
 
@@ -25,6 +16,14 @@ class DataProductMetadata:
     * be YAML compliant
     * contain only a single dictionary document
     * use only the JSON subset of YAML values
+
+    Refer to https://confluence.skatelescope.org/display/SWSI/\
+    ADR-55+Definition+of+metadata+for+data+management+at+AA0.5
+    for additional details.
+
+    This is similar to https://gitlab.com/ska-telescope/sdp/ska-sdp-dataproduct-metadata
+    but is SDP specific hence it is not the preferred option here.
+
     """
 
     filepath: str

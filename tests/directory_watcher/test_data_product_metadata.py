@@ -6,7 +6,7 @@ from shutil import copytree
 import pytest
 
 from ska_dlm_client.directory_watcher import config
-from ska_dlm_client.directory_watcher.metadata import DataProductMetadata
+from ska_dlm_client.directory_watcher.data_product_metadata import DataProductMetadata
 
 
 @pytest.fixture(autouse=True)
