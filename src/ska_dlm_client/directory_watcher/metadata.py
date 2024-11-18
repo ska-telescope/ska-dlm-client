@@ -19,7 +19,13 @@ logger = logging.getLogger(__name__)
 
 
 class DataProductMetadata:
-    """Class handling metadata for data item(s)."""
+    """Class handling metadata for data item(s).
+
+    Metadata filepath must:
+    * be YAML compliant
+    * contain only a single dictionary document
+    * use only the JSON subset of YAML values
+    """
 
     filepath: str
     root: dict
@@ -34,9 +40,17 @@ class DataProductMetadata:
 
         Raises
         ------
+        FileNotFoundError
+            https://docs.python.org/3/library/exceptions.html#FileNotFoundError
+        OSError
+            https://docs.python.org/3/library/exceptions.html#OSError
         TypeError
-            If during the loading/reading of the given metadata file an unexpected condition
-            is found then this exception will be raised. Refer to the error message for details.
+            Root document element in the read file is not a dictionary.
+        ScannerError
+            File is not yaml compliant.
+        ComposerError
+            Multiple metadata documents in a single yaml file is not supported.
+
 
         """
         # Log that the metadata filename does not match the expected naming convention.
@@ -58,7 +72,7 @@ class DataProductMetadata:
             self.root = metadata
 
     def get_execution_block_value(self):
-        """Return the executin block value/attribute/id as defined in the metadata file.
+        """Return the execution block value/attribute/id as defined in the metadata file.
 
         Returns
         -------
