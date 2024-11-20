@@ -40,7 +40,7 @@ def _get_file_crc(file_path: str) -> str:
 
 
 def _get_file_dict(file_path: str, relative_path: str, description: str) -> dict:
-    """Bild the dict of file attribute for metadata."""
+    """Build the dict of file attribute for metadata."""
     try:
         size = os.path.getsize(file_path)
     except OSError as err:
@@ -62,7 +62,7 @@ def _get_file_dict(file_path: str, relative_path: str, description: str) -> dict
     }
 
 
-def _build_files_list(path: str, description: str) -> [dict]:
+def _build_files_list(path: str, description: str) -> list[dict]:
     """Build a list of all files within a given directory or a single file."""
     files_list = []
 
@@ -110,11 +110,12 @@ def minimal_metadata_generator(dataproduct_path: str) -> MetaData:
     Some internal exceptions are caught and logged with some "defaults" being put in their place
     so that a MetaData can always be generated. This will likely need refinement.
 
-    Rasises
-    -------
+    Raises
+    ------
     ValueError
         When the dataproduct_path is not a file or directory. Not expected during normal
-        operation so only expected as a program development error.
+        operation but problems in this area are being looked at in
+        https://jira.skatelescope.org/browse/YAN-1893
     OSError
         https://docs.python.org/3/library/exceptions.html#OSError
 

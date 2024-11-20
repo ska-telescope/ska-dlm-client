@@ -6,7 +6,7 @@ global:
 
 directory_watcher:
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
-  version: "0.1.0-dev.c6b5dc9e7"
+  version: "0.1.0-dev.cfc01cbb8"
 
 ska_dlm:
   fullname: "ska-dlm-dev"
