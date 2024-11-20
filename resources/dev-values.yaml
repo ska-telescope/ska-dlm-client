@@ -1,8 +1,7 @@
-# values required when testing in private namespace on DP cluster
 global:
-  dataProduct:
-    pvc:
-      name: shared
+  storageClass: nfss1
+  ingress:
+    enabled: true
 
 directory_watcher:
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
@@ -10,4 +9,4 @@ directory_watcher:
   directory_to_watch: "/data/dlm"
 
 ska_dlm:
-  fullname: "ska-dlm-dev"
+  fullname: "ska-dlm"

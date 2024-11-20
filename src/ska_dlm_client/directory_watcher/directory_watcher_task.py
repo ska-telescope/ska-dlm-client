@@ -19,7 +19,7 @@ class DirectoryWatcher:
         self._registration_processor = watcher_registration_processor
 
     def process_directory_entry_change(self, entry: tuple[Change, str]):
-        """TODO: Test function currently."""
+        """Take action for the directory entry Change type given."""
         logger.info("in do process_directory_entry_change %s", entry)
         change_type = entry[0]
         full_path = entry[1]
