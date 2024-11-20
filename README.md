@@ -34,6 +34,11 @@ The additional parameters can be given for greater configuration.
 NOTE: --test_init and --test_init_storage_url are ONLY used to configure a predefined
 location and storage config plus create the given storage name.
 
+### Metadata Handling
+
+Code has been added to generate a "minimal set of metadata" for any dataproduct found without
+an identifiable associated metadata file. The exact rules for this are a WIP.
+
 ## Execution Modes
 
 The SKA DLM client can run in two modes:
