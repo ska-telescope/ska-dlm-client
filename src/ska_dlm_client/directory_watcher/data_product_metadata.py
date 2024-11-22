@@ -105,3 +105,7 @@ class DataProductMetadata:
             Returns the execution block as in the metadata file or None if not found.
         """
         return self.root.get(config.METADATA_EXECUTION_BLOCK_KEY, None)
+
+    def as_dict(self) -> dict:
+        """Return a dictitonary representation of the metadata."""
+        return self.root

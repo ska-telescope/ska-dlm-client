@@ -1,0 +1,13 @@
+global:
+  storageClass: nfss1
+  ingress:
+    enabled: true
+
+directory_watcher:
+  image: "ska-dlm-client"
+  version: "0.1.0-dirty"
+  directory_to_watch: "/data"
+  imagePullPolicy: Never
+
+ska_dlm:
+  fullname: "ska-dlm"
