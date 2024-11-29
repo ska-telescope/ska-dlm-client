@@ -2,6 +2,8 @@
 
 import logging
 import os
+from os import listdir
+from os.path import isdir, isfile, islink
 
 import yaml
 
@@ -42,22 +44,24 @@ class DataProductMetadata:
 
     """
 
-    dp_path: str
+    _dp_path: str
+    _found_metadata_filename: str = None
     root: dict
 
     def __init__(self, dp_path: str):
         """Init the class."""
-        self.dp_path = dp_path
-        if not os.path.exists(self.dp_path):
-            raise FileNotFoundError(f"File not found {self.dp_path}")
+        self._dp_path = dp_path
+        if not os.path.exists(self._dp_path):
+            raise FileNotFoundError(f"File not found {self._dp_path}")
         dir_path = ""
-        if os.path.isfile(self.dp_path):
-            dir_path = os.path.dirname(self.dp_path)
-        elif os.path.isdir(self.dp_path):
-            dir_path = self.dp_path
+        if os.path.isfile(self._dp_path):
+            dir_path = os.path.dirname(self._dp_path)
+        elif os.path.isdir(self._dp_path):
+            dir_path = self._dp_path
         metadata_path = os.path.join(dir_path, config.METADATA_FILENAME)
         if os.path.exists(metadata_path):
             self.load_metadata(metadata_path)
+            self._found_metadata_filename = metadata_path
         else:
             self.root = minimal_metadata_generator(dp_path)
 
@@ -106,6 +110,62 @@ class DataProductMetadata:
         """
         return self.root.get(config.METADATA_EXECUTION_BLOCK_KEY, None)
 
+    def is_generated_metadata(self):
+        """Let the caller know if metadata file is generated or not."""
+        return self._found_metadata_filename is None
+
+    def found_metadata_filename(self):
+        """Return the path found to the metadata file."""
+        return self._found_metadata_filename
+
     def as_dict(self) -> dict:
         """Return a dictitonary representation of the metadata."""
         return self.root
+
+
+def directory_is_measurement_set(full_path: str) -> bool:
+    """Return true if path points to a measurement set."""
+    return os.path.isdir(full_path) and full_path.lower().endswith(
+        config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
+    )
+
+
+def is_metadata_file(filename: str) -> bool:
+    """Return True if if given file is a data product metadata file.
+
+    NOTE: This will need work as more 'rules' on what is metadata are discovered.
+    """
+    if str is None:
+        return False
+    return filename.endswith(config.METADATA_FILENAME) and os.path.exists(filename)
+
+
+def data_product_root(full_path: str):
+    """Return the root directory of the data product."""
+    # found_metadata = False
+    if isfile(full_path):
+        logger.info("searching for metadata for file %s", full_path)
+        # metadata_filename = os.path.join(os.path.dirname(full_path), config.METADATA_FILENAME)
+        # found_metadata = is_metadata_file(metadata_filename)
+    elif isdir(full_path):
+        logger.info("searching for metadata for directory %s", full_path)
+        if directory_is_measurement_set(full_path):
+            # if a measurement set then just add directory
+            # TODO: handle case for measurement set
+            logger.error("Found measurement set but don't know where to look for metadata file.")
+            logger.error("^^^^^^^^^^^^^^^^^^^^^^")
+        else:
+            # otherwise see if metadata file exists
+            dir_entries = listdir(full_path)
+            for dir_entry in dir_entries:
+                new_full_path = f"{full_path}/{dir_entry}"
+                logger.info("still implementing %s", new_full_path)
+                # new_relative_path = f"{relative_path}/{dir_entry}"
+                # self.add_path(full_path=new_full_path, relative_path=new_relative_path)
+    else:
+        if islink(full_path):
+            error_text = f"Symbolic links are currently not supported: {full_path}"
+        else:
+            error_text = f"Unspported file/directory entry type: {full_path}"
+        logging.error(error_text)
+        # TODO: Do we throw this or just log here, raise RuntimeError(error_text)
