@@ -101,17 +101,15 @@ def _build_files_list(path: str, description: str) -> list[dict]:
 
 
 def minimal_metadata_generator(dataproduct_path: str) -> dict:
-    """Given the dataproduct_path, file or directory, generate a MetaData object.
+    """Given the dataproduct_path, file or directory, generate a valid metadata dict.
 
-    This function is intended to build a minimal MetaData from a single file or from a
-    directory of files.
+    This function is intended to build a minimal metadata dict from a single file or from a
+    directory of files. The caller is likely calling this as the real file representing
+    the data product metadata could not be found.
 
-    MetaData is returned as the caller is likely calling this as the real file representing
-    MetaData is not available.
+    No metadata file will be physically created it is just returned as a metadata dict.
 
-    No metadata file will be physically created it is just returned as a MetaData object.
-
-    The fields of the MetaData that are filled include:
+    The fields of the metadata that are filled include:
         * execution_block_id based on date and time for uniqueness but readability
         * data.files   NOTE: a file entry will be created for each file in a directory
             * crc
@@ -122,7 +120,7 @@ def minimal_metadata_generator(dataproduct_path: str) -> dict:
         * data.obscore.access_estsize of file or contents of directory
 
     Some internal exceptions are caught and logged with some "defaults" being put in their place
-    so that a MetaData can always be generated. This will likely need refinement.
+    so that a valid metadata can always be generated. This will likely need refinement.
 
     Raises
     ------

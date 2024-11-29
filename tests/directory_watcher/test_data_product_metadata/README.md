@@ -9,3 +9,6 @@ $ diff ska-data-product.yaml invalid-ska-data-product.yaml
 ---
 > execution_block_id: eb-m001-20191031-12345
 ```
+
+There is no specific meaning to ending the test data product files in ```.ext```. The
+files are never read as "meaningful data".

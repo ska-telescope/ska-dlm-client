@@ -84,7 +84,7 @@ class DataProductMetadata:
         # valid format with a valid key.
         if not metadata_path.endswith(config.METADATA_FILENAME):
             logger.warning(
-                "Expected metadata file name to with %s but got %s",
+                "Expected metadata file name to be %s but got %s",
                 config.METADATA_FILENAME,
                 metadata_path,
             )
@@ -92,11 +92,11 @@ class DataProductMetadata:
             metadata = yaml.safe_load(file)
             if not isinstance(metadata, dict):
                 raise TypeError(
-                    f"Metadata file {metadata_path} does contain a dictionary root element."
+                    f"Metadata file {metadata_path} does not contain a dictionary root element."
                 )
             self.root = metadata
 
-    def get_execution_block_value(self):
+    def get_execution_block_value(self) -> str | None:
         """Return the execution block value/attribute/id as defined in the metadata file.
 
         Returns

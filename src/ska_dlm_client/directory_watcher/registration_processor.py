@@ -83,7 +83,7 @@ class RegistrationProcessor:
             self._register_entry(relative_path=relative_path, metadata=metadata)
         elif isdir(full_path):
             logger.info("entry is directory")
-            if relative_path.endswith(
+            if relative_path.lower().endswith(
                 ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
             ):
                 # if a measurement set then just add directory
