@@ -8,6 +8,7 @@ from pathlib import Path
 
 import ska_dlm_client.directory_watcher.config
 from ska_dlm_client.directory_watcher.config import Config
+from ska_dlm_client.directory_watcher.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntry
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.dlm_api import ingest_api
@@ -35,7 +36,7 @@ class RegistrationProcessor:
             path.is_dir()
             path.is_file()
 
-    def _register_entry(self, relative_path: str):
+    def _register_entry(self, relative_path: str, metadata: dict):
         """Register the given entry_path."""
         with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
@@ -44,6 +45,7 @@ class RegistrationProcessor:
                     item_name=relative_path,
                     uri=relative_path,
                     storage_name=self._config.storage_name,
+                    body=metadata,
                 )
             except OpenApiException as err:
                 logger.error("OpenApiException caught during register_data_item\n%s", err)
@@ -75,16 +77,17 @@ class RegistrationProcessor:
         If full_path is a symlink, then not currently supported.
         """
         logger.info("in add_path with %s and %s", full_path, relative_path)
+        metadata = DataProductMetadata(full_path).as_dict()
         if isfile(full_path):
             logger.info("entry is file")
-            self._register_entry(relative_path=relative_path)
+            self._register_entry(relative_path=relative_path, metadata=metadata)
         elif isdir(full_path):
             logger.info("entry is directory")
-            if relative_path.endswith(
+            if relative_path.lower().endswith(
                 ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
             ):
                 # if a measurement set then just add directory
-                self._register_entry(relative_path=relative_path)
+                self._register_entry(relative_path=relative_path, metadata=metadata)
             else:
                 # otherwise add each file or directory
                 dir_entries = listdir(full_path)
