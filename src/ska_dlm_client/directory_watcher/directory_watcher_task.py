@@ -1,13 +1,149 @@
 """Class to perform directory watching tasks."""
 
 import logging
+import os
+import time
 
+from watchdog.events import (
+    DirCreatedEvent,
+    DirDeletedEvent,
+    DirModifiedEvent,
+    DirMovedEvent,
+    FileClosedEvent,
+    FileClosedNoWriteEvent,
+    FileCreatedEvent,
+    FileDeletedEvent,
+    FileModifiedEvent,
+    FileMovedEvent,
+    FileOpenedEvent,
+    FileSystemEvent,
+    FileSystemEventHandler,
+)
+from watchdog.observers.api import EventQueue, ObservedWatch
+from watchdog.observers.polling import (
+    DEFAULT_EMITTER_TIMEOUT,
+    DEFAULT_OBSERVER_TIMEOUT,
+    BaseObserver,
+    PollingEmitter,
+)
 from watchfiles import Change, awatch
 
 from ska_dlm_client.directory_watcher.config import Config
 from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
 
 logger = logging.getLogger(__name__)
+
+
+class MyPollingEmitter(PollingEmitter):
+    """Extends ```PollingEmitter``` to use os.lstat instead of os.stat.
+
+    As of December 2024 a fix for this seems to be in the works but not yet available.
+    """
+
+    def __init__(
+        self,
+        event_queue: EventQueue,
+        watch: ObservedWatch,
+        timeout: float = DEFAULT_EMITTER_TIMEOUT,
+        event_filter: list[type[FileSystemEvent]] | None = None,
+    ) -> None:
+        """Take in the same parameters as ```PollingEmitter``` but change stat to os.lstat."""
+        super().__init__(
+            event_queue=event_queue,
+            watch=watch,
+            timeout=timeout,
+            event_filter=event_filter,
+            stat=os.lstat,
+        )
+
+
+class MyPollingObserver(BaseObserver):
+    """Class replacing ```PollingObserver``` for the use of a custom ```PollingEmitter```."""
+
+    def __init__(self, *, timeout: float = DEFAULT_OBSERVER_TIMEOUT) -> None:
+        """Instantiate class using our custom ```PollingEmitter```."""
+        super().__init__(MyPollingEmitter, timeout=timeout)
+
+
+class WatcherEventHandler(FileSystemEventHandler):
+    """Either log or take action for all the possible events.
+
+    Originally based on ```LoggingEventHandler```.
+    """
+
+    def on_moved(self, event: DirMovedEvent | FileMovedEvent) -> None:
+        """Take action when a moved event is captured."""
+        super().on_moved(event)
+        what = "directory" if event.is_directory else "file"
+        logger.info(
+            "Type %s: Moved %s: from %s to %s",
+            event.event_type,
+            what,
+            event.src_path,
+            event.dest_path,
+        )
+
+    def on_created(self, event: DirCreatedEvent | FileCreatedEvent) -> None:
+        """Take action when a create event is captured."""
+        super().on_created(event)
+        what = "directory" if event.is_directory else "file"
+        logger.info("Created %s: %s", what, event.src_path)
+
+    def on_deleted(self, event: DirDeletedEvent | FileDeletedEvent) -> None:
+        """Take action when a delete event is captured."""
+        super().on_deleted(event)
+        what = "directory" if event.is_directory else "file"
+        logger.info("Deleted %s: %s", what, event.src_path)
+
+    def on_modified(self, event: DirModifiedEvent | FileModifiedEvent) -> None:
+        """Take action when a modified event is captured."""
+        super().on_modified(event)
+        what = "directory" if event.is_directory else "file"
+        logger.info("Modified %s: %s", what, event.src_path)
+
+    def on_closed(self, event: FileClosedEvent) -> None:
+        """Take action when a closed event is captured."""
+        super().on_closed(event)
+        logger.info("Closed modified file: %s", event.src_path)
+
+    def on_closed_no_write(self, event: FileClosedNoWriteEvent) -> None:
+        """Take action when a closed with no write event is captured."""
+        super().on_closed_no_write(event)
+        logger.info("Closed read file: %s", event.src_path)
+
+    def on_opened(self, event: FileOpenedEvent) -> None:
+        """Take action when an open event is captured."""
+        super().on_opened(event)
+        logger.info("Opened file: %s", event.src_path)
+
+
+class PollingDirectoryWatcher:  # pylint: disable=too-few-public-methods
+    """Class for the running of the directory_watcher."""
+
+    # def __init__(self, config: Config, watcher_registration_processor: RegistrationProcessor):
+    #    """Initialise with the given Config."""
+    #    self._config = config
+    #    self._registration_processor = watcher_registration_processor
+
+    def start(self, watch_dir: str):
+        """Take action for the directory entry Change type given."""
+        # from watchdog.observers.polling import PollingObserver
+        # logger.info("with config parameters %s", self._config)
+        # logger.info("starting to watchdog %s", self._config.directory_to_watch)
+        logger.info(
+            "NOTE: MyPollingObserver has recursive=False, in case this matters in the futuer."
+        )
+        event_handler = WatcherEventHandler()
+        observer = MyPollingObserver()
+        # observer.schedule(event_handler, self._config.directory_to_watch, recursive=False)
+        observer.schedule(event_handler=event_handler, path=watch_dir, recursive=False)
+        observer.start()
+        try:
+            while True:
+                time.sleep(10)
+        except KeyboardInterrupt:
+            observer.stop()
+        observer.join()
 
 
 class DirectoryWatcher:
@@ -43,3 +179,7 @@ class DirectoryWatcher:
             for change in changes:
                 logger.info("in main %s", change)
                 self.process_directory_entry_change(change)
+
+
+pdw = PollingDirectoryWatcher()
+pdw.start("/Users/00077990/yanda/pi24/watch_dir")

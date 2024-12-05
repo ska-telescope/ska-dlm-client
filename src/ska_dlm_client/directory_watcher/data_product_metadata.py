@@ -119,7 +119,7 @@ class DataProductMetadata:
         return self._found_metadata_filename
 
     def as_dict(self) -> dict:
-        """Return a dictitonary representation of the metadata."""
+        """Return a dictionary representation of the metadata."""
         return self.root
 
 
@@ -131,7 +131,7 @@ def directory_is_measurement_set(full_path: str) -> bool:
 
 
 def is_metadata_file(filename: str) -> bool:
-    """Return True if if given file is a data product metadata file.
+    """Return True if given file is a data product metadata file.
 
     NOTE: This will need work as more 'rules' on what is metadata are discovered.
     """
