@@ -87,7 +87,7 @@ def setup_directory_watcher() -> DirectoryWatcher:
 def main():
     """Start the directory watcher application."""
     directory_watcher = setup_directory_watcher()
-    asyncio.run(directory_watcher.start(), debug=None)
+    asyncio.run(directory_watcher.start_inotify_watch(), debug=None)
 
 
 if __name__ == "__main__":

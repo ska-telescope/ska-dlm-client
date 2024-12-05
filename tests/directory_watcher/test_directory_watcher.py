@@ -70,12 +70,33 @@ class TestDirectoryWatcher(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(self.config.directory_watcher_entries, DirectoryWatcherEntries)
         self.assertIsInstance(self.config.ingest_configuration, Configuration)
 
+    async def test_process_directory_polling_entry_change(self) -> None:
+        """Test case for process_directory_entry_change."""
+        registration_processor = MockRegistrationProcessor(self.config)
+        directory_watcher = DirectoryWatcher(self.config, registration_processor)
+        a_temp_file = tempfile.mktemp(dir=self.the_watch_dir)
+        await directory_watcher.start_polling_watch()
+        # Now let the directory_watcher start and listen on given directory
+        await asyncio.sleep(2)
+        # Add a file to the watcher directory
+        with open(a_temp_file, "w", encoding="utf-8") as the_file:
+            the_file.write("nothing string")
+        # Wait again now to allow the watcher to process the added file
+        await asyncio.sleep(2)
+        a_temp_file_relative_path = a_temp_file.replace(f"{self.the_watch_dir}/", "")
+        # On MacOS the system messes with the path by adding a /private
+        full_path = registration_processor.full_path.replace("/private", "")
+        relative_path = registration_processor.relative_path.replace("/private", "")
+        self.assertEqual(a_temp_file, full_path)
+        self.assertEqual(a_temp_file_relative_path, relative_path)
+        Path(a_temp_file).unlink()
+
     async def test_process_directory_entry_change(self) -> None:
         """Test case for process_directory_entry_change."""
         registration_processor = MockRegistrationProcessor(self.config)
         directory_watcher = DirectoryWatcher(self.config, registration_processor)
         a_temp_file = tempfile.mktemp(dir=self.the_watch_dir)
-        asyncio.create_task(directory_watcher.start())
+        asyncio.create_task(directory_watcher.start_inotify_watch())
         # Now let the directory_watcher start and listen on given directory
         await asyncio.sleep(2)
         # Add a file to the watcher directory
