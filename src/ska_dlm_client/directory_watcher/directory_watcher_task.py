@@ -179,4 +179,3 @@ class DirectoryWatcher:
             for change in changes:
                 logger.info("in main %s", change)
                 self.process_directory_entry_change(change)
-
