@@ -180,6 +180,3 @@ class DirectoryWatcher:
                 logger.info("in main %s", change)
                 self.process_directory_entry_change(change)
 
-
-pdw = PollingDirectoryWatcher()
-pdw.start("/Users/00077990/yanda/pi24/watch_dir")
