@@ -49,8 +49,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--use-polling-watcher",
-        type=bool,
-        required=False,
+        action=argparse.BooleanOptionalAction,
         default=False,
         help="When defined using the polling watcher rather than iNotify event driven watcher.",
     )
