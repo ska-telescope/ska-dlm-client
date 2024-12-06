@@ -28,6 +28,10 @@ spec:
         - {{ .Values.directory_watcher.storage_name }}
         - "--register-dir-prefix"
         - {{ .Values.directory_watcher.register_dir_prefix }}
+        - {{- if eq $.Values.directory_watcher.use_polling_watcher true }}
+        - >-
+          --use-polling-watcher
+        - {{- end }}
         - "--ingest-server-url"
         - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.directory_watcher.ingest_service_port }}"
         volumeMounts:

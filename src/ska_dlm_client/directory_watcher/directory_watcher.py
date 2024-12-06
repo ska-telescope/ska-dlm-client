@@ -48,6 +48,13 @@ def create_parser() -> argparse.ArgumentParser:
         help="The prefix to add to any data item being registered.",
     )
     parser.add_argument(
+        "--use-polling-watcher",
+        type=bool,
+        required=False,
+        default=False,
+        help="When defined using the polling watcher rather than iNotify event driven watcher.",
+    )
+    parser.add_argument(
         "--reload-status-file",
         type=bool,
         required=False,
@@ -85,18 +92,22 @@ def process_args(args: argparse.Namespace) -> Config:
     return config
 
 
-def setup_directory_watcher() -> DirectoryWatcher:
+def setup_directory_watcher() -> [DirectoryWatcher, bool]:
     """Perform setup tasks required to run the directory watcher."""
     parser = create_parser()
-    config = process_args(args=parser.parse_args())
+    args = parser.parse_args()
+    config = process_args(args=args)
     registration_processor = RegistrationProcessor(config)
-    return DirectoryWatcher(config, registration_processor)
+    return DirectoryWatcher(config, registration_processor), args.use_polling_watcher
 
 
 def main():
     """Start the directory watcher application."""
-    directory_watcher = setup_directory_watcher()
-    asyncio.run(directory_watcher.start_inotify_watch(), debug=None)
+    directory_watcher, use_polling_watcher = setup_directory_watcher()
+    if use_polling_watcher:
+        asyncio.run(directory_watcher.start_polling_watch(), debug=None)
+    else:
+        asyncio.run(directory_watcher.start_inotify_watch(), debug=None)
 
 
 if __name__ == "__main__":

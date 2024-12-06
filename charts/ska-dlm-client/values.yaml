@@ -24,5 +24,6 @@ directory_watcher:
   replicas: 1
   directory_to_watch: /data
   register_dir_prefix: dlm
+  use_polling_watcher: false
   storage_name: data
   ingest_service_port: 80
