@@ -75,7 +75,7 @@ class TestDirectoryWatcher(unittest.IsolatedAsyncioTestCase):
         registration_processor = MockRegistrationProcessor(self.config)
         directory_watcher = DirectoryWatcher(self.config, registration_processor)
         a_temp_file = tempfile.mktemp(dir=self.the_watch_dir)
-        await directory_watcher.start_polling_watch()
+        asyncio.get_event_loop().create_task(directory_watcher.start_polling_watch())
         # Now let the directory_watcher start and listen on given directory
         await asyncio.sleep(2)
         # Add a file to the watcher directory

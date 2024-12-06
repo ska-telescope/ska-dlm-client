@@ -1,5 +1,6 @@
 """Class to perform directory watching tasks."""
 
+import asyncio
 import logging
 import os
 
@@ -157,12 +158,12 @@ class DirectoryWatcher:
             recursive=False,
         )
         observer.start()
-        # try:
-        #    while True:
-        #        time.sleep(1)
-        # except KeyboardInterrupt:
-        #    observer.stop()
-        # observer.join()
+        try:
+           while True:
+               await asyncio.sleep(1)
+        except KeyboardInterrupt:
+           observer.stop()
+        observer.join()
 
     def _handle_directory_entry_change(self, entry: tuple[Change, str]):
         """Take action for the directory entry Change type given.
