@@ -54,9 +54,14 @@ def create_parser() -> argparse.ArgumentParser:
         help="When defined using the polling watcher rather than iNotify event driven watcher.",
     )
     parser.add_argument(
+        "--use-status-file",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Use the status file, default is NOT to use, this may change in a future release.",
+    )
+    parser.add_argument(
         "--reload-status-file",
-        type=bool,
-        required=False,
+        action=argparse.BooleanOptionalAction,
         default=False,
         help="Reload the status file that already exists in the watch directory.",
     )
@@ -66,13 +71,6 @@ def create_parser() -> argparse.ArgumentParser:
         required=False,
         default=ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME,
         help="",
-    )
-    parser.add_argument(
-        "--use-status-file",
-        type=bool,
-        required=False,
-        default=False,
-        help="Use the status file, default is NOT to use, this may change in a future release.",
     )
     return parser
 

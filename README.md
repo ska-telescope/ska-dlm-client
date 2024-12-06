@@ -19,20 +19,26 @@ As parameters the directory_watcher requires
 - A directory to watch
 - The storage name to use for registering the files
 - The URL to the DLM server
-- The execution block id to use for registering the files
+
+Optional parameters include
+- Prefix to add to uri of data items being registered
+- Use a polling watcher instead of the iNotify event based watcher
+- Whether to use the status file
+- Reload the status file
+- An alternative name for the status file
 
 ```sh
-$ directory_watcher
-usage: directory_watcher [-h] -d DIRECTORY_TO_WATCH -i INGEST_SERVER_URL -n STORAGE_NAME
-                         [--reload-status-file RELOAD_STATUS_FILE]
-                         [--status-file-filename STATUS_FILE_FILENAME]
-                         [--use-status-file USE_STATUS_FILE]
+$ dlm_directory_watcher
+usage: dlm_directory_watcher [-h] -d DIRECTORY_TO_WATCH -i INGEST_SERVER_URL
+                             -n STORAGE_NAME [-p REGISTER_DIR_PREFIX]
+                             [--use-polling-watcher | --no-use-polling-watcher]
+                             [--use-status-file | --no-use-status-file]
+                             [--reload-status-file | --no-reload-status-file]
+                             [--status-file-filename STATUS_FILE_FILENAME]
+dlm_directory_watcher: error: the following arguments are required: -d/--directory-to-watch, -i/--ingest-server-url, -n/--storage-name
 ```
 
 The additional parameters can be given for greater configuration.
-
-NOTE: --test_init and --test_init_storage_url are ONLY used to configure a predefined
-location and storage config plus create the given storage name.
 
 ### Metadata Handling
 
