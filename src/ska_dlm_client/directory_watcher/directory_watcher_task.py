@@ -144,14 +144,12 @@ class DirectoryWatcher:
 
     async def start_polling_watch(self):
         """Take action for the directory entry Change type given."""
-        # from watchdog.observers.polling import PollingObserver
-        # logger.info("with config parameters %s", self._config)
-        # logger.info("starting to watchdog %s", self._config.directory_to_watch)
+        logger.info("with config parameters %s", self._config)
+        logger.info("starting to watchdog %s", self._config.directory_to_watch)
         logger.info(
             "NOTE: MyPollingObserver has recursive=False, in case this matters in the futuer."
         )
         observer = MyPollingObserver()
-        # observer.schedule(event_handler, self._config.directory_to_watch, recursive=False)
         observer.schedule(
             event_handler=self._event_handler,
             path=self._config.directory_to_watch,
@@ -159,10 +157,10 @@ class DirectoryWatcher:
         )
         observer.start()
         try:
-           while True:
-               await asyncio.sleep(1)
+            while True:
+                await asyncio.sleep(1)
         except KeyboardInterrupt:
-           observer.stop()
+            observer.stop()
         observer.join()
 
     def _handle_directory_entry_change(self, entry: tuple[Change, str]):
