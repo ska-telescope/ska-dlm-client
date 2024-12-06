@@ -40,6 +40,14 @@ def create_parser() -> argparse.ArgumentParser:
         help="The name by which the DLM system know the storage as.",
     )
     parser.add_argument(
+        "-p",
+        "--register-dir-prefix",
+        type=str,
+        required=False,
+        default="",
+        help="The prefix to add to any data item being registered.",
+    )
+    parser.add_argument(
         "--reload-status-file",
         type=bool,
         required=False,
@@ -69,6 +77,7 @@ def process_args(args: argparse.Namespace) -> Config:
         directory_to_watch=args.directory_to_watch,
         ingest_server_url=args.ingest_server_url,
         storage_name=args.storage_name,
+        register_dir_prefix=args.register_dir_prefix,
         reload_status_file=args.reload_status_file,
         status_file_full_filename=f"{args.directory_to_watch}/{args.status_file_filename}",
         use_status_file=args.use_status_file,

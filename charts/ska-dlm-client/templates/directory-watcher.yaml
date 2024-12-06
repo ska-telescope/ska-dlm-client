@@ -26,6 +26,8 @@ spec:
         - {{ .Values.directory_watcher.directory_to_watch }}
         - "--storage-name"
         - {{ .Values.directory_watcher.storage_name }}
+        - "--register-dir-prefix"
+        - {{ .Values.directory_watcher.register_dir_prefix }}
         - "--ingest-server-url"
         - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.directory_watcher.ingest_service_port }}"
         volumeMounts:

@@ -29,6 +29,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         directory_to_watch: str,
         ingest_server_url: str,
         storage_name: str,
+        register_dir_prefix: str,
         reload_status_file: bool = False,
         status_file_full_filename: str = STATUS_FILE_FILENAME,
         use_status_file: bool = False,
@@ -37,6 +38,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         self.directory_to_watch = directory_to_watch
         self.ingest_server_url = f"{ingest_server_url}"
         self.storage_name = storage_name
+        self.register_dir_prefix = register_dir_prefix
         self.reload_status_file = reload_status_file
         self.status_file_full_filename = status_file_full_filename
         self.use_status_file = use_status_file
