@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-import ska_dlm_client.directory_watcher.config
+from ska_dlm_client.directory_watcher.config import STATUS_FILE_FILENAME
 from ska_dlm_client.directory_watcher.directory_watcher import create_parser, process_args
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntries
 from ska_dlm_client.directory_watcher.directory_watcher_task import DirectoryWatcher
@@ -23,57 +23,53 @@ class TestDirectoryWatcher:
     add_path_successful = False
 
     @classmethod
-    def setup_class(self) -> None:
+    def setup_class(cls) -> None:
         """Set for the testing process."""
-        self.the_watch_dir = tempfile.mkdtemp()
-        self.parser = create_parser()
-        self.parsed = self.parser.parse_args(
+        cls.the_watch_dir = tempfile.mkdtemp()
+        cls.parser = create_parser()
+        cls.parsed = cls.parser.parse_args(
             [
                 "--directory-to-watch",
-                self.the_watch_dir,
+                cls.the_watch_dir,
                 "--ingest-server-url",
-                self.INGREST_SERVER_URL,
+                cls.INGREST_SERVER_URL,
                 "--storage-name",
-                self.STORAGE_NAME,
+                cls.STORAGE_NAME,
             ]
         )
-        self.config = process_args(args=self.parsed)
+        cls.config = process_args(args=cls.parsed)
 
     @classmethod
-    def teardown_class(self) -> None:
+    def teardown_class(cls) -> None:
         """Tear down any setup."""
-        Path(self.the_watch_dir).rmdir()
+        Path(cls.the_watch_dir).rmdir()
 
     def test_process_args(self) -> None:
         """Test case for init_data_item_ingest_init_data_item_post."""
         assert self.parsed.directory_to_watch == self.the_watch_dir
         assert self.parsed.ingest_server_url == self.INGREST_SERVER_URL
         assert self.parsed.storage_name == self.STORAGE_NAME
-        assert self.parsed.reload_status_file == False
-        assert (
-            self.parsed.status_file_filename
-            == ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME
-        )
-        assert self.parsed.use_status_file == False
+        assert self.parsed.reload_status_file is False
+        assert self.parsed.status_file_filename == STATUS_FILE_FILENAME
+        assert self.parsed.use_status_file is False
 
     def test_config_generation(self) -> None:
         """Test the correct config is generated from the command line args."""
         assert self.config.directory_to_watch == self.the_watch_dir
         assert self.config.ingest_server_url == self.INGREST_SERVER_URL
         assert self.config.storage_name == self.STORAGE_NAME
-        assert self.config.reload_status_file == False
+        assert self.config.reload_status_file is False
         assert (
-            self.config.status_file_full_filename
-            == f"{self.the_watch_dir}/{ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME}"
+            self.config.status_file_full_filename == f"{self.the_watch_dir}/{STATUS_FILE_FILENAME}"
         )
-        assert self.config.use_status_file == False
+        assert self.config.use_status_file is False
         assert isinstance(self.config.directory_watcher_entries, DirectoryWatcherEntries)
         assert isinstance(self.config.ingest_configuration, Configuration)
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("test_polling", [True, False])
     async def test_process_directory_entry_change_test(self, test_polling) -> None:
-        """Test code for test case for process_directory_entry_change both polling and non polling."""
+        """Test code for process_directory_entry_change both polling and non polling."""
         registration_processor = MockRegistrationProcessor(self.config)
         directory_watcher = DirectoryWatcher(self.config, registration_processor)
         a_temp_file = tempfile.mktemp(dir=self.the_watch_dir)
