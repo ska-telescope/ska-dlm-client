@@ -2,8 +2,9 @@
 
 import asyncio
 import tempfile
-import unittest
 from pathlib import Path
+
+import pytest
 
 import ska_dlm_client.directory_watcher.config
 from ska_dlm_client.directory_watcher.directory_watcher import create_parser, process_args
@@ -13,7 +14,7 @@ from ska_dlm_client.directory_watcher.registration_processor import Registration
 from ska_dlm_client.openapi.configuration import Configuration
 
 
-class TestDirectoryWatcher(unittest.IsolatedAsyncioTestCase):
+class TestDirectoryWatcher:
     """DirectoryWatcher unit test stubs."""
 
     STORAGE_NAME = "data"
@@ -21,7 +22,8 @@ class TestDirectoryWatcher(unittest.IsolatedAsyncioTestCase):
 
     add_path_successful = False
 
-    def setUp(self) -> None:
+    @classmethod
+    def setup_class(self) -> None:
         """Set for the testing process."""
         self.the_watch_dir = tempfile.mkdtemp()
         self.parser = create_parser()
@@ -37,38 +39,41 @@ class TestDirectoryWatcher(unittest.IsolatedAsyncioTestCase):
         )
         self.config = process_args(args=self.parsed)
 
-    def tearDown(self) -> None:
+    @classmethod
+    def teardown_class(self) -> None:
         """Tear down any setup."""
         Path(self.the_watch_dir).rmdir()
 
     def test_process_args(self) -> None:
         """Test case for init_data_item_ingest_init_data_item_post."""
-        self.assertEqual(self.parsed.directory_to_watch, self.the_watch_dir)
-        self.assertEqual(self.parsed.ingest_server_url, self.INGREST_SERVER_URL)
-        self.assertEqual(self.parsed.storage_name, self.STORAGE_NAME)
-        self.assertEqual(self.parsed.reload_status_file, False)
-        self.assertEqual(
-            self.parsed.status_file_filename,
-            ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME,
+        assert self.parsed.directory_to_watch == self.the_watch_dir
+        assert self.parsed.ingest_server_url == self.INGREST_SERVER_URL
+        assert self.parsed.storage_name == self.STORAGE_NAME
+        assert self.parsed.reload_status_file == False
+        assert (
+            self.parsed.status_file_filename
+            == ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME
         )
-        self.assertEqual(self.parsed.use_status_file, False)
+        assert self.parsed.use_status_file == False
 
     def test_config_generation(self) -> None:
         """Test the correct config is generated from the command line args."""
-        self.assertEqual(self.config.directory_to_watch, self.the_watch_dir)
-        self.assertEqual(self.config.ingest_server_url, self.INGREST_SERVER_URL)
-        self.assertEqual(self.config.storage_name, self.STORAGE_NAME)
-        self.assertEqual(self.config.reload_status_file, False)
-        self.assertEqual(
-            self.config.status_file_full_filename,
-            f"{self.the_watch_dir}/{ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME}",
+        assert self.config.directory_to_watch == self.the_watch_dir
+        assert self.config.ingest_server_url == self.INGREST_SERVER_URL
+        assert self.config.storage_name == self.STORAGE_NAME
+        assert self.config.reload_status_file == False
+        assert (
+            self.config.status_file_full_filename
+            == f"{self.the_watch_dir}/{ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME}"
         )
-        self.assertEqual(self.config.use_status_file, False)
-        self.assertIsInstance(self.config.directory_watcher_entries, DirectoryWatcherEntries)
-        self.assertIsInstance(self.config.ingest_configuration, Configuration)
+        assert self.config.use_status_file == False
+        assert isinstance(self.config.directory_watcher_entries, DirectoryWatcherEntries)
+        assert isinstance(self.config.ingest_configuration, Configuration)
 
-    async def process_directory_entry_change_test(self, test_polling: bool = False) -> None:
-        """Run common test code for test case for process_directory_entry_change."""
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("test_polling", [True, False])
+    async def test_process_directory_entry_change_test(self, test_polling) -> None:
+        """Test code for test case for process_directory_entry_change both polling and non polling."""
         registration_processor = MockRegistrationProcessor(self.config)
         directory_watcher = DirectoryWatcher(self.config, registration_processor)
         a_temp_file = tempfile.mktemp(dir=self.the_watch_dir)
@@ -87,17 +92,9 @@ class TestDirectoryWatcher(unittest.IsolatedAsyncioTestCase):
         # On MacOS the system messes with the path by adding a /private
         full_path = registration_processor.full_path.replace("/private", "")
         relative_path = registration_processor.relative_path.replace("/private", "")
-        self.assertEqual(a_temp_file, full_path)
-        self.assertEqual(a_temp_file_relative_path, relative_path)
+        assert a_temp_file == full_path
+        assert a_temp_file_relative_path == relative_path
         Path(a_temp_file).unlink()
-
-    async def test_process_directory_polling_entry_change(self) -> None:
-        """Test case for process_directory_entry_change."""
-        await self.process_directory_entry_change_test(test_polling=True)
-
-    async def test_process_directory_entry_change(self) -> None:
-        """Test case for process_directory_entry_change."""
-        await self.process_directory_entry_change_test(test_polling=False)
 
 
 class MockRegistrationProcessor(RegistrationProcessor):
@@ -110,7 +107,3 @@ class MockRegistrationProcessor(RegistrationProcessor):
         """Perform testing on the given paths."""
         self.full_path = full_path
         self.relative_path = relative_path
-
-
-if __name__ == "__main__":
-    unittest.main()

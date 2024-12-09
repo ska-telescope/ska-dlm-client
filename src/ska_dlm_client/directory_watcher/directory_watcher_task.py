@@ -164,6 +164,7 @@ class DirectoryWatcher:
             observer.stop()
             observer.join()
             raise
+        # TODO: Capture async cancel
 
     def _handle_directory_entry_change(self, entry: tuple[Change, str]):
         """Take action for the directory entry Change type given.
