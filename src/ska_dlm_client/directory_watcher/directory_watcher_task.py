@@ -142,7 +142,7 @@ class DirectoryWatcher:
             config=config, watcher_registration_processor=watcher_registration_processor
         )
 
-    async def start_polling_watch(self):
+    async def polling_watch(self):
         """Take action for the directory entry Change type given."""
         logger.info("with config parameters %s", self._config)
         logger.info("starting to watchdog %s", self._config.directory_to_watch)
@@ -158,10 +158,12 @@ class DirectoryWatcher:
         observer.start()
         try:
             while True:
+                # What is really needed here is "asyncio suspend" as not expected to ever return
                 await asyncio.sleep(1)
-        except KeyboardInterrupt:
+        except (asyncio.CancelledError, KeyboardInterrupt):
             observer.stop()
-        observer.join()
+            observer.join()
+            raise
 
     def _handle_directory_entry_change(self, entry: tuple[Change, str]):
         """Take action for the directory entry Change type given.
@@ -179,7 +181,7 @@ class DirectoryWatcher:
             self._event_handler.on_created(event)
         # TODO: Change.deleted Change.modified mayh need support
 
-    async def start_inotify_watch(self):
+    async def inotify_watch(self):
         """Start watching the given directory."""
         logger.info("with config parameters %s", self._config)
         logger.info("starting to watch %s", self._config.directory_to_watch)

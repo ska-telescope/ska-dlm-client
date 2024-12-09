@@ -56,7 +56,7 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--use-status-file",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=False,
         help="Use the status file, default is NOT to use, this may change in a future release.",
     )
     parser.add_argument(
@@ -102,9 +102,9 @@ def main():
     """Start the directory watcher application."""
     directory_watcher, use_polling_watcher = setup_directory_watcher()
     if use_polling_watcher:
-        asyncio.run(directory_watcher.start_polling_watch(), debug=None)
+        asyncio.run(directory_watcher.polling_watch(), debug=None)
     else:
-        asyncio.run(directory_watcher.start_inotify_watch(), debug=None)
+        asyncio.run(directory_watcher.inotify_watch(), debug=None)
 
 
 if __name__ == "__main__":
