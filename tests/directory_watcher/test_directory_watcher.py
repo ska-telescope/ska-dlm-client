@@ -7,9 +7,12 @@ from pathlib import Path
 import pytest
 
 from ska_dlm_client.directory_watcher.config import STATUS_FILE_FILENAME
-from ska_dlm_client.directory_watcher.directory_watcher import create_parser, process_args
+from ska_dlm_client.directory_watcher.directory_watcher import (
+    INotifyDirectoryWatcher,
+    PollingDirectoryWatcher,
+)
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntries
-from ska_dlm_client.directory_watcher.directory_watcher_task import DirectoryWatcher
+from ska_dlm_client.directory_watcher.main import create_parser, process_args
 from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
 from ska_dlm_client.openapi.configuration import Configuration
 
@@ -71,12 +74,12 @@ class TestDirectoryWatcher:
     async def test_process_directory_entry_change_test(self, test_polling) -> None:
         """Test code for process_directory_entry_change both polling and non polling."""
         registration_processor = MockRegistrationProcessor(self.config)
-        directory_watcher = DirectoryWatcher(self.config, registration_processor)
         a_temp_file = tempfile.mktemp(dir=self.the_watch_dir)
         if test_polling:
-            asyncio.get_event_loop().create_task(directory_watcher.polling_watch())
+            directory_watcher = PollingDirectoryWatcher(self.config, registration_processor)
         else:
-            asyncio.create_task(directory_watcher.inotify_watch())
+            directory_watcher = INotifyDirectoryWatcher(self.config, registration_processor)
+        asyncio.get_event_loop().create_task(directory_watcher.watch())
         # Now let the directory_watcher start and listen on given directory
         await asyncio.sleep(2)
         # Add a file to the watcher directory

@@ -1,111 +1,117 @@
-"""Application to watch a directory for changes and send to DLM."""
+"""Class to perform directory watching tasks."""
 
-import argparse
 import asyncio
 import logging
+import os
+from abc import ABC, abstractmethod
 
-import ska_dlm_client.directory_watcher.config
+from watchdog.events import DirCreatedEvent, FileCreatedEvent, FileSystemEvent
+from watchdog.observers.api import EventQueue, ObservedWatch
+from watchdog.observers.polling import DEFAULT_EMITTER_TIMEOUT, BaseObserver, PollingEmitter
+from watchfiles import Change, awatch
+
 from ska_dlm_client.directory_watcher.config import Config
-from ska_dlm_client.directory_watcher.directory_watcher_task import DirectoryWatcher
 from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
+from ska_dlm_client.directory_watcher.watcher_event_handler import WatcherEventHandler
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def create_parser() -> argparse.ArgumentParser:
-    """Define a parser for all the command line parameters."""
-    parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
+class LStatPollingEmitter(PollingEmitter):
+    """Emitter that polls a directory to detect filesystem changes using `os.lstat`.
 
-    # Adding optional argument.
-    parser.add_argument(
-        "-d",
-        "--directory-to-watch",
-        type=str,
-        required=True,
-        help="Full path to directory to watch.",
-    )
-    parser.add_argument(
-        "-i",
-        "--ingest-server-url",
-        type=str,
-        required=True,
-        help="Ingest server URL including the service port.",
-    )
-    parser.add_argument(
-        "-n",
-        "--storage-name",
-        type=str,
-        required=True,
-        help="The name by which the DLM system know the storage as.",
-    )
-    parser.add_argument(
-        "-p",
-        "--register-dir-prefix",
-        type=str,
-        required=False,
-        default="",
-        help="The prefix to add to any data item being registered.",
-    )
-    parser.add_argument(
-        "--use-polling-watcher",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="When defined using the polling watcher rather than iNotify event driven watcher.",
-    )
-    parser.add_argument(
-        "--use-status-file",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Use the status file, default is NOT to use, this may change in a future release.",
-    )
-    parser.add_argument(
-        "--reload-status-file",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Reload the status file that already exists in the watch directory.",
-    )
-    parser.add_argument(
-        "--status-file-filename",
-        type=str,
-        required=False,
-        default=ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME,
-        help="",
-    )
-    return parser
+    NOTE: As of December 2024 a fix for this seems to be in the works but not yet available.
+    """
+
+    def __init__(
+        self,
+        event_queue: EventQueue,
+        watch: ObservedWatch,
+        timeout: float = DEFAULT_EMITTER_TIMEOUT,
+        event_filter: list[type[FileSystemEvent]] | None = None,
+    ) -> None:
+        """Take in the same parameters as `PollingEmitter` but change stat to os.lstat."""
+        super().__init__(
+            event_queue=event_queue,
+            watch=watch,
+            timeout=timeout,
+            event_filter=event_filter,
+            stat=os.lstat,
+        )
 
 
-def process_args(args: argparse.Namespace) -> Config:
-    """Collect up all command line parameters and return a Config."""
-    config = Config(
-        directory_to_watch=args.directory_to_watch,
-        ingest_server_url=args.ingest_server_url,
-        storage_name=args.storage_name,
-        register_dir_prefix=args.register_dir_prefix,
-        reload_status_file=args.reload_status_file,
-        status_file_full_filename=f"{args.directory_to_watch}/{args.status_file_filename}",
-        use_status_file=args.use_status_file,
-    )
-    return config
+class DirectoryWatcher(ABC):  # pylint: disable=too-few-public-methods
+    """Class for the running of the directory_watcher."""
+
+    def __init__(self, config: Config, registration_processor: RegistrationProcessor):
+        """Initialise with the given Config."""
+        self._config = config
+        self._event_handler = WatcherEventHandler(
+            config=config, registration_processor=registration_processor
+        )
+
+    @abstractmethod
+    async def watch(self) -> None:
+        """Abstract method to watch, wait and take action on directory entry changes."""
+        raise NotImplementedError("Method must be implemnted.")
 
 
-def setup_directory_watcher() -> [DirectoryWatcher, bool]:
-    """Perform setup tasks required to run the directory watcher."""
-    parser = create_parser()
-    args = parser.parse_args()
-    config = process_args(args=args)
-    registration_processor = RegistrationProcessor(config)
-    return DirectoryWatcher(config, registration_processor), args.use_polling_watcher
+class PollingDirectoryWatcher(DirectoryWatcher):  # pylint: disable=too-few-public-methods
+    """DirectoryWatcher using filesystem polling."""
+
+    async def watch(self):
+        """Watch for changes in the defined directory and process each change found."""
+        logger.info("with config parameters %s", self._config)
+        logger.info("starting to watchdog %s", self._config.directory_to_watch)
+        logger.info(
+            "NOTE: MyPollingObserver has recursive=False, in case this matters in the future."
+        )
+        observer = BaseObserver(LStatPollingEmitter)
+        observer.schedule(
+            event_handler=self._event_handler,
+            path=self._config.directory_to_watch,
+            recursive=False,
+        )
+        observer.start()
+        try:
+            while True:
+                # What is really needed here is "asyncio suspend" as not expected to ever return
+                await asyncio.sleep(1)
+        except (asyncio.CancelledError, KeyboardInterrupt):
+            observer.stop()
+            observer.join()
+            raise
 
 
-def main():
-    """Start the directory watcher application."""
-    directory_watcher, use_polling_watcher = setup_directory_watcher()
-    if use_polling_watcher:
-        asyncio.run(directory_watcher.polling_watch(), debug=None)
-    else:
-        asyncio.run(directory_watcher.inotify_watch(), debug=None)
+class INotifyDirectoryWatcher(DirectoryWatcher):  # pylint: disable=too-few-public-methods
+    """Directory watcher using INotify filesytem events."""
 
+    def _process_directory_entry_change(self, entry: tuple[Change, str]):
+        """Take action for the directory entry Change type given.
 
-if __name__ == "__main__":
-    main()
+        This will pass off the change to a `WatcherEventHandler`.
+        """
+        logger.info("in do _handle_directory_entry_change %s", entry)
+        change_type = entry[0]
+        change_path = entry[1]
+        if change_type is Change.added:
+            if os.path.isdir(change_path):
+                event = DirCreatedEvent(src_path=change_path)
+            else:
+                event = FileCreatedEvent(src_path=change_path)
+            self._event_handler.on_created(event)
+        logger.info("Ignoring %s ", change_type)
+
+    async def watch(self):
+        """Watch for changes in the defined directory and process each change found."""
+        logger.info("with config parameters %s", self._config)
+        logger.info("starting to watch %s", self._config.directory_to_watch)
+        logger.info(
+            "NOTE: watchfiles.awatch has recursive=False, in case this matters in the futuer."
+        )
+        async for changes in awatch(
+            self._config.directory_to_watch, recursive=False
+        ):  # type: Set[tuple[Change, str]]
+            for change in changes:
+                logger.info("in main %s", change)
+                self._process_directory_entry_change(change)

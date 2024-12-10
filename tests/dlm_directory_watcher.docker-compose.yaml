@@ -11,7 +11,7 @@ services:
        dockerfile: tests/Dockerfile-dlm_directory_watcher
     # NOTE: the IP address is fixed here but need to work out how to connect in
     # the general case via a service name or similar.
-    entrypoint: python3 -m ska_dlm_client.directory_watcher.directory_watcher -d /data -n data -s "http://localhost"
+    entrypoint: python3 -m ska_dlm_client.directory_watcher.main -d /data -n data -s "http://localhost"
     # entrypoint: python3
     volumes:
       - shared-tmpfs:/data

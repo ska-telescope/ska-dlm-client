@@ -31,10 +31,10 @@ class RegistrationProcessor:
         self._config = config
 
     def _follow_sym_link(self, path: Path) -> Path:
-        """Return the real path after following the sysmlink."""
+        """Return the real path after following the symlink."""
         if path.is_symlink():
-            path.is_dir()
-            path.is_file()
+            path.resolve()
+        return path
 
     def _register_entry(self, relative_path: str, metadata: dict):
         """Register the given entry_path."""
