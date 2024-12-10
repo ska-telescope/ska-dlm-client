@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import logging
+import signal
 
 import ska_dlm_client.directory_watcher.config
 from ska_dlm_client.directory_watcher.config import Config
@@ -105,10 +106,39 @@ def create_directory_watcher() -> DirectoryWatcher:
         return INotifyDirectoryWatcher(config, registration_processor)
 
 
-def main():
-    """Create and run the directory watcher application."""
+def _setup_async_graceful_termination(
+    signals=(signal.SIGINT, signal.SIGTERM),
+):
+    """
+    Gracefully handles shutdown signals by cancelling all pending tasks.
+
+    Can only be called from an async function.
+    """
+
+    async def _shutdown(sig: signal.Signals):
+        """Canel the required tasks."""
+        logger.info("handling %s", sig)
+        for task in [task for task in asyncio.all_tasks() if task is not asyncio.current_task()]:
+            task.cancel()
+
+    loop = asyncio.get_running_loop()
+    for signame in signals:
+        loop.add_signal_handler(
+            signame,
+            lambda signame=signame: asyncio.create_task(_shutdown(signame)),
+        )
+
+
+async def amain():
+    """Run main in asyncio."""
+    _setup_async_graceful_termination()
     directory_watcher = create_directory_watcher()
     asyncio.run(directory_watcher.watch(), debug=None)
+
+
+def main():
+    """Run amain function in a new loop."""
+    asyncio.run(amain())
 
 
 if __name__ == "__main__":
