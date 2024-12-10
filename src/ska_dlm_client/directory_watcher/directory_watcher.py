@@ -53,7 +53,6 @@ class DirectoryWatcher(ABC):  # pylint: disable=too-few-public-methods
     @abstractmethod
     async def watch(self) -> None:
         """Abstract method to watch, wait and take action on directory entry changes."""
-        raise NotImplementedError("Method must be implemnted.")
 
 
 class PollingDirectoryWatcher(DirectoryWatcher):  # pylint: disable=too-few-public-methods
@@ -77,7 +76,7 @@ class PollingDirectoryWatcher(DirectoryWatcher):  # pylint: disable=too-few-publ
             while True:
                 # What is really needed here is "asyncio suspend" as not expected to ever return
                 await asyncio.sleep(1)
-        except (asyncio.CancelledError, KeyboardInterrupt):
+        except asyncio.CancelledError:
             observer.stop()
             observer.join()
             raise

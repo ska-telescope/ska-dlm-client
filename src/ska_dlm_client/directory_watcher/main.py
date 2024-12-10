@@ -99,10 +99,10 @@ def create_directory_watcher() -> DirectoryWatcher:
     args = parser.parse_args()
     config = process_args(args=args)
     registration_processor = RegistrationProcessor(config)
-    if args.use_polling_watcher:
+    if args.use_polling_watcher:  # pylint: disable=no-else-return"
         return PollingDirectoryWatcher(config, registration_processor)
-    # else
-    return INotifyDirectoryWatcher(config, registration_processor)
+    else:
+        return INotifyDirectoryWatcher(config, registration_processor)
 
 
 def main():
