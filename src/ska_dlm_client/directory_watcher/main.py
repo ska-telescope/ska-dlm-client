@@ -125,7 +125,7 @@ def _setup_async_graceful_termination(
     for signame in signals:
         loop.add_signal_handler(
             signame,
-            lambda signame=signame: asyncio.create_task(_shutdown(signame)),
+            lambda the_signame=signame: asyncio.create_task(_shutdown(sig=the_signame)),
         )
 
 
