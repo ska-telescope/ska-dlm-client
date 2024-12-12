@@ -31,19 +31,24 @@ class RegistrationProcessor:
         self._config = config
 
     def _follow_sym_link(self, path: Path) -> Path:
-        """Return the real path after following the sysmlink."""
+        """Return the real path after following the symlink."""
         if path.is_symlink():
-            path.is_dir()
-            path.is_file()
+            path.resolve()
+        return path
 
     def _register_entry(self, relative_path: str, metadata: dict):
         """Register the given entry_path."""
         with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
             try:
+                uri = (
+                    relative_path
+                    if self._config.register_dir_prefix == ""
+                    else f"{self._config.register_dir_prefix}/{relative_path}"
+                )
                 response = api_ingest.register_data_item_ingest_register_data_item_post(
                     item_name=relative_path,
-                    uri=relative_path,
+                    uri=uri,
                     storage_name=self._config.storage_name,
                     body=metadata,
                 )
