@@ -133,7 +133,7 @@ async def amain():
     """Run main in asyncio."""
     _setup_async_graceful_termination()
     directory_watcher = create_directory_watcher()
-    asyncio.run(directory_watcher.watch(), debug=None)
+    await asyncio.run(directory_watcher.watch(), debug=None)
 
 
 def main():
