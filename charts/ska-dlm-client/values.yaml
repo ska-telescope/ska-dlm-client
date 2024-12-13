@@ -27,3 +27,15 @@ directory_watcher:
   use_polling_watcher: false
   storage_name: data
   ingest_service_port: 80
+
+kafka_watcher:
+  component: kafka-watcher
+  subsystem: data-lifecycle-management
+  image: harbor.skao.int/production/ska-dlm-client
+  version: "0.1.0"
+  imagePullPolicy: Always
+  replicas: 1
+  kafka_broker_url: "kafka:9092"
+  kafka_topic: "ska-sdp-dataproduct-ingest"
+  storage_name: data
+  consume_service_port: 81

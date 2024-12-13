@@ -11,5 +11,11 @@ directory_watcher:
   register_dir_prefix: "dlm"
   use_polling_watcher: true
 
+kafka_watcher:
+  image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
+  version: "0.1.0-dev.cf844843b"
+  kafka_broker_url: "kafka:9092"
+  kafka_topic: "ska-sdp-dataproduct-ingest"
+
 ska_dlm:
   fullname: "ska-dlm-dev"
