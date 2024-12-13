@@ -1,8 +1,8 @@
 """Register the given file or directory with the DLM."""
 
 import logging
+import os
 import time
-from os import listdir
 from os.path import isdir, isfile, islink
 from pathlib import Path
 
@@ -58,7 +58,7 @@ class RegistrationProcessor:
                 return
 
         # TODO: decode JSON response
-        dlm_registration_id = response
+        dlm_registration_id = str(response)
         time_registered = time.time()
 
         directory_watcher_entry = DirectoryWatcherEntry(
@@ -70,6 +70,27 @@ class RegistrationProcessor:
         self._config.directory_watcher_entries.add(directory_watcher_entry)
         self._config.directory_watcher_entries.save_to_file()
         logger.info("entry %s added.", relative_path)
+
+    def directory_contains_only_files(self, full_path: str) -> bool:
+        """Return True if the given directory contains only files."""
+        for entry in os.listdir(full_path):
+            if os.path.isdir(full_path + entry):
+                return False
+        return True
+
+    def data_item_directories(self, full_path: str):  # , relative_path: str):
+        """Process the directory entry looking for a data items."""
+        # current_dir = ""
+        # list_of_data_items = []
+        for root, dirs, files in os.walk(full_path, followlinks=False):
+            if dirs == [] and files == []:
+                logger.info("root: %s", root)
+            elif dirs == []:  # so only contains files
+                pass
+            elif files == []:  # so only contains directories
+                pass
+            else:  # contains file and directories
+                pass
 
     def add_path(self, full_path: str, relative_path: str):
         """Add the given relative_path to the DLM.
@@ -95,7 +116,7 @@ class RegistrationProcessor:
                 self._register_entry(relative_path=relative_path, metadata=metadata)
             else:
                 # otherwise add each file or directory
-                dir_entries = listdir(full_path)
+                dir_entries = os.listdir(full_path)
                 for dir_entry in dir_entries:
                     new_full_path = f"{full_path}/{dir_entry}"
                     new_relative_path = f"{relative_path}/{dir_entry}"
