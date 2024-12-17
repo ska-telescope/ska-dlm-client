@@ -8,7 +8,7 @@ import logging
 import aiokafka
 import requests
 
-from .. import CONFIG
+from ska_dlm_client import CONFIG
 
 logging.basicConfig(level=logging.INFO)
 
