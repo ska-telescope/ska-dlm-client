@@ -55,7 +55,7 @@ async def post_dlm_data_item(data):
     """HTTP POST call to DLM."""
     # TODO: Use requests library to simulate an HTTP call (YAN-1937)
     response = requests.post(CONFIG.DLM.url, json=data, timeout=5)
-    logger.info("Mock HTTP call completed with status code: %d", response.status_code)
+    logger.info("HTTP call completed with status code: %d", response.status_code)
     logger.info("Response content: %s", response.json())
 
 
