@@ -10,7 +10,7 @@ import requests
 import requests_mock as rm
 
 from src.ska_dlm_client import CONFIG
-from src.ska_dlm_client.kafka_watcher import main, watch
+from src.ska_dlm_client.kafka_watcher.main import main, watch
 
 KAFKA_HOST = "localhost:9092"
 TEST_TOPIC = "test-events"
@@ -28,15 +28,15 @@ def test_main(mocker: pytest_mock.MockerFixture):
     # Mock the argparse.ArgumentParser to return simulated arguments
     mock_args = mock.Mock(kafka_server=[KAFKA_HOST], kafka_topic=[TEST_TOPIC])
     mocker.patch(
-        "src.ska_dlm_client.kafka_watcher.argparse.ArgumentParser.parse_args",
+        "src.ska_dlm_client.kafka_watcher.main.argparse.ArgumentParser.parse_args",
         return_value=mock_args,
     )
 
     # Mock the `watch` function itself to verify it is called correctly
-    mock_watch = mocker.patch("src.ska_dlm_client.kafka_watcher.watch")
+    mock_watch = mocker.patch("src.ska_dlm_client.kafka_watcher.main.watch")
 
     # Mock asyncio.run to prevent actual execution
-    mock_asyncio_run = mocker.patch("src.ska_dlm_client.kafka_watcher.asyncio.run")
+    mock_asyncio_run = mocker.patch("src.ska_dlm_client.kafka_watcher.main.asyncio.run")
 
     # Call the main function
     main()
@@ -91,7 +91,7 @@ async def test_watch_http_failure(
 ):
     """Test watch function handles HTTP call failures gracefully."""
     # Run the test and capture the logs
-    with caplog.at_level("ERROR", logger="ska_dlm_client.kafka_watcher"):
+    with caplog.at_level("ERROR", logger="ska_dlm_client.kafka_watcher.main"):
         requests_mock.post(
             CONFIG.DLM.url, exc=requests.exceptions.RequestException("HTTP call failed")
         )
