@@ -79,9 +79,9 @@ async def post_dlm_data_item(ingest_server_url: str, storage_name: str, data):
         try:
             # TODO: Verify correct message/data/call format
             response = api_ingest.register_data_item_ingest_register_data_item_post(
-                item_name=data.item_path,
+                item_name=data,
                 storage_name=storage_name,
-                body=data.metadata,
+                body=data,
             )
             logger.info("item posted successfully with response %s", response)
         except OpenApiException as err:
