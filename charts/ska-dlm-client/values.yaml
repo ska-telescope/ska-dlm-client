@@ -41,4 +41,3 @@ kafka_watcher:
   kafka_broker_url: "kafka:9092"
   kafka_topic: "ska-sdp-dataproduct-ingest"
   storage_name: data
-  consume_service_port: 81

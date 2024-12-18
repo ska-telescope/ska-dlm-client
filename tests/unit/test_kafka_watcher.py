@@ -9,11 +9,12 @@ import pytest_mock
 import requests
 import requests_mock as rm
 
-from src.ska_dlm_client import CONFIG
 from src.ska_dlm_client.kafka_watcher.main import main, watch
 
 KAFKA_HOST = "localhost:9092"
 TEST_TOPIC = "test-events"
+INGEST_HOST = "http://dlm/api"
+STORAGE_NAME = "data"
 
 
 def test_main(mocker: pytest_mock.MockerFixture):
@@ -70,8 +71,13 @@ async def test_watch_post_success(requests_mock: rm.Mocker, mock_kafka_consumer:
     mock_kafka_consumer.start.side_effect = [False, True]
 
     # Mock HTTP call to simulate a 200 response
-    requests_mock.post(CONFIG.DLM.url, json={"success": True})
-    await watch(servers=[KAFKA_HOST], topics=[TEST_TOPIC])
+    requests_mock.post(INGEST_HOST, json={"success": True})
+    await watch(
+        servers=[KAFKA_HOST],
+        topics=[TEST_TOPIC],
+        ingest_server_url=INGEST_HOST,
+        storage_name=STORAGE_NAME,
+    )
 
     # Assert that the HTTP call was made once
     assert requests_mock.call_count == 1
@@ -93,9 +99,14 @@ async def test_watch_http_failure(
     # Run the test and capture the logs
     with caplog.at_level("ERROR", logger="ska_dlm_client.kafka_watcher.main"):
         requests_mock.post(
-            CONFIG.DLM.url, exc=requests.exceptions.RequestException("HTTP call failed")
+            INGEST_HOST, exc=requests.exceptions.RequestException("HTTP call failed")
         )
-        await watch(servers=[KAFKA_HOST], topics=[TEST_TOPIC])
+        await watch(
+            servers=[KAFKA_HOST],
+            topics=[TEST_TOPIC],
+            ingest_server_url=INGEST_HOST,
+            storage_name=STORAGE_NAME,
+        )
 
         # Check that the error log was captured
         assert len(caplog.records) > 0  # Ensure there's at least one log entry

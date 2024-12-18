@@ -6,9 +6,10 @@ import json
 import logging
 
 import aiokafka
-import requests
 
-from ska_dlm_client import CONFIG
+from ska_dlm_client.openapi import api_client, configuration
+from ska_dlm_client.openapi.dlm_api import ingest_api
+from ska_dlm_client.openapi.exceptions import OpenApiException
 
 logging.basicConfig(level=logging.INFO)
 
@@ -31,12 +32,6 @@ def main():
         help="The URL of the Kafka broker.",
     )
     parser.add_argument(
-        "--consume-service-port",
-        type=int,
-        required=True,
-        help="The service port.",
-    )
-    parser.add_argument(
         "--storage-name",
         type=str,
         required=True,
@@ -50,7 +45,14 @@ def main():
     )
 
     args = parser.parse_args()
-    asyncio.run(watch(args.kafka_broker_url, args.kafka_topic))
+    asyncio.run(
+        watch(
+            servers=args.kafka_broker_url,
+            topics=args.kafka_topic,
+            ingest_server_url=args.ingest_server_url,
+            storage_name=args.storage_name,
+        )
+    )
 
 
 async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int = 5):
@@ -69,15 +71,25 @@ async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int 
             await asyncio.sleep(1)
 
 
-async def post_dlm_data_item(data):
+async def post_dlm_data_item(ingest_server_url: str, storage_name: str, data):
     """HTTP POST call to DLM."""
-    # TODO: Use requests library to simulate an HTTP call (YAN-1937)
-    response = requests.post(CONFIG.DLM.url, json=data, timeout=5)
-    logger.info("HTTP call completed with status code: %d", response.status_code)
-    logger.info("Response content: %s", response.json())
+    ingest_configuration = configuration.Configuration(host=ingest_server_url)
+    with api_client.ApiClient(ingest_configuration) as ingest_api_client:
+        api_ingest = ingest_api.IngestApi(ingest_api_client)
+        try:
+            # TODO: Verify correct message/data/call format
+            response = api_ingest.register_data_item_ingest_register_data_item_post(
+                item_name=data.item_path,
+                storage_name=storage_name,
+                body=data.metadata,
+            )
+            logger.info("item posted successfully with response %s", response)
+        except OpenApiException as err:
+            logger.error("OpenApiException caught during register_data_item\n%s", err)
+            logger.error("Ignoring and continueing.....")
 
 
-async def watch(servers: list[str], topics: list[str]):
+async def watch(servers: list[str], topics: list[str], ingest_server_url: str, storage_name: str):
     """
     Asynchronously consumes data product, create events from data queues, and notifies DLM.
 
@@ -100,10 +112,9 @@ async def watch(servers: list[str], topics: list[str]):
                 logger.info("Consuming JSON message: %s", data)
 
                 # Call the HTTP function (to be handled separately)
-                await post_dlm_data_item(data)
-
-            except requests.exceptions.RequestException as e:
-                logger.error("Notifying DLM failed: %s", e)
+                await post_dlm_data_item(
+                    ingest_server_url=ingest_server_url, storage_name=storage_name, data=data
+                )
 
             except json.JSONDecodeError:
                 logger.warning(
