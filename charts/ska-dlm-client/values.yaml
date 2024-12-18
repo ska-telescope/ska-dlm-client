@@ -14,6 +14,7 @@ setupStorageLocation: false
 
 ska_dlm:
   fullname: "ska-dlm"
+  ingest_service_port: 80
 
 # DLM
 directory_watcher:
@@ -28,7 +29,6 @@ directory_watcher:
   register_dir_prefix: dlm
   use_polling_watcher: false
   storage_name: data
-  ingest_service_port: 80
 
 kafka_watcher:
   enabled: false

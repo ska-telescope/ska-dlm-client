@@ -31,5 +31,7 @@ spec:
         - "{{ .Values.kafka_watcher.consume_service_port }}"
         - "--storage-name"
         - "{{ .Values.kafka_watcher.storage_name }}"
+        - "--ingest-server-url"
+        - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.ska_dlm.ingest_service_port }}"
       dnsPolicy: ClusterFirstWithHostNet
 {{- end }}

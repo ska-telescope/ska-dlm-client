@@ -42,6 +42,12 @@ def main():
         required=True,
         help="The storage name to register data items against.",
     )
+    parser.add_argument(
+        "--ingest-server-url",
+        type=str,
+        required=True,
+        help="Ingest server URL including the service port.",
+    )
 
     args = parser.parse_args()
     asyncio.run(watch(args.kafka_broker_url, args.kafka_topic))
