@@ -71,15 +71,16 @@ async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int 
             await asyncio.sleep(1)
 
 
-async def post_dlm_data_item(ingest_server_url: str, storage_name: str, data):
+async def post_dlm_data_item(ingest_server_url: str, storage_name: str, data: dict):
     """HTTP POST call to DLM."""
     ingest_configuration = configuration.Configuration(host=ingest_server_url)
     with api_client.ApiClient(ingest_configuration) as ingest_api_client:
         api_ingest = ingest_api.IngestApi(ingest_api_client)
         try:
-            # TODO: Verify correct message/data/call format
+            # TODO: Need to fix item_name and data once correct message is sent via kafka
+            post_data = json.dumps(data)
             response = api_ingest.register_data_item_ingest_register_data_item_post(
-                item_name=data,
+                item_name=post_data,
                 storage_name=storage_name,
                 body=data,
             )
