@@ -10,12 +10,14 @@ global:
 
 nameOverride: ""
 fullnameOverride: ""
+setupStorageLocation: false
 
 ska_dlm:
   fullname: "ska-dlm"
 
 # DLM
 directory_watcher:
+  enabled: false
   component: directory-watcher
   subsystem: data-lifecycle-management
   image: harbor.skao.int/production/ska-dlm-client
@@ -29,6 +31,7 @@ directory_watcher:
   ingest_service_port: 80
 
 kafka_watcher:
+  enabled: false
   component: kafka-watcher
   subsystem: data-lifecycle-management
   image: harbor.skao.int/production/ska-dlm-client

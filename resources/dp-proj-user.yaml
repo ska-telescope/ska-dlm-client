@@ -4,7 +4,10 @@ global:
     pvc:
       name: shared
 
+setupStorageLocation: false
+
 directory_watcher:
+  enabled: false
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
   version: "0.1.0-dev.cf844843b"
   directory_to_watch: "/data/dlm"
@@ -12,8 +15,9 @@ directory_watcher:
   use_polling_watcher: true
 
 kafka_watcher:
+  enabled: true
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
-  version: "0.1.0-dev.cf844843b"
+  version: "0.1.0-dev.ca31fb0f2"
   kafka_broker_url: "kafka:9092"
   kafka_topic: "ska-sdp-dataproduct-ingest"
 

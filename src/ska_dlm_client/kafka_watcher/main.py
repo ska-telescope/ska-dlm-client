@@ -19,20 +19,32 @@ def main():
     """Control the main execution of the program."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--kafka-server",
-        nargs="*",
-        default=["localhost:9092"],
-        help="The host:port of the Kafka server(s) to bootstrap from",
-    )
-    parser.add_argument(
         "--kafka-topic",
         nargs="*",
         default=["ska-sdp-dataproduct-ingest"],
         help="The Kafka topic(s) to watch",
     )
+    parser.add_argument(
+        "--kafka-broker-url",
+        type=str,
+        required=True,
+        help="The URL of the Kafka broker.",
+    )
+    parser.add_argument(
+        "--consume-service-port",
+        type=int,
+        required=True,
+        help="The service port.",
+    )
+    parser.add_argument(
+        "--storage-name",
+        type=str,
+        required=True,
+        help="The storage name to register data items against.",
+    )
 
     args = parser.parse_args()
-    asyncio.run(watch(args.kafka_server, args.kafka_topic))
+    asyncio.run(watch(args.kafka_broker_url, args.kafka_topic))
 
 
 async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int = 5):

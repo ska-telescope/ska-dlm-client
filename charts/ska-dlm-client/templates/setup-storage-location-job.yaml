@@ -1,3 +1,4 @@
+{{- if $.Values.setupStorageLocation }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -35,3 +36,4 @@ spec:
       - name: dlm-configmap
         configMap:
           name: {{ .Values.ska_dlm.fullname }}-configmap
+{{- end }}

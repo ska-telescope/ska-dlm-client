@@ -1,3 +1,4 @@
+{{- if $.Values.directory_watcher.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -47,3 +48,4 @@ spec:
       - name: data-product-storage
         persistentVolumeClaim:
           claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
+{{- end }}

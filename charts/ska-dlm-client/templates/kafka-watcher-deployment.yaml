@@ -1,3 +1,4 @@
+{{- if $.Values.kafka_watcher.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -30,12 +31,5 @@ spec:
         - "{{ .Values.kafka_watcher.consume_service_port }}"
         - "--storage-name"
         - "{{ .Values.kafka_watcher.storage_name }}"
-        volumeMounts:
-        - name: dlm-configmap
-          mountPath: "/home/ska-dlm/.dlm"
-          readOnly: true
       dnsPolicy: ClusterFirstWithHostNet
-      volumes:
-      - name: dlm-configmap
-        configMap:
-          name: {{ .Values.ska_dlm.fullname }}-configmap
+{{- end }}

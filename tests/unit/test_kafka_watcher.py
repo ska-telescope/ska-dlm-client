@@ -26,7 +26,7 @@ def test_main(mocker: pytest_mock.MockerFixture):
     - The `watch` function is triggered with the correct arguments without being executed.
     """
     # Mock the argparse.ArgumentParser to return simulated arguments
-    mock_args = mock.Mock(kafka_server=[KAFKA_HOST], kafka_topic=[TEST_TOPIC])
+    mock_args = mock.Mock(kafka_broker_url=[KAFKA_HOST], kafka_topic=[TEST_TOPIC])
     mocker.patch(
         "src.ska_dlm_client.kafka_watcher.main.argparse.ArgumentParser.parse_args",
         return_value=mock_args,
@@ -46,7 +46,7 @@ def test_main(mocker: pytest_mock.MockerFixture):
 
     # Verify that watch was called with the correct arguments
     mock_watch.assert_called_once_with(
-        [KAFKA_HOST], [TEST_TOPIC]  # Expected kafka_server  # Expected kafka_topic
+        [KAFKA_HOST], [TEST_TOPIC]  # Expected kafka_broker_url  # Expected kafka_topic
     )
 
 
