@@ -57,3 +57,20 @@ component: {{ .Values.directory_watcher.component }}
 subsystem: {{ .Values.directory_watcher.subsystem }}
 intent: production
 {{- end }}
+
+{{/*
+Kafka watcher labels
+*/}}
+{{- define "ska-dlm-client.kafka-watcher.labels" }}
+{{- include "ska-dlm-client.labels" . }}
+component: {{ .Values.kafka_watcher.component }}
+subsystem: {{ .Values.kafka_watcher.subsystem }}
+intent: production
+{{- end }}
+
+{{/*
+Storage location labels
+*/}}
+{{- define "ska-dlm-client.setup-storage-location.labels" }}
+{{- include "ska-dlm-client.labels" . }}
+{{- end }}

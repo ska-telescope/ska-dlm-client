@@ -1,0 +1,39 @@
+{{- if $.Values.setupStorageLocation }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "ska-dlm-client.fullname" . }}-setup-storage-location
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ska-dlm-client.setup-storage-location.labels" . | indent 4 }}
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "ska-dlm-client.setup-storage-location.labels" . | indent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: setup-storage-location
+        image: {{ .Values.kafka_watcher.image }}:{{ .Values.kafka_watcher.version }}
+        imagePullPolicy: {{ .Values.kafka_watcher.imagePullPolicy }}
+        command:
+        - "dlm-setup-storage-location"
+        - "--kafka-broker-url"
+        - "{{ .Values.kafka_watcher.kafka_broker_url }}"
+        - "--kafka-topic"
+        - "{{ .Values.kafka_watcher.kafka_topic }}"
+        - "--consume-service-port"
+        - "{{ .Values.kafka_watcher.consume_service_port }}"
+        - "--storage-name"
+        - "{{ .Values.kafka_watcher.storage_name }}"
+        volumeMounts:
+        - name: dlm-configmap
+          mountPath: "/home/ska-dlm/.dlm"
+          readOnly: true
+      dnsPolicy: ClusterFirstWithHostNet
+      volumes:
+      - name: dlm-configmap
+        configMap:
+          name: {{ .Values.ska_dlm.fullname }}-configmap
+{{- end }}
