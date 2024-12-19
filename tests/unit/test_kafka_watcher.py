@@ -131,7 +131,7 @@ async def test_watch_http_failure(
 
         # Check that the error log was captured
         assert len(caplog.records) > 0  # Ensure there's at least one log entry
-        assert "HTTP call failed" in caplog.text  # Check if the error message is present
+        assert "Call to DLM failed" in caplog.text  # Check if the error message is present
 
     # Assert that consumer.stop() was called even on failure
     mock_kafka_consumer.stop.assert_called_once()

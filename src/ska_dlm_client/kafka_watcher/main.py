@@ -71,24 +71,24 @@ async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int 
             await asyncio.sleep(1)
 
 
-async def post_dlm_data_item(ingest_server_url: str, storage_name: str, data: dict):
-    """HTTP POST call to DLM."""
+async def post_dlm_data_item(ingest_server_url: str, storage_name: str, ingest_event_data: dict):
+    """Call DLM via the OpenAPI spec."""
     ingest_configuration = configuration.Configuration(host=ingest_server_url)
     with api_client.ApiClient(ingest_configuration) as ingest_api_client:
         api_ingest = ingest_api.IngestApi(ingest_api_client)
         try:
-            # TODO: Need to fix item_name and data once correct message is sent via kafka
-            post_data = json.dumps(data)
+            # TODO YAN-1961: Need to fix item_name / data once correct message is sent via kafka
+            item_name = json.dumps(ingest_event_data)
             response = api_ingest.register_data_item_ingest_register_data_item_post(
-                item_name=post_data,
+                item_name=item_name,
                 storage_name=storage_name,
-                body=data,
+                body=ingest_event_data,
             )
             logger.info("item posted successfully with response %s", response)
         except OpenApiException as err:
             logger.error("OpenApiException caught during register_data_item\n%s", err)
-            logger.error("HTTP call failed")
-            logger.error("Ignoring and continueing.....")
+            logger.error("Call to DLM failed")
+            logger.error("Ignoring and continuing.....")
 
 
 async def watch(
@@ -112,12 +112,14 @@ async def watch(
     try:
         async for msg in consumer:
             try:
-                data = json.loads(msg.value)
-                logger.info("Consuming JSON message: %s", data)
+                ingest_event_data = json.loads(msg.value)
+                logger.info("Consuming JSON message: %s", ingest_event_data)
 
-                # Call the HTTP function (to be handled separately)
+                # Call the DLM (to be handled separately)
                 await post_dlm_data_item(
-                    ingest_server_url=ingest_server_url, storage_name=storage_name, data=data
+                    ingest_server_url=ingest_server_url,
+                    storage_name=storage_name,
+                    ingest_event_data=ingest_event_data,
                 )
 
             except json.JSONDecodeError:
