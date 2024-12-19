@@ -1,3 +1,4 @@
+{{- if $.Values.directory_watcher.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,7 +33,7 @@ spec:
         - "--use-polling-watcher"
         {{- end }}
         - "--ingest-server-url"
-        - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.directory_watcher.ingest_service_port }}"
+        - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.ska_dlm.ingest_service_port }}"
         volumeMounts:
         - name: dlm-configmap
           mountPath: "/home/ska-dlm/.dlm"
@@ -47,3 +48,4 @@ spec:
       - name: data-product-storage
         persistentVolumeClaim:
           claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
+{{- end }}

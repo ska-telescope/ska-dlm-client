@@ -1,0 +1,35 @@
+{{- if $.Values.kafka_watcher.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ska-dlm-client.fullname" . }}-kafka-watcher
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ska-dlm-client.kafka-watcher.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.kafka_watcher.replicas }}
+  selector:
+    matchLabels:
+      component: {{ .Values.kafka_watcher.component }}
+      subsystem: {{ .Values.kafka_watcher.subsystem }}
+  template:
+    metadata:
+      labels:
+        {{- include "ska-dlm-client.kafka-watcher.labels" . | indent 8 }}
+    spec:
+      containers:
+      - name: kafka-watcher
+        image: {{ .Values.kafka_watcher.image }}:{{ .Values.kafka_watcher.version }}
+        imagePullPolicy: {{ .Values.kafka_watcher.imagePullPolicy }}
+        command:
+        - "dlm-kafka-watcher"
+        - "--kafka-broker-url"
+        - "{{ .Values.kafka_watcher.kafka_broker_url }}"
+        - "--kafka-topic"
+        - "{{ .Values.kafka_watcher.kafka_topic }}"
+        - "--storage-name"
+        - "{{ .Values.kafka_watcher.storage_name }}"
+        - "--ingest-server-url"
+        - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.ska_dlm.ingest_service_port }}"
+      dnsPolicy: ClusterFirstWithHostNet
+{{- end }}
