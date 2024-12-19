@@ -47,8 +47,8 @@ def main():
     args = parser.parse_args()
     asyncio.run(
         watch(
-            servers=args.kafka_broker_url,
-            topics=args.kafka_topic,
+            kafka_broker_url=args.kafka_broker_url,
+            kafka_topic=args.kafka_topic,
             ingest_server_url=args.ingest_server_url,
             storage_name=args.storage_name,
         )
@@ -87,10 +87,13 @@ async def post_dlm_data_item(ingest_server_url: str, storage_name: str, data: di
             logger.info("item posted successfully with response %s", response)
         except OpenApiException as err:
             logger.error("OpenApiException caught during register_data_item\n%s", err)
+            logger.error("HTTP call failed")
             logger.error("Ignoring and continueing.....")
 
 
-async def watch(servers: list[str], topics: list[str], ingest_server_url: str, storage_name: str):
+async def watch(
+    kafka_broker_url: list[str], kafka_topic: list[str], ingest_server_url: str, storage_name: str
+):
     """
     Asynchronously consumes data product, create events from data queues, and notifies DLM.
 
@@ -98,10 +101,10 @@ async def watch(servers: list[str], topics: list[str], ingest_server_url: str, s
         servers (list[str]): Data queue servers.
         topics (list[str]): Data queue topics.
     """
-    logger.debug("Connecting to Kafka server(s): %s", ", ".join(servers))
-    logger.info("Watching %s topic(s) for dataproducts to process", ", ".join(topics))
+    logger.debug("Connecting to Kafka server(s): %s", ", ".join(kafka_broker_url))
+    logger.info("Watching %s topic(s) for dataproducts to process", ", ".join(kafka_broker_url))
 
-    consumer = aiokafka.AIOKafkaConsumer(*topics, bootstrap_servers=servers)
+    consumer = aiokafka.AIOKafkaConsumer(*kafka_topic, bootstrap_servers=kafka_broker_url)
 
     # Attempt to start the consumer once
     await _start_consumer(consumer)
