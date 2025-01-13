@@ -166,12 +166,3 @@ def paths_and_metadata(full_path: str, relative_path: str) -> (list[str], dict):
     else:
         logger.error("entry is unknown")
     return path_list, metadata
-
-
-# path = "/Users/00077990/yanda/shared/watch_dir/obs"
-# logger.info("--------------------")
-# for i in range(4):
-#     full_path = f"{path}{i}"
-#     rel_path = split(full_path)[1]
-#     logger.info(paths_and_metadata(full_path, rel_path))
-#     logger.info("\n--------------------")
