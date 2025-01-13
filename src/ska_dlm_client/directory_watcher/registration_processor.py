@@ -71,13 +71,6 @@ class RegistrationProcessor:
         self._config.directory_watcher_entries.save_to_file()
         logger.info("entry %s added.", relative_path)
 
-    def directory_contains_only_files(self, full_path: str) -> bool:
-        """Return True if the given directory contains only files."""
-        for entry in os.listdir(full_path):
-            if os.path.isdir(full_path + entry):
-                return False
-        return True
-
     def data_item_directories(self, full_path: str):  # , relative_path: str):
         """Process the directory entry looking for a data items."""
         # current_dir = ""
@@ -128,3 +121,57 @@ class RegistrationProcessor:
                 error_text = f"Unspported file/directory entry type: {relative_path}"
             logging.error(error_text)
             # TODO: Do we throw this or just log here, raise RuntimeError(error_text)
+
+
+def directory_contains_only_files(full_path: str) -> bool:
+    """Return True if the given directory contains only files."""
+    for entry in os.listdir(full_path):
+        if os.path.isdir(full_path + entry):
+            return False
+    return True
+
+
+def directory_list_minus_metadata_file(full_path: str) -> list[str]:
+    """Return a listing of the given full_path directory without the metadata file."""
+    path_list: list[str] = []
+    for entry in os.listdir(full_path):
+        if not entry == ska_dlm_client.directory_watcher.config.METADATA_FILENAME:
+            path_list.append(entry)
+    return path_list
+
+
+def paths_and_metadata(full_path: str, relative_path: str) -> (list[str], dict):
+    """Return the list of data items and their associated metadata."""
+    logger.info("working with path %s", full_path)
+    path_list = None
+    metadata = None
+    if isfile(full_path):
+        logger.info("entry is file")
+        path_list = [relative_path]
+        metadata = DataProductMetadata(full_path).as_dict()
+    elif isdir(full_path):
+        if islink(full_path):
+            linked_path = os.readlink(full_path)
+            logger.info("entry is symbolic link to a directory %s -> %s", full_path, linked_path)
+        else:
+            logger.info("entry is directory")
+        path_list = directory_list_minus_metadata_file(full_path)
+        logger.info("%s: %s", full_path, path_list)
+        if directory_contains_only_files(full_path):
+            metadata = DataProductMetadata(full_path).as_dict()
+        else:
+            logger.error("subdirectories of data_item path does not support subdirecories.")
+    elif islink(full_path):
+        logger.error("entry is symbolic link NOT pointing to a drectory, this is not handled")
+    else:
+        logger.error("entry is unknown")
+    return path_list, metadata
+
+
+# path = "/Users/00077990/yanda/shared/watch_dir/obs"
+# logger.info("--------------------")
+# for i in range(4):
+#     full_path = f"{path}{i}"
+#     rel_path = split(full_path)[1]
+#     logger.info(paths_and_metadata(full_path, rel_path))
+#     logger.info("\n--------------------")
