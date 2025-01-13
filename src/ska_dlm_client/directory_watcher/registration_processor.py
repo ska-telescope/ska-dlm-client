@@ -85,7 +85,7 @@ class RegistrationProcessor:
             else:  # contains file and directories
                 pass
 
-    def add_path(self, full_path: str, relative_path: str):
+    def _add_path(self, full_path: str, relative_path: str):
         """Add the given relative_path to the DLM.
 
         If full_path is a file, a single file will be registered with the DLM.
@@ -122,8 +122,16 @@ class RegistrationProcessor:
             logging.error(error_text)
             # TODO: Do we throw this or just log here, raise RuntimeError(error_text)
 
+    def add_path(self, full_path: str, relative_path: str):
+        """Add the given relative_path to the DLM."""
+        logger.info("in add_path with %s and %s", full_path, relative_path)
+        data_items, metadata = paths_and_metadata(full_path=full_path, relative_path=relative_path)
+        for data_item in data_items:
+            # Send the same metadata for each data item
+            self._register_entry(relative_path=data_item, metadata=metadata)
 
-def directory_contains_only_files(full_path: str) -> bool:
+
+def _directory_contains_only_files(full_path: str) -> bool:
     """Return True if the given directory contains only files."""
     for entry in os.listdir(full_path):
         if os.path.isdir(full_path + entry):
@@ -131,12 +139,12 @@ def directory_contains_only_files(full_path: str) -> bool:
     return True
 
 
-def directory_list_minus_metadata_file(full_path: str) -> list[str]:
+def _directory_list_minus_metadata_file(full_path: str, relative_path: str) -> list[str]:
     """Return a listing of the given full_path directory without the metadata file."""
     path_list: list[str] = []
     for entry in os.listdir(full_path):
         if not entry == ska_dlm_client.directory_watcher.config.METADATA_FILENAME:
-            path_list.append(entry)
+            path_list.append(os.path.join(relative_path, entry))
     return path_list
 
 
@@ -155,9 +163,11 @@ def paths_and_metadata(full_path: str, relative_path: str) -> (list[str], dict):
             logger.info("entry is symbolic link to a directory %s -> %s", full_path, linked_path)
         else:
             logger.info("entry is directory")
-        path_list = directory_list_minus_metadata_file(full_path)
+        path_list = _directory_list_minus_metadata_file(
+            full_path=full_path, relative_path=relative_path
+        )
         logger.info("%s: %s", full_path, path_list)
-        if directory_contains_only_files(full_path):
+        if _directory_contains_only_files(full_path):
             metadata = DataProductMetadata(full_path).as_dict()
         else:
             logger.error("subdirectories of data_item path does not support subdirecories.")

@@ -4,7 +4,7 @@ import os
 
 from ska_dlm_client.directory_watcher.registration_processor import paths_and_metadata
 
-SYMBOLIC_LINKED_DIR_ENTRIES = ["data", "weights"]
+DIR_ENTRIES = ["data", "weights"]
 
 
 def test_registration_processor(request):
@@ -23,13 +23,21 @@ def test_registration_processor(request):
     assert dir_entries == ["data_item_file_only"]
 
     # Test when path to add is symlink.
-    full_path = os.path.join(watch_dir, "symbolic_link_path")
+    test_path = "symbolic_link_path"
+    full_path = os.path.join(watch_dir, test_path)
     rel_path = os.path.split(full_path)[1]
     dir_entries, _ = paths_and_metadata(full_path, rel_path)
-    assert set(dir_entries) == set(SYMBOLIC_LINKED_DIR_ENTRIES)
+    relative_path_entries: list[str] = []
+    for dir_entry in DIR_ENTRIES:
+        relative_path_entries.append(os.path.join(test_path, dir_entry))
+    assert set(dir_entries) == set(relative_path_entries)
 
     # Test when path to add directory.
-    full_path = os.path.join(watch_dir, "directory_entry")
+    test_path = "directory_entry"
+    full_path = os.path.join(watch_dir, test_path)
     rel_path = os.path.split(full_path)[1]
     dir_entries, _ = paths_and_metadata(full_path, rel_path)
-    assert set(dir_entries) == set(SYMBOLIC_LINKED_DIR_ENTRIES)
+    relative_path_entries.clear()
+    for dir_entry in DIR_ENTRIES:
+        relative_path_entries.append(os.path.join(test_path, dir_entry))
+    assert set(dir_entries) == set(relative_path_entries)
