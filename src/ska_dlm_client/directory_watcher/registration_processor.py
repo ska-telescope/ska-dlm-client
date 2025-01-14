@@ -85,7 +85,7 @@ class RegistrationProcessor:
             else:  # contains file and directories
                 pass
 
-    def _add_path(self, full_path: str, relative_path: str):
+    def add_path(self, full_path: str, relative_path: str):
         """Add the given relative_path to the DLM.
 
         If full_path is a file, a single file will be registered with the DLM.
@@ -96,39 +96,15 @@ class RegistrationProcessor:
         If full_path is a symlink, then not currently supported.
         """
         logger.info("in add_path with %s and %s", full_path, relative_path)
-        metadata = DataProductMetadata(full_path).as_dict()
-        if isfile(full_path):
-            logger.info("entry is file")
-            self._register_entry(relative_path=relative_path, metadata=metadata)
-        elif isdir(full_path):
-            logger.info("entry is directory")
-            if relative_path.lower().endswith(
-                ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
-            ):
-                # if a measurement set then just add directory
-                self._register_entry(relative_path=relative_path, metadata=metadata)
-            else:
-                # otherwise add each file or directory
-                dir_entries = os.listdir(full_path)
-                for dir_entry in dir_entries:
-                    new_full_path = f"{full_path}/{dir_entry}"
-                    new_relative_path = f"{relative_path}/{dir_entry}"
-                    self.add_path(full_path=new_full_path, relative_path=new_relative_path)
-        else:
-            if islink(full_path):
-                error_text = f"Symbolic links are currently not supported: {relative_path}"
-            else:
-                error_text = f"Unspported file/directory entry type: {relative_path}"
-            logging.error(error_text)
-            # TODO: Do we throw this or just log here, raise RuntimeError(error_text)
-
-    def add_path(self, full_path: str, relative_path: str):
-        """Add the given relative_path to the DLM."""
-        logger.info("in add_path with %s and %s", full_path, relative_path)
         data_items, metadata = paths_and_metadata(full_path=full_path, relative_path=relative_path)
-        for data_item in data_items:
-            # Send the same metadata for each data item
-            self._register_entry(relative_path=data_item, metadata=metadata)
+        logger.info("data_items %s", data_items)
+        logger.info("metadata %s", metadata)
+        if data_items is None or metadata is None:
+            logging.error("No files and/or metadata found, NOT added to DLM!")
+        else:
+            for data_item in data_items:
+                # Send the same metadata for each data item
+                self._register_entry(relative_path=data_item, metadata=metadata)
 
 
 def _directory_contains_only_files(full_path: str) -> bool:
