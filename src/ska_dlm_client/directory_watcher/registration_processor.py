@@ -71,20 +71,6 @@ class RegistrationProcessor:
         self._config.directory_watcher_entries.save_to_file()
         logger.info("entry %s added.", relative_path)
 
-    def data_item_directories(self, full_path: str):  # , relative_path: str):
-        """Process the directory entry looking for a data items."""
-        # current_dir = ""
-        # list_of_data_items = []
-        for root, dirs, files in os.walk(full_path, followlinks=False):
-            if dirs == [] and files == []:
-                logger.info("root: %s", root)
-            elif dirs == []:  # so only contains files
-                pass
-            elif files == []:  # so only contains directories
-                pass
-            else:  # contains file and directories
-                pass
-
     def add_path(self, full_path: str, relative_path: str):
         """Add the given relative_path to the DLM.
 
