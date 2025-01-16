@@ -125,14 +125,22 @@ def paths_and_metadata(full_path: str, relative_path: str) -> (list[str], dict):
             logger.info("entry is symbolic link to a directory %s -> %s", full_path, linked_path)
         else:
             logger.info("entry is directory")
-        path_list = _directory_list_minus_metadata_file(
-            full_path=full_path, relative_path=relative_path
-        )
-        logger.info("%s: %s", full_path, path_list)
-        if _directory_contains_only_files(full_path):
+
+        # if a measurement set then just add directory
+        if relative_path.lower().endswith(
+            ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
+        ):
+            path_list = [relative_path]
             metadata = DataProductMetadata(full_path).as_dict()
         else:
-            logger.error("subdirectories of data_item path does not support subdirecories.")
+            path_list = _directory_list_minus_metadata_file(
+                full_path=full_path, relative_path=relative_path
+            )
+            logger.info("%s: %s", full_path, path_list)
+            if _directory_contains_only_files(full_path):
+                metadata = DataProductMetadata(full_path).as_dict()
+            else:
+                logger.error("subdirectories of data_item path does not support subdirecories.")
     elif islink(full_path):
         logger.error("entry is symbolic link NOT pointing to a drectory, this is not handled")
     else:
