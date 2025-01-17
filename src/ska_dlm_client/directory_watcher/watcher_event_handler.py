@@ -36,7 +36,7 @@ class WatcherEventHandler(FileSystemEventHandler):
         self._registration_processor = registration_processor
 
     def _ignore_event(self, event: FileSystemEvent) -> bool:
-        return self._config.status_file_full_filename == event.src_path
+        return self._config.status_file_absolute_path == event.src_path
 
     def on_moved(self, event: DirMovedEvent | FileMovedEvent) -> None:
         """Take action when a moved event is captured."""
@@ -57,9 +57,11 @@ class WatcherEventHandler(FileSystemEventHandler):
         logger.info("Created %s: %s", what, event.src_path)
         if self._ignore_event(event):
             return
-        full_path = event.src_path
-        relative_path = full_path.replace(f"{self._config.directory_to_watch}/", "")
-        self._registration_processor.add_path(full_path=full_path, relative_path=relative_path)
+        absolute_path = event.src_path
+        relative_path = absolute_path.replace(f"{self._config.directory_to_watch}/", "")
+        self._registration_processor.add_path(
+            absolute_path=absolute_path, relative_path=relative_path
+        )
 
     def on_deleted(self, event: DirDeletedEvent | FileDeletedEvent) -> None:
         """Take action when a delete event is captured."""

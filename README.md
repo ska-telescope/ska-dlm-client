@@ -43,7 +43,8 @@ The additional parameters can be given for greater configuration.
 ### Metadata Handling
 
 Code has been added to generate a "minimal set of metadata" for any dataproduct found without
-an identifiable associated metadata file. The exact rules for this are a WIP.
+an identifiable associated metadata file (expecting a file called ska-data-product.yaml). The
+exact rules for this are a WIP.
 
 ## Execution Modes
 

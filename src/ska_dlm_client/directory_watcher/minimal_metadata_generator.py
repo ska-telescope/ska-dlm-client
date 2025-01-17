@@ -1,11 +1,11 @@
 """This module is called when the dataproduct is an unidentified filetype."""
 
-import binascii
 import logging
 import os
 from datetime import datetime
 
 from benedict import benedict
+from crc32c import crc32c
 from ska_sdp_dataproduct_metadata import MetaData
 
 FOUR_BYTE_PAD: int = 0xFFFFFFFF
@@ -31,8 +31,8 @@ def _file_or_dir_size(path: str) -> int:
         return 0
 
 
-def _file_crc32(file_path: str, chunksize: int = 0x10000) -> str:
-    """Compute CRC32 from file path as a hexidecimal string.
+def _file_crc32c(file_path: str, chunksize: int = 0x10000) -> str:
+    """Compute CRC32c from file path as a hexidecimal string.
 
     Parameters
     ----------
@@ -44,12 +44,12 @@ def _file_crc32(file_path: str, chunksize: int = 0x10000) -> str:
     Returns
     -------
     str
-        CRC32 formatted string of 8 hexadecimal characters.
+        CRC32c formatted string of 8 hexadecimal characters.
     """
     with open(file_path, "rb") as file_reader:
         checksum = 0
         while chunk := file_reader.read(chunksize):
-            checksum = binascii.crc32(chunk, checksum)
+            checksum = crc32c(chunk, checksum)
         return f"{checksum:08x}"
 
 
@@ -62,7 +62,7 @@ def _file_dict(file_path: str, relative_path: str, description: str) -> dict:
         size = 0
 
     try:
-        crc = _file_crc32(file_path)
+        crc = _file_crc32c(file_path)
     except OSError as err:
         logger.error("Failed to get CRC for %s with exception %s", file_path, err)
         crc = f"{FOUR_BYTE_PAD:08x}"

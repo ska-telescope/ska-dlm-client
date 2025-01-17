@@ -1,0 +1,42 @@
+config:
+  image: artefact.skao.int/ska-pst/ska-pst
+  version: 0.13.0
+context:
+  intent: Tied-array beam observation of J1921+2153
+  notes: Unknown
+  observer: jdoe
+execution_block: eb-x449-20231105-34696
+files:
+- description: Channelised voltage data raw files
+  path: data
+  size: 937869312
+  status: done
+- description: Channelised weights raw files
+  path: weights
+  size: 7986432
+  status: done
+interface: http://schema.skao.int/ska-data-product-meta/0.1
+obscore:
+  access_estsize: 937820160
+  calib_level: 0
+  dataproduct_subtype: voltages
+  dataproduct_type: timeseries
+  em_max: 80859375.0
+  em_min: 77734375.0
+  em_res_power: 'null'
+  em_resolution: 3616.8981481481483
+  em_unit: Hz
+  em_xel: 864
+  facility_name: SKA-Observatory
+  instrument_name: SKA-LOW
+  o_ucd: 'null'
+  obs_id: '1238'
+  pol_states: 'null'
+  pol_xel: 2
+  s_dec: 21.884
+  s_ra: 19.362448611111116
+  t_exptime: 28.134604799999998
+  t_max: 51544.003323317
+  t_min: 51544.0029976852
+  t_resolution: 0.00020736
+  target_name: J1921+2153

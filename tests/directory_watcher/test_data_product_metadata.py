@@ -33,25 +33,25 @@ def test_data_product_metadata(tmp_path):
     with pytest.raises(FileNotFoundError):
         DataProductMetadata(f"{tmp_path}/a-dummy-file")
 
-    full_dp_file = f"{tmp_path}/{TEST_DATA_PRODUCT_FILE}"
-    full_metadata_file = f"{tmp_path}/{config.METADATA_FILENAME}"
+    absolute_path_to_dp_file = f"{tmp_path}/{TEST_DATA_PRODUCT_FILE}"
+    absolute_path_to_metadata_file = f"{tmp_path}/{config.METADATA_FILENAME}"
 
     # Given a data product load the metadata file and check the eb_id
-    dpm = DataProductMetadata(full_dp_file)
+    dpm = DataProductMetadata(absolute_path_to_dp_file)
     assert dpm.get_execution_block_value() == TEST_EB_ID
 
     # If a directory does not contain metadata check that some is created
-    full_dp_dir = f"{tmp_path}/{TEST_DATA_PRODUCT_DIRECTORY}"
-    dpm = DataProductMetadata(full_dp_dir)
+    absolute_path_to_dp_dir = f"{tmp_path}/{TEST_DATA_PRODUCT_DIRECTORY}"
+    dpm = DataProductMetadata(absolute_path_to_dp_dir)
     assert dpm.get_execution_block_value().startswith(UNKNOWN_EB_ID)
 
     # If a directory does contain metadata check it is found and loaded
-    dst_file = os.path.join(full_dp_dir, config.METADATA_FILENAME)
-    shutil.copyfile(src=full_metadata_file, dst=dst_file)
-    dpm = DataProductMetadata(full_dp_dir)
+    dst_file = os.path.join(absolute_path_to_dp_dir, config.METADATA_FILENAME)
+    shutil.copyfile(src=absolute_path_to_metadata_file, dst=dst_file)
+    dpm = DataProductMetadata(absolute_path_to_dp_dir)
     assert dpm.get_execution_block_value() == TEST_EB_ID
 
     # Given a data product load the metadata file and check the eb_id
-    os.remove(full_metadata_file)
-    dpm = DataProductMetadata(full_dp_file)
+    os.remove(absolute_path_to_metadata_file)
+    dpm = DataProductMetadata(absolute_path_to_dp_file)
     assert dpm.get_execution_block_value().startswith(UNKNOWN_EB_ID)

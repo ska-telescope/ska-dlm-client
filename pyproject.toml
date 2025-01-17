@@ -37,6 +37,7 @@ watchfiles = "^0.24.0"
 pyyaml = "^6.0.2"
 ska-sdp-dataproduct-metadata = "^0.7.0"
 watchdog = "^6.0.0"
+crc32c = "^2.7.1"
 
 [tool.poetry.group.test.dependencies]
 black = "^24.8.0"

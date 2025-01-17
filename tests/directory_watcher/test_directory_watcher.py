@@ -63,7 +63,7 @@ class TestDirectoryWatcher:
         assert self.config.storage_name == self.STORAGE_NAME
         assert self.config.reload_status_file is False
         assert (
-            self.config.status_file_full_filename == f"{self.the_watch_dir}/{STATUS_FILE_FILENAME}"
+            self.config.status_file_absolute_path == f"{self.the_watch_dir}/{STATUS_FILE_FILENAME}"
         )
         assert self.config.use_status_file is False
         assert isinstance(self.config.directory_watcher_entries, DirectoryWatcherEntries)
@@ -89,9 +89,9 @@ class TestDirectoryWatcher:
         await asyncio.sleep(2)
         a_temp_file_relative_path = a_temp_file.replace(f"{self.the_watch_dir}/", "")
         # On MacOS the system messes with the path by adding a /private
-        full_path = registration_processor.full_path.replace("/private", "")
+        absolute_path = registration_processor.absolute_path.replace("/private", "")
         relative_path = registration_processor.relative_path.replace("/private", "")
-        assert a_temp_file == full_path
+        assert a_temp_file == absolute_path
         assert a_temp_file_relative_path == relative_path
         Path(a_temp_file).unlink()
 
@@ -99,10 +99,10 @@ class TestDirectoryWatcher:
 class MockRegistrationProcessor(RegistrationProcessor):
     """A class to use for test of directory watcher."""
 
-    full_path: str
+    absolute_path: str
     relative_path: str
 
-    def add_path(self, full_path: str, relative_path: str):
+    def add_path(self, absolute_path: str, relative_path: str):
         """Perform testing on the given paths."""
-        self.full_path = full_path
+        self.absolute_path = absolute_path
         self.relative_path = relative_path

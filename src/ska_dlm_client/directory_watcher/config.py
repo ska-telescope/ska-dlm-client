@@ -19,7 +19,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
     ingest_server_url: str
     storage_name: str
     reload_status_file: bool
-    status_file_full_filename: str
+    status_file_absolute_path: str
     use_status_file: bool
     directory_watcher_entries: DirectoryWatcherEntries
     ingest_configuration: Configuration
@@ -30,8 +30,8 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         ingest_server_url: str,
         storage_name: str,
         register_dir_prefix: str,
+        status_file_absolute_path: str,
         reload_status_file: bool = False,
-        status_file_full_filename: str = STATUS_FILE_FILENAME,
         use_status_file: bool = False,
     ):
         """Init the values required for correct operation of directory_watcher."""
@@ -40,10 +40,10 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         self.storage_name = storage_name
         self.register_dir_prefix = register_dir_prefix
         self.reload_status_file = reload_status_file
-        self.status_file_full_filename = status_file_full_filename
+        self.status_file_absolute_path = status_file_absolute_path
         self.use_status_file = use_status_file
         self.directory_watcher_entries = DirectoryWatcherEntries(
-            entries_file=self.status_file_full_filename,
+            entries_file=self.status_file_absolute_path,
             reload_from_status_file=self.reload_status_file,
         )
         self.ingest_configuration = configuration.Configuration(host=self.ingest_server_url)
@@ -55,7 +55,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
             f"ingest_server_url {self.ingest_server_url}\n"
             f"storage_name {self.storage_name}\n"
             f"reload_status_file {self.reload_status_file}\n"
-            f"status_file_full_filename {self.status_file_full_filename}\n"
+            f"status_file_absolute_path {self.status_file_absolute_path}\n"
             f"use_stat_file {self.use_status_file}\n"
             f"ingest_configuration {self.ingest_configuration}\n"
             f"directory_watcher_entries {self.directory_watcher_entries}\n"
