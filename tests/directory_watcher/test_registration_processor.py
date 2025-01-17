@@ -32,7 +32,7 @@ def test_registration_processor(request):
         expected_relative_path_entries.append(os.path.join(test_path, dir_entry))
     assert sorted(dir_entries) == sorted(expected_relative_path_entries)
 
-    # Test when path to add directory.
+    # Test when path to add is a directory.
     test_path = "directory_entry"
     absolute_path = os.path.join(watch_dir, test_path)
     rel_path = os.path.split(absolute_path)[1]
