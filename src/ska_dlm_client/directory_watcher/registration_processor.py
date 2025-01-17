@@ -110,7 +110,7 @@ def _directory_list_minus_metadata_file(full_path: str, relative_path: str) -> l
     return path_list
 
 
-def paths_and_metadata(full_path: str, relative_path: str) -> (list[str], dict):
+def paths_and_metadata(full_path: str, relative_path: str) -> tuple[list[str], dict]:
     """Return the list of data items and their associated metadata."""
     logger.info("working with path %s", full_path)
     path_list = None
@@ -140,9 +140,9 @@ def paths_and_metadata(full_path: str, relative_path: str) -> (list[str], dict):
             if _directory_contains_only_files(full_path):
                 metadata = DataProductMetadata(full_path).as_dict()
             else:
-                logger.error("subdirectories of data_item path does not support subdirecories.")
+                logger.error("subdirectories of data_item path does not support subdirectories.")
     elif islink(full_path):
-        logger.error("entry is symbolic link NOT pointing to a drectory, this is not handled")
+        logger.error("entry is symbolic link NOT pointing to a directory, this is not handled")
     else:
         logger.error("entry is unknown")
     return path_list, metadata
