@@ -17,27 +17,27 @@ def test_registration_processor(request):
     watch_dir = os.path.join(test_dir, "watch_dir")
 
     # Test when path to add is a file.
-    full_path = os.path.join(watch_dir, "data_item_file_only")
-    rel_path = os.path.split(full_path)[1]
-    dir_entries, _ = paths_and_metadata(full_path, rel_path)
+    absolute_path = os.path.join(watch_dir, "data_item_file_only")
+    rel_path = os.path.split(absolute_path)[1]
+    dir_entries, _ = paths_and_metadata(absolute_path, rel_path)
     assert dir_entries == ["data_item_file_only"]
 
     # Test when path to add is symlink.
     test_path = "symbolic_link_path"
-    full_path = os.path.join(watch_dir, test_path)
-    rel_path = os.path.split(full_path)[1]
-    dir_entries, _ = paths_and_metadata(full_path, rel_path)
-    relative_path_entries: list[str] = []
+    absolute_path = os.path.join(watch_dir, test_path)
+    rel_path = os.path.split(absolute_path)[1]
+    dir_entries, _ = paths_and_metadata(absolute_path, rel_path)
+    expected_relative_path_entries: list[str] = []
     for dir_entry in DIR_ENTRIES:
-        relative_path_entries.append(os.path.join(test_path, dir_entry))
-    assert set(dir_entries) == set(relative_path_entries)
+        expected_relative_path_entries.append(os.path.join(test_path, dir_entry))
+    assert sorted(dir_entries) == sorted(expected_relative_path_entries)
 
     # Test when path to add directory.
     test_path = "directory_entry"
-    full_path = os.path.join(watch_dir, test_path)
-    rel_path = os.path.split(full_path)[1]
-    dir_entries, _ = paths_and_metadata(full_path, rel_path)
-    relative_path_entries.clear()
+    absolute_path = os.path.join(watch_dir, test_path)
+    rel_path = os.path.split(absolute_path)[1]
+    dir_entries, _ = paths_and_metadata(absolute_path, rel_path)
+    expected_relative_path_entries.clear()
     for dir_entry in DIR_ENTRIES:
-        relative_path_entries.append(os.path.join(test_path, dir_entry))
-    assert set(dir_entries) == set(relative_path_entries)
+        expected_relative_path_entries.append(os.path.join(test_path, dir_entry))
+    assert sorted(dir_entries) == sorted(expected_relative_path_entries)

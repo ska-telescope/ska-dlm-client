@@ -87,8 +87,8 @@ def process_args(args: argparse.Namespace) -> Config:
         ingest_server_url=args.ingest_server_url,
         storage_name=args.storage_name,
         register_dir_prefix=args.register_dir_prefix,
+        status_file_absolute_path=f"{args.directory_to_watch}/{args.status_file_filename}",
         reload_status_file=args.reload_status_file,
-        status_file_full_filename=f"{args.directory_to_watch}/{args.status_file_filename}",
         use_status_file=args.use_status_file,
     )
     return config
