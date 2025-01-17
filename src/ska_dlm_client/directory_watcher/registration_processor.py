@@ -81,7 +81,7 @@ class RegistrationProcessor:
         all files and subdirectories
         """
         logger.info("in add_path with %s and %s", absolute_path, relative_path)
-        data_item_relative_path_list, metadata = paths_and_metadata(
+        data_item_relative_path_list, metadata = generate_paths_and_metadata(
             absolute_path=absolute_path, relative_path=relative_path
         )
         logger.info("data_item_relative_path_list %s", data_item_relative_path_list)
@@ -111,7 +111,7 @@ def _directory_list_minus_metadata_file(absolute_path: str, relative_path: str) 
     return path_list
 
 
-def paths_and_metadata(absolute_path: str, relative_path: str) -> tuple[list[str], dict]:
+def generate_paths_and_metadata(absolute_path: str, relative_path: str) -> tuple[list[str], dict]:
     """Return the list of relative paths to data items and their associated metadata."""
     logger.info("working with path %s", absolute_path)
     relative_path_list = None
