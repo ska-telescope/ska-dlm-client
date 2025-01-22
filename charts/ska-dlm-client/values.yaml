@@ -17,6 +17,10 @@ ska_dlm:
   ingest_service_port: 80
 
 # DLM
+
+integration_verification:
+  enabled: false
+
 directory_watcher:
   enabled: false
   component: directory-watcher

@@ -13,14 +13,14 @@ def create_parser() -> argparse.ArgumentParser:
         "--directory-to-create-symlinks",
         type=str,
         required=False,
-        default="/Users/00077990/yanda/shared/watch_dir",
+        default="/data/watch_dir",
         help="Full path to directory where symbolic link is to be created.",
     )
     parser.add_argument(
         "--directory-to-create-data-items",
         type=str,
         required=False,
-        default="/Users/00077990/yanda/shared/testing2",
+        default="/data/data_dir",
         help="Full path to directory where data items are to be located.",
     )
     parser.add_argument(
@@ -29,6 +29,14 @@ def create_parser() -> argparse.ArgumentParser:
         required=False,
         default=5,
         help="Time in seconds between data item creations.",
+    )
+    parser.add_argument(
+        "--time-before-delete-on-completion",
+        type=int,
+        required=False,
+        default=10,
+        help="Time in seconds to wait after last symlink creation before created "
+        "data is deleted. Only relevant if --delete-on-completion is specified.",
     )
     parser.add_argument(
         "--delete-on-completion",
@@ -49,6 +57,7 @@ def main():
         data_dir=args.directory_to_create_data_items,
         sleep_time=args.time_between_data_item_creations,
         delete_on_completion=args.delete_on_completion,
+        time_before_delete_on_completion=args.time_before_delete_on_completion,
     )
 
 

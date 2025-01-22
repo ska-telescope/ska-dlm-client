@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
-def create_verify_dir_symlink_names(data_dir: str, symlink_dir: str) -> (list[str], list[str]):
+def create_dir_symlink_names(data_dir: str, symlink_dir: str) -> (list[str], list[str]):
     """Create directory and symlink names from given base directories, exit if any exist."""
     symlinks: list[str] = []
     for symlink in SYMLINKS:
@@ -47,12 +47,16 @@ def create_verify_dir_symlink_names(data_dir: str, symlink_dir: str) -> (list[st
 
 
 def popluate_data_items(
-    symlink_dir: str, data_dir: str, sleep_time: int, delete_on_completion: bool
+    symlink_dir: str,
+    data_dir: str,
+    sleep_time: int,
+    delete_on_completion: bool,
+    time_before_delete_on_completion: int,
 ):
     """Generate required directory structure and files for integration testing."""
     # Directory and symlinks must not exist at startup, test for this during setup
     # If they do exist then exit before creating anything!
-    test_dirs, symlinks = create_verify_dir_symlink_names(data_dir, symlink_dir)
+    test_dirs, symlinks = create_dir_symlink_names(data_dir, symlink_dir)
 
     for test_dir in test_dirs:
         os.mkdir(test_dir)
@@ -62,13 +66,13 @@ def popluate_data_items(
                 output_file.write(os.urandom(DATA_FILE_SIZE_BYTES))
 
     for n, symlink in enumerate(symlinks):
+        time.sleep(sleep_time)
         src = test_dirs[n]
         os.symlink(src, symlink)
-        time.sleep(sleep_time)
 
     if delete_on_completion:
         # wait another sleep_time before deletion
-        time.sleep(sleep_time)
+        time.sleep(time_before_delete_on_completion)
         for test_dir in test_dirs:
             shutil.rmtree(test_dir)
         for symlink in symlinks:
