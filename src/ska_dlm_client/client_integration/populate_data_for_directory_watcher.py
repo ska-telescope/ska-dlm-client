@@ -28,40 +28,6 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
-def create_parser() -> argparse.ArgumentParser:
-    """Define a parser for all the command line parameters."""
-    parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
-
-    parser.add_argument(
-        "--directory-to-create-symlinks",
-        type=str,
-        required=False,
-        default="shared/watch_dir",
-        help="Full path to directory where symbolic link is to be created.",
-    )
-    parser.add_argument(
-        "--directory-to-create-data-items",
-        type=str,
-        required=False,
-        default="shared/testing2",
-        help="Full path to directory where data items are to be located.",
-    )
-    parser.add_argument(
-        "--time-between-data-item-creations",
-        type=int,
-        required=False,
-        default=5,
-        help="Time in seconds between data item creations.",
-    )
-    parser.add_argument(
-        "--delete-on-completion",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help="Delete all created directories, files and symlinks at completion.",
-    )
-    return parser
-
-
 def create_verify_dir_symlink_names(data_dir: str, symlink_dir: str) -> (list[str], list[str]):
     """Create directory and symlink names from given base directories, exit if any exist."""
     symlinks: list[str] = []
@@ -81,11 +47,10 @@ def create_verify_dir_symlink_names(data_dir: str, symlink_dir: str) -> (list[st
     return test_dirs, symlinks
 
 
-def popluate_data_items(args: argparse.Namespace):
-    """Collect up all command line parameters and generate required structure."""
-    symlink_dir = args.directory_to_create_symlinks
-    data_dir = args.directory_to_create_data_items
-    sleep_time = args.time_between_data_item_creations
+def popluate_data_items(
+    symlink_dir: str, data_dir: str, sleep_time: int, delete_on_completion: bool
+):
+    """Generate required directory structure and files for integration testing."""
 
     # Directory and symlinks must not exist at startup, test for this during setup
     # If they do exist then exit before creating anything!
@@ -103,21 +68,10 @@ def popluate_data_items(args: argparse.Namespace):
         os.symlink(src, symlink)
         time.sleep(sleep_time)
 
-    if args.delete_on_completion:
+    if delete_on_completion:
         # wait another sleep_time before deletion
         time.sleep(sleep_time)
         for test_dir in test_dirs:
             shutil.rmtree(test_dir)
         for symlink in symlinks:
             os.unlink(symlink)
-
-
-def main():
-    """Perform the required steps to read args and generate data items."""
-    parser = create_parser()
-    args = parser.parse_args()
-    popluate_data_items(args)
-
-
-if __name__ == "__main__":
-    main()
