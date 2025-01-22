@@ -10,7 +10,6 @@ NOTE: This does not test the results, ie that it has appeared in the database an
 has been transferred by rclone correctly.
 """
 
-import argparse
 import logging
 import os
 import os.path
@@ -51,7 +50,6 @@ def popluate_data_items(
     symlink_dir: str, data_dir: str, sleep_time: int, delete_on_completion: bool
 ):
     """Generate required directory structure and files for integration testing."""
-
     # Directory and symlinks must not exist at startup, test for this during setup
     # If they do exist then exit before creating anything!
     test_dirs, symlinks = create_verify_dir_symlink_names(data_dir, symlink_dir)

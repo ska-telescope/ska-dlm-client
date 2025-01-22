@@ -2,7 +2,7 @@
 
 import argparse
 
-from populate_data_for_directory_watcher import popluate_data_items
+from .populate_data_for_directory_watcher import popluate_data_items
 
 
 def create_parser() -> argparse.ArgumentParser:
