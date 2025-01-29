@@ -20,6 +20,12 @@ ska_dlm:
 
 integration_verification:
   enabled: false
+  version: "0.1.0"
+  directory_to_create_symlinks: "/data/watch_dir"
+  directory_to_create_data_items: "/data/data_dir"
+  time_between_data_item_creations: 10
+  delete_on_completion: true
+  time_before_delete_on_completion: 30
 
 directory_watcher:
   enabled: false

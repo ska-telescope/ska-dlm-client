@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "ska-dlm-client.fullname" . }}-setup-storage-location
+  name: {{ include "ska-dlm-client.fullname" . }}-integration-verification
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "ska-dlm-client.integration-verification.labels" . | indent 4 }}
@@ -14,9 +14,9 @@ spec:
     spec:
       restartPolicy: Never
       containers:
-      - name: setup-storage-location
-        image: {{ .Values.kafka_watcher.image }}:{{ .Values.kafka_watcher.version }}
-        imagePullPolicy: {{ .Values.kafka_watcher.imagePullPolicy }}
+      - name: integration-verification
+        image: {{ .Values.directory_watcher.image}}:{{ .Values.directory_watcher.version }}
+        imagePullPolicy: {{ .Values.directory_watcher.imagePullPolicy }}
         command:
         - "dlm-client-integration-verification"
         - "--directory-to-create-symlinks"
