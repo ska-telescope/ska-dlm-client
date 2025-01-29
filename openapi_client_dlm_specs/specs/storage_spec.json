@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "0.1.0"
+        "version": "0.2.0"
     },
     "paths": {
         "/storage/query_location": {
@@ -16,7 +16,7 @@
                 "tags": [
                     "storage"
                 ],
-                "description": "Query a location by at least specifying a location_name.",
+                "description": "Query a location.",
                 "operationId": "query_location_storage_query_location_get",
                 "parameters": [
                     {
@@ -72,7 +72,7 @@
                 "tags": [
                     "storage"
                 ],
-                "description": "Intialize a new storage by at least specifying a storage_name.",
+                "description": "Initialize a new storage.\n\nlocation_name or location_id is required.",
                 "operationId": "init_storage_storage_init_storage_post",
                 "parameters": [
                     {
@@ -109,13 +109,30 @@
                         "description": "storage interface for rclone access, e.g. \"posix\", \"s3\""
                     },
                     {
+                        "name": "root_directory",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "data directory as an absolute path on the remote storage endpoint",
+                            "title": "Root Directory"
+                        },
+                        "description": "data directory as an absolute path on the remote storage endpoint"
+                    },
+                    {
                         "name": "location_id",
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
                             "description": "a dlm registered location id",
-                            "default": "",
                             "title": "Location Id"
                         },
                         "description": "a dlm registered location id"
@@ -125,9 +142,15 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
                             "description": "a dlm registered location name",
-                            "default": "",
                             "title": "Location Name"
                         },
                         "description": "a dlm registered location name"
@@ -170,7 +193,7 @@
                                     }
                                 ],
                                 "description": "extra rclone values such as secrets required for connection",
-                                "title": "Json Data"
+                                "title": "Rclone Config"
                             }
                         }
                     }
@@ -347,12 +370,12 @@
         },
         "/storage/rclone_config": {
             "post": {
-                "summary": "Rclone Config",
+                "summary": "Create Rclone Config",
                 "tags": [
                     "storage"
                 ],
                 "description": "Create a new rclone backend configuration entry on the rclone server.",
-                "operationId": "rclone_config_storage_rclone_config_post",
+                "operationId": "create_rclone_config_storage_rclone_config_post",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -483,7 +506,7 @@
                 "tags": [
                     "storage"
                 ],
-                "description": "Query a storage by at least specifying a storage_name.",
+                "description": "Query a storage.",
                 "operationId": "query_storage_storage_query_storage_get",
                 "parameters": [
                     {

@@ -35,6 +35,263 @@ class StorageApi:
         self.api_client = api_client
 
     @validate_call
+    def create_rclone_config_storage_rclone_config_post(
+        self,
+        body: Dict[str, Any],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        """Create Rclone Config
+
+        Create a new rclone backend configuration entry on the rclone server.
+
+        Parameters
+        ----------
+        body : object
+            (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._create_rclone_config_storage_rclone_config_post_serialize(
+            body=body,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def create_rclone_config_storage_rclone_config_post_with_http_info(
+        self,
+        body: Dict[str, Any],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[object]:
+        """Create Rclone Config
+
+        Create a new rclone backend configuration entry on the rclone server.
+
+        Parameters
+        ----------
+        body : object
+            (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._create_rclone_config_storage_rclone_config_post_serialize(
+            body=body,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def create_rclone_config_storage_rclone_config_post_without_preload_content(
+        self,
+        body: Dict[str, Any],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Create Rclone Config
+
+        Create a new rclone backend configuration entry on the rclone server.
+
+        Parameters
+        ----------
+        body : object
+            (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._create_rclone_config_storage_rclone_config_post_serialize(
+            body=body,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _create_rclone_config_storage_rclone_config_post_serialize(
+        self,
+        body,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if body is not None:
+            _body_params = body
+
+        # set the HTTP header `Accept`
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params["Content-Type"] = _content_type
+        else:
+            _default_content_type = self.api_client.select_header_content_type(
+                ["application/json"]
+            )
+            if _default_content_type is not None:
+                _header_params["Content-Type"] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method="POST",
+            resource_path="/storage/rclone_config",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
     def create_storage_config_storage_create_storage_config_post(
         self,
         body: Dict[str, Any],
@@ -1032,6 +1289,10 @@ class StorageApi:
         storage_interface: Annotated[
             StrictStr, Field(description='storage interface for rclone access, e.g. "posix", "s3"')
         ],
+        root_directory: Annotated[
+            StrictStr,
+            Field(description="data directory as an absolute path on the remote storage endpoint"),
+        ],
         location_id: Annotated[
             Optional[StrictStr], Field(description="a dlm registered location id")
         ] = None,
@@ -1057,7 +1318,7 @@ class StorageApi:
     ) -> object:
         """Init Storage
 
-        Intialize a new storage by at least specifying a storage_name.
+        Initialize a new storage.  location_name or location_id is required.
 
         Parameters
         ----------
@@ -1069,6 +1330,9 @@ class StorageApi:
         storage_interface : str
             storage interface for rclone access, e.g. \"posix\", \"s3\"
             (required)
+        root_directory : str
+            data directory as an absolute path on the remote storage
+            endpoint (required)
         location_id : str
             a dlm registered location id
         location_name : str
@@ -1108,6 +1372,7 @@ class StorageApi:
             storage_name=storage_name,
             storage_type=storage_type,
             storage_interface=storage_interface,
+            root_directory=root_directory,
             location_id=location_id,
             location_name=location_name,
             storage_capacity=storage_capacity,
@@ -1142,6 +1407,10 @@ class StorageApi:
         storage_interface: Annotated[
             StrictStr, Field(description='storage interface for rclone access, e.g. "posix", "s3"')
         ],
+        root_directory: Annotated[
+            StrictStr,
+            Field(description="data directory as an absolute path on the remote storage endpoint"),
+        ],
         location_id: Annotated[
             Optional[StrictStr], Field(description="a dlm registered location id")
         ] = None,
@@ -1167,7 +1436,7 @@ class StorageApi:
     ) -> ApiResponse[object]:
         """Init Storage
 
-        Intialize a new storage by at least specifying a storage_name.
+        Initialize a new storage.  location_name or location_id is required.
 
         Parameters
         ----------
@@ -1179,6 +1448,9 @@ class StorageApi:
         storage_interface : str
             storage interface for rclone access, e.g. \"posix\", \"s3\"
             (required)
+        root_directory : str
+            data directory as an absolute path on the remote storage
+            endpoint (required)
         location_id : str
             a dlm registered location id
         location_name : str
@@ -1218,6 +1490,7 @@ class StorageApi:
             storage_name=storage_name,
             storage_type=storage_type,
             storage_interface=storage_interface,
+            root_directory=root_directory,
             location_id=location_id,
             location_name=location_name,
             storage_capacity=storage_capacity,
@@ -1252,6 +1525,10 @@ class StorageApi:
         storage_interface: Annotated[
             StrictStr, Field(description='storage interface for rclone access, e.g. "posix", "s3"')
         ],
+        root_directory: Annotated[
+            StrictStr,
+            Field(description="data directory as an absolute path on the remote storage endpoint"),
+        ],
         location_id: Annotated[
             Optional[StrictStr], Field(description="a dlm registered location id")
         ] = None,
@@ -1277,7 +1554,7 @@ class StorageApi:
     ) -> RESTResponseType:
         """Init Storage
 
-        Intialize a new storage by at least specifying a storage_name.
+        Initialize a new storage.  location_name or location_id is required.
 
         Parameters
         ----------
@@ -1289,6 +1566,9 @@ class StorageApi:
         storage_interface : str
             storage interface for rclone access, e.g. \"posix\", \"s3\"
             (required)
+        root_directory : str
+            data directory as an absolute path on the remote storage
+            endpoint (required)
         location_id : str
             a dlm registered location id
         location_name : str
@@ -1328,6 +1608,7 @@ class StorageApi:
             storage_name=storage_name,
             storage_type=storage_type,
             storage_interface=storage_interface,
+            root_directory=root_directory,
             location_id=location_id,
             location_name=location_name,
             storage_capacity=storage_capacity,
@@ -1351,6 +1632,7 @@ class StorageApi:
         storage_name,
         storage_type,
         storage_interface,
+        root_directory,
         location_id,
         location_name,
         storage_capacity,
@@ -1386,6 +1668,10 @@ class StorageApi:
         if storage_interface is not None:
 
             _query_params.append(("storage_interface", storage_interface))
+
+        if root_directory is not None:
+
+            _query_params.append(("root_directory", root_directory))
 
         if location_id is not None:
 
@@ -1464,7 +1750,7 @@ class StorageApi:
     ) -> object:
         """Query Location
 
-        Query a location by at least specifying a location_name.
+        Query a location.
 
         Parameters
         ----------
@@ -1542,7 +1828,7 @@ class StorageApi:
     ) -> ApiResponse[object]:
         """Query Location
 
-        Query a location by at least specifying a location_name.
+        Query a location.
 
         Parameters
         ----------
@@ -1620,7 +1906,7 @@ class StorageApi:
     ) -> RESTResponseType:
         """Query Location
 
-        Query a location by at least specifying a location_name.
+        Query a location.
 
         Parameters
         ----------
@@ -1751,7 +2037,7 @@ class StorageApi:
     ) -> object:
         """Query Storage
 
-        Query a storage by at least specifying a storage_name.
+        Query a storage.
 
         Parameters
         ----------
@@ -1829,7 +2115,7 @@ class StorageApi:
     ) -> ApiResponse[object]:
         """Query Storage
 
-        Query a storage by at least specifying a storage_name.
+        Query a storage.
 
         Parameters
         ----------
@@ -1907,7 +2193,7 @@ class StorageApi:
     ) -> RESTResponseType:
         """Query Storage
 
-        Query a storage by at least specifying a storage_name.
+        Query a storage.
 
         Parameters
         ----------
@@ -2003,263 +2289,6 @@ class StorageApi:
         return self.api_client.param_serialize(
             method="GET",
             resource_path="/storage/query_storage",
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
-            body=_body_params,
-            post_params=_form_params,
-            files=_files,
-            auth_settings=_auth_settings,
-            collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth,
-        )
-
-    @validate_call
-    def rclone_config_storage_rclone_config_post(
-        self,
-        body: Dict[str, Any],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
-        """Rclone Config
-
-        Create a new rclone backend configuration entry on the rclone server.
-
-        Parameters
-        ----------
-        body : object
-            (required)
-        _request_timeout : int, tuple(int, int), optional
-            timeout setting for this request. If one number provided, it
-            will be total request timeout. It can also be a pair (tuple)
-            of (connection, read) timeouts.
-        _request_auth : dict, optional
-            set to override the auth_settings for an a single request;
-            this effectively ignores the authentication in the spec for
-            a single request.
-        _content_type : str, Optional
-            force content-type for the request.
-        _headers : dict, optional
-            set to override the headers for a single request; this
-            effectively ignores the headers in the spec for a single
-            request.
-        _host_index : int, optional
-            set to override the host_index for a single request; this
-            effectively ignores the host_index in the spec for a single
-            request.
-
-        Returns
-        -------
-        unknown
-            Returns the result object.
-        """
-        # noqa: E501
-
-        _param = self._rclone_config_storage_rclone_config_post_serialize(
-            body=body,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index,
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
-            "422": "HTTPValidationError",
-        }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-    @validate_call
-    def rclone_config_storage_rclone_config_post_with_http_info(
-        self,
-        body: Dict[str, Any],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
-        """Rclone Config
-
-        Create a new rclone backend configuration entry on the rclone server.
-
-        Parameters
-        ----------
-        body : object
-            (required)
-        _request_timeout : int, tuple(int, int), optional
-            timeout setting for this request. If one number provided, it
-            will be total request timeout. It can also be a pair (tuple)
-            of (connection, read) timeouts.
-        _request_auth : dict, optional
-            set to override the auth_settings for an a single request;
-            this effectively ignores the authentication in the spec for
-            a single request.
-        _content_type : str, Optional
-            force content-type for the request.
-        _headers : dict, optional
-            set to override the headers for a single request; this
-            effectively ignores the headers in the spec for a single
-            request.
-        _host_index : int, optional
-            set to override the host_index for a single request; this
-            effectively ignores the host_index in the spec for a single
-            request.
-
-        Returns
-        -------
-        unknown
-            Returns the result object.
-        """
-        # noqa: E501
-
-        _param = self._rclone_config_storage_rclone_config_post_serialize(
-            body=body,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index,
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
-            "422": "HTTPValidationError",
-        }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-    @validate_call
-    def rclone_config_storage_rclone_config_post_without_preload_content(
-        self,
-        body: Dict[str, Any],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Rclone Config
-
-        Create a new rclone backend configuration entry on the rclone server.
-
-        Parameters
-        ----------
-        body : object
-            (required)
-        _request_timeout : int, tuple(int, int), optional
-            timeout setting for this request. If one number provided, it
-            will be total request timeout. It can also be a pair (tuple)
-            of (connection, read) timeouts.
-        _request_auth : dict, optional
-            set to override the auth_settings for an a single request;
-            this effectively ignores the authentication in the spec for
-            a single request.
-        _content_type : str, Optional
-            force content-type for the request.
-        _headers : dict, optional
-            set to override the headers for a single request; this
-            effectively ignores the headers in the spec for a single
-            request.
-        _host_index : int, optional
-            set to override the host_index for a single request; this
-            effectively ignores the host_index in the spec for a single
-            request.
-
-        Returns
-        -------
-        unknown
-            Returns the result object.
-        """
-        # noqa: E501
-
-        _param = self._rclone_config_storage_rclone_config_post_serialize(
-            body=body,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index,
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
-            "422": "HTTPValidationError",
-        }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
-        return response_data.response
-
-    def _rclone_config_storage_rclone_config_post_serialize(
-        self,
-        body,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> RequestSerialized:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {}
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
-        _body_params: Optional[bytes] = None
-
-        # process the path parameters
-        # process the query parameters
-        # process the header parameters
-        # process the form parameters
-        # process the body parameter
-        if body is not None:
-            _body_params = body
-
-        # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
-
-        # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params["Content-Type"] = _content_type
-        else:
-            _default_content_type = self.api_client.select_header_content_type(
-                ["application/json"]
-            )
-            if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
-
-        # authentication setting
-        _auth_settings: List[str] = []
-
-        return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/storage/rclone_config",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
