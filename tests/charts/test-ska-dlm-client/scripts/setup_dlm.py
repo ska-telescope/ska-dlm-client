@@ -70,7 +70,7 @@ def init_storage_for_testing(
     storage_root_directory: str,
     the_location_id: str,
 ) -> str:
-    """Perform storge initialisation to be used when testing."""
+    """Perform storage initialisation to be used when testing."""
     assert the_location_id is not None
     with api_client.ApiClient(storage_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
