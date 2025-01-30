@@ -16,6 +16,7 @@ directory_watcher:
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
   version: "0.1.0-dev.ca4ce2f13"
   directory_to_watch: "/data/dlm"
+  storage_root_directory: "/data"
 
 ska_dlm:
   fullname: "ska-dlm"

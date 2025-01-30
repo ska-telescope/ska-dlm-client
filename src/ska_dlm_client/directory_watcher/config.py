@@ -1,5 +1,7 @@
 """Class to hold the configuration used by the directory_watcher package."""
 
+import os.path
+
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntries
 from ska_dlm_client.openapi import configuration
 from ska_dlm_client.openapi.configuration import Configuration
@@ -24,6 +26,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
     use_status_file: bool
     directory_watcher_entries: DirectoryWatcherEntries
     ingest_configuration: Configuration
+    ingest_register_path_to_add: str
 
     def __init__(  # pylint: disable=too-many-arguments, disable=too-many-positional-arguments
         self,
@@ -48,6 +51,11 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
             reload_from_status_file=self.reload_status_file,
         )
         self.ingest_configuration = configuration.Configuration(host=self.ingest_server_url)
+        # We need to know the relative path from the storage root directory to the watch directory
+        # as this path is prepended to any found files/directories in the watch directory.
+        self.ingest_register_path_to_add = os.path.relpath(
+            path=self.directory_to_watch, start=self.storage_root_directory
+        )
 
     def __str__(self):
         """Create a string from this class."""
@@ -61,4 +69,5 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
             f"use_stat_file {self.use_status_file}\n"
             f"ingest_configuration {self.ingest_configuration}\n"
             f"directory_watcher_entries {self.directory_watcher_entries}\n"
+            f"ingest_register_path_to_add {self.ingest_register_path_to_add}\n"
         )

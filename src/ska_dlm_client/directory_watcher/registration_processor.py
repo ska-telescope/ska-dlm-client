@@ -43,8 +43,8 @@ class RegistrationProcessor:
             try:
                 uri = (
                     relative_path
-                    if self._config.register_dir_prefix == ""
-                    else f"{self._config.register_dir_prefix}/{relative_path}"
+                    if self._config.ingest_register_path_to_add == ""
+                    else f"{self._config.ingest_register_path_to_add}/{relative_path}"
                 )
                 response = api_ingest.register_data_item_ingest_register_data_item_post(
                     item_name=relative_path,
