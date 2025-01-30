@@ -33,6 +33,13 @@ class TestMigrationApi(unittest.TestCase):
         """
         pass
 
+    def test_query_migrations_migration_query_migrations_get(self) -> None:
+        """Test case for query_migrations_migration_query_migrations_get
+
+        Query Migrations
+        """
+        pass
+
 
 if __name__ == "__main__":
     unittest.main()

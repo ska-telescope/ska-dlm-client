@@ -18,7 +18,7 @@ Method | HTTP request | Description
 
 Query Data Item
 
-Query a new data_item by at least specifying an item_name.
+Query a data_item.  At least one of item_name, oid, uid, or params is required.
 
 ### Example
 
@@ -228,7 +228,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_exists_request_query_exists_get**
-> object query_exists_request_query_exists_get(item_name=item_name, oid=oid, uid=uid, body=body)
+> object query_exists_request_query_exists_get(item_name=item_name, oid=oid, uid=uid, ready=ready)
 
 Query Exists
 
@@ -256,11 +256,11 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     item_name = '' # str | optional item_name (optional) (default to '')
     oid = '' # str | the oid to be searched for (optional) (default to '')
     uid = '' # str | this returns only one storage_id (optional) (default to '')
-    body = True # bool |  (optional)
+    ready = False # bool | whether the item must be in ready state. (optional) (default to False)
 
     try:
         # Query Exists
-        api_response = api_instance.query_exists_request_query_exists_get(item_name=item_name, oid=oid, uid=uid, body=body)
+        api_response = api_instance.query_exists_request_query_exists_get(item_name=item_name, oid=oid, uid=uid, ready=ready)
         print("The response of RequestApi->query_exists_request_query_exists_get:\n")
         pprint(api_response)
     except Exception as e:
@@ -277,7 +277,7 @@ Name | Type | Description  | Notes
  **item_name** | **str**| optional item_name | [optional] [default to &#39;&#39;]
  **oid** | **str**| the oid to be searched for | [optional] [default to &#39;&#39;]
  **uid** | **str**| this returns only one storage_id | [optional] [default to &#39;&#39;]
- **body** | **bool**|  | [optional] 
+ **ready** | **bool**| whether the item must be in ready state. | [optional] [default to False]
 
 ### Return type
 
@@ -289,7 +289,7 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 ### HTTP response details

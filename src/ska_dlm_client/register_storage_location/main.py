@@ -53,9 +53,12 @@ def init_location_for_testing(storage_configuration: Configuration) -> str:
 
 
 def init_storage_for_testing(
-    storage_name: str, storage_configuration: Configuration, the_location_id: str
+    storage_name: str,
+    storage_configuration: Configuration,
+    storage_root_directory: str,
+    the_location_id: str,
 ) -> str:
-    """Perform storge initialisation to be used when testing."""
+    """Perform storage initialisation to be used when testing."""
     assert the_location_id is not None
     with api_client.ApiClient(storage_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
@@ -73,6 +76,7 @@ def init_storage_for_testing(
                 storage_name=storage_name,
                 storage_type=STORAGE_TYPE,
                 storage_interface=STORAGE_INTERFACE,
+                root_directory=storage_root_directory,
                 location_id=the_location_id,
                 location_name=LOCATION_NAME,
             )
@@ -92,7 +96,9 @@ def init_storage_for_testing(
     return the_storage_id
 
 
-def setup_testing(storage_name: str, storage_configuration: Configuration):
+def setup_testing(
+    storage_name: str, storage_configuration: Configuration, storage_root_directory: str
+):
     """Complete configuration of the environment."""
     # TODO: It would be expected that the following config would already be
     # completed in prod but leaving in place for now.
@@ -101,6 +107,7 @@ def setup_testing(storage_name: str, storage_configuration: Configuration):
     storage_id = init_storage_for_testing(
         storage_name=storage_name,
         storage_configuration=storage_configuration,
+        storage_root_directory=storage_root_directory,
         the_location_id=location_id,
     )
     logger.info("location id %s and storage id %s", location_id, storage_id)
@@ -125,6 +132,13 @@ def create_parser() -> argparse.ArgumentParser:
         required=True,
         help="Storage service URL.",
     )
+    parser.add_argument(
+        "-r",
+        "--storage-root-directory",
+        type=str,
+        required=True,
+        help="Storage root directory.",
+    )
     return parser
 
 
@@ -133,7 +147,7 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
     storage_configuration = Configuration(host=args.storage_server_url)
-    setup_testing(args.storage_name, storage_configuration)
+    setup_testing(args.storage_name, storage_configuration, args.storage_root_directory)
 
 
 if __name__ == "__main__":
