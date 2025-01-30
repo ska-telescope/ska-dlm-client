@@ -45,12 +45,12 @@ def create_parser() -> argparse.ArgumentParser:
         help="The name by which the DLM system know the storage as.",
     )
     parser.add_argument(
-        "-p",
-        "--register-dir-prefix",
+        "-r",
+        "--storage-root-directory",
         type=str,
-        required=False,
+        required=True,
         default="",
-        help="The prefix to add to any data item being registered.",
+        help="The root directory of the assocated storage, used to match relative path names.",
     )
     parser.add_argument(
         "--use-polling-watcher",
@@ -86,8 +86,8 @@ def process_args(args: argparse.Namespace) -> Config:
         directory_to_watch=args.directory_to_watch,
         ingest_server_url=args.ingest_server_url,
         storage_name=args.storage_name,
-        register_dir_prefix=args.register_dir_prefix,
         status_file_absolute_path=f"{args.directory_to_watch}/{args.status_file_filename}",
+        storage_root_directory=args.storage_root_directory,
         reload_status_file=args.reload_status_file,
         use_status_file=args.use_status_file,
     )
