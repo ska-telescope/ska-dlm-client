@@ -93,9 +93,9 @@ class TestDirectoryWatcher:
         a_temp_file_relative_path = a_temp_file.replace(f"{self.the_watch_dir}/", "")
         # On MacOS the system messes with the path by adding a /private
         absolute_path = registration_processor.absolute_path.replace("/private", "")
-        relative_path = registration_processor.relative_path.replace("/private", "")
+        path_rel_to_watch_dir = registration_processor.path_rel_to_watch_dir.replace("/private", "")
         assert a_temp_file == absolute_path
-        assert a_temp_file_relative_path == relative_path
+        assert a_temp_file_relative_path == path_rel_to_watch_dir
         Path(a_temp_file).unlink()
 
 
@@ -103,9 +103,9 @@ class MockRegistrationProcessor(RegistrationProcessor):
     """A class to use for test of directory watcher."""
 
     absolute_path: str
-    relative_path: str
+    path_rel_to_watch_dir: str
 
-    def add_path(self, absolute_path: str, relative_path: str):
+    def add_path(self, absolute_path: str, path_rel_to_watch_dir: str):
         """Perform testing on the given paths."""
         self.absolute_path = absolute_path
-        self.relative_path = relative_path
+        self.path_rel_to_watch_dir = path_rel_to_watch_dir

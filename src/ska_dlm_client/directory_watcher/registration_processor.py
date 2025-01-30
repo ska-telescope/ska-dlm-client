@@ -36,18 +36,18 @@ class RegistrationProcessor:
             path.resolve()
         return path
 
-    def _register_entry(self, relative_path: str, metadata: dict):
+    def _register_entry(self, path_rel_to_watch_dir: str, metadata: dict):
         """Register the given entry_path."""
         with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
             try:
                 uri = (
-                    relative_path
+                    path_rel_to_watch_dir
                     if self._config.ingest_register_path_to_add == ""
-                    else f"{self._config.ingest_register_path_to_add}/{relative_path}"
+                    else f"{self._config.ingest_register_path_to_add}/{path_rel_to_watch_dir}"
                 )
                 response = api_ingest.register_data_item_ingest_register_data_item_post(
-                    item_name=relative_path,
+                    item_name=path_rel_to_watch_dir,
                     uri=uri,
                     storage_name=self._config.storage_name,
                     body=metadata,
@@ -62,17 +62,17 @@ class RegistrationProcessor:
         time_registered = time.time()
 
         directory_watcher_entry = DirectoryWatcherEntry(
-            file_or_directory=relative_path,
+            file_or_directory=path_rel_to_watch_dir,
             dlm_storage_name=self._config.storage_name,
             dlm_registration_id=dlm_registration_id,
             time_registered=time_registered,
         )
         self._config.directory_watcher_entries.add(directory_watcher_entry)
         self._config.directory_watcher_entries.save_to_file()
-        logger.info("entry %s added.", relative_path)
+        logger.info("entry %s added.", path_rel_to_watch_dir)
 
-    def add_path(self, absolute_path: str, relative_path: str):
-        """Add the given relative_path to the DLM.
+    def add_path(self, absolute_path: str, path_rel_to_watch_dir: str):
+        """Add the given path_rel_to_watch_dir to the DLM.
 
         If absolute_path is a file, a single file will be registered with the DLM.
         If absolute_path is a directory, and it is an MS, then ingest a single data
@@ -80,9 +80,9 @@ class RegistrationProcessor:
         If absolute_path is a directory, and it is NOT an MS, then recursively ingest
         all files and subdirectories
         """
-        logger.info("in add_path with %s and %s", absolute_path, relative_path)
+        logger.info("in add_path with %s and %s", absolute_path, path_rel_to_watch_dir)
         data_item_relative_path_list, metadata = generate_paths_and_metadata(
-            absolute_path=absolute_path, relative_path=relative_path
+            absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
         )
         logger.info("data_item_relative_path_list %s", data_item_relative_path_list)
         logger.info("metadata %s", metadata)
@@ -91,7 +91,7 @@ class RegistrationProcessor:
         else:
             for data_item_relative_path in data_item_relative_path_list:
                 # Send the same metadata for each data item
-                self._register_entry(relative_path=data_item_relative_path, metadata=metadata)
+                self._register_entry(path_rel_to_watch_dir=data_item_relative_path, metadata=metadata)
 
 
 def _directory_contains_only_files(absolute_path: str) -> bool:
@@ -102,23 +102,23 @@ def _directory_contains_only_files(absolute_path: str) -> bool:
     return True
 
 
-def _directory_list_minus_metadata_file(absolute_path: str, relative_path: str) -> list[str]:
+def _directory_list_minus_metadata_file(absolute_path: str, path_rel_to_watch_dir: str) -> list[str]:
     """Return a listing of the given absolute_path directory without the metadata file."""
     path_list: list[str] = []
     for entry in os.listdir(absolute_path):
         if not entry == ska_dlm_client.directory_watcher.config.METADATA_FILENAME:
-            path_list.append(os.path.join(relative_path, entry))
+            path_list.append(os.path.join(path_rel_to_watch_dir, entry))
     return path_list
 
 
-def generate_paths_and_metadata(absolute_path: str, relative_path: str) -> tuple[list[str], dict]:
+def generate_paths_and_metadata(absolute_path: str, path_rel_to_watch_dir: str) -> tuple[list[str], dict]:
     """Return the list of relative paths to data items and their associated metadata."""
     logger.info("working with path %s", absolute_path)
     relative_path_list = None
     metadata = None
     if isfile(absolute_path):
         logger.info("entry is file")
-        relative_path_list = [relative_path]
+        relative_path_list = [path_rel_to_watch_dir]
         metadata = DataProductMetadata(absolute_path).as_dict()
     elif isdir(absolute_path):
         if islink(absolute_path):
@@ -130,14 +130,14 @@ def generate_paths_and_metadata(absolute_path: str, relative_path: str) -> tuple
             logger.info("entry is directory")
 
         # if a measurement set then just add directory
-        if relative_path.lower().endswith(
+        if path_rel_to_watch_dir.lower().endswith(
             ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
         ):
-            relative_path_list = [relative_path]
+            relative_path_list = [path_rel_to_watch_dir]
             metadata = DataProductMetadata(absolute_path).as_dict()
         else:
             relative_path_list = _directory_list_minus_metadata_file(
-                absolute_path=absolute_path, relative_path=relative_path
+                absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
             )
             logger.info("%s: %s", absolute_path, relative_path_list)
             if _directory_contains_only_files(absolute_path):
