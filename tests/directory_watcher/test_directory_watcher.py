@@ -93,7 +93,9 @@ class TestDirectoryWatcher:
         a_temp_file_relative_path = a_temp_file.replace(f"{self.the_watch_dir}/", "")
         # On MacOS the system messes with the path by adding a /private
         absolute_path = registration_processor.absolute_path.replace("/private", "")
-        path_rel_to_watch_dir = registration_processor.path_rel_to_watch_dir.replace("/private", "")
+        path_rel_to_watch_dir = registration_processor.path_rel_to_watch_dir.replace(
+            "/private", ""
+        )
         assert a_temp_file == absolute_path
         assert a_temp_file_relative_path == path_rel_to_watch_dir
         Path(a_temp_file).unlink()

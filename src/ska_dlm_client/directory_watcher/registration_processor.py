@@ -91,7 +91,9 @@ class RegistrationProcessor:
         else:
             for data_item_relative_path in data_item_relative_path_list:
                 # Send the same metadata for each data item
-                self._register_entry(path_rel_to_watch_dir=data_item_relative_path, metadata=metadata)
+                self._register_entry(
+                    path_rel_to_watch_dir=data_item_relative_path, metadata=metadata
+                )
 
 
 def _directory_contains_only_files(absolute_path: str) -> bool:
@@ -102,7 +104,9 @@ def _directory_contains_only_files(absolute_path: str) -> bool:
     return True
 
 
-def _directory_list_minus_metadata_file(absolute_path: str, path_rel_to_watch_dir: str) -> list[str]:
+def _directory_list_minus_metadata_file(
+    absolute_path: str, path_rel_to_watch_dir: str
+) -> list[str]:
     """Return a listing of the given absolute_path directory without the metadata file."""
     path_list: list[str] = []
     for entry in os.listdir(absolute_path):
@@ -111,7 +115,9 @@ def _directory_list_minus_metadata_file(absolute_path: str, path_rel_to_watch_di
     return path_list
 
 
-def generate_paths_and_metadata(absolute_path: str, path_rel_to_watch_dir: str) -> tuple[list[str], dict]:
+def generate_paths_and_metadata(
+    absolute_path: str, path_rel_to_watch_dir: str
+) -> tuple[list[str], dict]:
     """Return the list of relative paths to data items and their associated metadata."""
     logger.info("working with path %s", absolute_path)
     relative_path_list = None
