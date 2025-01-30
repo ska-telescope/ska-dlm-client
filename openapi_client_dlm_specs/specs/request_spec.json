@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "0.1.0"
+        "version": "0.2.0"
     },
     "paths": {
         "/request/query_data_item": {
@@ -16,7 +16,7 @@
                 "tags": [
                     "request"
                 ],
-                "description": "Query a new data_item by at least specifying an item_name.",
+                "description": "Query a data_item.\n\nAt least one of item_name, oid, uid, or params is required.",
                 "operationId": "query_data_item_request_query_data_item_get",
                 "parameters": [
                     {
@@ -290,20 +290,20 @@
                             "title": "Uid"
                         },
                         "description": "this returns only one storage_id"
+                    },
+                    {
+                        "name": "ready",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "description": "whether the item must be in ready state.",
+                            "default": false,
+                            "title": "Ready"
+                        },
+                        "description": "whether the item must be in ready state."
                     }
                 ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "boolean",
-                                "description": "whether the item must be in ready state.",
-                                "default": false,
-                                "title": "Ready"
-                            }
-                        }
-                    }
-                },
                 "responses": {
                     "200": {
                         "description": "Successful Response",

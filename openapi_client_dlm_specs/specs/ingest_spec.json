@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "0.1.0"
+        "version": "0.2.0"
     },
     "paths": {
         "/ingest/init_data_item": {
@@ -16,7 +16,7 @@
                 "tags": [
                     "ingest"
                 ],
-                "description": "Initialize a new data_item by at least specifying an item_name.",
+                "description": "Initialize a new data_item.\n\nitem_name or json_data is required.",
                 "operationId": "init_data_item_ingest_init_data_item_post",
                 "parameters": [
                     {
@@ -24,9 +24,15 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
                             "description": "the item_name, can be empty, but then json_data has to be specified.",
-                            "default": "",
                             "title": "Item Name"
                         },
                         "description": "the item_name, can be empty, but then json_data has to be specified."
@@ -74,7 +80,7 @@
                                         "type": "null"
                                     }
                                 ],
-                                "description": "provides the ability to specify all values.",
+                                "description": "data item table values.",
                                 "title": "Json Data"
                             }
                         }
@@ -108,7 +114,7 @@
                 "tags": [
                     "ingest"
                 ],
-                "description": "Ingest a data_item (register function is an alias).\n\nThis high level function is a combination of init_data_item, set_uri and set_state(READY).\nIt also checks whether a data_item is already registered on the requested storage.\n\n(1) check whether requested storage is known and accessible\n(2) check whether item is accessible/exists on that storage\n(3) check whether item is already registered on that storage\n(4) initialize the new item with the same OID on the new storage\n(5) set state to READY\n(6) generate metadata\n(7) notify the data dashboard",
+                "description": "Ingest a data_item (register function is an alias).\n\nThis high level function is a combination of init_data_item, set_uri and set_state(READY).\nIt also checks whether a data_item is already registered on the requested storage.\n\n(1) check whether requested storage is known and accessible\n(2) check whether item is accessible/exists on that storage\n(3) check whether item is already registered on that storage\n(4) initialize the new item with the same OID on the new storage\n(5) set state to READY\n(6) save metadata\n(7) notify the data dashboard",
                 "operationId": "register_data_item_ingest_register_data_item_post",
                 "parameters": [
                     {
@@ -125,14 +131,22 @@
                     {
                         "name": "uri",
                         "in": "query",
-                        "required": false,
+                        "required": true,
                         "schema": {
                             "type": "string",
-                            "description": "the access path to the payload.",
-                            "default": "",
+                            "description": "the relative access path to the payload.",
                             "title": "Uri"
                         },
-                        "description": "the access path to the payload."
+                        "description": "the relative access path to the payload."
+                    },
+                    {
+                        "name": "item_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/ItemType",
+                            "default": "file"
+                        }
                     },
                     {
                         "name": "storage_name",
@@ -159,7 +173,7 @@
                         "description": "the ID of the configured storage."
                     },
                     {
-                        "name": "item_format",
+                        "name": "parents",
                         "in": "query",
                         "required": false,
                         "schema": {
@@ -171,11 +185,10 @@
                                     "type": "null"
                                 }
                             ],
-                            "description": "format of the data item",
-                            "default": "unknown",
-                            "title": "Item Format"
+                            "description": "uuid of parent item",
+                            "title": "Parents"
                         },
-                        "description": "format of the data item"
+                        "description": "uuid of parent item"
                     },
                     {
                         "name": "eb_id",
@@ -269,6 +282,16 @@
                 },
                 "type": "object",
                 "title": "HTTPValidationError"
+            },
+            "ItemType": {
+                "type": "string",
+                "enum": [
+                    "unkown",
+                    "file",
+                    "container"
+                ],
+                "title": "ItemType",
+                "description": "Data Item on the filesystem."
             },
             "ValidationError": {
                 "properties": {

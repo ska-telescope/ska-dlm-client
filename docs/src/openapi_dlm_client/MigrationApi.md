@@ -5,14 +5,15 @@ All URIs are relative to *http://localhost:8080*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**copy_data_item_migration_copy_data_item_post**](MigrationApi.md#copy_data_item_migration_copy_data_item_post) | **POST** /migration/copy_data_item | Copy Data Item
+[**query_migrations_migration_query_migrations_get**](MigrationApi.md#query_migrations_migration_query_migrations_get) | **GET** /migration/query_migrations | Query Migrations
 
 
 # **copy_data_item_migration_copy_data_item_post**
-> object copy_data_item_migration_copy_data_item_post(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path)
+> object copy_data_item_migration_copy_data_item_post(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, authorization=authorization)
 
 Copy Data Item
 
-Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one(first) storage_id to a configured rclone backend (3) check whether item already exists on destination (4) initialize the new item with the same OID on the new storage (5) use the rclone copy command to copy it to the new location (6) make sure the copy was successful
+Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialize the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) make sure the copy was successful
 
 ### Example
 
@@ -38,11 +39,12 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     uid = '' # str | Return data_item referred to by the UID provided, by default \"\" (optional) (default to '')
     destination_name = '' # str | the name of the destination storage volume, by default \"\" (optional) (default to '')
     destination_id = '' # str | the destination storage, by default \"\" (optional) (default to '')
-    path = '' # str | the destination path, by default \"\" (optional) (default to '')
+    path = '' # str | the destination path relative to storage root, by default \"\" (optional) (default to '')
+    authorization = 'authorization_example' # str | Validated Bearer token with UserInfo (optional)
 
     try:
         # Copy Data Item
-        api_response = api_instance.copy_data_item_migration_copy_data_item_post(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path)
+        api_response = api_instance.copy_data_item_migration_copy_data_item_post(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, authorization=authorization)
         print("The response of MigrationApi->copy_data_item_migration_copy_data_item_post:\n")
         pprint(api_response)
     except Exception as e:
@@ -61,7 +63,76 @@ Name | Type | Description  | Notes
  **uid** | **str**| Return data_item referred to by the UID provided, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
  **destination_name** | **str**| the name of the destination storage volume, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
  **destination_id** | **str**| the destination storage, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
- **path** | **str**| the destination path, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
+ **path** | **str**| the destination path relative to storage root, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
+ **authorization** | **str**| Validated Bearer token with UserInfo | [optional] 
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **query_migrations_migration_query_migrations_get**
+> object query_migrations_migration_query_migrations_get(authorization=authorization)
+
+Query Migrations
+
+Query for all migrations by a given user.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.MigrationApi(api_client)
+    authorization = 'authorization_example' # str | Validated Bearer token with UserInfo (optional)
+
+    try:
+        # Query Migrations
+        api_response = api_instance.query_migrations_migration_query_migrations_get(authorization=authorization)
+        print("The response of MigrationApi->query_migrations_migration_query_migrations_get:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling MigrationApi->query_migrations_migration_query_migrations_get: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **authorization** | **str**| Validated Bearer token with UserInfo | [optional] 
 
 ### Return type
 

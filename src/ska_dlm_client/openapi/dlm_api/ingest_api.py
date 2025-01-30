@@ -14,7 +14,7 @@ Do not edit the class manually.
 import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from pydantic import Field, StrictFloat, StrictInt, StrictStr, validate_call
+from pydantic import Field, StrictFloat, StrictInt, StrictStr, field_validator, validate_call
 from typing_extensions import Annotated
 
 from ska_dlm_client.openapi.api_client import ApiClient, RequestSerialized
@@ -65,7 +65,7 @@ class IngestApi:
     ) -> object:
         """Init Data Item
 
-        Initialize a new data_item by at least specifying an item_name.
+        Initialize a new data_item.  item_name or json_data is required.
 
         Parameters
         ----------
@@ -157,7 +157,7 @@ class IngestApi:
     ) -> ApiResponse[object]:
         """Init Data Item
 
-        Initialize a new data_item by at least specifying an item_name.
+        Initialize a new data_item.  item_name or json_data is required.
 
         Parameters
         ----------
@@ -249,7 +249,7 @@ class IngestApi:
     ) -> RESTResponseType:
         """Init Data Item
 
-        Initialize a new data_item by at least specifying an item_name.
+        Initialize a new data_item.  item_name or json_data is required.
 
         Parameters
         ----------
@@ -386,9 +386,8 @@ class IngestApi:
             StrictStr,
             Field(description="could be empty, in which case the first 1000 items are returned"),
         ],
-        uri: Annotated[
-            Optional[StrictStr], Field(description="the access path to the payload.")
-        ] = None,
+        uri: Annotated[StrictStr, Field(description="the relative access path to the payload.")],
+        item_type: Optional[StrictStr] = None,
         storage_name: Annotated[
             Optional[StrictStr],
             Field(description="the name of the configured storage volume (name or ID required)"),
@@ -396,9 +395,7 @@ class IngestApi:
         storage_id: Annotated[
             Optional[StrictStr], Field(description="the ID of the configured storage.")
         ] = None,
-        item_format: Annotated[
-            Optional[StrictStr], Field(description="format of the data item")
-        ] = None,
+        parents: Annotated[Optional[StrictStr], Field(description="uuid of parent item")] = None,
         eb_id: Annotated[
             Optional[StrictStr], Field(description="execution block ID provided by the client")
         ] = None,
@@ -418,7 +415,7 @@ class IngestApi:
     ) -> object:
         """Register Data Item
 
-        Ingest a data_item (register function is an alias).  This high level function is a combination of init_data_item, set_uri and set_state(READY). It also checks whether a data_item is already registered on the requested storage.  (1) check whether requested storage is known and accessible (2) check whether item is accessible/exists on that storage (3) check whether item is already registered on that storage (4) initialize the new item with the same OID on the new storage (5) set state to READY (6) generate metadata (7) notify the data dashboard
+        Ingest a data_item (register function is an alias).  This high level function is a combination of init_data_item, set_uri and set_state(READY). It also checks whether a data_item is already registered on the requested storage.  (1) check whether requested storage is known and accessible (2) check whether item is accessible/exists on that storage (3) check whether item is already registered on that storage (4) initialize the new item with the same OID on the new storage (5) set state to READY (6) save metadata (7) notify the data dashboard
 
         Parameters
         ----------
@@ -426,14 +423,15 @@ class IngestApi:
             could be empty, in which case the first 1000 items are
             returned (required)
         uri : str
-            the access path to the payload.
+            the relative access path to the payload. (required)
+        item_type : str
         storage_name : str
             the name of the configured storage volume (name or ID
             required)
         storage_id : str
             the ID of the configured storage.
-        item_format : str
-            format of the data item
+        parents : str
+            uuid of parent item
         eb_id : str
             execution block ID provided by the client
         authorization : str
@@ -468,9 +466,10 @@ class IngestApi:
         _param = self._register_data_item_ingest_register_data_item_post_serialize(
             item_name=item_name,
             uri=uri,
+            item_type=item_type,
             storage_name=storage_name,
             storage_id=storage_id,
-            item_format=item_format,
+            parents=parents,
             eb_id=eb_id,
             authorization=authorization,
             body=body,
@@ -498,9 +497,8 @@ class IngestApi:
             StrictStr,
             Field(description="could be empty, in which case the first 1000 items are returned"),
         ],
-        uri: Annotated[
-            Optional[StrictStr], Field(description="the access path to the payload.")
-        ] = None,
+        uri: Annotated[StrictStr, Field(description="the relative access path to the payload.")],
+        item_type: Optional[StrictStr] = None,
         storage_name: Annotated[
             Optional[StrictStr],
             Field(description="the name of the configured storage volume (name or ID required)"),
@@ -508,9 +506,7 @@ class IngestApi:
         storage_id: Annotated[
             Optional[StrictStr], Field(description="the ID of the configured storage.")
         ] = None,
-        item_format: Annotated[
-            Optional[StrictStr], Field(description="format of the data item")
-        ] = None,
+        parents: Annotated[Optional[StrictStr], Field(description="uuid of parent item")] = None,
         eb_id: Annotated[
             Optional[StrictStr], Field(description="execution block ID provided by the client")
         ] = None,
@@ -530,7 +526,7 @@ class IngestApi:
     ) -> ApiResponse[object]:
         """Register Data Item
 
-        Ingest a data_item (register function is an alias).  This high level function is a combination of init_data_item, set_uri and set_state(READY). It also checks whether a data_item is already registered on the requested storage.  (1) check whether requested storage is known and accessible (2) check whether item is accessible/exists on that storage (3) check whether item is already registered on that storage (4) initialize the new item with the same OID on the new storage (5) set state to READY (6) generate metadata (7) notify the data dashboard
+        Ingest a data_item (register function is an alias).  This high level function is a combination of init_data_item, set_uri and set_state(READY). It also checks whether a data_item is already registered on the requested storage.  (1) check whether requested storage is known and accessible (2) check whether item is accessible/exists on that storage (3) check whether item is already registered on that storage (4) initialize the new item with the same OID on the new storage (5) set state to READY (6) save metadata (7) notify the data dashboard
 
         Parameters
         ----------
@@ -538,14 +534,15 @@ class IngestApi:
             could be empty, in which case the first 1000 items are
             returned (required)
         uri : str
-            the access path to the payload.
+            the relative access path to the payload. (required)
+        item_type : str
         storage_name : str
             the name of the configured storage volume (name or ID
             required)
         storage_id : str
             the ID of the configured storage.
-        item_format : str
-            format of the data item
+        parents : str
+            uuid of parent item
         eb_id : str
             execution block ID provided by the client
         authorization : str
@@ -580,9 +577,10 @@ class IngestApi:
         _param = self._register_data_item_ingest_register_data_item_post_serialize(
             item_name=item_name,
             uri=uri,
+            item_type=item_type,
             storage_name=storage_name,
             storage_id=storage_id,
-            item_format=item_format,
+            parents=parents,
             eb_id=eb_id,
             authorization=authorization,
             body=body,
@@ -610,9 +608,8 @@ class IngestApi:
             StrictStr,
             Field(description="could be empty, in which case the first 1000 items are returned"),
         ],
-        uri: Annotated[
-            Optional[StrictStr], Field(description="the access path to the payload.")
-        ] = None,
+        uri: Annotated[StrictStr, Field(description="the relative access path to the payload.")],
+        item_type: Optional[StrictStr] = None,
         storage_name: Annotated[
             Optional[StrictStr],
             Field(description="the name of the configured storage volume (name or ID required)"),
@@ -620,9 +617,7 @@ class IngestApi:
         storage_id: Annotated[
             Optional[StrictStr], Field(description="the ID of the configured storage.")
         ] = None,
-        item_format: Annotated[
-            Optional[StrictStr], Field(description="format of the data item")
-        ] = None,
+        parents: Annotated[Optional[StrictStr], Field(description="uuid of parent item")] = None,
         eb_id: Annotated[
             Optional[StrictStr], Field(description="execution block ID provided by the client")
         ] = None,
@@ -642,7 +637,7 @@ class IngestApi:
     ) -> RESTResponseType:
         """Register Data Item
 
-        Ingest a data_item (register function is an alias).  This high level function is a combination of init_data_item, set_uri and set_state(READY). It also checks whether a data_item is already registered on the requested storage.  (1) check whether requested storage is known and accessible (2) check whether item is accessible/exists on that storage (3) check whether item is already registered on that storage (4) initialize the new item with the same OID on the new storage (5) set state to READY (6) generate metadata (7) notify the data dashboard
+        Ingest a data_item (register function is an alias).  This high level function is a combination of init_data_item, set_uri and set_state(READY). It also checks whether a data_item is already registered on the requested storage.  (1) check whether requested storage is known and accessible (2) check whether item is accessible/exists on that storage (3) check whether item is already registered on that storage (4) initialize the new item with the same OID on the new storage (5) set state to READY (6) save metadata (7) notify the data dashboard
 
         Parameters
         ----------
@@ -650,14 +645,15 @@ class IngestApi:
             could be empty, in which case the first 1000 items are
             returned (required)
         uri : str
-            the access path to the payload.
+            the relative access path to the payload. (required)
+        item_type : str
         storage_name : str
             the name of the configured storage volume (name or ID
             required)
         storage_id : str
             the ID of the configured storage.
-        item_format : str
-            format of the data item
+        parents : str
+            uuid of parent item
         eb_id : str
             execution block ID provided by the client
         authorization : str
@@ -692,9 +688,10 @@ class IngestApi:
         _param = self._register_data_item_ingest_register_data_item_post_serialize(
             item_name=item_name,
             uri=uri,
+            item_type=item_type,
             storage_name=storage_name,
             storage_id=storage_id,
-            item_format=item_format,
+            parents=parents,
             eb_id=eb_id,
             authorization=authorization,
             body=body,
@@ -715,9 +712,10 @@ class IngestApi:
         self,
         item_name,
         uri,
+        item_type,
         storage_name,
         storage_id,
-        item_format,
+        parents,
         eb_id,
         authorization,
         body,
@@ -748,6 +746,10 @@ class IngestApi:
 
             _query_params.append(("uri", uri))
 
+        if item_type is not None:
+
+            _query_params.append(("item_type", item_type))
+
         if storage_name is not None:
 
             _query_params.append(("storage_name", storage_name))
@@ -756,9 +758,9 @@ class IngestApi:
 
             _query_params.append(("storage_id", storage_id))
 
-        if item_format is not None:
+        if parents is not None:
 
-            _query_params.append(("item_format", item_format))
+            _query_params.append(("parents", parents))
 
         if eb_id is not None:
 

@@ -26,6 +26,13 @@ class TestStorageApi(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
+    def test_create_rclone_config_storage_rclone_config_post(self) -> None:
+        """Test case for create_rclone_config_storage_rclone_config_post
+
+        Create Rclone Config
+        """
+        pass
+
     def test_create_storage_config_storage_create_storage_config_post(self) -> None:
         """Test case for create_storage_config_storage_create_storage_config_post
 
@@ -65,13 +72,6 @@ class TestStorageApi(unittest.TestCase):
         """Test case for query_storage_storage_query_storage_get
 
         Query Storage
-        """
-        pass
-
-    def test_rclone_config_storage_rclone_config_post(self) -> None:
-        """Test case for rclone_config_storage_rclone_config_post
-
-        Rclone Config
         """
         pass
 

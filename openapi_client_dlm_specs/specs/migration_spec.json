@@ -7,16 +7,66 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "0.1.0"
+        "version": "0.2.0"
     },
     "paths": {
+        "/migration/query_migrations": {
+            "get": {
+                "summary": "Query Migrations",
+                "tags": [
+                    "migration"
+                ],
+                "description": "Query for all migrations by a given user.",
+                "operationId": "query_migrations_migration_query_migrations_get",
+                "parameters": [
+                    {
+                        "name": "authorization",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Validated Bearer token with UserInfo",
+                            "title": "Authorization"
+                        },
+                        "description": "Validated Bearer token with UserInfo"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/migration/copy_data_item": {
             "post": {
                 "summary": "Copy Data Item",
                 "tags": [
                     "migration"
                 ],
-                "description": "Copy a data_item from source to destination.\n\nSteps\n(1) get the current storage_id(s) of the item\n(2) convert one(first) storage_id to a configured rclone backend\n(3) check whether item already exists on destination\n(4) initialize the new item with the same OID on the new storage\n(5) use the rclone copy command to copy it to the new location\n(6) make sure the copy was successful",
+                "description": "Copy a data_item from source to destination.\n\nSteps\n(1) get the current storage_id(s) of the item\n(2) convert one (first) storage_id to a configured rclone backend\n(3) initialize the new item with the same OID on the new storage\n(4) use the rclone copy command to copy it to the new location\n(5) make sure the copy was successful",
                 "operationId": "copy_data_item_migration_copy_data_item_post",
                 "parameters": [
                     {
@@ -85,11 +135,29 @@
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "description": "the destination path, by default \"\"",
+                            "description": "the destination path relative to storage root, by default \"\"",
                             "default": "",
                             "title": "Path"
                         },
-                        "description": "the destination path, by default \"\""
+                        "description": "the destination path relative to storage root, by default \"\""
+                    },
+                    {
+                        "name": "authorization",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Validated Bearer token with UserInfo",
+                            "title": "Authorization"
+                        },
+                        "description": "Validated Bearer token with UserInfo"
                     }
                 ],
                 "responses": {

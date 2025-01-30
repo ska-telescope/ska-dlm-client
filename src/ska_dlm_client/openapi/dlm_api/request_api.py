@@ -64,7 +64,7 @@ class RequestApi:
     ) -> object:
         """Query Data Item
 
-        Query a new data_item by at least specifying an item_name.
+        Query a data_item.  At least one of item_name, oid, uid, or params is required.
 
         Parameters
         ----------
@@ -155,7 +155,7 @@ class RequestApi:
     ) -> ApiResponse[object]:
         """Query Data Item
 
-        Query a new data_item by at least specifying an item_name.
+        Query a data_item.  At least one of item_name, oid, uid, or params is required.
 
         Parameters
         ----------
@@ -246,7 +246,7 @@ class RequestApi:
     ) -> RESTResponseType:
         """Query Data Item
 
-        Query a new data_item by at least specifying an item_name.
+        Query a data_item.  At least one of item_name, oid, uid, or params is required.
 
         Parameters
         ----------
@@ -930,7 +930,9 @@ class RequestApi:
         uid: Annotated[
             Optional[StrictStr], Field(description="this returns only one storage_id")
         ] = None,
-        body: Optional[StrictBool] = None,
+        ready: Annotated[
+            Optional[StrictBool], Field(description="whether the item must be in ready state.")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -953,7 +955,8 @@ class RequestApi:
             the oid to be searched for
         uid : str
             this returns only one storage_id
-        body : bool
+        ready : bool
+            whether the item must be in ready state.
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -984,7 +987,7 @@ class RequestApi:
             item_name=item_name,
             oid=oid,
             uid=uid,
-            body=body,
+            ready=ready,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1012,7 +1015,9 @@ class RequestApi:
         uid: Annotated[
             Optional[StrictStr], Field(description="this returns only one storage_id")
         ] = None,
-        body: Optional[StrictBool] = None,
+        ready: Annotated[
+            Optional[StrictBool], Field(description="whether the item must be in ready state.")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1035,7 +1040,8 @@ class RequestApi:
             the oid to be searched for
         uid : str
             this returns only one storage_id
-        body : bool
+        ready : bool
+            whether the item must be in ready state.
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -1066,7 +1072,7 @@ class RequestApi:
             item_name=item_name,
             oid=oid,
             uid=uid,
-            body=body,
+            ready=ready,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1094,7 +1100,9 @@ class RequestApi:
         uid: Annotated[
             Optional[StrictStr], Field(description="this returns only one storage_id")
         ] = None,
-        body: Optional[StrictBool] = None,
+        ready: Annotated[
+            Optional[StrictBool], Field(description="whether the item must be in ready state.")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1117,7 +1125,8 @@ class RequestApi:
             the oid to be searched for
         uid : str
             this returns only one storage_id
-        body : bool
+        ready : bool
+            whether the item must be in ready state.
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -1148,7 +1157,7 @@ class RequestApi:
             item_name=item_name,
             oid=oid,
             uid=uid,
-            body=body,
+            ready=ready,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1167,7 +1176,7 @@ class RequestApi:
         item_name,
         oid,
         uid,
-        body,
+        ready,
         _request_auth,
         _content_type,
         _headers,
@@ -1199,25 +1208,17 @@ class RequestApi:
 
             _query_params.append(("uid", uid))
 
+        if ready is not None:
+
+            _query_params.append(("ready", ready))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if body is not None:
-            _body_params = body
 
         # set the HTTP header `Accept`
         if "Accept" not in _header_params:
             _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
-
-        # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params["Content-Type"] = _content_type
-        else:
-            _default_content_type = self.api_client.select_header_content_type(
-                ["application/json"]
-            )
-            if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
         _auth_settings: List[str] = []
