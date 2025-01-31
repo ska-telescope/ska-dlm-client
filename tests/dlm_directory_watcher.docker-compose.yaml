@@ -8,10 +8,23 @@ services:
     container_name: dlm_directory_watcher
     build:
        context: ..
-       dockerfile: tests/Dockerfile-dlm_directory_watcher
+       dockerfile: ../Dockerfile
     # NOTE: the IP address is fixed here but need to work out how to connect in
     # the general case via a service name or similar.
-    entrypoint: python3 -m ska_dlm_client.directory_watcher.main -d /data -n data -s "http://localhost"
-    # entrypoint: python3
+    entrypoint: python3 -m ska_dlm_client.directory_watcher.main --directory-to-watch /data/dlm/watch_dir --storage-name data1 --storage-root-directory /data --use-polling-watcher --ingest-server-url "http://localhost"
     volumes:
       - shared-tmpfs:/data
+    networks:
+      - dlm_network
+  setup_storage_location:
+    platform: linux/amd64
+    image: dlm_directory_watcher
+    container_name: dlm_setup_storage_location
+    build:
+      context: ..
+      dockerfile: ../Dockerfile
+    # NOTE: the IP address is fixed here but need to work out how to connect in
+    # the general case via a service name or similar.
+    entrypoint: python3 -m ska_dlm_client.register_storage_location.main --storage-name data1 --storage-root-directory /data --storage-server-url "http://localhost:8003"
+    networks:
+      - dlm_network
