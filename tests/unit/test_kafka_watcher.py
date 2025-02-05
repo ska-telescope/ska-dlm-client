@@ -3,7 +3,7 @@
 import json
 import logging
 from unittest import mock
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import pytest_mock
@@ -16,7 +16,7 @@ TEST_TOPIC = "test-events"
 INGEST_HOST = "http://dlm/api"
 STORAGE_NAME = "data"
 KAFKA_MSG = {
-    "file": "file_name",
+    "file": "data/file_name",
     "time": "2025-02-05T14:23:45.678901",
     "metadata": {"eb_id": "eb-meta-20240723-00000"},
 }
@@ -69,8 +69,8 @@ def mock_kafka_consumer_fixture(mocker: pytest_mock.MockerFixture):
     """Create a mock for the Kafka consumer and simulate a single message."""
     mock_kafka_consumer = mocker.patch("aiokafka.AIOKafkaConsumer")
     mock_kafka_consumer_instance = mock_kafka_consumer.return_value
-    mock_kafka_consumer_instance.start = mock.AsyncMock()
-    mock_kafka_consumer_instance.stop = mock.AsyncMock()
+    mock_kafka_consumer_instance.start = AsyncMock()
+    mock_kafka_consumer_instance.stop = AsyncMock()
     mock_kafka_consumer_instance.__aiter__.return_value = [
         mock.Mock(value=json.dumps(KAFKA_MSG).encode("utf-8"))
     ]
@@ -152,7 +152,7 @@ async def test_post_dlm_data_item_success(mock_apiingest, caplog):
 
     # Ensure API call was made with correct parameters
     mock_apiingest.assert_called_once_with(
-        item_name=KAFKA_MSG["file"],
+        item_name="file_name",
         uri=KAFKA_MSG["file"],  # Assuming file is used as the URI
         storage_name=STORAGE_NAME,
         body=KAFKA_MSG["metadata"],
