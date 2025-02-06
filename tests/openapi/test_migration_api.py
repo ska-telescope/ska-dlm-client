@@ -26,15 +26,15 @@ class TestMigrationApi(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
-    def test_copy_data_item_migration_copy_data_item_post(self) -> None:
-        """Test case for copy_data_item_migration_copy_data_item_post
+    def test_copy_data_item(self) -> None:
+        """Test case for copy_data_item
 
         Copy Data Item
         """
         pass
 
-    def test_query_migrations_migration_query_migrations_get(self) -> None:
-        """Test case for query_migrations_migration_query_migrations_get
+    def test_query_migrations(self) -> None:
+        """Test case for query_migrations
 
         Query Migrations
         """

@@ -9,6 +9,7 @@ the watch directory.
 * crc32c is now used during metadata generation to improve performance.
 * Updated OpenAPI spec and code for DLM server 0.2.0. No change in DLM client version as
 no production version released yet.
+* Includes return types although the generator doesn't add return type doc strings.
 
 ## 0.1.0
 

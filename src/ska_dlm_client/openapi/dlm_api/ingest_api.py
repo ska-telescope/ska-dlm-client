@@ -35,7 +35,7 @@ class IngestApi:
         self.api_client = api_client
 
     @validate_call
-    def init_data_item_ingest_init_data_item_post(
+    def init_data_item(
         self,
         item_name: Annotated[
             Optional[StrictStr],
@@ -62,7 +62,7 @@ class IngestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> str:
         """Init Data Item
 
         Initialize a new data_item.  item_name or json_data is required.
@@ -104,7 +104,7 @@ class IngestApi:
         """
         # noqa: E501
 
-        _param = self._init_data_item_ingest_init_data_item_post_serialize(
+        _param = self._init_data_item_serialize(
             item_name=item_name,
             phase=phase,
             authorization=authorization,
@@ -116,7 +116,7 @@ class IngestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -127,7 +127,7 @@ class IngestApi:
         ).data
 
     @validate_call
-    def init_data_item_ingest_init_data_item_post_with_http_info(
+    def init_data_item_with_http_info(
         self,
         item_name: Annotated[
             Optional[StrictStr],
@@ -154,7 +154,7 @@ class IngestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[str]:
         """Init Data Item
 
         Initialize a new data_item.  item_name or json_data is required.
@@ -196,7 +196,7 @@ class IngestApi:
         """
         # noqa: E501
 
-        _param = self._init_data_item_ingest_init_data_item_post_serialize(
+        _param = self._init_data_item_serialize(
             item_name=item_name,
             phase=phase,
             authorization=authorization,
@@ -208,7 +208,7 @@ class IngestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -219,7 +219,7 @@ class IngestApi:
         )
 
     @validate_call
-    def init_data_item_ingest_init_data_item_post_without_preload_content(
+    def init_data_item_without_preload_content(
         self,
         item_name: Annotated[
             Optional[StrictStr],
@@ -288,7 +288,7 @@ class IngestApi:
         """
         # noqa: E501
 
-        _param = self._init_data_item_ingest_init_data_item_post_serialize(
+        _param = self._init_data_item_serialize(
             item_name=item_name,
             phase=phase,
             authorization=authorization,
@@ -300,13 +300,13 @@ class IngestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _init_data_item_ingest_init_data_item_post_serialize(
+    def _init_data_item_serialize(
         self,
         item_name,
         phase,
@@ -380,7 +380,7 @@ class IngestApi:
         )
 
     @validate_call
-    def register_data_item_ingest_register_data_item_post(
+    def register_data_item(
         self,
         item_name: Annotated[
             StrictStr,
@@ -412,7 +412,7 @@ class IngestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> str:
         """Register Data Item
 
         Ingest a data_item (register function is an alias).  This high level function is a combination of init_data_item, set_uri and set_state(READY). It also checks whether a data_item is already registered on the requested storage.  (1) check whether requested storage is known and accessible (2) check whether item is accessible/exists on that storage (3) check whether item is already registered on that storage (4) initialize the new item with the same OID on the new storage (5) set state to READY (6) save metadata (7) notify the data dashboard
@@ -463,7 +463,7 @@ class IngestApi:
         """
         # noqa: E501
 
-        _param = self._register_data_item_ingest_register_data_item_post_serialize(
+        _param = self._register_data_item_serialize(
             item_name=item_name,
             uri=uri,
             item_type=item_type,
@@ -480,7 +480,7 @@ class IngestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -491,7 +491,7 @@ class IngestApi:
         ).data
 
     @validate_call
-    def register_data_item_ingest_register_data_item_post_with_http_info(
+    def register_data_item_with_http_info(
         self,
         item_name: Annotated[
             StrictStr,
@@ -523,7 +523,7 @@ class IngestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[str]:
         """Register Data Item
 
         Ingest a data_item (register function is an alias).  This high level function is a combination of init_data_item, set_uri and set_state(READY). It also checks whether a data_item is already registered on the requested storage.  (1) check whether requested storage is known and accessible (2) check whether item is accessible/exists on that storage (3) check whether item is already registered on that storage (4) initialize the new item with the same OID on the new storage (5) set state to READY (6) save metadata (7) notify the data dashboard
@@ -574,7 +574,7 @@ class IngestApi:
         """
         # noqa: E501
 
-        _param = self._register_data_item_ingest_register_data_item_post_serialize(
+        _param = self._register_data_item_serialize(
             item_name=item_name,
             uri=uri,
             item_type=item_type,
@@ -591,7 +591,7 @@ class IngestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -602,7 +602,7 @@ class IngestApi:
         )
 
     @validate_call
-    def register_data_item_ingest_register_data_item_post_without_preload_content(
+    def register_data_item_without_preload_content(
         self,
         item_name: Annotated[
             StrictStr,
@@ -685,7 +685,7 @@ class IngestApi:
         """
         # noqa: E501
 
-        _param = self._register_data_item_ingest_register_data_item_post_serialize(
+        _param = self._register_data_item_serialize(
             item_name=item_name,
             uri=uri,
             item_type=item_type,
@@ -702,13 +702,13 @@ class IngestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _register_data_item_ingest_register_data_item_post_serialize(
+    def _register_data_item_serialize(
         self,
         item_name,
         uri,

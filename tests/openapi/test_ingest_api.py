@@ -26,15 +26,15 @@ class TestIngestApi(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
-    def test_init_data_item_ingest_init_data_item_post(self) -> None:
-        """Test case for init_data_item_ingest_init_data_item_post
+    def test_init_data_item(self) -> None:
+        """Test case for init_data_item
 
         Init Data Item
         """
         pass
 
-    def test_register_data_item_ingest_register_data_item_post(self) -> None:
-        """Test case for register_data_item_ingest_register_data_item_post
+    def test_register_data_item(self) -> None:
+        """Test case for register_data_item
 
         Register Data Item
         """

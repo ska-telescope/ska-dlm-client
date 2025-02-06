@@ -40,9 +40,7 @@ def init_location_for_testing(storage_configuration: Configuration) -> str:
         api_storage = storage_api.StorageApi(the_api_client)
 
         # get the location_id
-        response = api_storage.query_location_storage_query_location_get(
-            location_name=LOCATION_NAME
-        )
+        response = api_storage.query_location(location_name=LOCATION_NAME)
         logger.info("query_location response: %s", response)
         if not isinstance(response, list):
             logger.error("Unexpected response from query_location_storage")
@@ -51,7 +49,7 @@ def init_location_for_testing(storage_configuration: Configuration) -> str:
             the_location_id = response[0]["location_id"]
             logger.info("location already exists in DLM")
         else:
-            response = api_storage.init_location_storage_init_location_post(
+            response = api_storage.init_location(
                 location_name=LOCATION_NAME,
                 location_type=LOCATION_TYPE,
                 location_country=LOCATION_COUNTRY,
@@ -75,7 +73,7 @@ def init_storage_for_testing(
     with api_client.ApiClient(storage_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
         # Get the storage_id
-        response = api_storage.query_storage_storage_query_storage_get(storage_name=storage_name)
+        response = api_storage.query_storage(storage_name=storage_name)
         logger.info("query_storage response: %s", response)
         if not isinstance(response, list):
             logger.error("Unexpected response from query_storage_storage")
@@ -84,7 +82,7 @@ def init_storage_for_testing(
             the_storage_id = response[0]["storage_id"]
             logger.info("storage_id already exists in DLM")
         else:
-            response = api_storage.init_storage_storage_init_storage_post(
+            response = api_storage.init_storage(
                 storage_name=storage_name,
                 storage_type=STORAGE_TYPE,
                 storage_interface=STORAGE_INTERFACE,
@@ -97,7 +95,7 @@ def init_storage_for_testing(
         logger.info("storage_id: %s", the_storage_id)
 
         # Setup the storage config. Doesn't matter if it has been set before.
-        response = api_storage.create_storage_config_storage_create_storage_config_post(
+        response = api_storage.create_storage_config(
             body=STORAGE_CONFIG,
             storage_id=the_storage_id,
             storage_name=storage_name,

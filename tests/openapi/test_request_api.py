@@ -26,50 +26,50 @@ class TestRequestApi(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
-    def test_query_data_item_request_query_data_item_get(self) -> None:
-        """Test case for query_data_item_request_query_data_item_get
+    def test_query_data_item(self) -> None:
+        """Test case for query_data_item
 
         Query Data Item
         """
         pass
 
-    def test_query_deleted_request_query_deleted_get(self) -> None:
-        """Test case for query_deleted_request_query_deleted_get
+    def test_query_deleted(self) -> None:
+        """Test case for query_deleted
 
         Query Deleted
         """
         pass
 
-    def test_query_exists_and_ready_request_query_exist_and_ready_get(self) -> None:
-        """Test case for query_exists_and_ready_request_query_exist_and_ready_get
-
-        Query Exists And Ready
-        """
-        pass
-
-    def test_query_exists_request_query_exists_get(self) -> None:
-        """Test case for query_exists_request_query_exists_get
+    def test_query_exists(self) -> None:
+        """Test case for query_exists
 
         Query Exists
         """
         pass
 
-    def test_query_expired_request_query_expired_get(self) -> None:
-        """Test case for query_expired_request_query_expired_get
+    def test_query_exists_and_ready(self) -> None:
+        """Test case for query_exists_and_ready
+
+        Query Exists And Ready
+        """
+        pass
+
+    def test_query_expired(self) -> None:
+        """Test case for query_expired
 
         Query Expired
         """
         pass
 
-    def test_query_item_storage_request_query_item_storage_get(self) -> None:
-        """Test case for query_item_storage_request_query_item_storage_get
+    def test_query_item_storage(self) -> None:
+        """Test case for query_item_storage
 
         Query Item Storage
         """
         pass
 
-    def test_query_new_request_query_new_get(self) -> None:
-        """Test case for query_new_request_query_new_get
+    def test_query_new(self) -> None:
+        """Test case for query_new
 
         Query New
         """

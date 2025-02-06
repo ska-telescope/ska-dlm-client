@@ -17,7 +17,7 @@
                     "migration"
                 ],
                 "description": "Query for all migrations by a given user.",
-                "operationId": "query_migrations_migration_query_migrations_get",
+                "operationId": "query_migrations",
                 "parameters": [
                     {
                         "name": "authorization",
@@ -43,7 +43,13 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object"
+                                    },
+                                    "title": "Response Query Migrations"
+                                }
                             }
                         }
                     },
@@ -67,7 +73,7 @@
                     "migration"
                 ],
                 "description": "Copy a data_item from source to destination.\n\nSteps\n(1) get the current storage_id(s) of the item\n(2) convert one (first) storage_id to a configured rclone backend\n(3) initialize the new item with the same OID on the new storage\n(4) use the rclone copy command to copy it to the new location\n(5) make sure the copy was successful",
-                "operationId": "copy_data_item_migration_copy_data_item_post",
+                "operationId": "copy_data_item",
                 "parameters": [
                     {
                         "name": "item_name",
@@ -165,7 +171,10 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Copy Data Item"
+                                }
                             }
                         }
                     },

@@ -17,7 +17,7 @@
                     "storage"
                 ],
                 "description": "Query a location.",
-                "operationId": "query_location_storage_query_location_get",
+                "operationId": "query_location",
                 "parameters": [
                     {
                         "name": "location_name",
@@ -49,7 +49,13 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object"
+                                    },
+                                    "title": "Response Query Location"
+                                }
                             }
                         }
                     },
@@ -73,7 +79,7 @@
                     "storage"
                 ],
                 "description": "Initialize a new storage.\n\nlocation_name or location_id is required.",
-                "operationId": "init_storage_storage_init_storage_post",
+                "operationId": "init_storage",
                 "parameters": [
                     {
                         "name": "storage_name",
@@ -203,7 +209,10 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "string",
+                                    "title": "Response Init Storage"
+                                }
                             }
                         }
                     },
@@ -227,7 +236,7 @@
                     "storage"
                 ],
                 "description": "Create a new record in the storage_config table for a storage with the given id.",
-                "operationId": "create_storage_config_storage_create_storage_config_post",
+                "operationId": "create_storage_config",
                 "parameters": [
                     {
                         "name": "storage_id",
@@ -283,7 +292,10 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "string",
+                                    "title": "Response Create Storage Config"
+                                }
                             }
                         }
                     },
@@ -307,7 +319,7 @@
                     "storage"
                 ],
                 "description": "Get the storage configuration entry for a particular storage backend.",
-                "operationId": "get_storage_config_storage_get_storage_config_get",
+                "operationId": "get_storage_config",
                 "parameters": [
                     {
                         "name": "storage_id",
@@ -351,7 +363,13 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "title": "Response Get Storage Config"
+                                }
                             }
                         }
                     },
@@ -375,7 +393,7 @@
                     "storage"
                 ],
                 "description": "Create a new rclone backend configuration entry on the rclone server.",
-                "operationId": "create_rclone_config_storage_rclone_config_post",
+                "operationId": "create_rclone_config",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -393,7 +411,10 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "boolean",
+                                    "title": "Response Create Rclone Config"
+                                }
                             }
                         }
                     },
@@ -417,7 +438,7 @@
                     "storage"
                 ],
                 "description": "Initialize a new storage location.",
-                "operationId": "init_location_storage_init_location_post",
+                "operationId": "init_location",
                 "parameters": [
                     {
                         "name": "location_name",
@@ -483,7 +504,10 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "string",
+                                    "title": "Response Init Location"
+                                }
                             }
                         }
                     },
@@ -507,7 +531,7 @@
                     "storage"
                 ],
                 "description": "Query a storage.",
-                "operationId": "query_storage_storage_query_storage_get",
+                "operationId": "query_storage",
                 "parameters": [
                     {
                         "name": "storage_name",
@@ -539,7 +563,13 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object"
+                                    },
+                                    "title": "Response Query Storage"
+                                }
                             }
                         }
                     },
