@@ -46,7 +46,7 @@ class RegistrationProcessor:
                     if self._config.register_dir_prefix == ""
                     else f"{self._config.register_dir_prefix}/{relative_path}"
                 )
-                response = api_ingest.register_data_item_ingest_register_data_item_post(
+                response = api_ingest.register_data_item(
                     item_name=relative_path,
                     uri=uri,
                     storage_name=self._config.storage_name,

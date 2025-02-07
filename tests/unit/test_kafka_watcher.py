@@ -75,8 +75,7 @@ def mock_kafka_consumer_fixture(mocker: pytest_mock.MockerFixture):
 def mock_api_ingest_fixture(mocker: pytest_mock.MockerFixture):
     """Create a mock for the OpenAPI ingest and simulate a single message."""
     mock_ingest_api = mocker.patch(
-        "ska_dlm_client.openapi.dlm_api.ingest_api.IngestApi"
-        ".register_data_item_ingest_register_data_item_post"
+        "ska_dlm_client.openapi.dlm_api.ingest_api.IngestApi.register_data_item"
     )
     mock_ingest_api.return_value = {"Success": True}
     yield mock_ingest_api
@@ -86,8 +85,7 @@ def mock_api_ingest_fixture(mocker: pytest_mock.MockerFixture):
 def mock_api_ingest_exception_fixture(mocker: pytest_mock.MockerFixture):
     """Create a mock for the OpenAPI ingest and simulate a single message."""
     mock_ingest_api = mocker.patch(
-        "ska_dlm_client.openapi.dlm_api.ingest_api.IngestApi"
-        ".register_data_item_ingest_register_data_item_post"
+        "ska_dlm_client.openapi.dlm_api.ingest_api.IngestApi.register_data_item"
     )
     mock_ingest_api.side_effect = OpenApiException()
     pytest.raises(OpenApiException)

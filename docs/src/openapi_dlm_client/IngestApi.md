@@ -4,12 +4,12 @@ All URIs are relative to *http://localhost:8080*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**init_data_item_ingest_init_data_item_post**](IngestApi.md#init_data_item_ingest_init_data_item_post) | **POST** /ingest/init_data_item | Init Data Item
-[**register_data_item_ingest_register_data_item_post**](IngestApi.md#register_data_item_ingest_register_data_item_post) | **POST** /ingest/register_data_item | Register Data Item
+[**init_data_item**](IngestApi.md#init_data_item) | **POST** /ingest/init_data_item | Init Data Item
+[**register_data_item**](IngestApi.md#register_data_item) | **POST** /ingest/register_data_item | Register Data Item
 
 
-# **init_data_item_ingest_init_data_item_post**
-> object init_data_item_ingest_init_data_item_post(item_name=item_name, phase=phase, authorization=authorization, body=body)
+# **init_data_item**
+> str init_data_item(item_name=item_name, phase=phase, authorization=authorization, body=body)
 
 Init Data Item
 
@@ -41,11 +41,11 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
     try:
         # Init Data Item
-        api_response = api_instance.init_data_item_ingest_init_data_item_post(item_name=item_name, phase=phase, authorization=authorization, body=body)
-        print("The response of IngestApi->init_data_item_ingest_init_data_item_post:\n")
+        api_response = api_instance.init_data_item(item_name=item_name, phase=phase, authorization=authorization, body=body)
+        print("The response of IngestApi->init_data_item:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling IngestApi->init_data_item_ingest_init_data_item_post: %s\n" % e)
+        print("Exception when calling IngestApi->init_data_item: %s\n" % e)
 ```
 
 
@@ -62,7 +62,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+**str**
 
 ### Authorization
 
@@ -82,8 +82,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **register_data_item_ingest_register_data_item_post**
-> object register_data_item_ingest_register_data_item_post(item_name, uri, item_type=item_type, storage_name=storage_name, storage_id=storage_id, parents=parents, eb_id=eb_id, authorization=authorization, body=body)
+# **register_data_item**
+> str register_data_item(item_name, uri, item_type=item_type, storage_name=storage_name, storage_id=storage_id, parents=parents, eb_id=eb_id, authorization=authorization, body=body)
 
 Register Data Item
 
@@ -120,11 +120,11 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
     try:
         # Register Data Item
-        api_response = api_instance.register_data_item_ingest_register_data_item_post(item_name, uri, item_type=item_type, storage_name=storage_name, storage_id=storage_id, parents=parents, eb_id=eb_id, authorization=authorization, body=body)
-        print("The response of IngestApi->register_data_item_ingest_register_data_item_post:\n")
+        api_response = api_instance.register_data_item(item_name, uri, item_type=item_type, storage_name=storage_name, storage_id=storage_id, parents=parents, eb_id=eb_id, authorization=authorization, body=body)
+        print("The response of IngestApi->register_data_item:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling IngestApi->register_data_item_ingest_register_data_item_post: %s\n" % e)
+        print("Exception when calling IngestApi->register_data_item: %s\n" % e)
 ```
 
 
@@ -146,7 +146,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+**str**
 
 ### Authorization
 

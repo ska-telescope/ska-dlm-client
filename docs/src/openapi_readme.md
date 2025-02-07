@@ -89,24 +89,24 @@ Class | Method | HTTP request | Description
 *GatewayApi* | [**heartbeat_heartbeat_get**](openapi_dlm_client/GatewayApi.md#heartbeat_heartbeat_get) | **GET** /heartbeat | Heartbeat
 *GatewayApi* | [**token_by_auth_flow_token_by_auth_flow_get**](openapi_dlm_client/GatewayApi.md#token_by_auth_flow_token_by_auth_flow_get) | **GET** /token_by_auth_flow | Token By Auth Flow
 *GatewayApi* | [**token_by_username_password_token_by_username_password_get**](openapi_dlm_client/GatewayApi.md#token_by_username_password_token_by_username_password_get) | **GET** /token_by_username_password | Token By Username Password
-*IngestApi* | [**init_data_item_ingest_init_data_item_post**](openapi_dlm_client/IngestApi.md#init_data_item_ingest_init_data_item_post) | **POST** /ingest/init_data_item | Init Data Item
-*IngestApi* | [**register_data_item_ingest_register_data_item_post**](openapi_dlm_client/IngestApi.md#register_data_item_ingest_register_data_item_post) | **POST** /ingest/register_data_item | Register Data Item
-*MigrationApi* | [**copy_data_item_migration_copy_data_item_post**](openapi_dlm_client/MigrationApi.md#copy_data_item_migration_copy_data_item_post) | **POST** /migration/copy_data_item | Copy Data Item
-*MigrationApi* | [**query_migrations_migration_query_migrations_get**](openapi_dlm_client/MigrationApi.md#query_migrations_migration_query_migrations_get) | **GET** /migration/query_migrations | Query Migrations
-*RequestApi* | [**query_data_item_request_query_data_item_get**](openapi_dlm_client/RequestApi.md#query_data_item_request_query_data_item_get) | **GET** /request/query_data_item | Query Data Item
-*RequestApi* | [**query_deleted_request_query_deleted_get**](openapi_dlm_client/RequestApi.md#query_deleted_request_query_deleted_get) | **GET** /request/query_deleted | Query Deleted
-*RequestApi* | [**query_exists_and_ready_request_query_exist_and_ready_get**](openapi_dlm_client/RequestApi.md#query_exists_and_ready_request_query_exist_and_ready_get) | **GET** /request/query_exist_and_ready | Query Exists And Ready
-*RequestApi* | [**query_exists_request_query_exists_get**](openapi_dlm_client/RequestApi.md#query_exists_request_query_exists_get) | **GET** /request/query_exists | Query Exists
-*RequestApi* | [**query_expired_request_query_expired_get**](openapi_dlm_client/RequestApi.md#query_expired_request_query_expired_get) | **GET** /request/query_expired | Query Expired
-*RequestApi* | [**query_item_storage_request_query_item_storage_get**](openapi_dlm_client/RequestApi.md#query_item_storage_request_query_item_storage_get) | **GET** /request/query_item_storage | Query Item Storage
-*RequestApi* | [**query_new_request_query_new_get**](openapi_dlm_client/RequestApi.md#query_new_request_query_new_get) | **GET** /request/query_new | Query New
-*StorageApi* | [**create_rclone_config_storage_rclone_config_post**](openapi_dlm_client/StorageApi.md#create_rclone_config_storage_rclone_config_post) | **POST** /storage/rclone_config | Create Rclone Config
-*StorageApi* | [**create_storage_config_storage_create_storage_config_post**](openapi_dlm_client/StorageApi.md#create_storage_config_storage_create_storage_config_post) | **POST** /storage/create_storage_config | Create Storage Config
-*StorageApi* | [**get_storage_config_storage_get_storage_config_get**](openapi_dlm_client/StorageApi.md#get_storage_config_storage_get_storage_config_get) | **GET** /storage/get_storage_config | Get Storage Config
-*StorageApi* | [**init_location_storage_init_location_post**](openapi_dlm_client/StorageApi.md#init_location_storage_init_location_post) | **POST** /storage/init_location | Init Location
-*StorageApi* | [**init_storage_storage_init_storage_post**](openapi_dlm_client/StorageApi.md#init_storage_storage_init_storage_post) | **POST** /storage/init_storage | Init Storage
-*StorageApi* | [**query_location_storage_query_location_get**](openapi_dlm_client/StorageApi.md#query_location_storage_query_location_get) | **GET** /storage/query_location | Query Location
-*StorageApi* | [**query_storage_storage_query_storage_get**](openapi_dlm_client/StorageApi.md#query_storage_storage_query_storage_get) | **GET** /storage/query_storage | Query Storage
+*IngestApi* | [**init_data_item**](openapi_dlm_client/IngestApi.md#init_data_item) | **POST** /ingest/init_data_item | Init Data Item
+*IngestApi* | [**register_data_item**](openapi_dlm_client/IngestApi.md#register_data_item) | **POST** /ingest/register_data_item | Register Data Item
+*MigrationApi* | [**copy_data_item**](openapi_dlm_client/MigrationApi.md#copy_data_item) | **POST** /migration/copy_data_item | Copy Data Item
+*MigrationApi* | [**query_migrations**](openapi_dlm_client/MigrationApi.md#query_migrations) | **GET** /migration/query_migrations | Query Migrations
+*RequestApi* | [**query_data_item**](openapi_dlm_client/RequestApi.md#query_data_item) | **GET** /request/query_data_item | Query Data Item
+*RequestApi* | [**query_deleted**](openapi_dlm_client/RequestApi.md#query_deleted) | **GET** /request/query_deleted | Query Deleted
+*RequestApi* | [**query_exists**](openapi_dlm_client/RequestApi.md#query_exists) | **GET** /request/query_exists | Query Exists
+*RequestApi* | [**query_exists_and_ready**](openapi_dlm_client/RequestApi.md#query_exists_and_ready) | **GET** /request/query_exist_and_ready | Query Exists And Ready
+*RequestApi* | [**query_expired**](openapi_dlm_client/RequestApi.md#query_expired) | **GET** /request/query_expired | Query Expired
+*RequestApi* | [**query_item_storage**](openapi_dlm_client/RequestApi.md#query_item_storage) | **GET** /request/query_item_storage | Query Item Storage
+*RequestApi* | [**query_new**](openapi_dlm_client/RequestApi.md#query_new) | **GET** /request/query_new | Query New
+*StorageApi* | [**create_rclone_config**](openapi_dlm_client/StorageApi.md#create_rclone_config) | **POST** /storage/rclone_config | Create Rclone Config
+*StorageApi* | [**create_storage_config**](openapi_dlm_client/StorageApi.md#create_storage_config) | **POST** /storage/create_storage_config | Create Storage Config
+*StorageApi* | [**get_storage_config**](openapi_dlm_client/StorageApi.md#get_storage_config) | **GET** /storage/get_storage_config | Get Storage Config
+*StorageApi* | [**init_location**](openapi_dlm_client/StorageApi.md#init_location) | **POST** /storage/init_location | Init Location
+*StorageApi* | [**init_storage**](openapi_dlm_client/StorageApi.md#init_storage) | **POST** /storage/init_storage | Init Storage
+*StorageApi* | [**query_location**](openapi_dlm_client/StorageApi.md#query_location) | **GET** /storage/query_location | Query Location
+*StorageApi* | [**query_storage**](openapi_dlm_client/StorageApi.md#query_storage) | **GET** /storage/query_storage | Query Storage
 
 
 ## Models
