@@ -17,7 +17,7 @@
                     "request"
                 ],
                 "description": "Query a data_item.\n\nAt least one of item_name, oid, uid, or params is required.",
-                "operationId": "query_data_item_request_query_data_item_get",
+                "operationId": "query_data_item",
                 "parameters": [
                     {
                         "name": "item_name",
@@ -79,7 +79,13 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object"
+                                    },
+                                    "title": "Response Query Data Item"
+                                }
                             }
                         }
                     },
@@ -103,7 +109,7 @@
                     "request"
                 ],
                 "description": "Query for all expired data_items using the uid_expiration timestamp.",
-                "operationId": "query_expired_request_query_expired_get",
+                "operationId": "query_expired",
                 "parameters": [
                     {
                         "name": "offset",
@@ -130,7 +136,13 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object"
+                                    },
+                                    "title": "Response Query Expired"
+                                }
                             }
                         }
                     },
@@ -154,7 +166,7 @@
                     "request"
                 ],
                 "description": "Query for all deleted data_items using the deleted state.",
-                "operationId": "query_deleted_request_query_deleted_get",
+                "operationId": "query_deleted",
                 "parameters": [
                     {
                         "name": "uid",
@@ -174,7 +186,13 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object"
+                                    },
+                                    "title": "Response Query Deleted"
+                                }
                             }
                         }
                     },
@@ -198,7 +216,7 @@
                     "request"
                 ],
                 "description": "Query for all data_items newer than the date provided.",
-                "operationId": "query_new_request_query_new_get",
+                "operationId": "query_new",
                 "parameters": [
                     {
                         "name": "check_date",
@@ -229,7 +247,13 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object"
+                                    },
+                                    "title": "Response Query New"
+                                }
                             }
                         }
                     },
@@ -253,7 +277,7 @@
                     "request"
                 ],
                 "description": "Query to check for existence of a data_item.",
-                "operationId": "query_exists_request_query_exists_get",
+                "operationId": "query_exists",
                 "parameters": [
                     {
                         "name": "item_name",
@@ -309,7 +333,10 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "boolean",
+                                    "title": "Response Query Exists"
+                                }
                             }
                         }
                     },
@@ -333,7 +360,7 @@
                     "request"
                 ],
                 "description": "Check whether a data_item exists and is in ready state.",
-                "operationId": "query_exists_and_ready_request_query_exist_and_ready_get",
+                "operationId": "query_exists_and_ready",
                 "parameters": [
                     {
                         "name": "item_name",
@@ -377,7 +404,10 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "boolean",
+                                    "title": "Response Query Exists And Ready"
+                                }
                             }
                         }
                     },
@@ -401,7 +431,7 @@
                     "request"
                 ],
                 "description": "Query for the storage_ids of all backends holding a copy of a data_item.\n\nEither an item_name or a OID have to be provided.",
-                "operationId": "query_item_storage_request_query_item_storage_get",
+                "operationId": "query_item_storage",
                 "parameters": [
                     {
                         "name": "item_name",
@@ -445,7 +475,13 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object"
+                                    },
+                                    "title": "Response Query Item Storage"
+                                }
                             }
                         }
                     },

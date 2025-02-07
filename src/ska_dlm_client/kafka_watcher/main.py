@@ -79,7 +79,7 @@ async def post_dlm_data_item(ingest_server_url: str, storage_name: str, ingest_e
         api_ingest = ingest_api.IngestApi(ingest_api_client)
         try:
             # TODO YAN-1961: Need to fix item_name / data once correct message is sent via kafka
-            response = api_ingest.register_data_item_ingest_register_data_item_post(
+            response = api_ingest.register_data_item(
                 item_name=os.path.basename(ingest_event_data["file"].rstrip("/")),
                 uri=ingest_event_data["file"],
                 storage_name=storage_name,

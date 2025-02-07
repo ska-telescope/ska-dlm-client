@@ -35,7 +35,7 @@ class MigrationApi:
         self.api_client = api_client
 
     @validate_call
-    def copy_data_item_migration_copy_data_item_post(
+    def copy_data_item(
         self,
         item_name: Annotated[
             Optional[StrictStr],
@@ -127,7 +127,7 @@ class MigrationApi:
         """
         # noqa: E501
 
-        _param = self._copy_data_item_migration_copy_data_item_post_serialize(
+        _param = self._copy_data_item_serialize(
             item_name=item_name,
             oid=oid,
             uid=uid,
@@ -153,7 +153,7 @@ class MigrationApi:
         ).data
 
     @validate_call
-    def copy_data_item_migration_copy_data_item_post_with_http_info(
+    def copy_data_item_with_http_info(
         self,
         item_name: Annotated[
             Optional[StrictStr],
@@ -245,7 +245,7 @@ class MigrationApi:
         """
         # noqa: E501
 
-        _param = self._copy_data_item_migration_copy_data_item_post_serialize(
+        _param = self._copy_data_item_serialize(
             item_name=item_name,
             oid=oid,
             uid=uid,
@@ -271,7 +271,7 @@ class MigrationApi:
         )
 
     @validate_call
-    def copy_data_item_migration_copy_data_item_post_without_preload_content(
+    def copy_data_item_without_preload_content(
         self,
         item_name: Annotated[
             Optional[StrictStr],
@@ -363,7 +363,7 @@ class MigrationApi:
         """
         # noqa: E501
 
-        _param = self._copy_data_item_migration_copy_data_item_post_serialize(
+        _param = self._copy_data_item_serialize(
             item_name=item_name,
             oid=oid,
             uid=uid,
@@ -384,7 +384,7 @@ class MigrationApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _copy_data_item_migration_copy_data_item_post_serialize(
+    def _copy_data_item_serialize(
         self,
         item_name,
         oid,
@@ -465,7 +465,7 @@ class MigrationApi:
         )
 
     @validate_call
-    def query_migrations_migration_query_migrations_get(
+    def query_migrations(
         self,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
@@ -479,7 +479,7 @@ class MigrationApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> List[Optional[object]]:
         """Query Migrations
 
         Query for all migrations by a given user.
@@ -514,7 +514,7 @@ class MigrationApi:
         """
         # noqa: E501
 
-        _param = self._query_migrations_migration_query_migrations_get_serialize(
+        _param = self._query_migrations_serialize(
             authorization=authorization,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -523,7 +523,7 @@ class MigrationApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "List[Optional[object]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -534,7 +534,7 @@ class MigrationApi:
         ).data
 
     @validate_call
-    def query_migrations_migration_query_migrations_get_with_http_info(
+    def query_migrations_with_http_info(
         self,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
@@ -548,7 +548,7 @@ class MigrationApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[List[Optional[object]]]:
         """Query Migrations
 
         Query for all migrations by a given user.
@@ -583,7 +583,7 @@ class MigrationApi:
         """
         # noqa: E501
 
-        _param = self._query_migrations_migration_query_migrations_get_serialize(
+        _param = self._query_migrations_serialize(
             authorization=authorization,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -592,7 +592,7 @@ class MigrationApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "List[Optional[object]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -603,7 +603,7 @@ class MigrationApi:
         )
 
     @validate_call
-    def query_migrations_migration_query_migrations_get_without_preload_content(
+    def query_migrations_without_preload_content(
         self,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
@@ -652,7 +652,7 @@ class MigrationApi:
         """
         # noqa: E501
 
-        _param = self._query_migrations_migration_query_migrations_get_serialize(
+        _param = self._query_migrations_serialize(
             authorization=authorization,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -661,13 +661,13 @@ class MigrationApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "List[Optional[object]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _query_migrations_migration_query_migrations_get_serialize(
+    def _query_migrations_serialize(
         self,
         authorization,
         _request_auth,

@@ -4,12 +4,12 @@ All URIs are relative to *http://localhost:8080*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**copy_data_item_migration_copy_data_item_post**](MigrationApi.md#copy_data_item_migration_copy_data_item_post) | **POST** /migration/copy_data_item | Copy Data Item
-[**query_migrations_migration_query_migrations_get**](MigrationApi.md#query_migrations_migration_query_migrations_get) | **GET** /migration/query_migrations | Query Migrations
+[**copy_data_item**](MigrationApi.md#copy_data_item) | **POST** /migration/copy_data_item | Copy Data Item
+[**query_migrations**](MigrationApi.md#query_migrations) | **GET** /migration/query_migrations | Query Migrations
 
 
-# **copy_data_item_migration_copy_data_item_post**
-> object copy_data_item_migration_copy_data_item_post(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, authorization=authorization)
+# **copy_data_item**
+> object copy_data_item(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, authorization=authorization)
 
 Copy Data Item
 
@@ -44,11 +44,11 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
     try:
         # Copy Data Item
-        api_response = api_instance.copy_data_item_migration_copy_data_item_post(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, authorization=authorization)
-        print("The response of MigrationApi->copy_data_item_migration_copy_data_item_post:\n")
+        api_response = api_instance.copy_data_item(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, authorization=authorization)
+        print("The response of MigrationApi->copy_data_item:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling MigrationApi->copy_data_item_migration_copy_data_item_post: %s\n" % e)
+        print("Exception when calling MigrationApi->copy_data_item: %s\n" % e)
 ```
 
 
@@ -88,8 +88,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **query_migrations_migration_query_migrations_get**
-> object query_migrations_migration_query_migrations_get(authorization=authorization)
+# **query_migrations**
+> List[Optional[object]] query_migrations(authorization=authorization)
 
 Query Migrations
 
@@ -118,11 +118,11 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
     try:
         # Query Migrations
-        api_response = api_instance.query_migrations_migration_query_migrations_get(authorization=authorization)
-        print("The response of MigrationApi->query_migrations_migration_query_migrations_get:\n")
+        api_response = api_instance.query_migrations(authorization=authorization)
+        print("The response of MigrationApi->query_migrations:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling MigrationApi->query_migrations_migration_query_migrations_get: %s\n" % e)
+        print("Exception when calling MigrationApi->query_migrations: %s\n" % e)
 ```
 
 
@@ -136,7 +136,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+**List[Optional[object]]**
 
 ### Authorization
 
