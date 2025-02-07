@@ -20,9 +20,9 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
     directory_to_watch: str
     ingest_server_url: str
     storage_name: str
-    reload_status_file: bool
-    storage_root_directory: str
     status_file_absolute_path: str
+    storage_root_directory: str
+    reload_status_file: bool
     use_status_file: bool
     directory_watcher_entries: DirectoryWatcherEntries
     ingest_configuration: Configuration
@@ -34,7 +34,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         ingest_server_url: str,
         storage_name: str,
         status_file_absolute_path: str,
-        storage_root_directory: str = "",
+        storage_root_directory: str,
         reload_status_file: bool = False,
         use_status_file: bool = False,
     ):

@@ -35,7 +35,7 @@ directory_watcher:
   version: "0.1.0"
   imagePullPolicy: Always
   replicas: 1
-  directory_to_watch: /data/dlm
+  directory_to_watch: /data/dlm/watch_dir
   storage_root_directory: /data
   use_polling_watcher: false
   storage_name: data
