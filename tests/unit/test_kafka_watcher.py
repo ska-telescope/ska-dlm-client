@@ -153,6 +153,7 @@ async def test_post_dlm_data_item_success(mock_apiingest, caplog):
         item_name="file_name",
         uri=KAFKA_MSG["file"],  # Assuming file is used as the URI
         storage_name=STORAGE_NAME,
+        eb_id=KAFKA_MSG["metadata"]["eb_id"],
         body=KAFKA_MSG["metadata"],
     )
 
