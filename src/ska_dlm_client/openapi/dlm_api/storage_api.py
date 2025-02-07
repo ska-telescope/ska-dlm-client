@@ -14,7 +14,7 @@ Do not edit the class manually.
 import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from pydantic import Field, StrictFloat, StrictInt, StrictStr, validate_call
+from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr, validate_call
 from typing_extensions import Annotated
 
 from ska_dlm_client.openapi.api_client import ApiClient, RequestSerialized
@@ -35,7 +35,7 @@ class StorageApi:
         self.api_client = api_client
 
     @validate_call
-    def create_rclone_config_storage_rclone_config_post(
+    def create_rclone_config(
         self,
         body: Dict[str, Any],
         _request_timeout: Union[
@@ -47,7 +47,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> bool:
         """Create Rclone Config
 
         Create a new rclone backend configuration entry on the rclone server.
@@ -82,7 +82,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._create_rclone_config_storage_rclone_config_post_serialize(
+        _param = self._create_rclone_config_serialize(
             body=body,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -91,7 +91,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "bool",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -102,7 +102,7 @@ class StorageApi:
         ).data
 
     @validate_call
-    def create_rclone_config_storage_rclone_config_post_with_http_info(
+    def create_rclone_config_with_http_info(
         self,
         body: Dict[str, Any],
         _request_timeout: Union[
@@ -114,7 +114,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[bool]:
         """Create Rclone Config
 
         Create a new rclone backend configuration entry on the rclone server.
@@ -149,7 +149,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._create_rclone_config_storage_rclone_config_post_serialize(
+        _param = self._create_rclone_config_serialize(
             body=body,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -158,7 +158,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "bool",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -169,7 +169,7 @@ class StorageApi:
         )
 
     @validate_call
-    def create_rclone_config_storage_rclone_config_post_without_preload_content(
+    def create_rclone_config_without_preload_content(
         self,
         body: Dict[str, Any],
         _request_timeout: Union[
@@ -216,7 +216,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._create_rclone_config_storage_rclone_config_post_serialize(
+        _param = self._create_rclone_config_serialize(
             body=body,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -225,13 +225,13 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "bool",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _create_rclone_config_storage_rclone_config_post_serialize(
+    def _create_rclone_config_serialize(
         self,
         body,
         _request_auth,
@@ -292,7 +292,7 @@ class StorageApi:
         )
 
     @validate_call
-    def create_storage_config_storage_create_storage_config_post(
+    def create_storage_config(
         self,
         body: Dict[str, Any],
         storage_id: Annotated[
@@ -315,7 +315,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> str:
         """Create Storage Config
 
         Create a new record in the storage_config table for a storage with the given id.
@@ -357,7 +357,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._create_storage_config_storage_create_storage_config_post_serialize(
+        _param = self._create_storage_config_serialize(
             body=body,
             storage_id=storage_id,
             storage_name=storage_name,
@@ -369,7 +369,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -380,7 +380,7 @@ class StorageApi:
         ).data
 
     @validate_call
-    def create_storage_config_storage_create_storage_config_post_with_http_info(
+    def create_storage_config_with_http_info(
         self,
         body: Dict[str, Any],
         storage_id: Annotated[
@@ -403,7 +403,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[str]:
         """Create Storage Config
 
         Create a new record in the storage_config table for a storage with the given id.
@@ -445,7 +445,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._create_storage_config_storage_create_storage_config_post_serialize(
+        _param = self._create_storage_config_serialize(
             body=body,
             storage_id=storage_id,
             storage_name=storage_name,
@@ -457,7 +457,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -468,7 +468,7 @@ class StorageApi:
         )
 
     @validate_call
-    def create_storage_config_storage_create_storage_config_post_without_preload_content(
+    def create_storage_config_without_preload_content(
         self,
         body: Dict[str, Any],
         storage_id: Annotated[
@@ -533,7 +533,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._create_storage_config_storage_create_storage_config_post_serialize(
+        _param = self._create_storage_config_serialize(
             body=body,
             storage_id=storage_id,
             storage_name=storage_name,
@@ -545,13 +545,13 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _create_storage_config_storage_create_storage_config_post_serialize(
+    def _create_storage_config_serialize(
         self,
         body,
         storage_id,
@@ -627,7 +627,7 @@ class StorageApi:
         )
 
     @validate_call
-    def get_storage_config_storage_get_storage_config_get(
+    def get_storage_config(
         self,
         storage_id: Annotated[
             Optional[StrictStr], Field(description='the storage id, by default ""')
@@ -648,7 +648,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> List[Optional[str]]:
         """Get Storage Config
 
         Get the storage configuration entry for a particular storage backend.
@@ -687,7 +687,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._get_storage_config_storage_get_storage_config_get_serialize(
+        _param = self._get_storage_config_serialize(
             storage_id=storage_id,
             storage_name=storage_name,
             config_type=config_type,
@@ -698,7 +698,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "List[Optional[str]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -709,7 +709,7 @@ class StorageApi:
         ).data
 
     @validate_call
-    def get_storage_config_storage_get_storage_config_get_with_http_info(
+    def get_storage_config_with_http_info(
         self,
         storage_id: Annotated[
             Optional[StrictStr], Field(description='the storage id, by default ""')
@@ -730,7 +730,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[List[Optional[str]]]:
         """Get Storage Config
 
         Get the storage configuration entry for a particular storage backend.
@@ -769,7 +769,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._get_storage_config_storage_get_storage_config_get_serialize(
+        _param = self._get_storage_config_serialize(
             storage_id=storage_id,
             storage_name=storage_name,
             config_type=config_type,
@@ -780,7 +780,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "List[Optional[str]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -791,7 +791,7 @@ class StorageApi:
         )
 
     @validate_call
-    def get_storage_config_storage_get_storage_config_get_without_preload_content(
+    def get_storage_config_without_preload_content(
         self,
         storage_id: Annotated[
             Optional[StrictStr], Field(description='the storage id, by default ""')
@@ -851,7 +851,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._get_storage_config_storage_get_storage_config_get_serialize(
+        _param = self._get_storage_config_serialize(
             storage_id=storage_id,
             storage_name=storage_name,
             config_type=config_type,
@@ -862,13 +862,13 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "List[Optional[str]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _get_storage_config_storage_get_storage_config_get_serialize(
+    def _get_storage_config_serialize(
         self,
         storage_id,
         storage_name,
@@ -931,7 +931,7 @@ class StorageApi:
         )
 
     @validate_call
-    def init_location_storage_init_location_post(
+    def init_location(
         self,
         location_name: Annotated[
             StrictStr,
@@ -956,7 +956,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> str:
         """Init Location
 
         Initialize a new storage location.
@@ -1000,7 +1000,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._init_location_storage_init_location_post_serialize(
+        _param = self._init_location_serialize(
             location_name=location_name,
             location_type=location_type,
             location_country=location_country,
@@ -1013,7 +1013,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1024,7 +1024,7 @@ class StorageApi:
         ).data
 
     @validate_call
-    def init_location_storage_init_location_post_with_http_info(
+    def init_location_with_http_info(
         self,
         location_name: Annotated[
             StrictStr,
@@ -1049,7 +1049,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[str]:
         """Init Location
 
         Initialize a new storage location.
@@ -1093,7 +1093,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._init_location_storage_init_location_post_serialize(
+        _param = self._init_location_serialize(
             location_name=location_name,
             location_type=location_type,
             location_country=location_country,
@@ -1106,7 +1106,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1117,7 +1117,7 @@ class StorageApi:
         )
 
     @validate_call
-    def init_location_storage_init_location_post_without_preload_content(
+    def init_location_without_preload_content(
         self,
         location_name: Annotated[
             StrictStr,
@@ -1186,7 +1186,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._init_location_storage_init_location_post_serialize(
+        _param = self._init_location_serialize(
             location_name=location_name,
             location_type=location_type,
             location_country=location_country,
@@ -1199,13 +1199,13 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _init_location_storage_init_location_post_serialize(
+    def _init_location_serialize(
         self,
         location_name,
         location_type,
@@ -1278,7 +1278,7 @@ class StorageApi:
         )
 
     @validate_call
-    def init_storage_storage_init_storage_post(
+    def init_storage(
         self,
         storage_name: Annotated[
             StrictStr, Field(description="An organisation or owner name for the storage.")
@@ -1315,7 +1315,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> str:
         """Init Storage
 
         Initialize a new storage.  location_name or location_id is required.
@@ -1368,7 +1368,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._init_storage_storage_init_storage_post_serialize(
+        _param = self._init_storage_serialize(
             storage_name=storage_name,
             storage_type=storage_type,
             storage_interface=storage_interface,
@@ -1385,7 +1385,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1396,7 +1396,7 @@ class StorageApi:
         ).data
 
     @validate_call
-    def init_storage_storage_init_storage_post_with_http_info(
+    def init_storage_with_http_info(
         self,
         storage_name: Annotated[
             StrictStr, Field(description="An organisation or owner name for the storage.")
@@ -1433,7 +1433,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[str]:
         """Init Storage
 
         Initialize a new storage.  location_name or location_id is required.
@@ -1486,7 +1486,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._init_storage_storage_init_storage_post_serialize(
+        _param = self._init_storage_serialize(
             storage_name=storage_name,
             storage_type=storage_type,
             storage_interface=storage_interface,
@@ -1503,7 +1503,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1514,7 +1514,7 @@ class StorageApi:
         )
 
     @validate_call
-    def init_storage_storage_init_storage_post_without_preload_content(
+    def init_storage_without_preload_content(
         self,
         storage_name: Annotated[
             StrictStr, Field(description="An organisation or owner name for the storage.")
@@ -1604,7 +1604,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._init_storage_storage_init_storage_post_serialize(
+        _param = self._init_storage_serialize(
             storage_name=storage_name,
             storage_type=storage_type,
             storage_interface=storage_interface,
@@ -1621,13 +1621,13 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "str",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _init_storage_storage_init_storage_post_serialize(
+    def _init_storage_serialize(
         self,
         storage_name,
         storage_type,
@@ -1728,7 +1728,7 @@ class StorageApi:
         )
 
     @validate_call
-    def query_location_storage_query_location_get(
+    def query_location(
         self,
         location_name: Annotated[
             Optional[StrictStr],
@@ -1747,7 +1747,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> List[Optional[object]]:
         """Query Location
 
         Query a location.
@@ -1785,7 +1785,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._query_location_storage_query_location_get_serialize(
+        _param = self._query_location_serialize(
             location_name=location_name,
             location_id=location_id,
             _request_auth=_request_auth,
@@ -1795,7 +1795,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "List[Optional[object]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1806,7 +1806,7 @@ class StorageApi:
         ).data
 
     @validate_call
-    def query_location_storage_query_location_get_with_http_info(
+    def query_location_with_http_info(
         self,
         location_name: Annotated[
             Optional[StrictStr],
@@ -1825,7 +1825,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[List[Optional[object]]]:
         """Query Location
 
         Query a location.
@@ -1863,7 +1863,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._query_location_storage_query_location_get_serialize(
+        _param = self._query_location_serialize(
             location_name=location_name,
             location_id=location_id,
             _request_auth=_request_auth,
@@ -1873,7 +1873,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "List[Optional[object]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1884,7 +1884,7 @@ class StorageApi:
         )
 
     @validate_call
-    def query_location_storage_query_location_get_without_preload_content(
+    def query_location_without_preload_content(
         self,
         location_name: Annotated[
             Optional[StrictStr],
@@ -1941,7 +1941,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._query_location_storage_query_location_get_serialize(
+        _param = self._query_location_serialize(
             location_name=location_name,
             location_id=location_id,
             _request_auth=_request_auth,
@@ -1951,13 +1951,13 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "List[Optional[object]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _query_location_storage_query_location_get_serialize(
+    def _query_location_serialize(
         self,
         location_name,
         location_id,
@@ -2015,7 +2015,7 @@ class StorageApi:
         )
 
     @validate_call
-    def query_storage_storage_query_storage_get(
+    def query_storage(
         self,
         storage_name: Annotated[
             Optional[StrictStr],
@@ -2034,7 +2034,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> List[Optional[object]]:
         """Query Storage
 
         Query a storage.
@@ -2072,7 +2072,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._query_storage_storage_query_storage_get_serialize(
+        _param = self._query_storage_serialize(
             storage_name=storage_name,
             storage_id=storage_id,
             _request_auth=_request_auth,
@@ -2082,7 +2082,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "List[Optional[object]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2093,7 +2093,7 @@ class StorageApi:
         ).data
 
     @validate_call
-    def query_storage_storage_query_storage_get_with_http_info(
+    def query_storage_with_http_info(
         self,
         storage_name: Annotated[
             Optional[StrictStr],
@@ -2112,7 +2112,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[List[Optional[object]]]:
         """Query Storage
 
         Query a storage.
@@ -2150,7 +2150,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._query_storage_storage_query_storage_get_serialize(
+        _param = self._query_storage_serialize(
             storage_name=storage_name,
             storage_id=storage_id,
             _request_auth=_request_auth,
@@ -2160,7 +2160,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "List[Optional[object]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2171,7 +2171,7 @@ class StorageApi:
         )
 
     @validate_call
-    def query_storage_storage_query_storage_get_without_preload_content(
+    def query_storage_without_preload_content(
         self,
         storage_name: Annotated[
             Optional[StrictStr],
@@ -2228,7 +2228,7 @@ class StorageApi:
         """
         # noqa: E501
 
-        _param = self._query_storage_storage_query_storage_get_serialize(
+        _param = self._query_storage_serialize(
             storage_name=storage_name,
             storage_id=storage_id,
             _request_auth=_request_auth,
@@ -2238,13 +2238,13 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "List[Optional[object]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _query_storage_storage_query_storage_get_serialize(
+    def _query_storage_serialize(
         self,
         storage_name,
         storage_id,

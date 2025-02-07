@@ -89,7 +89,7 @@ class RegistrationProcessor:
                     if self._config.ingest_register_path_to_add == ""
                     else f"{self._config.ingest_register_path_to_add}/{path_rel_to_watch_dir}"
                 )
-                response = api_ingest.register_data_item_ingest_register_data_item_post(
+                response = api_ingest.register_data_item(
                     item_name=path_rel_to_watch_dir,
                     uri=uri,
                     storage_name=self._config.storage_name,

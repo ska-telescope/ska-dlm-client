@@ -1,6 +1,7 @@
 """Kafka unit tests."""
 
 import json
+import logging
 from unittest import mock
 from unittest.mock import AsyncMock, MagicMock
 
@@ -8,12 +9,17 @@ import pytest
 import pytest_mock
 
 from ska_dlm_client.openapi.exceptions import OpenApiException
-from src.ska_dlm_client.kafka_watcher.main import main, watch
+from src.ska_dlm_client.kafka_watcher.main import main, post_dlm_data_item, watch
 
 KAFKA_HOST = "localhost:9092"
 TEST_TOPIC = "test-events"
 INGEST_HOST = "http://dlm/api"
 STORAGE_NAME = "data"
+KAFKA_MSG = {
+    "file": "data/file_name",
+    "time": "2025-02-05T14:23:45.678901",
+    "metadata": {"eb_id": "eb-meta-20240723-00000"},
+}
 
 
 def test_main(mocker: pytest_mock.MockerFixture):
@@ -66,7 +72,7 @@ def mock_kafka_consumer_fixture(mocker: pytest_mock.MockerFixture):
     mock_kafka_consumer_instance.start = AsyncMock()
     mock_kafka_consumer_instance.stop = AsyncMock()
     mock_kafka_consumer_instance.__aiter__.return_value = [
-        mock.Mock(value=json.dumps({"key": "value"}).encode("utf-8"))
+        mock.Mock(value=json.dumps(KAFKA_MSG).encode("utf-8"))
     ]
     yield mock_kafka_consumer_instance
 
@@ -75,8 +81,7 @@ def mock_kafka_consumer_fixture(mocker: pytest_mock.MockerFixture):
 def mock_api_ingest_fixture(mocker: pytest_mock.MockerFixture):
     """Create a mock for the OpenAPI ingest and simulate a single message."""
     mock_ingest_api = mocker.patch(
-        "ska_dlm_client.openapi.dlm_api.ingest_api.IngestApi"
-        ".register_data_item_ingest_register_data_item_post"
+        "ska_dlm_client.openapi.dlm_api.ingest_api.IngestApi.register_data_item"
     )
     mock_ingest_api.return_value = {"Success": True}
     yield mock_ingest_api
@@ -86,8 +91,7 @@ def mock_api_ingest_fixture(mocker: pytest_mock.MockerFixture):
 def mock_api_ingest_exception_fixture(mocker: pytest_mock.MockerFixture):
     """Create a mock for the OpenAPI ingest and simulate a single message."""
     mock_ingest_api = mocker.patch(
-        "ska_dlm_client.openapi.dlm_api.ingest_api.IngestApi"
-        ".register_data_item_ingest_register_data_item_post"
+        "ska_dlm_client.openapi.dlm_api.ingest_api.IngestApi.register_data_item"
     )
     mock_ingest_api.side_effect = OpenApiException()
     pytest.raises(OpenApiException)
@@ -135,3 +139,56 @@ async def test_watch_http_failure(
 
     # Assert that consumer.stop() was called even on failure
     mock_kafka_consumer.stop.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_post_dlm_data_item_success(mock_apiingest, caplog):
+    """Test that post_dlm_data_item successfully calls the API and logs the success message."""
+    caplog.set_level(logging.INFO)
+
+    await post_dlm_data_item(INGEST_HOST, STORAGE_NAME, KAFKA_MSG)
+
+    # Ensure API call was made with correct parameters
+    mock_apiingest.assert_called_once_with(
+        item_name="file_name",
+        uri=KAFKA_MSG["file"],  # Assuming file is used as the URI
+        storage_name=STORAGE_NAME,
+        eb_id=KAFKA_MSG["metadata"]["eb_id"],
+        body=KAFKA_MSG["metadata"],
+    )
+
+    # Assert: No warnings or errors in logs
+    for record in caplog.records:
+        assert record.levelname not in [
+            "WARNING",
+            "ERROR",
+        ], f"Unexpected log level {record.levelname}: {record.message}"
+
+
+@pytest.mark.asyncio
+async def test_post_dlm_data_item_failure(mock_apiingest, caplog):
+    """Test that post_dlm_data_item handles OpenApiException gracefully and logs errors."""
+    caplog.set_level(logging.ERROR)
+
+    # Simulate an API failure
+    mock_apiingest.side_effect = OpenApiException("API Error")
+
+    # Call function
+    await post_dlm_data_item(INGEST_HOST, STORAGE_NAME, KAFKA_MSG)
+
+    # Ensure the function attempted the call
+    mock_apiingest.assert_called_once()
+
+    # Assert errors are logged
+    error_messages = [record.message for record in caplog.records if record.levelname == "ERROR"]
+
+    expected_errors = [
+        "OpenApiException caught during register_data_item\nAPI Error",
+        "Call to DLM failed",
+        "Ignoring and continuing.....",
+    ]
+
+    for expected in expected_errors:
+        assert any(
+            expected in msg for msg in error_messages
+        ), f"Expected log message not found: {expected}"

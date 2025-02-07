@@ -9,14 +9,13 @@ the watch directory.
 * crc32c is now used during metadata generation to improve performance.
 * Updated OpenAPI spec and code for DLM server 0.2.0. No change in DLM client version as
 no production version released yet.
+* Includes return types although the generator doesn't add return type doc strings.
+* Metadata is sent in the body of the API request to DLM
 
 ## 0.1.0
 
-Added
------
+### Added
 
 * Added Kafka server
-
 * Bootstrap repo with ska-cookiecutter-pypackage
-
 * Added directory watcher
