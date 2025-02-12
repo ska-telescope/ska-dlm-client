@@ -46,7 +46,7 @@ class Item:
         self,
         path_rel_to_watch_dir: str,
         item_type: ItemType,
-        metadata: DataProductMetadata,
+        metadata: DataProductMetadata | None,
         parent: Self = None,
     ):
         """Initialise the Item with required values.
@@ -114,6 +114,89 @@ class RegistrationProcessor:
         self._config.directory_watcher_entries.save_to_file()
         logger.info("entry %s added.", path_rel_to_watch_dir)
 
+    def _register_container_parent_item(self, item: Item) -> str | None:
+        """Register the given item returning its uuid in the DLM."""
+        with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
+            api_ingest = ingest_api.IngestApi(ingest_api_client)
+            try:
+                # Generate the uri relative to the root directory.
+                item_path_rel_to_watch_dir = item.path_rel_to_watch_dir
+                uri = (
+                    item_path_rel_to_watch_dir
+                    if self._config.ingest_register_path_to_add == ""
+                    else f"{self._config.ingest_register_path_to_add}/{item_path_rel_to_watch_dir}"
+                )
+                response = api_ingest.register_data_item(
+                    item_name=item_path_rel_to_watch_dir,
+                    uri=uri,
+                    item_type=item.item_type,
+                    storage_name=self._config.storage_name,
+                    body=item.metadata.as_dict(),
+                )
+                item.uuid = str(response)
+            except OpenApiException as err:
+                logger.error(
+                    "OpenApiException caught during _register_container_parent_item\n%s", err
+                )
+                logger.error("Ignoring and continueing.....")
+                return None
+
+        dlm_registration_uuid = str(response)
+        time_registered = time.time()
+
+        directory_watcher_entry = DirectoryWatcherEntry(
+            file_or_directory=item_path_rel_to_watch_dir,
+            dlm_storage_name=self._config.storage_name,
+            dlm_registration_id=dlm_registration_uuid,
+            time_registered=time_registered,
+        )
+        self._config.directory_watcher_entries.add(directory_watcher_entry)
+        self._config.directory_watcher_entries.save_to_file()
+        logger.info("entry %s added.", item_path_rel_to_watch_dir)
+        return dlm_registration_uuid
+
+    def _register_container_items(self, parent_item: Item, item_list: list[Item]):
+        """Register the given item returning its uuid in the DLM."""
+        with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
+            api_ingest = ingest_api.IngestApi(ingest_api_client)
+            parent_uuid = parent_item.uuid
+            for item in item_list:
+                try:
+                    # Generate the uri relative to the root directory.
+                    item_path_rel_to_watch_dir = item.path_rel_to_watch_dir
+                    uri = (
+                        item_path_rel_to_watch_dir
+                        if self._config.ingest_register_path_to_add == ""
+                        else f"{self._config.ingest_register_path_to_add}/"
+                        f"{item_path_rel_to_watch_dir}"
+                    )
+                    response = api_ingest.register_data_item(
+                        item_name=item_path_rel_to_watch_dir,
+                        uri=uri,
+                        item_type=item.item_type,
+                        storage_name=self._config.storage_name,
+                        parents=parent_uuid,
+                        body=None if item.metadata is None else item.metadata.as_dict(),
+                    )
+                except OpenApiException as err:
+                    logger.error("OpenApiException caught during register_data_item\n%s", err)
+                    logger.error("Ignoring and continueing.....")
+                    return
+
+                dlm_registration_uuid = str(response)
+                time_registered = time.time()
+
+                directory_watcher_entry = DirectoryWatcherEntry(
+                    file_or_directory=item_path_rel_to_watch_dir,
+                    dlm_storage_name=self._config.storage_name,
+                    dlm_registration_id=dlm_registration_uuid,
+                    time_registered=time_registered,
+                )
+                self._config.directory_watcher_entries.add(directory_watcher_entry)
+                self._config.directory_watcher_entries.save_to_file()
+                logger.info("entry %s added.", item_path_rel_to_watch_dir)
+                time.sleep(2)
+
     def add_path(self, absolute_path: str, path_rel_to_watch_dir: str):
         """Add the given path_rel_to_watch_dir to the DLM.
 
@@ -124,19 +207,18 @@ class RegistrationProcessor:
         all files and subdirectories
         """
         logger.info("in add_path with %s and %s", absolute_path, path_rel_to_watch_dir)
-        data_item_relative_path_list, metadata = generate_paths_and_metadata(
+        item_list = generate_paths_and_metadata(
             absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
         )
-        logger.info("data_item_relative_path_list %s", data_item_relative_path_list)
-        logger.info("metadata %s", metadata)
-        if data_item_relative_path_list is None or metadata is None:
+        logger.info("data_item_relative_path_list %s", item_list)
+        if item_list is None:
             logging.error("No files and/or metadata found, NOT added to DLM!")
         else:
-            for data_item_relative_path in data_item_relative_path_list:
-                # Send the same metadata for each data item
-                self._register_entry(
-                    path_rel_to_watch_dir=data_item_relative_path, metadata=metadata
-                )
+            parent_item = item_list[0]
+            self._register_container_parent_item(parent_item)
+            time.sleep(2)
+            item_list.remove(parent_item)
+            self._register_container_items(parent_item=parent_item, item_list=item_list)
 
 
 def _directory_contains_only_files(absolute_path: str) -> bool:
@@ -147,46 +229,29 @@ def _directory_contains_only_files(absolute_path: str) -> bool:
     return True
 
 
-def _directory_list_minus_metadata_file(
-    absolute_path: str, path_rel_to_watch_dir: str
-) -> list[str]:
-    """Return a listing of the given absolute_path directory without the metadata file."""
-    path_list: list[str] = []
-    for entry in os.listdir(absolute_path):
-        if not entry == ska_dlm_client.directory_watcher.config.METADATA_FILENAME:
-            path_list.append(os.path.join(path_rel_to_watch_dir, entry))
-    return path_list
-
-
 def _item_list_minus_metadata_file(
-    absolute_path: str, path_rel_to_watch_dir: str, metadata: DataProductMetadata, parent: Item
+    container_item: Item, absolute_path: str, path_rel_to_watch_dir: str
 ) -> list[Item]:
     """Return a listing of the given absolute_path directory without the metadata file."""
     item_list: list[Item] = []
     for entry in os.listdir(absolute_path):
         if not entry == ska_dlm_client.directory_watcher.config.METADATA_FILENAME:
-            item_list.append(
-                Item(
-                    path_rel_to_watch_dir=os.path.join(path_rel_to_watch_dir, entry),
-                    item_type=ItemType.FILE,
-                    metadata=metadata,
-                    parent=parent,
-                )
+            item = Item(
+                path_rel_to_watch_dir=os.path.join(path_rel_to_watch_dir, entry),
+                item_type=ItemType.FILE,
+                metadata=None,  # Set to know as Container has this file's metadata
+                parent=container_item,
             )
+            item_list.append(item)
     return item_list
 
 
-def generate_paths_and_metadata(
-    absolute_path: str, path_rel_to_watch_dir: str
-) -> tuple[list[str], dict]:
+def generate_paths_and_metadata(absolute_path: str, path_rel_to_watch_dir: str) -> list[Item]:
     """Return the list of relative paths to data items and their associated metadata."""
     logger.info("working with path %s", absolute_path)
-    relative_path_list = None
-    item_list = [Item]
-    metadata = None
+    item_list: list[Item] = []
     if isfile(absolute_path):
         logger.info("entry is file")
-        relative_path_list = [path_rel_to_watch_dir]
         metadata = DataProductMetadata(absolute_path)
         item_list.append(
             Item(
@@ -204,37 +269,52 @@ def generate_paths_and_metadata(
         else:
             logger.info("entry is directory")
 
+        metadata = DataProductMetadata(absolute_path)
+        container_item = Item(
+            path_rel_to_watch_dir=path_rel_to_watch_dir,
+            item_type=ItemType.CONTAINER,
+            metadata=metadata,
+        )
+        # The container must be registered first so that the uid of the container can be
+        # assigned to all the files in the directory/container.
+        item_list.append(container_item)
+
         # if a measurement set then just add directory
-        if path_rel_to_watch_dir.lower().endswith(
+        if not path_rel_to_watch_dir.lower().endswith(
             ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
         ):
-            relative_path_list = [path_rel_to_watch_dir]
-            metadata = DataProductMetadata(absolute_path)
-            item_list.append(
-                Item(
-                    path_rel_to_watch_dir=path_rel_to_watch_dir,
-                    item_type=ItemType.CONTAINER,
-                    metadata=metadata,
-                )
+            additional_items = _item_list_minus_metadata_file(
+                container_item=container_item,
+                absolute_path=absolute_path,
+                path_rel_to_watch_dir=path_rel_to_watch_dir,
             )
-        else:
-            relative_path_list = _directory_list_minus_metadata_file(
-                absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
-            )
-            logger.info("%s: %s", absolute_path, relative_path_list)
-            if _directory_contains_only_files(absolute_path):
-                metadata = DataProductMetadata(absolute_path)
-            else:
+            item_list.extend(additional_items)
+            logger.info("%s: %s", absolute_path, item_list)
+            if not _directory_contains_only_files(absolute_path):
                 logger.error("subdirectories of data_item path does not support subdirectories.")
-            item_list.append(
-                Item(
-                    path_rel_to_watch_dir=path_rel_to_watch_dir,
-                    item_type=ItemType.CONTAINER,
-                    metadata=metadata,
-                )
-            )
     elif islink(absolute_path):
         logger.error("entry is symbolic link NOT pointing to a directory, this is not handled")
     else:
         logger.error("entry is unknown")
-    return relative_path_list, metadata.as_dict()
+    return item_list
+
+
+def main():
+    """Run amain function in a new loop."""
+    # result = generate_paths_and_metadata(absolute_path=
+    # "/Users/00077990/yanda/shared/watch_dir", path_rel_to_watch_dir="obs3")
+    # logger.info(result)
+    watch_dir = "/data/watch_dir"
+    config = Config(
+        directory_to_watch=watch_dir,
+        ingest_server_url="http://localhost:8001",
+        storage_name="data",
+        status_file_absolute_path=f"{watch_dir}/status.json",
+        storage_root_directory="/data",
+    )
+    rg = RegistrationProcessor(config=config)
+    rg.add_path(absolute_path="/data/watch_dir/obs2", path_rel_to_watch_dir="obs2")
+
+
+if __name__ == "__main__":
+    main()

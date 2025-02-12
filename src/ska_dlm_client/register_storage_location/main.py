@@ -17,7 +17,7 @@ LOCATION_TYPE = "ThisDLMClientLocation"
 LOCATION_COUNTRY = "Australia"
 LOCATION_CITY = "Marksville"
 LOCATION_FACILITY = "ICRAR"
-STORAGE_CONFIG = {"name": "data", "type": "local", "parameters": {}}
+STORAGE_CONFIG = {"name": "data", "type": "alias", "parameters": {"remote": "/"}}
 STORAGE_INTERFACE = "posix"
 STORAGE_TYPE = "disk"
 
