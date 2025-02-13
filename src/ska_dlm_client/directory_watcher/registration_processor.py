@@ -14,10 +14,11 @@ import ska_dlm_client.directory_watcher.config
 from ska_dlm_client.directory_watcher.config import Config
 from ska_dlm_client.directory_watcher.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntry
-from ska_dlm_client.openapi import api_client
+from ska_dlm_client.openapi import ApiException, api_client
 from ska_dlm_client.openapi.dlm_api import ingest_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -78,43 +79,7 @@ class RegistrationProcessor:
             path.resolve()
         return path
 
-    def _register_entry(self, path_rel_to_watch_dir: str, metadata: dict):
-        """Register the given entry_path."""
-        with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
-            api_ingest = ingest_api.IngestApi(ingest_api_client)
-            try:
-                # Generate the uri relative to the root directory.
-                uri = (
-                    path_rel_to_watch_dir
-                    if self._config.ingest_register_path_to_add == ""
-                    else f"{self._config.ingest_register_path_to_add}/{path_rel_to_watch_dir}"
-                )
-                response = api_ingest.register_data_item(
-                    item_name=path_rel_to_watch_dir,
-                    uri=uri,
-                    storage_name=self._config.storage_name,
-                    body=metadata,
-                )
-            except OpenApiException as err:
-                logger.error("OpenApiException caught during register_data_item\n%s", err)
-                logger.error("Ignoring and continueing.....")
-                return
-
-        # TODO: decode JSON response
-        dlm_registration_id = str(response)
-        time_registered = time.time()
-
-        directory_watcher_entry = DirectoryWatcherEntry(
-            file_or_directory=path_rel_to_watch_dir,
-            dlm_storage_name=self._config.storage_name,
-            dlm_registration_id=dlm_registration_id,
-            time_registered=time_registered,
-        )
-        self._config.directory_watcher_entries.add(directory_watcher_entry)
-        self._config.directory_watcher_entries.save_to_file()
-        logger.info("entry %s added.", path_rel_to_watch_dir)
-
-    def _register_container_parent_item(self, item: Item) -> str | None:
+    def _register_single_item(self, item: Item) -> str | None:
         """Register the given item returning its uuid in the DLM."""
         with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
@@ -133,11 +98,11 @@ class RegistrationProcessor:
                     storage_name=self._config.storage_name,
                     body=item.metadata.as_dict(),
                 )
-                item.uuid = str(response)
             except OpenApiException as err:
-                logger.error(
-                    "OpenApiException caught during _register_container_parent_item\n%s", err
-                )
+                logger.error("OpenApiException caught during register_container_parent_item")
+                if isinstance(err, ApiException):
+                    logger.error("ApiException: %s", err.body)
+                logger.error("%s", err)
                 logger.error("Ignoring and continueing.....")
                 return None
 
@@ -155,11 +120,10 @@ class RegistrationProcessor:
         logger.info("entry %s added.", item_path_rel_to_watch_dir)
         return dlm_registration_uuid
 
-    def _register_container_items(self, parent_item: Item, item_list: list[Item]):
+    def _register_container_items(self, item_list: list[Item]):
         """Register the given item returning its uuid in the DLM."""
         with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
-            parent_uuid = parent_item.uuid
             for item in item_list:
                 try:
                     # Generate the uri relative to the root directory.
@@ -175,11 +139,14 @@ class RegistrationProcessor:
                         uri=uri,
                         item_type=item.item_type,
                         storage_name=self._config.storage_name,
-                        parents=parent_uuid,
+                        parents=item.parent.uuid,
                         body=None if item.metadata is None else item.metadata.as_dict(),
                     )
                 except OpenApiException as err:
-                    logger.error("OpenApiException caught during register_data_item\n%s", err)
+                    logger.error("OpenApiException caught during _register_container_items")
+                    if isinstance(err, ApiException):
+                        logger.error("ApiException: %s", err.body)
+                    logger.error("%s", err)
                     logger.error("Ignoring and continueing.....")
                     return
 
@@ -211,14 +178,21 @@ class RegistrationProcessor:
             absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
         )
         logger.info("data_item_relative_path_list %s", item_list)
-        if item_list is None:
-            logging.error("No files and/or metadata found, NOT added to DLM!")
+        if item_list is None or len(item_list) == 0:
+            logger.error("No files found, NOT added to DLM!")
+        if len(item_list) == 1:
+            item = item_list[0]
+            if item.item_type is ItemType.FILE:
+                self._register_single_item(item)
+            else:
+                logger.error("Single data item to add but is not a file, not added to DLM!")
         else:
+            # Register the container directory first so that its uuid can be used for the files.
             parent_item = item_list[0]
-            self._register_container_parent_item(parent_item)
+            self._register_single_item(parent_item)
             time.sleep(2)
             item_list.remove(parent_item)
-            self._register_container_items(parent_item=parent_item, item_list=item_list)
+            self._register_container_items(item_list=item_list)
 
 
 def _directory_contains_only_files(absolute_path: str) -> bool:
