@@ -179,7 +179,7 @@ class RegistrationProcessor:
         )
         logger.info("data_item_relative_path_list %s", item_list)
         if item_list is None or len(item_list) == 0:
-            logger.error("No files found, NOT added to DLM!")
+            logger.error("No data items found, NOT added to DLM!")
         if len(item_list) == 1:
             item = item_list[0]
             if item.item_type is ItemType.FILE:
@@ -193,6 +193,14 @@ class RegistrationProcessor:
             time.sleep(2)
             item_list.remove(parent_item)
             self._register_container_items(item_list=item_list)
+
+
+def _directory_contains_only_directories(absolute_path: str) -> bool:
+    """Return True if the given directory contains only directories."""
+    for entry in os.listdir(absolute_path):
+        if not os.path.isdir(absolute_path + entry):
+            return False
+    return True
 
 
 def _directory_contains_only_files(absolute_path: str) -> bool:
@@ -220,6 +228,58 @@ def _item_list_minus_metadata_file(
     return item_list
 
 
+def _generate_paths_and_metadata_for_direcotry(
+    absolute_path: str, path_rel_to_watch_dir: str
+) -> list[Item]:
+    """Return the list of relative paths to data items given a directory."""
+    item_list: list[Item] = []
+    # Determine first if the given path is the head of a data item or of a directory containing
+    # other data items. Exclude any configurations not currently supported
+    if not _directory_contains_only_files(absolute_path):
+        if _directory_contains_only_directories(absolute_path):
+            logger.info("Direcory %s contains only directories, processing.", absolute_path)
+        else:
+            logger.error(
+                "data_item path does not support subdirectories and files simultaneously."
+            )
+            return item_list
+
+    if not _directory_contains_only_directories(absolute_path):
+        # Working with a single directory (or link to a directory) containing only files
+        metadata = DataProductMetadata(absolute_path)
+        container_item = Item(
+            path_rel_to_watch_dir=path_rel_to_watch_dir,
+            item_type=ItemType.CONTAINER,
+            metadata=metadata,
+        )
+        # The container must be registered first so that the uid of the container can be
+        # assigned to all the files in the directory/container.
+        item_list.append(container_item)
+
+        # if a measurement set then just add directory
+        if not path_rel_to_watch_dir.lower().endswith(
+            ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
+        ):
+            additional_items = _item_list_minus_metadata_file(
+                container_item=container_item,
+                absolute_path=absolute_path,
+                path_rel_to_watch_dir=path_rel_to_watch_dir,
+            )
+            item_list.extend(additional_items)
+            logger.info("%s: %s", absolute_path, item_list)
+    else:
+        # From previous test we know that each entry must be directory
+        for entry in os.listdir(absolute_path):
+            local_abs_path = os.path.join(absolute_path, entry)
+            local_rel_path = os.path.join(path_rel_to_watch_dir, entry)
+            item_list.extend(
+                generate_paths_and_metadata(
+                    absolute_path=local_abs_path, path_rel_to_watch_dir=local_rel_path
+                )
+            )
+    return item_list
+
+
 def generate_paths_and_metadata(absolute_path: str, path_rel_to_watch_dir: str) -> list[Item]:
     """Return the list of relative paths to data items and their associated metadata."""
     logger.info("working with path %s", absolute_path)
@@ -243,29 +303,9 @@ def generate_paths_and_metadata(absolute_path: str, path_rel_to_watch_dir: str) 
         else:
             logger.info("entry is directory")
 
-        metadata = DataProductMetadata(absolute_path)
-        container_item = Item(
-            path_rel_to_watch_dir=path_rel_to_watch_dir,
-            item_type=ItemType.CONTAINER,
-            metadata=metadata,
+        item_list = _generate_paths_and_metadata_for_direcotry(
+            absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
         )
-        # The container must be registered first so that the uid of the container can be
-        # assigned to all the files in the directory/container.
-        item_list.append(container_item)
-
-        # if a measurement set then just add directory
-        if not path_rel_to_watch_dir.lower().endswith(
-            ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
-        ):
-            additional_items = _item_list_minus_metadata_file(
-                container_item=container_item,
-                absolute_path=absolute_path,
-                path_rel_to_watch_dir=path_rel_to_watch_dir,
-            )
-            item_list.extend(additional_items)
-            logger.info("%s: %s", absolute_path, item_list)
-            if not _directory_contains_only_files(absolute_path):
-                logger.error("subdirectories of data_item path does not support subdirectories.")
     elif islink(absolute_path):
         logger.error("entry is symbolic link NOT pointing to a directory, this is not handled")
     else:
