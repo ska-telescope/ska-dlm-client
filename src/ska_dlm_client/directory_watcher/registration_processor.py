@@ -247,16 +247,19 @@ def _generate_paths_and_metadata_for_direcotry(
     if not _directory_contains_only_directories(absolute_path):
         # Working with a single directory (or link to a directory) containing only files
         metadata = DataProductMetadata(absolute_path)
-        container_item = Item(
-            path_rel_to_watch_dir=path_rel_to_watch_dir,
-            item_type=ItemType.CONTAINER,
-            metadata=metadata,
-        )
-        # The container must be registered first so that the uid of the container can be
-        # assigned to all the files in the directory/container.
-        item_list.append(container_item)
+        # YAN-1976: if directory has its own metadata then treat directory as container
+        container_item = None
+        if metadata.dp_has_metadata:
+            container_item = Item(
+                path_rel_to_watch_dir=path_rel_to_watch_dir,
+                item_type=ItemType.CONTAINER,
+                metadata=metadata,
+            )
+            # The container must be registered first so that the uid of the container can be
+            # assigned to all the files in the directory/container.
+            item_list.append(container_item)
 
-        # if a measurement set then just add directory
+        # When not just a measurement set then add files from directory
         if not path_rel_to_watch_dir.lower().endswith(
             ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
         ):
