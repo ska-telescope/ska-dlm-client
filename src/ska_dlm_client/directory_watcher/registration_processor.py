@@ -91,12 +91,13 @@ class RegistrationProcessor:
                     if self._config.ingest_register_path_to_add == ""
                     else f"{self._config.ingest_register_path_to_add}/{item_path_rel_to_watch_dir}"
                 )
+                # response = None
                 response = api_ingest.register_data_item(
                     item_name=item_path_rel_to_watch_dir,
                     uri=uri,
                     item_type=item.item_type,
                     storage_name=self._config.storage_name,
-                    body=item.metadata.as_dict(),
+                    body=None if item.metadata is None else item.metadata.as_dict(),
                 )
             except OpenApiException as err:
                 logger.error("OpenApiException caught during register_container_parent_item")
@@ -134,12 +135,13 @@ class RegistrationProcessor:
                         else f"{self._config.ingest_register_path_to_add}/"
                         f"{item_path_rel_to_watch_dir}"
                     )
+                    # response = None
                     response = api_ingest.register_data_item(
                         item_name=item_path_rel_to_watch_dir,
                         uri=uri,
                         item_type=item.item_type,
                         storage_name=self._config.storage_name,
-                        parents=item.parent.uuid,
+                        parents=None if item.parent is None else item.parent.uuid,
                         body=None if item.metadata is None else item.metadata.as_dict(),
                     )
                 except OpenApiException as err:
@@ -198,7 +200,7 @@ class RegistrationProcessor:
 def _directory_contains_only_directories(absolute_path: str) -> bool:
     """Return True if the given directory contains only directories."""
     for entry in os.listdir(absolute_path):
-        if not os.path.isdir(absolute_path + entry):
+        if not os.path.isdir(os.path.join(absolute_path, entry)):
             return False
     return True
 
@@ -206,7 +208,7 @@ def _directory_contains_only_directories(absolute_path: str) -> bool:
 def _directory_contains_only_files(absolute_path: str) -> bool:
     """Return True if the given directory contains only files."""
     for entry in os.listdir(absolute_path):
-        if os.path.isdir(absolute_path + entry):
+        if not os.path.isfile(os.path.join(absolute_path, entry)):
             return False
     return True
 
@@ -275,11 +277,10 @@ def _generate_paths_and_metadata_for_direcotry(
         for entry in os.listdir(absolute_path):
             local_abs_path = os.path.join(absolute_path, entry)
             local_rel_path = os.path.join(path_rel_to_watch_dir, entry)
-            item_list.extend(
-                generate_paths_and_metadata(
-                    absolute_path=local_abs_path, path_rel_to_watch_dir=local_rel_path
-                )
+            new_items = _generate_paths_and_metadata_for_direcotry(
+                absolute_path=local_abs_path, path_rel_to_watch_dir=local_rel_path
             )
+            item_list.extend(new_items)
     return item_list
 
 
@@ -330,7 +331,8 @@ def main():
         storage_root_directory="/data",
     )
     rg = RegistrationProcessor(config=config)
-    rg.add_path(absolute_path="/data/watch_dir/obs2", path_rel_to_watch_dir="obs2")
+    rg.add_path(absolute_path="/data/watch_dir/session1", path_rel_to_watch_dir="session1")
+    # rg.add_path(absolute_path="/data/watch_dir/obs2", path_rel_to_watch_dir="obs2")
 
 
 if __name__ == "__main__":
