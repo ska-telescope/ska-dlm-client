@@ -333,9 +333,10 @@ def main():
         storage_root_directory="/data",
     )
     rg = RegistrationProcessor(config=config)
-    # rg.add_path(absolute_path="/Users/00077990/data/watch_dir/session1", path_rel_to_watch_dir="session1")
-    #rg.add_path(absolute_path="/data/watch_dir/session1", path_rel_to_watch_dir="session1")
-    rg.add_path(absolute_path="/Users/00077990/data/directory_entr", path_rel_to_watch_dir="directory_entr")
+    # rg.add_path(absolute_path="/data/watch_dir/session1", path_rel_to_watch_dir="session1")
+    rg.add_path(
+        absolute_path="/Users/00077990/data/directory_entr", path_rel_to_watch_dir="directory_entr"
+    )
 
 
 if __name__ == "__main__":
