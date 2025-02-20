@@ -56,6 +56,18 @@
                         "description": "Return data_item referred to by the UID provided."
                     },
                     {
+                        "name": "storage_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "Return data_item referred to by a given storage_id.",
+                            "default": "",
+                            "title": "Storage Id"
+                        },
+                        "description": "Return data_item referred to by a given storage_id."
+                    },
+                    {
                         "name": "params",
                         "in": "query",
                         "required": false,

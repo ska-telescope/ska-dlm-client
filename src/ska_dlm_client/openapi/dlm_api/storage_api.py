@@ -318,7 +318,7 @@ class StorageApi:
     ) -> str:
         """Create Storage Config
 
-        Create a new record in the storage_config table for a storage with the given id.
+        Create a new record in the storage_config table for a given storage_id.
 
         Parameters
         ----------
@@ -406,7 +406,7 @@ class StorageApi:
     ) -> ApiResponse[str]:
         """Create Storage Config
 
-        Create a new record in the storage_config table for a storage with the given id.
+        Create a new record in the storage_config table for a given storage_id.
 
         Parameters
         ----------
@@ -494,7 +494,7 @@ class StorageApi:
     ) -> RESTResponseType:
         """Create Storage Config
 
-        Create a new record in the storage_config table for a storage with the given id.
+        Create a new record in the storage_config table for a given storage_id.
 
         Parameters
         ----------
@@ -1318,7 +1318,7 @@ class StorageApi:
     ) -> str:
         """Init Storage
 
-        Initialize a new storage.  location_name or location_id is required.
+        Initialize a new storage.
 
         Parameters
         ----------
@@ -1436,7 +1436,7 @@ class StorageApi:
     ) -> ApiResponse[str]:
         """Init Storage
 
-        Initialize a new storage.  location_name or location_id is required.
+        Initialize a new storage.
 
         Parameters
         ----------
@@ -1554,7 +1554,7 @@ class StorageApi:
     ) -> RESTResponseType:
         """Init Storage
 
-        Initialize a new storage.  location_name or location_id is required.
+        Initialize a new storage.
 
         Parameters
         ----------
@@ -2019,11 +2019,13 @@ class StorageApi:
         self,
         storage_name: Annotated[
             Optional[StrictStr],
-            Field(description="could be empty, in which case the first 1000 items are returned"),
+            Field(
+                description="Name of the storage to query. If not provided, the first 1000 locations are returned."
+            ),
         ] = None,
         storage_id: Annotated[
             Optional[StrictStr],
-            Field(description="Return locations referred to by the location_id provided."),
+            Field(description="ID of the storage to query. Ignored if storage_name is provided."),
         ] = None,
         _request_timeout: Union[
             None,
@@ -2037,15 +2039,16 @@ class StorageApi:
     ) -> List[Optional[object]]:
         """Query Storage
 
-        Query a storage.
+        Query storage locations.
 
         Parameters
         ----------
         storage_name : str
-            could be empty, in which case the first 1000 items are
-            returned
+            Name of the storage to query. If not provided, the first
+            1000 locations are returned.
         storage_id : str
-            Return locations referred to by the location_id provided.
+            ID of the storage to query. Ignored if storage_name is
+            provided.
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -2097,11 +2100,13 @@ class StorageApi:
         self,
         storage_name: Annotated[
             Optional[StrictStr],
-            Field(description="could be empty, in which case the first 1000 items are returned"),
+            Field(
+                description="Name of the storage to query. If not provided, the first 1000 locations are returned."
+            ),
         ] = None,
         storage_id: Annotated[
             Optional[StrictStr],
-            Field(description="Return locations referred to by the location_id provided."),
+            Field(description="ID of the storage to query. Ignored if storage_name is provided."),
         ] = None,
         _request_timeout: Union[
             None,
@@ -2115,15 +2120,16 @@ class StorageApi:
     ) -> ApiResponse[List[Optional[object]]]:
         """Query Storage
 
-        Query a storage.
+        Query storage locations.
 
         Parameters
         ----------
         storage_name : str
-            could be empty, in which case the first 1000 items are
-            returned
+            Name of the storage to query. If not provided, the first
+            1000 locations are returned.
         storage_id : str
-            Return locations referred to by the location_id provided.
+            ID of the storage to query. Ignored if storage_name is
+            provided.
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -2175,11 +2181,13 @@ class StorageApi:
         self,
         storage_name: Annotated[
             Optional[StrictStr],
-            Field(description="could be empty, in which case the first 1000 items are returned"),
+            Field(
+                description="Name of the storage to query. If not provided, the first 1000 locations are returned."
+            ),
         ] = None,
         storage_id: Annotated[
             Optional[StrictStr],
-            Field(description="Return locations referred to by the location_id provided."),
+            Field(description="ID of the storage to query. Ignored if storage_name is provided."),
         ] = None,
         _request_timeout: Union[
             None,
@@ -2193,15 +2201,16 @@ class StorageApi:
     ) -> RESTResponseType:
         """Query Storage
 
-        Query a storage.
+        Query storage locations.
 
         Parameters
         ----------
         storage_name : str
-            could be empty, in which case the first 1000 items are
-            returned
+            Name of the storage to query. If not provided, the first
+            1000 locations are returned.
         storage_id : str
-            Return locations referred to by the location_id provided.
+            ID of the storage to query. Ignored if storage_name is
+            provided.
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)

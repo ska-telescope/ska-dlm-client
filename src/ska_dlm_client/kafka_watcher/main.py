@@ -82,7 +82,6 @@ async def post_dlm_data_item(ingest_server_url: str, storage_name: str, ingest_e
                 item_name=os.path.basename(ingest_event_data["file"].rstrip("/")),
                 uri=ingest_event_data["file"],
                 storage_name=storage_name,
-                eb_id=ingest_event_data["metadata"]["eb_id"],
                 body=ingest_event_data["metadata"],
             )
             logger.info("item posted successfully with response %s", response)

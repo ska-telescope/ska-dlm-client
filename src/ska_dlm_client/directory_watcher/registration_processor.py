@@ -97,6 +97,7 @@ class RegistrationProcessor:
                     uri=uri,
                     item_type=item.item_type,
                     storage_name=self._config.storage_name,
+                    do_storage_access_check=True,
                     body=None if item.metadata is None else item.metadata.as_dict(),
                 )
             except OpenApiException as err:
@@ -142,6 +143,7 @@ class RegistrationProcessor:
                         item_type=item.item_type,
                         storage_name=self._config.storage_name,
                         parents=None if item.parent is None else item.parent.uuid,
+                        do_storage_access_check=True,
                         body=None if item.metadata is None else item.metadata.as_dict(),
                     )
                 except OpenApiException as err:
@@ -331,8 +333,9 @@ def main():
         storage_root_directory="/data",
     )
     rg = RegistrationProcessor(config=config)
-    rg.add_path(absolute_path="/data/watch_dir/session1", path_rel_to_watch_dir="session1")
-    # rg.add_path(absolute_path="/data/watch_dir/obs2", path_rel_to_watch_dir="obs2")
+    # rg.add_path(absolute_path="/Users/00077990/data/watch_dir/session1", path_rel_to_watch_dir="session1")
+    #rg.add_path(absolute_path="/data/watch_dir/session1", path_rel_to_watch_dir="session1")
+    rg.add_path(absolute_path="/Users/00077990/data/directory_entr", path_rel_to_watch_dir="directory_entr")
 
 
 if __name__ == "__main__":

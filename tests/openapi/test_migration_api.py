@@ -33,6 +33,13 @@ class TestMigrationApi(unittest.TestCase):
         """
         pass
 
+    def test_get_migration_record(self) -> None:
+        """Test case for get_migration_record
+
+        Get Migration Record
+        """
+        pass
+
     def test_query_migrations(self) -> None:
         """Test case for query_migrations
 
