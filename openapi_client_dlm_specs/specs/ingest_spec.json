@@ -117,7 +117,7 @@
                 "tags": [
                     "ingest"
                 ],
-                "description": "Ingest a data_item (register function is an alias).\n\nThis high level function is a combination of init_data_item, set_uri and set_state(READY).\nIt also checks whether a data_item is already registered on the requested storage.\n\n(1) check whether requested storage is known and accessible\n(2) check whether item is accessible/exists on that storage\n(3) check whether item is already registered on that storage\n(4) initialize the new item with the same OID on the new storage\n(5) set state to READY\n(6) save metadata\n(7) notify the data dashboard",
+                "description": "Ingest a data_item (register function is an alias).\n\nThis high level function is a combination of init_data_item, set_uri and set_state(READY).\nIt also checks whether a data_item is already registered on the requested storage.\n\n(1) check whether requested storage is known and accessible\n(2) check, if required, whether item is accessible/exists on that storage\n(3) check whether item is already registered on that storage\n(4) initialize the item on the storage\n(5) set the access path to the payload\n(6) set state to READY\n(7) save metadata in the data_item table",
                 "operationId": "register_data_item",
                 "parameters": [
                     {
@@ -126,10 +126,10 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "description": "could be empty, in which case the first 1000 items are returned",
+                            "description": "item name to register with. Does not need to be unique.",
                             "title": "Item Name"
                         },
-                        "description": "could be empty, in which case the first 1000 items are returned"
+                        "description": "item name to register with. Does not need to be unique."
                     },
                     {
                         "name": "uri",
@@ -194,22 +194,16 @@
                         "description": "uuid of parent item"
                     },
                     {
-                        "name": "eb_id",
+                        "name": "do_storage_access_check",
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "anyOf": [
-                                {
-                                    "type": "string"
-                                },
-                                {
-                                    "type": "null"
-                                }
-                            ],
-                            "description": "execution block ID provided by the client",
-                            "title": "Eb Id"
+                            "type": "boolean",
+                            "description": "perform check_storage_access() against provided storage and uri",
+                            "default": true,
+                            "title": "Do Storage Access Check"
                         },
-                        "description": "execution block ID provided by the client"
+                        "description": "perform check_storage_access() against provided storage and uri"
                     },
                     {
                         "name": "authorization",

@@ -5,6 +5,7 @@ All URIs are relative to *http://localhost:8080*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**copy_data_item**](MigrationApi.md#copy_data_item) | **POST** /migration/copy_data_item | Copy Data Item
+[**get_migration_record**](MigrationApi.md#get_migration_record) | **GET** /migration/get_migration | Get Migration Record
 [**query_migrations**](MigrationApi.md#query_migrations) | **GET** /migration/query_migrations | Query Migrations
 
 
@@ -13,7 +14,7 @@ Method | HTTP request | Description
 
 Copy Data Item
 
-Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialize the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) make sure the copy was successful
+Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialize the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) set the access path to the payload (6) set state to READY (7) save metadata in the data_item table
 
 ### Example
 
@@ -65,6 +66,74 @@ Name | Type | Description  | Notes
  **destination_id** | **str**| the destination storage, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
  **path** | **str**| the destination path relative to storage root, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
  **authorization** | **str**| Validated Bearer token with UserInfo | [optional] 
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_migration_record**
+> object get_migration_record(migration_id)
+
+Get Migration Record
+
+Query for a specific migration.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.MigrationApi(api_client)
+    migration_id = 56 # int | Migration id of migration
+
+    try:
+        # Get Migration Record
+        api_response = api_instance.get_migration_record(migration_id)
+        print("The response of MigrationApi->get_migration_record:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling MigrationApi->get_migration_record: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **migration_id** | **int**| Migration id of migration | 
 
 ### Return type
 

@@ -92,6 +92,7 @@ Class | Method | HTTP request | Description
 *IngestApi* | [**init_data_item**](openapi_dlm_client/IngestApi.md#init_data_item) | **POST** /ingest/init_data_item | Init Data Item
 *IngestApi* | [**register_data_item**](openapi_dlm_client/IngestApi.md#register_data_item) | **POST** /ingest/register_data_item | Register Data Item
 *MigrationApi* | [**copy_data_item**](openapi_dlm_client/MigrationApi.md#copy_data_item) | **POST** /migration/copy_data_item | Copy Data Item
+*MigrationApi* | [**get_migration_record**](openapi_dlm_client/MigrationApi.md#get_migration_record) | **GET** /migration/get_migration | Get Migration Record
 *MigrationApi* | [**query_migrations**](openapi_dlm_client/MigrationApi.md#query_migrations) | **GET** /migration/query_migrations | Query Migrations
 *RequestApi* | [**query_data_item**](openapi_dlm_client/RequestApi.md#query_data_item) | **GET** /request/query_data_item | Query Data Item
 *RequestApi* | [**query_deleted**](openapi_dlm_client/RequestApi.md#query_deleted) | **GET** /request/query_deleted | Query Deleted

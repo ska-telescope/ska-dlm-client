@@ -14,7 +14,7 @@ Method | HTTP request | Description
 
 
 # **query_data_item**
-> List[Optional[object]] query_data_item(item_name=item_name, oid=oid, uid=uid, params=params)
+> List[Optional[object]] query_data_item(item_name=item_name, oid=oid, uid=uid, storage_id=storage_id, params=params)
 
 Query Data Item
 
@@ -42,11 +42,12 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     item_name = '' # str | could be empty, in which case the first 1000 items are returned. (optional) (default to '')
     oid = '' # str | Return data_items referred to by the OID provided. (optional) (default to '')
     uid = '' # str | Return data_item referred to by the UID provided. (optional) (default to '')
+    storage_id = '' # str | Return data_item referred to by a given storage_id. (optional) (default to '')
     params = 'params_example' # str | specify the query parameters (optional)
 
     try:
         # Query Data Item
-        api_response = api_instance.query_data_item(item_name=item_name, oid=oid, uid=uid, params=params)
+        api_response = api_instance.query_data_item(item_name=item_name, oid=oid, uid=uid, storage_id=storage_id, params=params)
         print("The response of RequestApi->query_data_item:\n")
         pprint(api_response)
     except Exception as e:
@@ -63,6 +64,7 @@ Name | Type | Description  | Notes
  **item_name** | **str**| could be empty, in which case the first 1000 items are returned. | [optional] [default to &#39;&#39;]
  **oid** | **str**| Return data_items referred to by the OID provided. | [optional] [default to &#39;&#39;]
  **uid** | **str**| Return data_item referred to by the UID provided. | [optional] [default to &#39;&#39;]
+ **storage_id** | **str**| Return data_item referred to by a given storage_id. | [optional] [default to &#39;&#39;]
  **params** | **str**| specify the query parameters | [optional] 
 
 ### Return type

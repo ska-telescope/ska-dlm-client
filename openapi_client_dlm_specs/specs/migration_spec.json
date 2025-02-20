@@ -66,13 +66,56 @@
                 }
             }
         },
+        "/migration/get_migration": {
+            "get": {
+                "summary": "Get Migration Record",
+                "tags": [
+                    "migration"
+                ],
+                "description": "Query for a specific migration.",
+                "operationId": "get_migration_record",
+                "parameters": [
+                    {
+                        "name": "migration_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "description": "Migration id of migration",
+                            "title": "Migration Id"
+                        },
+                        "description": "Migration id of migration"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/migration/copy_data_item": {
             "post": {
                 "summary": "Copy Data Item",
                 "tags": [
                     "migration"
                 ],
-                "description": "Copy a data_item from source to destination.\n\nSteps\n(1) get the current storage_id(s) of the item\n(2) convert one (first) storage_id to a configured rclone backend\n(3) initialize the new item with the same OID on the new storage\n(4) use the rclone copy command to copy it to the new location\n(5) make sure the copy was successful",
+                "description": "Copy a data_item from source to destination.\n\nSteps\n(1) get the current storage_id(s) of the item\n(2) convert one (first) storage_id to a configured rclone backend\n(3) initialize the new item with the same OID on the new storage\n(4) use the rclone copy command to copy it to the new location\n(5) set the access path to the payload\n(6) set state to READY\n(7) save metadata in the data_item table",
                 "operationId": "copy_data_item",
                 "parameters": [
                     {
