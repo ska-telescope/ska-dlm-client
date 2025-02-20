@@ -86,7 +86,7 @@ No authorization required
 
 Create Storage Config
 
-Create a new record in the storage_config table for a storage with the given id.
+Create a new record in the storage_config table for a given storage_id.
 
 ### Example
 
@@ -308,7 +308,7 @@ No authorization required
 
 Init Storage
 
-Initialize a new storage.  location_name or location_id is required.
+Initialize a new storage.
 
 ### Example
 
@@ -462,7 +462,7 @@ No authorization required
 
 Query Storage
 
-Query a storage.
+Query storage locations.
 
 ### Example
 
@@ -483,8 +483,8 @@ configuration = ska_dlm_client.openapi.Configuration(
 with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = ska_dlm_client.openapi.StorageApi(api_client)
-    storage_name = '' # str | could be empty, in which case the first 1000 items are returned (optional) (default to '')
-    storage_id = '' # str | Return locations referred to by the location_id provided. (optional) (default to '')
+    storage_name = '' # str | Name of the storage to query. If not provided, the first 1000 locations are returned. (optional) (default to '')
+    storage_id = '' # str | ID of the storage to query. Ignored if storage_name is provided. (optional) (default to '')
 
     try:
         # Query Storage
@@ -502,8 +502,8 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **storage_name** | **str**| could be empty, in which case the first 1000 items are returned | [optional] [default to &#39;&#39;]
- **storage_id** | **str**| Return locations referred to by the location_id provided. | [optional] [default to &#39;&#39;]
+ **storage_name** | **str**| Name of the storage to query. If not provided, the first 1000 locations are returned. | [optional] [default to &#39;&#39;]
+ **storage_id** | **str**| ID of the storage to query. Ignored if storage_name is provided. | [optional] [default to &#39;&#39;]
 
 ### Return type
 

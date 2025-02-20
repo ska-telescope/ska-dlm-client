@@ -78,7 +78,7 @@
                 "tags": [
                     "storage"
                 ],
-                "description": "Initialize a new storage.\n\nlocation_name or location_id is required.",
+                "description": "Initialize a new storage.",
                 "operationId": "init_storage",
                 "parameters": [
                     {
@@ -235,7 +235,7 @@
                 "tags": [
                     "storage"
                 ],
-                "description": "Create a new record in the storage_config table for a storage with the given id.",
+                "description": "Create a new record in the storage_config table for a given storage_id.",
                 "operationId": "create_storage_config",
                 "parameters": [
                     {
@@ -530,7 +530,7 @@
                 "tags": [
                     "storage"
                 ],
-                "description": "Query a storage.",
+                "description": "Query storage locations.",
                 "operationId": "query_storage",
                 "parameters": [
                     {
@@ -539,11 +539,11 @@
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "description": "could be empty, in which case the first 1000 items are returned",
+                            "description": "Name of the storage to query. If not provided, the first 1000 locations are returned.",
                             "default": "",
                             "title": "Storage Name"
                         },
-                        "description": "could be empty, in which case the first 1000 items are returned"
+                        "description": "Name of the storage to query. If not provided, the first 1000 locations are returned."
                     },
                     {
                         "name": "storage_id",
@@ -551,11 +551,11 @@
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "description": "Return locations referred to by the location_id provided.",
+                            "description": "ID of the storage to query. Ignored if storage_name is provided.",
                             "default": "",
                             "title": "Storage Id"
                         },
-                        "description": "Return locations referred to by the location_id provided."
+                        "description": "ID of the storage to query. Ignored if storage_name is provided."
                     }
                 ],
                 "responses": {

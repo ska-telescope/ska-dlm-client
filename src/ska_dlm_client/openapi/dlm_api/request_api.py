@@ -49,6 +49,10 @@ class RequestApi:
             Optional[StrictStr],
             Field(description="Return data_item referred to by the UID provided."),
         ] = None,
+        storage_id: Annotated[
+            Optional[StrictStr],
+            Field(description="Return data_item referred to by a given storage_id."),
+        ] = None,
         params: Annotated[
             Optional[StrictStr], Field(description="specify the query parameters")
         ] = None,
@@ -75,6 +79,8 @@ class RequestApi:
             Return data_items referred to by the OID provided.
         uid : str
             Return data_item referred to by the UID provided.
+        storage_id : str
+            Return data_item referred to by a given storage_id.
         params : str
             specify the query parameters
         _request_timeout : int, tuple(int, int), optional
@@ -107,6 +113,7 @@ class RequestApi:
             item_name=item_name,
             oid=oid,
             uid=uid,
+            storage_id=storage_id,
             params=params,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -140,6 +147,10 @@ class RequestApi:
             Optional[StrictStr],
             Field(description="Return data_item referred to by the UID provided."),
         ] = None,
+        storage_id: Annotated[
+            Optional[StrictStr],
+            Field(description="Return data_item referred to by a given storage_id."),
+        ] = None,
         params: Annotated[
             Optional[StrictStr], Field(description="specify the query parameters")
         ] = None,
@@ -166,6 +177,8 @@ class RequestApi:
             Return data_items referred to by the OID provided.
         uid : str
             Return data_item referred to by the UID provided.
+        storage_id : str
+            Return data_item referred to by a given storage_id.
         params : str
             specify the query parameters
         _request_timeout : int, tuple(int, int), optional
@@ -198,6 +211,7 @@ class RequestApi:
             item_name=item_name,
             oid=oid,
             uid=uid,
+            storage_id=storage_id,
             params=params,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -231,6 +245,10 @@ class RequestApi:
             Optional[StrictStr],
             Field(description="Return data_item referred to by the UID provided."),
         ] = None,
+        storage_id: Annotated[
+            Optional[StrictStr],
+            Field(description="Return data_item referred to by a given storage_id."),
+        ] = None,
         params: Annotated[
             Optional[StrictStr], Field(description="specify the query parameters")
         ] = None,
@@ -257,6 +275,8 @@ class RequestApi:
             Return data_items referred to by the OID provided.
         uid : str
             Return data_item referred to by the UID provided.
+        storage_id : str
+            Return data_item referred to by a given storage_id.
         params : str
             specify the query parameters
         _request_timeout : int, tuple(int, int), optional
@@ -289,6 +309,7 @@ class RequestApi:
             item_name=item_name,
             oid=oid,
             uid=uid,
+            storage_id=storage_id,
             params=params,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -308,6 +329,7 @@ class RequestApi:
         item_name,
         oid,
         uid,
+        storage_id,
         params,
         _request_auth,
         _content_type,
@@ -339,6 +361,10 @@ class RequestApi:
         if uid is not None:
 
             _query_params.append(("uid", uid))
+
+        if storage_id is not None:
+
+            _query_params.append(("storage_id", storage_id))
 
         if params is not None:
 
