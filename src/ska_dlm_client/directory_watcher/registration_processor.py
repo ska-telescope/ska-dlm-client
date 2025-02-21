@@ -50,6 +50,7 @@ class RegistrationProcessor:
                     item_name=relative_path,
                     uri=uri,
                     storage_name=self._config.storage_name,
+                    do_storage_access_check=self._config.rclone_access_check_on_register,
                     body=metadata,
                 )
             except OpenApiException as err:
