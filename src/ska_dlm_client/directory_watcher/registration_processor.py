@@ -97,7 +97,6 @@ class RegistrationProcessor:
                     uri=uri,
                     item_type=item.item_type,
                     storage_name=self._config.storage_name,
-                    do_storage_access_check=True,
                     body=None if item.metadata is None else item.metadata.as_dict(),
                 )
             except OpenApiException as err:
@@ -143,7 +142,6 @@ class RegistrationProcessor:
                         item_type=item.item_type,
                         storage_name=self._config.storage_name,
                         parents=None if item.parent is None else item.parent.uuid,
-                        do_storage_access_check=True,
                         body=None if item.metadata is None else item.metadata.as_dict(),
                     )
                 except OpenApiException as err:
