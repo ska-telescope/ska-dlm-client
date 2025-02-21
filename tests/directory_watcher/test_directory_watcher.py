@@ -58,6 +58,7 @@ class TestDirectoryWatcher:
         assert self.parsed.reload_status_file is False
         assert self.parsed.status_file_filename == STATUS_FILE_FILENAME
         assert self.parsed.use_status_file is False
+        assert self.parsed.skip_rclone_access_check_on_register is False
 
     def test_config_generation(self) -> None:
         """Test the correct config is generated from the command line args."""
@@ -69,6 +70,7 @@ class TestDirectoryWatcher:
             self.config.status_file_absolute_path == f"{self.the_watch_dir}/{STATUS_FILE_FILENAME}"
         )
         assert self.config.use_status_file is False
+        assert self.config.rclone_access_check_on_register is True
         assert isinstance(self.config.directory_watcher_entries, DirectoryWatcherEntries)
         assert isinstance(self.config.ingest_configuration, Configuration)
 

@@ -24,6 +24,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
     storage_root_directory: str
     reload_status_file: bool
     use_status_file: bool
+    rclone_access_check_on_register: bool
     directory_watcher_entries: DirectoryWatcherEntries
     ingest_configuration: Configuration
     ingest_register_path_to_add: str
@@ -37,6 +38,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         storage_root_directory: str,
         reload_status_file: bool = False,
         use_status_file: bool = False,
+        rclone_access_check_on_register: bool = True,
     ):
         """Init the values required for correct operation of directory_watcher."""
         self.directory_to_watch = directory_to_watch
@@ -46,6 +48,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         self.storage_root_directory = storage_root_directory
         self.reload_status_file = reload_status_file
         self.use_status_file = use_status_file
+        self.rclone_access_check_on_register = rclone_access_check_on_register
         self.directory_watcher_entries = DirectoryWatcherEntries(
             entries_file=self.status_file_absolute_path,
             reload_from_status_file=self.reload_status_file,
@@ -67,6 +70,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
             f"storage_root_directory {self.storage_root_directory}\n"
             f"reload_status_file {self.reload_status_file}\n"
             f"use_stat_file {self.use_status_file}\n"
+            f"rclone_access_check_on_register {self.rclone_access_check_on_register}\n"
             f"ingest_configuration {self.ingest_configuration}\n"
             f"directory_watcher_entries {self.directory_watcher_entries}\n"
             f"ingest_register_path_to_add {self.ingest_register_path_to_add}\n"

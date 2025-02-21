@@ -77,6 +77,12 @@ def create_parser() -> argparse.ArgumentParser:
         default=ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME,
         help="",
     )
+    parser.add_argument(
+        "--skip-rclone-access-check-on-register",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Skip performing the rclone access check when registering a data item with DLM.",
+    )
     return parser
 
 
@@ -90,6 +96,7 @@ def process_args(args: argparse.Namespace) -> Config:
         storage_root_directory=args.storage_root_directory,
         reload_status_file=args.reload_status_file,
         use_status_file=args.use_status_file,
+        rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,
     )
     return config
 
