@@ -52,6 +52,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         self.directory_watcher_entries = DirectoryWatcherEntries(
             entries_file=self.status_file_absolute_path,
             reload_from_status_file=self.reload_status_file,
+            write_directory_entries_file=use_status_file,
         )
         self.ingest_configuration = configuration.Configuration(host=self.ingest_server_url)
         # We need to know the relative path from the storage root directory to the watch directory

@@ -29,11 +29,15 @@ class DirectoryWatcherEntries:
 
     directory_watcher_entries: [DirectoryWatcherEntry]
     entries_file: str
+    write_directory_entries_file: bool
 
-    def __init__(self, entries_file: str, reload_from_status_file: bool):
+    def __init__(
+        self, entries_file: str, reload_from_status_file: bool, write_directory_entries_file: bool
+    ):
         """Init the class."""
         self.directory_watcher_entries = []
         self.entries_file = entries_file
+        self.write_directory_entries_file = write_directory_entries_file
         if reload_from_status_file:
             self.read_from_file()
 
@@ -43,8 +47,11 @@ class DirectoryWatcherEntries:
 
     def save_to_file(self):
         """Save the list of DirectoryWatcherEntry to a file in JSON format."""
-        with open(self.entries_file, "w", encoding="utf-8") as the_file:
-            json.dump(self.directory_watcher_entries, the_file, indent=4, cls=DataclassJSONEncoder)
+        if self.write_directory_entries_file:
+            with open(self.entries_file, "w", encoding="utf-8") as the_file:
+                json.dump(
+                    self.directory_watcher_entries, the_file, indent=4, cls=DataclassJSONEncoder
+                )
 
     def read_from_file(self):
         """Load the list of DirectoryWatcherEntry from a file in JSON format."""

@@ -324,13 +324,15 @@ def main():
     # result = generate_paths_and_metadata(absolute_path=
     # "/Users/00077990/yanda/shared/watch_dir", path_rel_to_watch_dir="obs3")
     # logger.info(result)
-    watch_dir = "/data/watch_dir"
+    watch_dir = "/data/product"
     config = Config(
         directory_to_watch=watch_dir,
         ingest_server_url="http://localhost:8001",
         storage_name="data",
         status_file_absolute_path=f"{watch_dir}/status.json",
+        use_status_file=False,
         storage_root_directory="/data",
+        rclone_access_check_on_register=False,
     )
     rg = RegistrationProcessor(config=config)
     # rg.add_path(absolute_path="/data/watch_dir/session1", path_rel_to_watch_dir="session1")
