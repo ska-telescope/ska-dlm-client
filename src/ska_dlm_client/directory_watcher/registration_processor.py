@@ -213,6 +213,10 @@ class RegistrationProcessor:
         container_item = None
         # Case when NOT MeasurementSet
         if metadata.dp_has_metadata:
+            ms_name = _measurement_set_directory_in(absolute_path=absolute_path)
+            if ms_name:  # if not None or empty
+                absolute_path = os.path.join(absolute_path, ms_name)
+                path_rel_to_watch_dir = os.path.join(path_rel_to_watch_dir, ms_name)
             container_item = Item(
                 path_rel_to_watch_dir=path_rel_to_watch_dir,
                 item_type=ItemType.CONTAINER,
@@ -233,7 +237,7 @@ class RegistrationProcessor:
                 )
                 item_list.extend(additional_items)
                 logger.info("%s: %s", absolute_path, item_list)
-            if not entry == ska_dlm_client.directory_watcher.config.METADATA_FILENAME:
+            elif not entry == ska_dlm_client.directory_watcher.config.METADATA_FILENAME:
                 item = Item(
                     path_rel_to_watch_dir=os.path.join(path_rel_to_watch_dir, entry),
                     item_type=ItemType.FILE,
@@ -243,9 +247,10 @@ class RegistrationProcessor:
                 item_list.append(item)
 
         # When not just a measurement set then add files from directory
-        if not path_rel_to_watch_dir.lower().endswith(
-            ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
-        ):
+        # if not path_rel_to_watch_dir.lower().endswith(
+        #    ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
+        # ):
+        if True:
             additional_items = _item_list_minus_metadata_file(
                 container_item=container_item,
                 absolute_path=absolute_path,
@@ -253,7 +258,7 @@ class RegistrationProcessor:
             )
             item_list.extend(additional_items)
             logger.info("%s: %s", absolute_path, item_list)
-        else:
+        elif os.path.isdir(absolute_path):
             # From previous test we know that each entry must be directory
             for entry in os.listdir(absolute_path):
                 local_abs_path = os.path.join(absolute_path, entry)
@@ -382,6 +387,16 @@ def _directory_contains_metadata_file(absolute_path: str) -> bool:
     return False
 
 
+def _measurement_set_directory_in(absolute_path: str) -> str | None:
+    """Return the name of the measurement set directory or None if nothing found."""
+    for entry in os.listdir(absolute_path):
+        if entry.lower().endswith(
+            ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
+        ):
+            return entry
+    return None
+
+
 def _item_list_minus_metadata_file(
     container_item: Item, absolute_path: str, path_rel_to_watch_dir: str
 ) -> list[Item]:
@@ -396,6 +411,7 @@ def _item_list_minus_metadata_file(
                 parent=container_item,
             )
             item_list.append(item)
+            logger.info("new item %s", item.path_rel_to_watch_dir)
     return item_list
 
 
@@ -417,10 +433,17 @@ def main():
     rg = RegistrationProcessor(config=config)
     # rg.add_path(absolute_path="/data/watch_dir/session1", path_rel_to_watch_dir="session1")
     # absolute_path="/Users/00077990/data/directory_entr", path_rel_to_watch_dir="directory_entr"
+    logger.info("\n##############################\n")
+    rg.add_path(
+        absolute_path="/data/product/eb-notebook-20250221-96550",
+        path_rel_to_watch_dir="eb-notebook-20250221-96550",
+    )
+    logger.info("\n##############################\n")
     rg.add_path(
         absolute_path="/data/product/eb-notebook-20250221-21194",
         path_rel_to_watch_dir="eb-notebook-20250221-21194",
     )
+    logger.info("\n##############################\n")
 
 
 if __name__ == "__main__":
