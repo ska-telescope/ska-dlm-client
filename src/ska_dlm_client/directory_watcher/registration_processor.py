@@ -169,7 +169,7 @@ class RegistrationProcessor:
                 self._config.directory_watcher_entries.add(directory_watcher_entry)
                 self._config.directory_watcher_entries.save_to_file()
                 logger.info("entry %s added.", item_path_rel_to_watch_dir)
-                time.sleep(2)
+                time.sleep(1)
 
     def add_path(self, absolute_path: str, path_rel_to_watch_dir: str):
         """Add the given path_rel_to_watch_dir to the DLM.
@@ -236,7 +236,7 @@ class RegistrationProcessor:
                     path_rel_to_watch_dir=net_path_rel_to_watch_dir,
                 )
                 item_list.extend(additional_items)
-                logger.info("%s: %s", absolute_path, item_list)
+                logger.info("%s: %s", absolute_path, additional_items)
             elif not entry == ska_dlm_client.directory_watcher.config.METADATA_FILENAME:
                 item = Item(
                     path_rel_to_watch_dir=os.path.join(path_rel_to_watch_dir, entry),
@@ -257,7 +257,7 @@ class RegistrationProcessor:
                 path_rel_to_watch_dir=path_rel_to_watch_dir,
             )
             item_list.extend(additional_items)
-            logger.info("%s: %s", absolute_path, item_list)
+            logger.info("%s: %s", absolute_path, additional_items)
         elif os.path.isdir(absolute_path):
             # From previous test we know that each entry must be directory
             for entry in os.listdir(absolute_path):
@@ -281,9 +281,10 @@ class RegistrationProcessor:
             if _directory_contains_only_directories(absolute_path):
                 logger.info("Direcory %s contains only directories, processing.", absolute_path)
             elif _directory_contains_metadata_file(absolute_path):
-                self._generate_paths_and_metadata1(
+                item_list = self._generate_paths_and_metadata1(
                     absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
                 )
+                return item_list
             else:
                 logger.error(
                     "data_item path does not support subdirectories and files in the same"
