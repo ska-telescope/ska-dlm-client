@@ -250,7 +250,7 @@ class RegistrationProcessor:
         # if not path_rel_to_watch_dir.lower().endswith(
         #    ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
         # ):
-        if True:
+        if not _directory_contains_only_directories(absolute_path=absolute_path):
             additional_items = _item_list_minus_metadata_file(
                 container_item=container_item,
                 absolute_path=absolute_path,
