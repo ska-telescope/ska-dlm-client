@@ -121,7 +121,12 @@ class RegistrationProcessor:
         )
         self._config.directory_watcher_entries.add(directory_watcher_entry)
         self._config.directory_watcher_entries.save_to_file()
-        logger.info("Added to DLM %s entry %s.", item.item_type, item_path_rel_to_watch_dir)
+        logger.info(
+            "Added to DLM %s %s metadata and path %s.",
+            item.item_type,
+            "without" if item.metadata is None else "with",
+            item_path_rel_to_watch_dir,
+        )
         return dlm_registration_uuid
 
     def _register_container_items(self, item_list: list[Item]):
@@ -293,6 +298,15 @@ class RegistrationProcessor:
                     "directory without a metadata file."
                 )
                 return item_list
+        elif _directory_contains_metadata_file(absolute_path):
+            dir_list = _directory_list_minus_metadata_file(absolute_path)
+            if len(dir_list) == 1:
+                item_list.append(
+                    _item_for_single_file_with_metadata(
+                        absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
+                    )
+                )
+                return item_list
 
         if not _directory_contains_only_directories(absolute_path):
             # Working with a single directory (or link to a directory) containing only files
@@ -339,12 +353,9 @@ class RegistrationProcessor:
         item_list: list[Item] = []
         if isfile(absolute_path):
             logger.info("entry is file")
-            metadata = DataProductMetadata(absolute_path)
             item_list.append(
-                Item(
-                    path_rel_to_watch_dir=path_rel_to_watch_dir,
-                    item_type=ItemType.FILE,
-                    metadata=metadata,
+                _item_for_single_file_with_metadata(
+                    absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
                 )
             )
         elif isdir(absolute_path):
@@ -364,6 +375,18 @@ class RegistrationProcessor:
         else:
             logger.error("entry is unknown")
         return item_list
+
+
+def _item_for_single_file_with_metadata(absolute_path: str, path_rel_to_watch_dir: str) -> Item:
+    """Create an Item for a file by itself adding any metadata to it."""
+    metadata = DataProductMetadata(absolute_path)
+    item = Item(
+        path_rel_to_watch_dir=path_rel_to_watch_dir,
+        item_type=ItemType.FILE,
+        metadata=metadata,
+    )
+    logger.info("Created single item with metadata %s", item)
+    return item
 
 
 def _directory_contains_only_directories(absolute_path: str) -> bool:
@@ -400,21 +423,28 @@ def _measurement_set_directory_in(absolute_path: str) -> str | None:
     return None
 
 
+def _directory_list_minus_metadata_file(absolute_path: str) -> list[str]:
+    """Return the list of relative minus the metadata file name."""
+    dir_list = os.listdir(absolute_path)
+    if ska_dlm_client.directory_watcher.config.METADATA_FILENAME in dir_list:
+        dir_list.remove(ska_dlm_client.directory_watcher.config.METADATA_FILENAME)
+    return dir_list
+
+
 def _item_list_minus_metadata_file(
     container_item: Item, absolute_path: str, path_rel_to_watch_dir: str
 ) -> list[Item]:
     """Return a listing of the given absolute_path directory without the metadata file."""
     item_list: list[Item] = []
-    for entry in os.listdir(absolute_path):
-        if not entry == ska_dlm_client.directory_watcher.config.METADATA_FILENAME:
-            item = Item(
-                path_rel_to_watch_dir=os.path.join(path_rel_to_watch_dir, entry),
-                item_type=ItemType.FILE,
-                metadata=None,  # Set to know as Container has this file's metadata
-                parent=container_item,
-            )
-            item_list.append(item)
-            logger.info("new item %s", item.path_rel_to_watch_dir)
+    for entry in _directory_list_minus_metadata_file(absolute_path):
+        item = Item(
+            path_rel_to_watch_dir=os.path.join(path_rel_to_watch_dir, entry),
+            item_type=ItemType.FILE,
+            metadata=None,  # Set to know as Container has this file's metadata
+            parent=container_item,
+        )
+        item_list.append(item)
+        logger.info("new item %s", item.path_rel_to_watch_dir)
     return item_list
 
 

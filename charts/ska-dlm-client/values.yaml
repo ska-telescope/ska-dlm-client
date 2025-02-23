@@ -39,6 +39,7 @@ directory_watcher:
   storage_root_directory: /data
   use_polling_watcher: false
   storage_name: data
+  skip_rclone_access_check_on_register: false
 
 kafka_watcher:
   enabled: false

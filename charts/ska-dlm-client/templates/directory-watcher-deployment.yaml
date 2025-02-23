@@ -32,6 +32,9 @@ spec:
         {{- if eq $.Values.directory_watcher.use_polling_watcher true }}
         - "--use-polling-watcher"
         {{- end }}
+        {{- if eq $.Values.directory_watcher.skip_rclone_access_check_on_register true }}
+        - "--skip-rclone-access-check-on-register"
+        {{- end }}
         - "--ingest-server-url"
         - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.ska_dlm.ingest_service_port }}"
         volumeMounts:
