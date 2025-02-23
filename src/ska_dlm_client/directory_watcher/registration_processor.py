@@ -64,7 +64,7 @@ class RegistrationProcessor:
     """The class used for processing of the registration."""
 
     _config: Config
-    debug: bool = True
+    debug: bool = False
 
     def __init__(self, config: Config):
         """Initialise the RegistrationProcessor with the given config."""
@@ -121,7 +121,7 @@ class RegistrationProcessor:
         )
         self._config.directory_watcher_entries.add(directory_watcher_entry)
         self._config.directory_watcher_entries.save_to_file()
-        logger.info("entry %s added.", item_path_rel_to_watch_dir)
+        logger.info("Added to DLM %s entry %s.", item.item_type, item_path_rel_to_watch_dir)
         return dlm_registration_uuid
 
     def _register_container_items(self, item_list: list[Item]):
@@ -168,8 +168,10 @@ class RegistrationProcessor:
                 )
                 self._config.directory_watcher_entries.add(directory_watcher_entry)
                 self._config.directory_watcher_entries.save_to_file()
-                logger.info("entry %s added.", item_path_rel_to_watch_dir)
-                time.sleep(1)
+                logger.info(
+                    "Added to DLM %s entry %s.", item.item_type, item_path_rel_to_watch_dir
+                )
+                time.sleep(0.1)
 
     def add_path(self, absolute_path: str, path_rel_to_watch_dir: str):
         """Add the given path_rel_to_watch_dir to the DLM.
@@ -250,23 +252,23 @@ class RegistrationProcessor:
         # if not path_rel_to_watch_dir.lower().endswith(
         #    ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
         # ):
-        if not _directory_contains_only_directories(absolute_path=absolute_path):
-            additional_items = _item_list_minus_metadata_file(
-                container_item=container_item,
-                absolute_path=absolute_path,
-                path_rel_to_watch_dir=path_rel_to_watch_dir,
-            )
-            item_list.extend(additional_items)
-            logger.info("%s: %s", absolute_path, additional_items)
-        elif os.path.isdir(absolute_path):
-            # From previous test we know that each entry must be directory
-            for entry in os.listdir(absolute_path):
-                local_abs_path = os.path.join(absolute_path, entry)
-                local_rel_path = os.path.join(path_rel_to_watch_dir, entry)
-                new_items = self._generate_paths_and_metadata_for_direcotry(
-                    absolute_path=local_abs_path, path_rel_to_watch_dir=local_rel_path
-                )
-                item_list.extend(new_items)
+        # if not _directory_contains_only_directories(absolute_path=absolute_path):
+        #    additional_items = _item_list_minus_metadata_file(
+        #        container_item=container_item,
+        #        absolute_path=absolute_path,
+        #        path_rel_to_watch_dir=path_rel_to_watch_dir,
+        #    )
+        #    item_list.extend(additional_items)
+        #    logger.info("%s: %s", absolute_path, additional_items)
+        # elif os.path.isdir(absolute_path):
+        #    # From previous test we know that each entry must be directory
+        #    for entry in os.listdir(absolute_path):
+        #        local_abs_path = os.path.join(absolute_path, entry)
+        #        local_rel_path = os.path.join(path_rel_to_watch_dir, entry)
+        #        new_items = self._generate_paths_and_metadata_for_direcotry(
+        #            absolute_path=local_abs_path, path_rel_to_watch_dir=local_rel_path
+        #        )
+        #        item_list.extend(new_items)
         return item_list
         ###############
 
@@ -416,11 +418,26 @@ def _item_list_minus_metadata_file(
     return item_list
 
 
+def register_directory_finding_data_items(
+    config: Config, wait_after_finish: bool = False, debug: bool = False
+):
+    """Provide a machanism to register the contents of the directory to watch."""
+    watch_dir = config.directory_to_watch
+    rg = RegistrationProcessor(config=config)
+    logger.info("\n##############################\n")
+    rg.debug = debug
+    for item in os.listdir(watch_dir):
+        rg.add_path(
+            absolute_path=os.path.join(watch_dir, item),
+            path_rel_to_watch_dir=item,
+        )
+        logger.info("\n\n##############################\n")
+    if wait_after_finish:
+        time.sleep(300)
+
+
 def main():
     """Run amain function in a new loop."""
-    # result = generate_paths_and_metadata(absolute_path=
-    # "/Users/00077990/yanda/shared/watch_dir", path_rel_to_watch_dir="obs3")
-    # logger.info(result)
     watch_dir = "/data/product"
     config = Config(
         directory_to_watch=watch_dir,
@@ -431,20 +448,7 @@ def main():
         storage_root_directory="/data",
         rclone_access_check_on_register=False,
     )
-    rg = RegistrationProcessor(config=config)
-    # rg.add_path(absolute_path="/data/watch_dir/session1", path_rel_to_watch_dir="session1")
-    # absolute_path="/Users/00077990/data/directory_entr", path_rel_to_watch_dir="directory_entr"
-    logger.info("\n##############################\n")
-    rg.add_path(
-        absolute_path="/data/product/eb-notebook-20250221-96550",
-        path_rel_to_watch_dir="eb-notebook-20250221-96550",
-    )
-    logger.info("\n##############################\n")
-    rg.add_path(
-        absolute_path="/data/product/eb-notebook-20250221-21194",
-        path_rel_to_watch_dir="eb-notebook-20250221-21194",
-    )
-    logger.info("\n##############################\n")
+    register_directory_finding_data_items(config, wait_after_finish=False, debug=False)
 
 
 if __name__ == "__main__":
