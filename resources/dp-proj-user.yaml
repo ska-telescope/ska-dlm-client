@@ -9,7 +9,7 @@ setupStorageLocation: false
 directory_watcher:
   enabled: true
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
-  version: "0.1.0-dev.c3292ab1b"
+  version: "0.1.0-dev.cf8022fd9"
   directory_to_watch: "/data/dlmw"
   storage_root_directory: "/data"
   use_polling_watcher: true

@@ -301,6 +301,8 @@ class RegistrationProcessor:
         elif _directory_contains_metadata_file(absolute_path):
             dir_list = _directory_list_minus_metadata_file(absolute_path)
             if len(dir_list) == 1:
+                absolute_path = os.path.join(absolute_path, dir_list[0])
+                path_rel_to_watch_dir = os.path.join(path_rel_to_watch_dir, dir_list[0])
                 item_list.append(
                     _item_for_single_file_with_metadata(
                         absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
@@ -478,7 +480,7 @@ def main():
         storage_root_directory="/data",
         rclone_access_check_on_register=False,
     )
-    register_directory_finding_data_items(config, wait_after_finish=False, debug=False)
+    register_directory_finding_data_items(config, wait_after_finish=False, debug=True)
 
 
 if __name__ == "__main__":
