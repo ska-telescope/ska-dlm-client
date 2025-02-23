@@ -7,6 +7,11 @@ global:
 
 setupStorageLocation: false
 
+ska_dlm_client:
+  image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
+  version: "0.1.0-dev.cee7d7be7"
+  storage_root_directory: "/data"
+
 directory_watcher:
   enabled: true
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"

@@ -450,20 +450,22 @@ def register_directory_finding_data_items(
         time.sleep(300)
 
 
-def main():
-    """Run main as a function."""
-    watch_dir = "/data/product"
-    config = Config(
-        directory_to_watch=watch_dir,
-        ingest_server_url="http://localhost:8001",
-        storage_name="data",
-        status_file_absolute_path=f"{watch_dir}/status.json",
-        use_status_file=False,
-        storage_root_directory="/data",
-        rclone_access_check_on_register=False,
-    )
-    register_directory_finding_data_items(config, wait_after_finish=False, debug=True)
+# This code provides a mechanism to test processing of data products without
+# running the full system.
+# def main():
+#    """Run main as a function."""
+#    watch_dir = "/data/product"
+#    config = Config(
+#        directory_to_watch=watch_dir,
+#        ingest_server_url="http://localhost:8001",
+#        storage_name="data",
+#        status_file_absolute_path=f"{watch_dir}/status.json",
+#        use_status_file=False,
+#        storage_root_directory="/data",
+#        rclone_access_check_on_register=False,
+#    )
+#    register_directory_finding_data_items(config, wait_after_finish=False, debug=True)
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#    main()

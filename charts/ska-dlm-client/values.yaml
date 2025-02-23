@@ -28,6 +28,12 @@ integration_verification:
   delete_on_completion: true
   time_before_delete_on_completion: 30
 
+ska_dlm_client:
+  image: harbor.skao.int/production/ska-dlm-client
+  version: "0.1.0"
+  storage_name: data
+  storage_root_directory: /data
+
 directory_watcher:
   enabled: false
   component: directory-watcher

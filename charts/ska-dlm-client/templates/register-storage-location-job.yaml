@@ -14,19 +14,17 @@ spec:
     spec:
       restartPolicy: Never
       containers:
-      - name: setup-storage-location
-        image: {{ .Values.kafka_watcher.image }}:{{ .Values.kafka_watcher.version }}
+      - name: register-storage-location
+        image: {{ .Values.ska_dlm_client.image }}:{{ .Values.ska_dlm_client.version }}
         imagePullPolicy: {{ .Values.kafka_watcher.imagePullPolicy }}
         command:
-        - "dlm-setup-storage-location"
-        - "--kafka-broker-url"
-        - "{{ .Values.kafka_watcher.kafka_broker_url }}"
-        - "--kafka-topic"
-        - "{{ .Values.kafka_watcher.kafka_topic }}"
-        - "--consume-service-port"
-        - "{{ .Values.kafka_watcher.consume_service_port }}"
+        - "dlm-register-storage-location"
+        - "--storage-server-url"
+        - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.ska_dlm.ingest_service_port }}"
         - "--storage-name"
-        - "{{ .Values.kafka_watcher.storage_name }}"
+        - {{ .Values.ska_dlm_client.storage_name }}
+        - "--storage-root-directory"
+        - {{ .Values.ska_dlm_client.storage_root_directory }}
         volumeMounts:
         - name: dlm-configmap
           mountPath: "/home/ska-dlm/.dlm"
