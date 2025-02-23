@@ -122,7 +122,7 @@ class RegistrationProcessor:
         self._config.directory_watcher_entries.add(directory_watcher_entry)
         self._config.directory_watcher_entries.save_to_file()
         logger.info(
-            "Added to DLM %s %s metadata and path %s.",
+            "Added to DLM %s %s metadata and path %s",
             item.item_type,
             "without" if item.metadata is None else "with",
             item_path_rel_to_watch_dir,
@@ -174,9 +174,12 @@ class RegistrationProcessor:
                 self._config.directory_watcher_entries.add(directory_watcher_entry)
                 self._config.directory_watcher_entries.save_to_file()
                 logger.info(
-                    "Added to DLM %s entry %s.", item.item_type, item_path_rel_to_watch_dir
+                    "Added to DLM %s %s metadata and path %s",
+                    item.item_type,
+                    "without" if item.metadata is None else "with",
+                    item_path_rel_to_watch_dir,
                 )
-                time.sleep(0.1)
+                time.sleep(0.01)
 
     def add_path(self, absolute_path: str, path_rel_to_watch_dir: str):
         """Add the given path_rel_to_watch_dir to the DLM.

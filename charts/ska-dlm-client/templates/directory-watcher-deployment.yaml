@@ -43,6 +43,9 @@ spec:
           readOnly: true
         - name: data-product-storage
           mountPath: /data
+          {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
+          readOnly: true
+          {{- end }}
       dnsPolicy: ClusterFirstWithHostNet
       volumes:
       - name: dlm-configmap
