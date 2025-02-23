@@ -70,6 +70,10 @@ class RegistrationProcessor:
         """Initialise the RegistrationProcessor with the given config."""
         self._config = config
 
+    def get_cofnig(self):
+        """Get the Config being used by the RegistrationProcessor."""
+        return self._config
+
     def set_config(self, config: Config):
         """Set/reset the config."""
         self._config = config
