@@ -5,17 +5,17 @@ global:
       name: shared
       read_only: true
 
-setupStorageLocation: false
+setupStorageLocation: True
 
 ska_dlm_client:
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
-  version: "0.1.0-dev.cee7d7be7"
+  version: "0.1.0-dev.c110803e1"
   storage_root_directory: "/data"
 
 directory_watcher:
   enabled: true
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
-  version: "0.1.0-dev.cee7d7be7"
+  version: "0.1.0-dev.c110803e1"
   directory_to_watch: "/data/dlmw"
   storage_root_directory: "/data"
   use_polling_watcher: true
