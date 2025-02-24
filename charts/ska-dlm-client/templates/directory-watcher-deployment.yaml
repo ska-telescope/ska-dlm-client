@@ -40,7 +40,7 @@ spec:
         - "--skip-rclone-access-check-on-register"
         {{- end }}
         - "--ingest-server-url"
-        - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.ska_dlm.ingest_service_port }}"
+        - {{ .Values.directory_watcher.ingest_server_url }}
         volumeMounts:
         - name: data-product-storage
           mountPath: /data

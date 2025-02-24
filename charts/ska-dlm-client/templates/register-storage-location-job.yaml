@@ -20,7 +20,7 @@ spec:
         command:
         - "dlm-register-storage-location"
         - "--storage-server-url"
-        - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.ska_dlm.ingest_service_port }}"
+        - {{ .Values.ska_dlm_client.storage_server_url }}
         - "--storage-name"
         - {{ .Values.ska_dlm_client.storage_name }}
         - "--storage-root-directory"
