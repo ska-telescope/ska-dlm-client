@@ -42,7 +42,7 @@ def create_parser() -> argparse.ArgumentParser:
         "--storage-name",
         type=str,
         required=True,
-        help="The name by which the DLM system know the storage as.",
+        help="The name by which the DLM system knows the storage as.",
     )
     parser.add_argument(
         "-r",

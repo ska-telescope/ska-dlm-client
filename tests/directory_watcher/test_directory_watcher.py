@@ -22,7 +22,7 @@ class TestDirectoryWatcher:
 
     STORAGE_NAME = "data"
     INGREST_SERVER_URL = "http://localhost:8001"
-    ROOT_DIRECTORTY = "/data"
+    ROOT_DIRECTORY = "/data"
 
     add_path_successful = False
 
@@ -40,7 +40,7 @@ class TestDirectoryWatcher:
                 "--storage-name",
                 cls.STORAGE_NAME,
                 "--storage-root-directory",
-                cls.ROOT_DIRECTORTY,
+                cls.ROOT_DIRECTORY,
             ]
         )
         cls.config = process_args(args=cls.parsed)
