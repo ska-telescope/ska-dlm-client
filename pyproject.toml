@@ -17,7 +17,6 @@ packages = [{include="ska_dlm_client", from="src"}]
 dlm-directory-watcher = "ska_dlm_client.directory_watcher.main:main"
 dlm-kafka-watcher = "ska_dlm_client.kafka_watcher.main:main"
 dlm-register-storage-location = "ska_dlm_client.register_storage_location.main:main"
-dlm-client-integration-verification = "ska_dlm_client.client_integration.main:main"
 
 [[tool.poetry.source]]
 name = 'skao'
