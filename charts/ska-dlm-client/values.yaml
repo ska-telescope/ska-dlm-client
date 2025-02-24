@@ -41,7 +41,6 @@ directory_watcher:
   use_polling_watcher: false
   storage_name: data
   skip_rclone_access_check_on_register: false
-  ingest_server_url: "http://ska-dlm-dev-ingest-example"
 
 kafka_watcher:
   enabled: false
