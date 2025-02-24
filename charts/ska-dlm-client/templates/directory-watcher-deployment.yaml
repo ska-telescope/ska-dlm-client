@@ -42,9 +42,6 @@ spec:
         - "--ingest-server-url"
         - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.ska_dlm.ingest_service_port }}"
         volumeMounts:
-        - name: dlm-configmap
-          mountPath: "/home/ska-dlm/.dlm"
-          readOnly: true
         - name: data-product-storage
           mountPath: /data
           {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
@@ -52,9 +49,6 @@ spec:
           {{- end }}
       dnsPolicy: ClusterFirstWithHostNet
       volumes:
-      - name: dlm-configmap
-        configMap:
-          name: {{ .Values.ska_dlm.fullname }}-configmap
       - name: data-product-storage
         persistentVolumeClaim:
           claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
