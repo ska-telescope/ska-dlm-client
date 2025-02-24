@@ -24,6 +24,7 @@ ska_dlm_client:
   version: "0.1.0"
   storage_name: data
   storage_root_directory: /data
+  securityContext: {}
 
 directory_watcher:
   enabled: false

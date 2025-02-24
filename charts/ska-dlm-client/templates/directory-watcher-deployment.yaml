@@ -17,6 +17,10 @@ spec:
       labels:
         {{- include "ska-dlm-client.directory-watcher.labels" . | indent 8 }}
     spec:
+      {{- if .Values.ska_dlm_client.securityContext }}
+      securityContext:
+        {{- .Values.ska_dlm_client.securityContext | toYaml | nindent 8 }}
+      {{- end }}
       containers:
       - name: directory-watcher
         image: {{ .Values.directory_watcher.image}}:{{ .Values.directory_watcher.version }}
