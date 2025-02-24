@@ -5,7 +5,7 @@ global:
       name: shared
       read_only: true
 
-setupStorageLocation: True
+setupStorageLocation: False
 
 ska_dlm_client:
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
