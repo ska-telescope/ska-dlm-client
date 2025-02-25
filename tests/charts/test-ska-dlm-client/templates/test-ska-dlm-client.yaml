@@ -23,6 +23,8 @@ spec:
     - "data"
     - "--storage-server-url"
     - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}.svc.cluster.local:80"
+    - "--storage-root-directory"
+    - "/data"
   volumes:
     - name: test-configmap
       configMap:

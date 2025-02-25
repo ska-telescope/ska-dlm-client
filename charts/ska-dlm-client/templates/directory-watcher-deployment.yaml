@@ -17,6 +17,10 @@ spec:
       labels:
         {{- include "ska-dlm-client.directory-watcher.labels" . | indent 8 }}
     spec:
+      {{- if .Values.ska_dlm_client.securityContext }}
+      securityContext:
+        {{- .Values.ska_dlm_client.securityContext | toYaml | nindent 8 }}
+      {{- end }}
       containers:
       - name: directory-watcher
         image: {{ .Values.directory_watcher.image}}:{{ .Values.directory_watcher.version }}
@@ -27,24 +31,24 @@ spec:
         - {{ .Values.directory_watcher.directory_to_watch }}
         - "--storage-name"
         - {{ .Values.directory_watcher.storage_name }}
-        - "--register-dir-prefix"
-        - {{ .Values.directory_watcher.register_dir_prefix }}
+        - "--storage-root-directory"
+        - {{ .Values.directory_watcher.storage_root_directory }}
         {{- if eq $.Values.directory_watcher.use_polling_watcher true }}
         - "--use-polling-watcher"
         {{- end }}
+        {{- if eq $.Values.directory_watcher.skip_rclone_access_check_on_register true }}
+        - "--skip-rclone-access-check-on-register"
+        {{- end }}
         - "--ingest-server-url"
-        - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.ska_dlm.ingest_service_port }}"
+        - {{ .Values.ska_dlm_client.ingest_server_url }}
         volumeMounts:
-        - name: dlm-configmap
-          mountPath: "/home/ska-dlm/.dlm"
-          readOnly: true
         - name: data-product-storage
           mountPath: /data
+          {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
+          readOnly: true
+          {{- end }}
       dnsPolicy: ClusterFirstWithHostNet
       volumes:
-      - name: dlm-configmap
-        configMap:
-          name: {{ .Values.ska_dlm.fullname }}-configmap
       - name: data-product-storage
         persistentVolumeClaim:
           claimName: "{{ $.Values.global.dataProduct.pvc.name }}"

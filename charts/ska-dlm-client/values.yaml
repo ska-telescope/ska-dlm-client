@@ -7,6 +7,7 @@ global:
   dataProduct:
     pvc:
       name: test-pvc
+      read_only: true
 
 nameOverride: ""
 fullnameOverride: ""
@@ -17,24 +18,35 @@ ska_dlm:
   ingest_service_port: 80
 
 # DLM
+
+ska_dlm_client:
+  image: artefact.skao.int/ska-dlm-client
+  version: "0.1.0"
+  storage_name: data
+  storage_root_directory: /data
+  securityContext: {}
+  ingest_server_url: "http://ska-dlm-dev-ingest-example"
+  storage_server_url: "http://ska-dlm-dev-storage-example"
+
 directory_watcher:
   enabled: false
   component: directory-watcher
   subsystem: data-lifecycle-management
-  image: harbor.skao.int/production/ska-dlm-client
+  image: artefact.skao.int/ska-dlm-client
   version: "0.1.0"
   imagePullPolicy: Always
   replicas: 1
-  directory_to_watch: /data
-  register_dir_prefix: dlm
+  directory_to_watch: /data/dlm/watch_dir
+  storage_root_directory: /data
   use_polling_watcher: false
   storage_name: data
+  skip_rclone_access_check_on_register: false
 
 kafka_watcher:
   enabled: false
   component: kafka-watcher
   subsystem: data-lifecycle-management
-  image: harbor.skao.int/production/ska-dlm-client
+  image: artefact.skao.int/ska-dlm-client
   version: "0.1.0"
   imagePullPolicy: Always
   replicas: 1

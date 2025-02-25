@@ -58,9 +58,9 @@ class WatcherEventHandler(FileSystemEventHandler):
         if self._ignore_event(event):
             return
         absolute_path = event.src_path
-        relative_path = absolute_path.replace(f"{self._config.directory_to_watch}/", "")
+        path_rel_to_watch_dir = absolute_path.replace(f"{self._config.directory_to_watch}/", "")
         self._registration_processor.add_path(
-            absolute_path=absolute_path, relative_path=relative_path
+            absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
         )
 
     def on_deleted(self, event: DirDeletedEvent | FileDeletedEvent) -> None:

@@ -43,6 +43,7 @@ class DataProductMetadata:
     """
 
     dp_path: str
+    dp_metadata_loaded_from_a_file: bool
     root: dict
 
     def __init__(self, dp_path: str):
@@ -58,8 +59,10 @@ class DataProductMetadata:
         metadata_path = os.path.join(dir_path, config.METADATA_FILENAME)
         if os.path.exists(metadata_path):
             self.load_metadata(metadata_path)
+            self.dp_metadata_loaded_from_a_file = True
         else:
             self.root = minimal_metadata_generator(dp_path)
+            self.dp_metadata_loaded_from_a_file = False
 
     def load_metadata(self, metadata_path: str):
         """Read in the metadata file.
