@@ -75,6 +75,83 @@ class TestRequestApi(unittest.TestCase):
         """
         pass
 
+    def test_set_acl(self) -> None:
+        """Test case for set_acl
+
+        Set Acl
+        """
+        pass
+
+    def test_set_group(self) -> None:
+        """Test case for set_group
+
+        Set Group
+        """
+        pass
+
+    def test_set_metadata(self) -> None:
+        """Test case for set_metadata
+
+        Set Metadata
+        """
+        pass
+
+    def test_set_oid_expiration(self) -> None:
+        """Test case for set_oid_expiration
+
+        Set Oid Expiration
+        """
+        pass
+
+    def test_set_phase(self) -> None:
+        """Test case for set_phase
+
+        Set Phase
+        """
+        pass
+
+    def test_set_state(self) -> None:
+        """Test case for set_state
+
+        Set State
+        """
+        pass
+
+    def test_set_uid_expiration(self) -> None:
+        """Test case for set_uid_expiration
+
+        Set Uid Expiration
+        """
+        pass
+
+    def test_set_uri(self) -> None:
+        """Test case for set_uri
+
+        Set Uri
+        """
+        pass
+
+    def test_set_user(self) -> None:
+        """Test case for set_user
+
+        Set User
+        """
+        pass
+
+    def test_update_data_item(self) -> None:
+        """Test case for update_data_item
+
+        Update Data Item
+        """
+        pass
+
+    def test_update_item_tags(self) -> None:
+        """Test case for update_item_tags
+
+        Update Item Tags
+        """
+        pass
+
 
 if __name__ == "__main__":
     unittest.main()
