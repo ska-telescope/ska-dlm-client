@@ -119,6 +119,23 @@ This will deploy to the currently configured cluster and namespace.
 
 NOTE: More production specific values (values files) will be added in a future release.
 
+### Values
+
+* global.dataProduct.pvc.name is name of the location of the data products or where directory to watched is located.
+* global.dataProduct.pvc.read_only should be set to True for now. This limits the scope of what directory_watcher can do.
+* setupStorageLocation set to True if a test location/storage is needed.
+
+NOTE: There is currently an overlap between ska_dlm_client, directory_watcher and kafka_watcher
+Defining in multiple locations will be required.
+* ska_dlm_client
+  * image: image location URL and name.
+  * version: the version to be used.
+  * storage_name: used by DLM to identify storage resource.
+  * storage_root_directory: used as the root directory when generating URIs for DLM DB.
+  * securityContext: Kubernetes context updated during deployment.
+  * ingest_server_url: URL of the ingest server.
+  * storage_server_url: URL of the storage server.
+
 
 ## Testing
 

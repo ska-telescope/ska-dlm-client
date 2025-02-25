@@ -5,6 +5,8 @@
 ### Added
 
 * Added command line option and implementation to skip rclone access check on data item register.
+* Added support for storage root directory.
+* Added support for skip rclone access check.
 
 ### Changed
 
@@ -15,6 +17,7 @@ the watch directory.
 no production version released yet.
 * Includes return types although the generator doesn't add return type doc strings.
 * Metadata is sent in the body of the API request to DLM.
+* Updated register process to cater for more metadata location options.
 
 ## 0.1.0
 
