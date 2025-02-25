@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class ItemType(str, Enum):
     """Data Item on the filesystem."""
 
-    UNKOWN = "unkown"
+    UNKOWN = "unknown"
     """A single file."""
     FILE = "file"
     """A single file."""
@@ -64,13 +64,13 @@ class RegistrationProcessor:
     """The class used for processing of the registration."""
 
     _config: Config
-    debug: bool = False
+    dry_run_for_debug: bool = False
 
     def __init__(self, config: Config):
         """Initialise the RegistrationProcessor with the given config."""
         self._config = config
 
-    def get_cofnig(self):
+    def get_config(self):
         """Get the Config being used by the RegistrationProcessor."""
         return self._config
 
@@ -97,7 +97,7 @@ class RegistrationProcessor:
                     else f"{self._config.ingest_register_path_to_add}/{item_path_rel_to_watch_dir}"
                 )
                 response = None
-                if not self.debug:
+                if not self.dry_run_for_debug:
                     response = api_ingest.register_data_item(
                         item_name=item_path_rel_to_watch_dir,
                         uri=uri,
@@ -148,7 +148,7 @@ class RegistrationProcessor:
                         f"{item_path_rel_to_watch_dir}"
                     )
                     response = None
-                    if not self.debug:
+                    if not self.dry_run_for_debug:
                         response = api_ingest.register_data_item(
                             item_name=item_path_rel_to_watch_dir,
                             uri=uri,
@@ -227,7 +227,7 @@ def _generate_item_list_for_data_product(
     metadata = DataProductMetadata(absolute_path)
     container_item = None
     # Case when NOT MeasurementSet
-    if metadata.dp_has_metadata:
+    if metadata.dp_metadata_loaded_from_a_file:
         ms_name = _measurement_set_directory_in(absolute_path=absolute_path)
         if ms_name:  # if not None or empty
             absolute_path = os.path.join(absolute_path, ms_name)
@@ -302,7 +302,7 @@ def _generate_paths_and_metadata_for_direcotry(
         metadata = DataProductMetadata(absolute_path)
         # YAN-1976: if directory has its own metadata then treat directory as container
         container_item = None
-        if metadata.dp_has_metadata:
+        if metadata.dp_metadata_loaded_from_a_file:
             container_item = Item(
                 path_rel_to_watch_dir=path_rel_to_watch_dir,
                 item_type=ItemType.CONTAINER,
@@ -437,13 +437,13 @@ def _item_list_minus_metadata_file(
 
 
 def register_directory_finding_data_items(
-    config: Config, wait_after_finish: bool = False, debug: bool = False
+    config: Config, wait_after_finish: bool = False, dry_run_for_debug: bool = False
 ):
     """Provide a machanism to register the contents of the directory to watch."""
     watch_dir = config.directory_to_watch
     rg = RegistrationProcessor(config=config)
     logger.info("\n##############################\n")
-    rg.debug = debug
+    rg.dry_run_for_debug = dry_run_for_debug
     for item in os.listdir(watch_dir):
         rg.add_path(
             absolute_path=os.path.join(watch_dir, item),
@@ -468,7 +468,7 @@ def register_directory_finding_data_items(
 #        storage_root_directory="/data",
 #        rclone_access_check_on_register=False,
 #    )
-#    register_directory_finding_data_items(config, wait_after_finish=False, debug=True)
+#    register_directory_finding_data_items(config, wait_after_finish=False, dry_run_for_debug=True)
 
 
 # if __name__ == "__main__":
