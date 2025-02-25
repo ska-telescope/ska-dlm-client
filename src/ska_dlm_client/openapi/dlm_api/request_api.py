@@ -1830,7 +1830,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Optional[object]]:
+    ) -> List[object]:
         """Query New
 
         Query for all data_items newer than the date provided.
@@ -1877,7 +1877,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1903,7 +1903,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Optional[object]]]:
+    ) -> ApiResponse[List[object]]:
         """Query New
 
         Query for all data_items newer than the date provided.
@@ -1950,7 +1950,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2023,7 +2023,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2074,6 +2074,3168 @@ class RequestApi:
         return self.api_client.param_serialize(
             method="GET",
             resource_path="/request/query_new",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
+    def set_acl(
+        self,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_item to be updated")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="the UID of the data_item to be updated")
+        ] = None,
+        acl: Annotated[
+            Optional[StrictStr], Field(description="the acl dict for the data_item")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        """Set Acl
+
+        Set the user field of the data_item(s) with the given OID or UID.
+
+        Parameters
+        ----------
+        oid : str
+            the OID of the data_item to be updated
+        uid : str
+            the UID of the data_item to be updated
+        acl : str
+            the acl dict for the data_item
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_acl_serialize(
+            oid=oid,
+            uid=uid,
+            acl=acl,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def set_acl_with_http_info(
+        self,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_item to be updated")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="the UID of the data_item to be updated")
+        ] = None,
+        acl: Annotated[
+            Optional[StrictStr], Field(description="the acl dict for the data_item")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[object]:
+        """Set Acl
+
+        Set the user field of the data_item(s) with the given OID or UID.
+
+        Parameters
+        ----------
+        oid : str
+            the OID of the data_item to be updated
+        uid : str
+            the UID of the data_item to be updated
+        acl : str
+            the acl dict for the data_item
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_acl_serialize(
+            oid=oid,
+            uid=uid,
+            acl=acl,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def set_acl_without_preload_content(
+        self,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_item to be updated")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="the UID of the data_item to be updated")
+        ] = None,
+        acl: Annotated[
+            Optional[StrictStr], Field(description="the acl dict for the data_item")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Set Acl
+
+        Set the user field of the data_item(s) with the given OID or UID.
+
+        Parameters
+        ----------
+        oid : str
+            the OID of the data_item to be updated
+        uid : str
+            the UID of the data_item to be updated
+        acl : str
+            the acl dict for the data_item
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_acl_serialize(
+            oid=oid,
+            uid=uid,
+            acl=acl,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _set_acl_serialize(
+        self,
+        oid,
+        uid,
+        acl,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if oid is not None:
+
+            _query_params.append(("oid", oid))
+
+        if uid is not None:
+
+            _query_params.append(("uid", uid))
+
+        if acl is not None:
+
+            _query_params.append(("acl", acl))
+
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+        # set the HTTP header `Accept`
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method="PATCH",
+            resource_path="/request/set_acl",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
+    def set_group(
+        self,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_item to be updated")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="the UID of the data_item to be updated")
+        ] = None,
+        group: Annotated[
+            Optional[StrictStr], Field(description="the group for the data_item")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        """Set Group
+
+        Set the user field of the data_item(s) with the given OID or UID.
+
+        Parameters
+        ----------
+        oid : str
+            the OID of the data_item to be updated
+        uid : str
+            the UID of the data_item to be updated
+        group : str
+            the group for the data_item
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_group_serialize(
+            oid=oid,
+            uid=uid,
+            group=group,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def set_group_with_http_info(
+        self,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_item to be updated")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="the UID of the data_item to be updated")
+        ] = None,
+        group: Annotated[
+            Optional[StrictStr], Field(description="the group for the data_item")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[object]:
+        """Set Group
+
+        Set the user field of the data_item(s) with the given OID or UID.
+
+        Parameters
+        ----------
+        oid : str
+            the OID of the data_item to be updated
+        uid : str
+            the UID of the data_item to be updated
+        group : str
+            the group for the data_item
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_group_serialize(
+            oid=oid,
+            uid=uid,
+            group=group,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def set_group_without_preload_content(
+        self,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_item to be updated")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="the UID of the data_item to be updated")
+        ] = None,
+        group: Annotated[
+            Optional[StrictStr], Field(description="the group for the data_item")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Set Group
+
+        Set the user field of the data_item(s) with the given OID or UID.
+
+        Parameters
+        ----------
+        oid : str
+            the OID of the data_item to be updated
+        uid : str
+            the UID of the data_item to be updated
+        group : str
+            the group for the data_item
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_group_serialize(
+            oid=oid,
+            uid=uid,
+            group=group,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _set_group_serialize(
+        self,
+        oid,
+        uid,
+        group,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if oid is not None:
+
+            _query_params.append(("oid", oid))
+
+        if uid is not None:
+
+            _query_params.append(("uid", uid))
+
+        if group is not None:
+
+            _query_params.append(("group", group))
+
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+        # set the HTTP header `Accept`
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method="PATCH",
+            resource_path="/request/set_group",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
+    def set_metadata(
+        self,
+        uid: Annotated[StrictStr, Field(description="the UID of the data_item to be updated")],
+        body: Optional[Dict[str, Any]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        """Set Metadata
+
+        Populate the metadata column for a data_item with the metadata.
+
+        Parameters
+        ----------
+        uid : str
+            the UID of the data_item to be updated (required)
+        body : object
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_metadata_serialize(
+            uid=uid,
+            body=body,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def set_metadata_with_http_info(
+        self,
+        uid: Annotated[StrictStr, Field(description="the UID of the data_item to be updated")],
+        body: Optional[Dict[str, Any]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[object]:
+        """Set Metadata
+
+        Populate the metadata column for a data_item with the metadata.
+
+        Parameters
+        ----------
+        uid : str
+            the UID of the data_item to be updated (required)
+        body : object
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_metadata_serialize(
+            uid=uid,
+            body=body,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def set_metadata_without_preload_content(
+        self,
+        uid: Annotated[StrictStr, Field(description="the UID of the data_item to be updated")],
+        body: Optional[Dict[str, Any]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Set Metadata
+
+        Populate the metadata column for a data_item with the metadata.
+
+        Parameters
+        ----------
+        uid : str
+            the UID of the data_item to be updated (required)
+        body : object
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_metadata_serialize(
+            uid=uid,
+            body=body,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _set_metadata_serialize(
+        self,
+        uid,
+        body,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if uid is not None:
+
+            _query_params.append(("uid", uid))
+
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if body is not None:
+            _body_params = body
+
+        # set the HTTP header `Accept`
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params["Content-Type"] = _content_type
+        else:
+            _default_content_type = self.api_client.select_header_content_type(
+                ["application/json"]
+            )
+            if _default_content_type is not None:
+                _header_params["Content-Type"] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method="PATCH",
+            resource_path="/request/set_metadata",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
+    def set_oid_expiration(
+        self,
+        oid: Annotated[StrictStr, Field(description="the oid of the data_item to be updated")],
+        expiration: Annotated[
+            StrictStr, Field(description="the expiration date for the data_item")
+        ],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        """Set Oid Expiration
+
+        Set the oid_expiration field of the data_items with the given OID.
+
+        Parameters
+        ----------
+        oid : str
+            the oid of the data_item to be updated (required)
+        expiration : str
+            the expiration date for the data_item (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_oid_expiration_serialize(
+            oid=oid,
+            expiration=expiration,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def set_oid_expiration_with_http_info(
+        self,
+        oid: Annotated[StrictStr, Field(description="the oid of the data_item to be updated")],
+        expiration: Annotated[
+            StrictStr, Field(description="the expiration date for the data_item")
+        ],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[object]:
+        """Set Oid Expiration
+
+        Set the oid_expiration field of the data_items with the given OID.
+
+        Parameters
+        ----------
+        oid : str
+            the oid of the data_item to be updated (required)
+        expiration : str
+            the expiration date for the data_item (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_oid_expiration_serialize(
+            oid=oid,
+            expiration=expiration,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def set_oid_expiration_without_preload_content(
+        self,
+        oid: Annotated[StrictStr, Field(description="the oid of the data_item to be updated")],
+        expiration: Annotated[
+            StrictStr, Field(description="the expiration date for the data_item")
+        ],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Set Oid Expiration
+
+        Set the oid_expiration field of the data_items with the given OID.
+
+        Parameters
+        ----------
+        oid : str
+            the oid of the data_item to be updated (required)
+        expiration : str
+            the expiration date for the data_item (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_oid_expiration_serialize(
+            oid=oid,
+            expiration=expiration,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _set_oid_expiration_serialize(
+        self,
+        oid,
+        expiration,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if oid is not None:
+
+            _query_params.append(("oid", oid))
+
+        if expiration is not None:
+
+            _query_params.append(("expiration", expiration))
+
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+        # set the HTTP header `Accept`
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method="PATCH",
+            resource_path="/request/set_oid_expiration",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
+    def set_phase(
+        self,
+        uid: Annotated[StrictStr, Field(description="the UID of the data_item to be updated")],
+        phase: Annotated[StrictStr, Field(description="the phase for the data_item")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        """Set Phase
+
+        Set the phase field of the data_item(s) with given UID.
+
+        Parameters
+        ----------
+        uid : str
+            the UID of the data_item to be updated (required)
+        phase : str
+            the phase for the data_item (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_phase_serialize(
+            uid=uid,
+            phase=phase,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def set_phase_with_http_info(
+        self,
+        uid: Annotated[StrictStr, Field(description="the UID of the data_item to be updated")],
+        phase: Annotated[StrictStr, Field(description="the phase for the data_item")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[object]:
+        """Set Phase
+
+        Set the phase field of the data_item(s) with given UID.
+
+        Parameters
+        ----------
+        uid : str
+            the UID of the data_item to be updated (required)
+        phase : str
+            the phase for the data_item (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_phase_serialize(
+            uid=uid,
+            phase=phase,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def set_phase_without_preload_content(
+        self,
+        uid: Annotated[StrictStr, Field(description="the UID of the data_item to be updated")],
+        phase: Annotated[StrictStr, Field(description="the phase for the data_item")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Set Phase
+
+        Set the phase field of the data_item(s) with given UID.
+
+        Parameters
+        ----------
+        uid : str
+            the UID of the data_item to be updated (required)
+        phase : str
+            the phase for the data_item (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_phase_serialize(
+            uid=uid,
+            phase=phase,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _set_phase_serialize(
+        self,
+        uid,
+        phase,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if uid is not None:
+
+            _query_params.append(("uid", uid))
+
+        if phase is not None:
+
+            _query_params.append(("phase", phase))
+
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+        # set the HTTP header `Accept`
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method="PATCH",
+            resource_path="/request/set_phase",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
+    def set_state(
+        self,
+        uid: Annotated[StrictStr, Field(description="the uid of the data_item to be updated")],
+        state: Annotated[StrictStr, Field(description="the new state for the data_item")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        """Set State
+
+        Set the state field of the uid data_item.
+
+        Parameters
+        ----------
+        uid : str
+            the uid of the data_item to be updated (required)
+        state : str
+            the new state for the data_item (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_state_serialize(
+            uid=uid,
+            state=state,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def set_state_with_http_info(
+        self,
+        uid: Annotated[StrictStr, Field(description="the uid of the data_item to be updated")],
+        state: Annotated[StrictStr, Field(description="the new state for the data_item")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[object]:
+        """Set State
+
+        Set the state field of the uid data_item.
+
+        Parameters
+        ----------
+        uid : str
+            the uid of the data_item to be updated (required)
+        state : str
+            the new state for the data_item (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_state_serialize(
+            uid=uid,
+            state=state,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def set_state_without_preload_content(
+        self,
+        uid: Annotated[StrictStr, Field(description="the uid of the data_item to be updated")],
+        state: Annotated[StrictStr, Field(description="the new state for the data_item")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Set State
+
+        Set the state field of the uid data_item.
+
+        Parameters
+        ----------
+        uid : str
+            the uid of the data_item to be updated (required)
+        state : str
+            the new state for the data_item (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_state_serialize(
+            uid=uid,
+            state=state,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _set_state_serialize(
+        self,
+        uid,
+        state,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if uid is not None:
+
+            _query_params.append(("uid", uid))
+
+        if state is not None:
+
+            _query_params.append(("state", state))
+
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+        # set the HTTP header `Accept`
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method="PATCH",
+            resource_path="/request/set_state",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
+    def set_uid_expiration(
+        self,
+        uid: Annotated[StrictStr, Field(description="the UID of the data_item to be updated")],
+        expiration: Annotated[
+            StrictStr, Field(description="the expiration date for the data_item")
+        ],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        """Set Uid Expiration
+
+        Set the uid_expiration field of the data_item with the given UID.
+
+        Parameters
+        ----------
+        uid : str
+            the UID of the data_item to be updated (required)
+        expiration : str
+            the expiration date for the data_item (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_uid_expiration_serialize(
+            uid=uid,
+            expiration=expiration,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def set_uid_expiration_with_http_info(
+        self,
+        uid: Annotated[StrictStr, Field(description="the UID of the data_item to be updated")],
+        expiration: Annotated[
+            StrictStr, Field(description="the expiration date for the data_item")
+        ],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[object]:
+        """Set Uid Expiration
+
+        Set the uid_expiration field of the data_item with the given UID.
+
+        Parameters
+        ----------
+        uid : str
+            the UID of the data_item to be updated (required)
+        expiration : str
+            the expiration date for the data_item (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_uid_expiration_serialize(
+            uid=uid,
+            expiration=expiration,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def set_uid_expiration_without_preload_content(
+        self,
+        uid: Annotated[StrictStr, Field(description="the UID of the data_item to be updated")],
+        expiration: Annotated[
+            StrictStr, Field(description="the expiration date for the data_item")
+        ],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Set Uid Expiration
+
+        Set the uid_expiration field of the data_item with the given UID.
+
+        Parameters
+        ----------
+        uid : str
+            the UID of the data_item to be updated (required)
+        expiration : str
+            the expiration date for the data_item (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_uid_expiration_serialize(
+            uid=uid,
+            expiration=expiration,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _set_uid_expiration_serialize(
+        self,
+        uid,
+        expiration,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if uid is not None:
+
+            _query_params.append(("uid", uid))
+
+        if expiration is not None:
+
+            _query_params.append(("expiration", expiration))
+
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+        # set the HTTP header `Accept`
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method="PATCH",
+            resource_path="/request/set_uid_expiration",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
+    def set_uri(
+        self,
+        uid: Annotated[StrictStr, Field(description="the uid of the data_item to be updated")],
+        uri: Annotated[StrictStr, Field(description="the access URI for the data_item")],
+        storage_id: Annotated[
+            StrictStr, Field(description="the storage_id associated with the URI")
+        ],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        """Set Uri
+
+        Set the URI field of the uid data_item.
+
+        Parameters
+        ----------
+        uid : str
+            the uid of the data_item to be updated (required)
+        uri : str
+            the access URI for the data_item (required)
+        storage_id : str
+            the storage_id associated with the URI (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_uri_serialize(
+            uid=uid,
+            uri=uri,
+            storage_id=storage_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def set_uri_with_http_info(
+        self,
+        uid: Annotated[StrictStr, Field(description="the uid of the data_item to be updated")],
+        uri: Annotated[StrictStr, Field(description="the access URI for the data_item")],
+        storage_id: Annotated[
+            StrictStr, Field(description="the storage_id associated with the URI")
+        ],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[object]:
+        """Set Uri
+
+        Set the URI field of the uid data_item.
+
+        Parameters
+        ----------
+        uid : str
+            the uid of the data_item to be updated (required)
+        uri : str
+            the access URI for the data_item (required)
+        storage_id : str
+            the storage_id associated with the URI (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_uri_serialize(
+            uid=uid,
+            uri=uri,
+            storage_id=storage_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def set_uri_without_preload_content(
+        self,
+        uid: Annotated[StrictStr, Field(description="the uid of the data_item to be updated")],
+        uri: Annotated[StrictStr, Field(description="the access URI for the data_item")],
+        storage_id: Annotated[
+            StrictStr, Field(description="the storage_id associated with the URI")
+        ],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Set Uri
+
+        Set the URI field of the uid data_item.
+
+        Parameters
+        ----------
+        uid : str
+            the uid of the data_item to be updated (required)
+        uri : str
+            the access URI for the data_item (required)
+        storage_id : str
+            the storage_id associated with the URI (required)
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_uri_serialize(
+            uid=uid,
+            uri=uri,
+            storage_id=storage_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _set_uri_serialize(
+        self,
+        uid,
+        uri,
+        storage_id,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if uid is not None:
+
+            _query_params.append(("uid", uid))
+
+        if uri is not None:
+
+            _query_params.append(("uri", uri))
+
+        if storage_id is not None:
+
+            _query_params.append(("storage_id", storage_id))
+
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+        # set the HTTP header `Accept`
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method="PATCH",
+            resource_path="/request/set_uri",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
+    def set_user(
+        self,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_item to be updated")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="the UID of the data_item to be updated")
+        ] = None,
+        user: Annotated[
+            Optional[StrictStr], Field(description="the user for the data_item")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        """Set User
+
+        Set the user field of the data_item(s) with the given OID or UID.
+
+        Parameters
+        ----------
+        oid : str
+            the OID of the data_item to be updated
+        uid : str
+            the UID of the data_item to be updated
+        user : str
+            the user for the data_item
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_user_serialize(
+            oid=oid,
+            uid=uid,
+            user=user,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def set_user_with_http_info(
+        self,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_item to be updated")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="the UID of the data_item to be updated")
+        ] = None,
+        user: Annotated[
+            Optional[StrictStr], Field(description="the user for the data_item")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[object]:
+        """Set User
+
+        Set the user field of the data_item(s) with the given OID or UID.
+
+        Parameters
+        ----------
+        oid : str
+            the OID of the data_item to be updated
+        uid : str
+            the UID of the data_item to be updated
+        user : str
+            the user for the data_item
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_user_serialize(
+            oid=oid,
+            uid=uid,
+            user=user,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def set_user_without_preload_content(
+        self,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_item to be updated")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="the UID of the data_item to be updated")
+        ] = None,
+        user: Annotated[
+            Optional[StrictStr], Field(description="the user for the data_item")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Set User
+
+        Set the user field of the data_item(s) with the given OID or UID.
+
+        Parameters
+        ----------
+        oid : str
+            the OID of the data_item to be updated
+        uid : str
+            the UID of the data_item to be updated
+        user : str
+            the user for the data_item
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._set_user_serialize(
+            oid=oid,
+            uid=uid,
+            user=user,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _set_user_serialize(
+        self,
+        oid,
+        uid,
+        user,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if oid is not None:
+
+            _query_params.append(("oid", oid))
+
+        if uid is not None:
+
+            _query_params.append(("uid", uid))
+
+        if user is not None:
+
+            _query_params.append(("user", user))
+
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+        # set the HTTP header `Accept`
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method="PATCH",
+            resource_path="/request/set_user",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
+    def update_data_item(
+        self,
+        item_name: Annotated[
+            Optional[StrictStr], Field(description="the name of the data_items to be updated")
+        ] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_items to be updated")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="the UID of the data_item to be updated")
+        ] = None,
+        body: Optional[Dict[str, Any]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        """Update Data Item
+
+        Update fields of an existing data_item.  This is mostly used by the other convenience functions. In general when specifying an OID or an item_name, multiple entries will be updated at the same time.
+
+        Parameters
+        ----------
+        item_name : str
+            the name of the data_items to be updated
+        oid : str
+            the OID of the data_items to be updated
+        uid : str
+            the UID of the data_item to be updated
+        body : object
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._update_data_item_serialize(
+            item_name=item_name,
+            oid=oid,
+            uid=uid,
+            body=body,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def update_data_item_with_http_info(
+        self,
+        item_name: Annotated[
+            Optional[StrictStr], Field(description="the name of the data_items to be updated")
+        ] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_items to be updated")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="the UID of the data_item to be updated")
+        ] = None,
+        body: Optional[Dict[str, Any]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[object]:
+        """Update Data Item
+
+        Update fields of an existing data_item.  This is mostly used by the other convenience functions. In general when specifying an OID or an item_name, multiple entries will be updated at the same time.
+
+        Parameters
+        ----------
+        item_name : str
+            the name of the data_items to be updated
+        oid : str
+            the OID of the data_items to be updated
+        uid : str
+            the UID of the data_item to be updated
+        body : object
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._update_data_item_serialize(
+            item_name=item_name,
+            oid=oid,
+            uid=uid,
+            body=body,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def update_data_item_without_preload_content(
+        self,
+        item_name: Annotated[
+            Optional[StrictStr], Field(description="the name of the data_items to be updated")
+        ] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_items to be updated")
+        ] = None,
+        uid: Annotated[
+            Optional[StrictStr], Field(description="the UID of the data_item to be updated")
+        ] = None,
+        body: Optional[Dict[str, Any]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Update Data Item
+
+        Update fields of an existing data_item.  This is mostly used by the other convenience functions. In general when specifying an OID or an item_name, multiple entries will be updated at the same time.
+
+        Parameters
+        ----------
+        item_name : str
+            the name of the data_items to be updated
+        oid : str
+            the OID of the data_items to be updated
+        uid : str
+            the UID of the data_item to be updated
+        body : object
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._update_data_item_serialize(
+            item_name=item_name,
+            oid=oid,
+            uid=uid,
+            body=body,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _update_data_item_serialize(
+        self,
+        item_name,
+        oid,
+        uid,
+        body,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if item_name is not None:
+
+            _query_params.append(("item_name", item_name))
+
+        if oid is not None:
+
+            _query_params.append(("oid", oid))
+
+        if uid is not None:
+
+            _query_params.append(("uid", uid))
+
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if body is not None:
+            _body_params = body
+
+        # set the HTTP header `Accept`
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params["Content-Type"] = _content_type
+        else:
+            _default_content_type = self.api_client.select_header_content_type(
+                ["application/json"]
+            )
+            if _default_content_type is not None:
+                _header_params["Content-Type"] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method="PATCH",
+            resource_path="/request/update_data_item",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
+    def update_item_tags(
+        self,
+        item_name: Annotated[
+            Optional[StrictStr], Field(description="the name of the data_item")
+        ] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_item to be updated")
+        ] = None,
+        body: Optional[Dict[str, Any]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        """Update Item Tags
+
+        Update/set the item_tags field of a data_item with given item_name/OID.  This will update all records for a data_item at the same time. Updating a single UID does not make sense.
+
+        Parameters
+        ----------
+        item_name : str
+            the name of the data_item
+        oid : str
+            the OID of the data_item to be updated
+        body : object
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._update_item_tags_serialize(
+            item_name=item_name,
+            oid=oid,
+            body=body,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def update_item_tags_with_http_info(
+        self,
+        item_name: Annotated[
+            Optional[StrictStr], Field(description="the name of the data_item")
+        ] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_item to be updated")
+        ] = None,
+        body: Optional[Dict[str, Any]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[object]:
+        """Update Item Tags
+
+        Update/set the item_tags field of a data_item with given item_name/OID.  This will update all records for a data_item at the same time. Updating a single UID does not make sense.
+
+        Parameters
+        ----------
+        item_name : str
+            the name of the data_item
+        oid : str
+            the OID of the data_item to be updated
+        body : object
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._update_item_tags_serialize(
+            item_name=item_name,
+            oid=oid,
+            body=body,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def update_item_tags_without_preload_content(
+        self,
+        item_name: Annotated[
+            Optional[StrictStr], Field(description="the name of the data_item")
+        ] = None,
+        oid: Annotated[
+            Optional[StrictStr], Field(description="the OID of the data_item to be updated")
+        ] = None,
+        body: Optional[Dict[str, Any]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Update Item Tags
+
+        Update/set the item_tags field of a data_item with given item_name/OID.  This will update all records for a data_item at the same time. Updating a single UID does not make sense.
+
+        Parameters
+        ----------
+        item_name : str
+            the name of the data_item
+        oid : str
+            the OID of the data_item to be updated
+        body : object
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._update_item_tags_serialize(
+            item_name=item_name,
+            oid=oid,
+            body=body,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "object",
+            "422": "HTTPValidationError",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _update_item_tags_serialize(
+        self,
+        item_name,
+        oid,
+        body,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if item_name is not None:
+
+            _query_params.append(("item_name", item_name))
+
+        if oid is not None:
+
+            _query_params.append(("oid", oid))
+
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if body is not None:
+            _body_params = body
+
+        # set the HTTP header `Accept`
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params["Content-Type"] = _content_type
+        else:
+            _default_content_type = self.api_client.select_header_content_type(
+                ["application/json"]
+            )
+            if _default_content_type is not None:
+                _header_params["Content-Type"] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method="PATCH",
+            resource_path="/request/update_item_tags",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

@@ -11,6 +11,17 @@ Method | HTTP request | Description
 [**query_expired**](RequestApi.md#query_expired) | **GET** /request/query_expired | Query Expired
 [**query_item_storage**](RequestApi.md#query_item_storage) | **GET** /request/query_item_storage | Query Item Storage
 [**query_new**](RequestApi.md#query_new) | **GET** /request/query_new | Query New
+[**set_acl**](RequestApi.md#set_acl) | **PATCH** /request/set_acl | Set Acl
+[**set_group**](RequestApi.md#set_group) | **PATCH** /request/set_group | Set Group
+[**set_metadata**](RequestApi.md#set_metadata) | **PATCH** /request/set_metadata | Set Metadata
+[**set_oid_expiration**](RequestApi.md#set_oid_expiration) | **PATCH** /request/set_oid_expiration | Set Oid Expiration
+[**set_phase**](RequestApi.md#set_phase) | **PATCH** /request/set_phase | Set Phase
+[**set_state**](RequestApi.md#set_state) | **PATCH** /request/set_state | Set State
+[**set_uid_expiration**](RequestApi.md#set_uid_expiration) | **PATCH** /request/set_uid_expiration | Set Uid Expiration
+[**set_uri**](RequestApi.md#set_uri) | **PATCH** /request/set_uri | Set Uri
+[**set_user**](RequestApi.md#set_user) | **PATCH** /request/set_user | Set User
+[**update_data_item**](RequestApi.md#update_data_item) | **PATCH** /request/update_data_item | Update Data Item
+[**update_item_tags**](RequestApi.md#update_item_tags) | **PATCH** /request/update_item_tags | Update Item Tags
 
 
 # **query_data_item**
@@ -444,7 +455,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_new**
-> List[Optional[object]] query_new(check_date, uid=uid)
+> List[object] query_new(check_date, uid=uid)
 
 Query New
 
@@ -493,7 +504,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**List[Optional[object]]**
+**List[object]**
 
 ### Authorization
 
@@ -502,6 +513,790 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_acl**
+> object set_acl(oid=oid, uid=uid, acl=acl)
+
+Set Acl
+
+Set the user field of the data_item(s) with the given OID or UID.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.RequestApi(api_client)
+    oid = '' # str | the OID of the data_item to be updated (optional) (default to '')
+    uid = '' # str | the UID of the data_item to be updated (optional) (default to '')
+    acl = '{}' # str | the acl dict for the data_item (optional) (default to '{}')
+
+    try:
+        # Set Acl
+        api_response = api_instance.set_acl(oid=oid, uid=uid, acl=acl)
+        print("The response of RequestApi->set_acl:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling RequestApi->set_acl: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **oid** | **str**| the OID of the data_item to be updated | [optional] [default to &#39;&#39;]
+ **uid** | **str**| the UID of the data_item to be updated | [optional] [default to &#39;&#39;]
+ **acl** | **str**| the acl dict for the data_item | [optional] [default to &#39;{}&#39;]
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_group**
+> object set_group(oid=oid, uid=uid, group=group)
+
+Set Group
+
+Set the user field of the data_item(s) with the given OID or UID.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.RequestApi(api_client)
+    oid = '' # str | the OID of the data_item to be updated (optional) (default to '')
+    uid = '' # str | the UID of the data_item to be updated (optional) (default to '')
+    group = 'SKA' # str | the group for the data_item (optional) (default to 'SKA')
+
+    try:
+        # Set Group
+        api_response = api_instance.set_group(oid=oid, uid=uid, group=group)
+        print("The response of RequestApi->set_group:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling RequestApi->set_group: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **oid** | **str**| the OID of the data_item to be updated | [optional] [default to &#39;&#39;]
+ **uid** | **str**| the UID of the data_item to be updated | [optional] [default to &#39;&#39;]
+ **group** | **str**| the group for the data_item | [optional] [default to &#39;SKA&#39;]
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_metadata**
+> object set_metadata(uid, body=body)
+
+Set Metadata
+
+Populate the metadata column for a data_item with the metadata.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.RequestApi(api_client)
+    uid = 'uid_example' # str | the UID of the data_item to be updated
+    body = None # object |  (optional)
+
+    try:
+        # Set Metadata
+        api_response = api_instance.set_metadata(uid, body=body)
+        print("The response of RequestApi->set_metadata:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling RequestApi->set_metadata: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **uid** | **str**| the UID of the data_item to be updated | 
+ **body** | **object**|  | [optional] 
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_oid_expiration**
+> object set_oid_expiration(oid, expiration)
+
+Set Oid Expiration
+
+Set the oid_expiration field of the data_items with the given OID.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.RequestApi(api_client)
+    oid = 'oid_example' # str | the oid of the data_item to be updated
+    expiration = 'expiration_example' # str | the expiration date for the data_item
+
+    try:
+        # Set Oid Expiration
+        api_response = api_instance.set_oid_expiration(oid, expiration)
+        print("The response of RequestApi->set_oid_expiration:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling RequestApi->set_oid_expiration: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **oid** | **str**| the oid of the data_item to be updated | 
+ **expiration** | **str**| the expiration date for the data_item | 
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_phase**
+> object set_phase(uid, phase)
+
+Set Phase
+
+Set the phase field of the data_item(s) with given UID.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.RequestApi(api_client)
+    uid = 'uid_example' # str | the UID of the data_item to be updated
+    phase = 'phase_example' # str | the phase for the data_item
+
+    try:
+        # Set Phase
+        api_response = api_instance.set_phase(uid, phase)
+        print("The response of RequestApi->set_phase:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling RequestApi->set_phase: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **uid** | **str**| the UID of the data_item to be updated | 
+ **phase** | **str**| the phase for the data_item | 
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_state**
+> object set_state(uid, state)
+
+Set State
+
+Set the state field of the uid data_item.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.RequestApi(api_client)
+    uid = 'uid_example' # str | the uid of the data_item to be updated
+    state = 'state_example' # str | the new state for the data_item
+
+    try:
+        # Set State
+        api_response = api_instance.set_state(uid, state)
+        print("The response of RequestApi->set_state:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling RequestApi->set_state: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **uid** | **str**| the uid of the data_item to be updated | 
+ **state** | **str**| the new state for the data_item | 
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_uid_expiration**
+> object set_uid_expiration(uid, expiration)
+
+Set Uid Expiration
+
+Set the uid_expiration field of the data_item with the given UID.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.RequestApi(api_client)
+    uid = 'uid_example' # str | the UID of the data_item to be updated
+    expiration = 'expiration_example' # str | the expiration date for the data_item
+
+    try:
+        # Set Uid Expiration
+        api_response = api_instance.set_uid_expiration(uid, expiration)
+        print("The response of RequestApi->set_uid_expiration:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling RequestApi->set_uid_expiration: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **uid** | **str**| the UID of the data_item to be updated | 
+ **expiration** | **str**| the expiration date for the data_item | 
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_uri**
+> object set_uri(uid, uri, storage_id)
+
+Set Uri
+
+Set the URI field of the uid data_item.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.RequestApi(api_client)
+    uid = 'uid_example' # str | the uid of the data_item to be updated
+    uri = 'uri_example' # str | the access URI for the data_item
+    storage_id = 'storage_id_example' # str | the storage_id associated with the URI
+
+    try:
+        # Set Uri
+        api_response = api_instance.set_uri(uid, uri, storage_id)
+        print("The response of RequestApi->set_uri:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling RequestApi->set_uri: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **uid** | **str**| the uid of the data_item to be updated | 
+ **uri** | **str**| the access URI for the data_item | 
+ **storage_id** | **str**| the storage_id associated with the URI | 
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_user**
+> object set_user(oid=oid, uid=uid, user=user)
+
+Set User
+
+Set the user field of the data_item(s) with the given OID or UID.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.RequestApi(api_client)
+    oid = '' # str | the OID of the data_item to be updated (optional) (default to '')
+    uid = '' # str | the UID of the data_item to be updated (optional) (default to '')
+    user = 'SKA' # str | the user for the data_item (optional) (default to 'SKA')
+
+    try:
+        # Set User
+        api_response = api_instance.set_user(oid=oid, uid=uid, user=user)
+        print("The response of RequestApi->set_user:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling RequestApi->set_user: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **oid** | **str**| the OID of the data_item to be updated | [optional] [default to &#39;&#39;]
+ **uid** | **str**| the UID of the data_item to be updated | [optional] [default to &#39;&#39;]
+ **user** | **str**| the user for the data_item | [optional] [default to &#39;SKA&#39;]
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **update_data_item**
+> object update_data_item(item_name=item_name, oid=oid, uid=uid, body=body)
+
+Update Data Item
+
+Update fields of an existing data_item.  This is mostly used by the other convenience functions. In general when specifying an OID or an item_name, multiple entries will be updated at the same time.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.RequestApi(api_client)
+    item_name = '' # str | the name of the data_items to be updated (optional) (default to '')
+    oid = '' # str | the OID of the data_items to be updated (optional) (default to '')
+    uid = '' # str | the UID of the data_item to be updated (optional) (default to '')
+    body = None # object |  (optional)
+
+    try:
+        # Update Data Item
+        api_response = api_instance.update_data_item(item_name=item_name, oid=oid, uid=uid, body=body)
+        print("The response of RequestApi->update_data_item:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling RequestApi->update_data_item: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **item_name** | **str**| the name of the data_items to be updated | [optional] [default to &#39;&#39;]
+ **oid** | **str**| the OID of the data_items to be updated | [optional] [default to &#39;&#39;]
+ **uid** | **str**| the UID of the data_item to be updated | [optional] [default to &#39;&#39;]
+ **body** | **object**|  | [optional] 
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **update_item_tags**
+> object update_item_tags(item_name=item_name, oid=oid, body=body)
+
+Update Item Tags
+
+Update/set the item_tags field of a data_item with given item_name/OID.  This will update all records for a data_item at the same time. Updating a single UID does not make sense.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.RequestApi(api_client)
+    item_name = '' # str | the name of the data_item (optional) (default to '')
+    oid = '' # str | the OID of the data_item to be updated (optional) (default to '')
+    body = None # object |  (optional)
+
+    try:
+        # Update Item Tags
+        api_response = api_instance.update_item_tags(item_name=item_name, oid=oid, body=body)
+        print("The response of RequestApi->update_item_tags:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling RequestApi->update_item_tags: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **item_name** | **str**| the name of the data_item | [optional] [default to &#39;&#39;]
+ **oid** | **str**| the OID of the data_item to be updated | [optional] [default to &#39;&#39;]
+ **body** | **object**|  | [optional] 
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 ### HTTP response details

@@ -101,6 +101,17 @@ Class | Method | HTTP request | Description
 *RequestApi* | [**query_expired**](openapi_dlm_client/RequestApi.md#query_expired) | **GET** /request/query_expired | Query Expired
 *RequestApi* | [**query_item_storage**](openapi_dlm_client/RequestApi.md#query_item_storage) | **GET** /request/query_item_storage | Query Item Storage
 *RequestApi* | [**query_new**](openapi_dlm_client/RequestApi.md#query_new) | **GET** /request/query_new | Query New
+*RequestApi* | [**set_acl**](openapi_dlm_client/RequestApi.md#set_acl) | **PATCH** /request/set_acl | Set Acl
+*RequestApi* | [**set_group**](openapi_dlm_client/RequestApi.md#set_group) | **PATCH** /request/set_group | Set Group
+*RequestApi* | [**set_metadata**](openapi_dlm_client/RequestApi.md#set_metadata) | **PATCH** /request/set_metadata | Set Metadata
+*RequestApi* | [**set_oid_expiration**](openapi_dlm_client/RequestApi.md#set_oid_expiration) | **PATCH** /request/set_oid_expiration | Set Oid Expiration
+*RequestApi* | [**set_phase**](openapi_dlm_client/RequestApi.md#set_phase) | **PATCH** /request/set_phase | Set Phase
+*RequestApi* | [**set_state**](openapi_dlm_client/RequestApi.md#set_state) | **PATCH** /request/set_state | Set State
+*RequestApi* | [**set_uid_expiration**](openapi_dlm_client/RequestApi.md#set_uid_expiration) | **PATCH** /request/set_uid_expiration | Set Uid Expiration
+*RequestApi* | [**set_uri**](openapi_dlm_client/RequestApi.md#set_uri) | **PATCH** /request/set_uri | Set Uri
+*RequestApi* | [**set_user**](openapi_dlm_client/RequestApi.md#set_user) | **PATCH** /request/set_user | Set User
+*RequestApi* | [**update_data_item**](openapi_dlm_client/RequestApi.md#update_data_item) | **PATCH** /request/update_data_item | Update Data Item
+*RequestApi* | [**update_item_tags**](openapi_dlm_client/RequestApi.md#update_item_tags) | **PATCH** /request/update_item_tags | Update Item Tags
 *StorageApi* | [**create_rclone_config**](openapi_dlm_client/StorageApi.md#create_rclone_config) | **POST** /storage/rclone_config | Create Rclone Config
 *StorageApi* | [**create_storage_config**](openapi_dlm_client/StorageApi.md#create_storage_config) | **POST** /storage/create_storage_config | Create Storage Config
 *StorageApi* | [**get_storage_config**](openapi_dlm_client/StorageApi.md#get_storage_config) | **GET** /storage/get_storage_config | Get Storage Config

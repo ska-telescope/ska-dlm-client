@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "0.2.0"
+        "version": "1.0.0"
     },
     "paths": {
         "/request/query_data_item": {
@@ -97,6 +97,745 @@
                                         "type": "object"
                                     },
                                     "title": "Response Query Data Item"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/update_data_item": {
+            "patch": {
+                "summary": "Update Data Item",
+                "tags": [
+                    "request"
+                ],
+                "description": "Update fields of an existing data_item.\n\nThis is mostly used by the other convenience functions. In general when specifying\nan OID or an item_name, multiple entries will be updated at the same time.",
+                "operationId": "update_data_item",
+                "parameters": [
+                    {
+                        "name": "item_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the name of the data_items to be updated",
+                            "default": "",
+                            "title": "Item Name"
+                        },
+                        "description": "the name of the data_items to be updated"
+                    },
+                    {
+                        "name": "oid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the OID of the data_items to be updated",
+                            "default": "",
+                            "title": "Oid"
+                        },
+                        "description": "the OID of the data_items to be updated"
+                    },
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the UID of the data_item to be updated",
+                            "default": "",
+                            "title": "Uid"
+                        },
+                        "description": "the UID of the data_item to be updated"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "anyOf": [
+                                    {
+                                        "type": "object"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "description": "the json formatted update data, compatible with postgREST",
+                                "title": "Post Data"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Update Data Item"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/set_uri": {
+            "patch": {
+                "summary": "Set Uri",
+                "tags": [
+                    "request"
+                ],
+                "description": "Set the URI field of the uid data_item.",
+                "operationId": "set_uri",
+                "parameters": [
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "the uid of the data_item to be updated",
+                            "title": "Uid"
+                        },
+                        "description": "the uid of the data_item to be updated"
+                    },
+                    {
+                        "name": "uri",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "the access URI for the data_item",
+                            "title": "Uri"
+                        },
+                        "description": "the access URI for the data_item"
+                    },
+                    {
+                        "name": "storage_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "the storage_id associated with the URI",
+                            "title": "Storage Id"
+                        },
+                        "description": "the storage_id associated with the URI"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Set Uri"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/set_metadata": {
+            "patch": {
+                "summary": "Set Metadata",
+                "tags": [
+                    "request"
+                ],
+                "description": "Populate the metadata column for a data_item with the metadata.",
+                "operationId": "set_metadata",
+                "parameters": [
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "the UID of the data_item to be updated",
+                            "title": "Uid"
+                        },
+                        "description": "the UID of the data_item to be updated"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "anyOf": [
+                                    {
+                                        "type": "object"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "description": "a metadata JSON string",
+                                "title": "Metadata Post"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Set Metadata"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/set_state": {
+            "patch": {
+                "summary": "Set State",
+                "tags": [
+                    "request"
+                ],
+                "description": "Set the state field of the uid data_item.",
+                "operationId": "set_state",
+                "parameters": [
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "the uid of the data_item to be updated",
+                            "title": "Uid"
+                        },
+                        "description": "the uid of the data_item to be updated"
+                    },
+                    {
+                        "name": "state",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "the new state for the data_item",
+                            "title": "State"
+                        },
+                        "description": "the new state for the data_item"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Set State"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/set_oid_expiration": {
+            "patch": {
+                "summary": "Set Oid Expiration",
+                "tags": [
+                    "request"
+                ],
+                "description": "Set the oid_expiration field of the data_items with the given OID.",
+                "operationId": "set_oid_expiration",
+                "parameters": [
+                    {
+                        "name": "oid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "the oid of the data_item to be updated",
+                            "title": "Oid"
+                        },
+                        "description": "the oid of the data_item to be updated"
+                    },
+                    {
+                        "name": "expiration",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "the expiration date for the data_item",
+                            "title": "Expiration"
+                        },
+                        "description": "the expiration date for the data_item"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Set Oid Expiration"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/set_uid_expiration": {
+            "patch": {
+                "summary": "Set Uid Expiration",
+                "tags": [
+                    "request"
+                ],
+                "description": "Set the uid_expiration field of the data_item with the given UID.",
+                "operationId": "set_uid_expiration",
+                "parameters": [
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "the UID of the data_item to be updated",
+                            "title": "Uid"
+                        },
+                        "description": "the UID of the data_item to be updated"
+                    },
+                    {
+                        "name": "expiration",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "the expiration date for the data_item",
+                            "title": "Expiration"
+                        },
+                        "description": "the expiration date for the data_item"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Set Uid Expiration"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/set_user": {
+            "patch": {
+                "summary": "Set User",
+                "tags": [
+                    "request"
+                ],
+                "description": "Set the user field of the data_item(s) with the given OID or UID.",
+                "operationId": "set_user",
+                "parameters": [
+                    {
+                        "name": "oid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the OID of the data_item to be updated",
+                            "default": "",
+                            "title": "Oid"
+                        },
+                        "description": "the OID of the data_item to be updated"
+                    },
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the UID of the data_item to be updated",
+                            "default": "",
+                            "title": "Uid"
+                        },
+                        "description": "the UID of the data_item to be updated"
+                    },
+                    {
+                        "name": "user",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the user for the data_item",
+                            "default": "SKA",
+                            "title": "User"
+                        },
+                        "description": "the user for the data_item"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Set User"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/set_group": {
+            "patch": {
+                "summary": "Set Group",
+                "tags": [
+                    "request"
+                ],
+                "description": "Set the user field of the data_item(s) with the given OID or UID.",
+                "operationId": "set_group",
+                "parameters": [
+                    {
+                        "name": "oid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the OID of the data_item to be updated",
+                            "default": "",
+                            "title": "Oid"
+                        },
+                        "description": "the OID of the data_item to be updated"
+                    },
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the UID of the data_item to be updated",
+                            "default": "",
+                            "title": "Uid"
+                        },
+                        "description": "the UID of the data_item to be updated"
+                    },
+                    {
+                        "name": "group",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the group for the data_item",
+                            "default": "SKA",
+                            "title": "Group"
+                        },
+                        "description": "the group for the data_item"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Set Group"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/set_acl": {
+            "patch": {
+                "summary": "Set Acl",
+                "tags": [
+                    "request"
+                ],
+                "description": "Set the user field of the data_item(s) with the given OID or UID.",
+                "operationId": "set_acl",
+                "parameters": [
+                    {
+                        "name": "oid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the OID of the data_item to be updated",
+                            "default": "",
+                            "title": "Oid"
+                        },
+                        "description": "the OID of the data_item to be updated"
+                    },
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the UID of the data_item to be updated",
+                            "default": "",
+                            "title": "Uid"
+                        },
+                        "description": "the UID of the data_item to be updated"
+                    },
+                    {
+                        "name": "acl",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the acl dict for the data_item",
+                            "default": "{}",
+                            "title": "Acl"
+                        },
+                        "description": "the acl dict for the data_item"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Set Acl"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/set_phase": {
+            "patch": {
+                "summary": "Set Phase",
+                "tags": [
+                    "request"
+                ],
+                "description": "Set the phase field of the data_item(s) with given UID.",
+                "operationId": "set_phase",
+                "parameters": [
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "the UID of the data_item to be updated",
+                            "title": "Uid"
+                        },
+                        "description": "the UID of the data_item to be updated"
+                    },
+                    {
+                        "name": "phase",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "the phase for the data_item",
+                            "title": "Phase"
+                        },
+                        "description": "the phase for the data_item"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Set Phase"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/request/update_item_tags": {
+            "patch": {
+                "summary": "Update Item Tags",
+                "tags": [
+                    "request"
+                ],
+                "description": "Update/set the item_tags field of a data_item with given item_name/OID.\n\nThis will update all records for a data_item at the same time.\nUpdating a single UID does not make sense.",
+                "operationId": "update_item_tags",
+                "parameters": [
+                    {
+                        "name": "item_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the name of the data_item",
+                            "default": "",
+                            "title": "Item Name"
+                        },
+                        "description": "the name of the data_item"
+                    },
+                    {
+                        "name": "oid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "the OID of the data_item to be updated",
+                            "default": "",
+                            "title": "Oid"
+                        },
+                        "description": "the OID of the data_item to be updated"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "anyOf": [
+                                    {
+                                        "type": "object"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "description": "dictionary of keyword/value pairs",
+                                "title": "Item Tags"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Update Item Tags"
                                 }
                             }
                         }

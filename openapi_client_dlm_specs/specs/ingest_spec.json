@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "0.2.0"
+        "version": "1.0.0"
     },
     "paths": {
         "/ingest/init_data_item": {
