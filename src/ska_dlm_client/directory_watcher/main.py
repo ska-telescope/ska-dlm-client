@@ -83,6 +83,12 @@ def create_parser() -> argparse.ArgumentParser:
         default=False,
         help="Skip performing the rclone access check when registering a data item with DLM.",
     )
+    parser.add_argument(
+        "--register-contents-of-watch-directory",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="First register each file/directory in the watch directory as a data product.",
+    )
     return parser
 
 
@@ -107,10 +113,16 @@ def create_directory_watcher() -> DirectoryWatcher:
     args = parser.parse_args()
     config = process_args(args=args)
     registration_processor = RegistrationProcessor(config)
-    if args.use_polling_watcher:  # pylint: disable=no-else-return"
-        return PollingDirectoryWatcher(config, registration_processor)
+    if args.register_contents_of_watch_directory:
+        registration_processor.register_data_products_from_watch_directory(dry_run_for_debug=False)
+    if args.use_polling_watcher:
+        return PollingDirectoryWatcher(
+            config=config, registration_processor=registration_processor
+        )
     else:
-        return INotifyDirectoryWatcher(config, registration_processor)
+        return INotifyDirectoryWatcher(
+            config=config, registration_processor=registration_processor
+        )
 
 
 def _setup_async_graceful_termination(
