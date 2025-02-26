@@ -7,6 +7,8 @@
 * Added command line option and implementation to skip rclone access check on data item register.
 * Added support for storage root directory.
 * Added support for skip rclone access check.
+* Added helm chart gitlab-ci support.
+* Added option to register the contents of the watch directory at startup.
 
 ### Changed
 
