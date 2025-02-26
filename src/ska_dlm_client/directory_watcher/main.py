@@ -115,7 +115,7 @@ def create_directory_watcher() -> DirectoryWatcher:
     registration_processor = RegistrationProcessor(config)
     if args.register_contents_of_watch_directory:
         registration_processor.register_data_products_from_watch_directory(dry_run_for_debug=False)
-    if args.use_polling_watcher:
+    if args.use_polling_watcher:  # pylint: disable=no-else-return"
         return PollingDirectoryWatcher(
             config=config, registration_processor=registration_processor
         )
