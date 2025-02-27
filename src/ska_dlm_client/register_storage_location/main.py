@@ -13,10 +13,10 @@ logger = logging.getLogger(__name__)
 
 # Constants that can be used for testing.
 LOCATION_NAME = "ThisDLMClientLocationName"
-LOCATION_TYPE = "ThisDLMClientLocation"
+LOCATION_TYPE = "ThisDLMClientLocationType"
 LOCATION_COUNTRY = "Australia"
-LOCATION_CITY = "Marksville"
-LOCATION_FACILITY = "ICRAR"
+LOCATION_CITY = "Kensington"
+LOCATION_FACILITY = "SKA-Test"
 STORAGE_CONFIG = {"name": "data", "type": "alias", "parameters": {"remote": "/"}}
 STORAGE_INTERFACE = "posix"
 STORAGE_TYPE = "disk"

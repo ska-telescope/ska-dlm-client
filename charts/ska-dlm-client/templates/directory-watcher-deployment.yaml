@@ -41,6 +41,9 @@ spec:
         {{- end }}
         - "--ingest-server-url"
         - {{ .Values.ska_dlm_client.ingest_server_url }}
+        {{- if eq $.Values.directory_watcher.register_contents_of_watch_directory true }}
+        - "--register-contents-of-watch-directory"
+        {{- end }}
         volumeMounts:
         - name: data-product-storage
           mountPath: /data

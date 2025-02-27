@@ -215,6 +215,17 @@ class RegistrationProcessor:
             item_list.remove(parent_item)
             self._register_container_items(item_list=item_list)
 
+    def register_data_products_from_watch_directory(self, dry_run_for_debug: bool = False):
+        """Provide a mechanism to register the contents of the directory to watch."""
+        logger.info("\n##############################\n")
+        self.dry_run_for_debug = dry_run_for_debug
+        for item in os.listdir(self._config.directory_to_watch):
+            self.add_path(
+                absolute_path=os.path.join(self._config.directory_to_watch, item),
+                path_rel_to_watch_dir=item,
+            )
+            logger.info("\n\n##############################\n")
+
 
 def _generate_item_list_for_data_product(
     absolute_path: str, path_rel_to_watch_dir: str
@@ -434,42 +445,3 @@ def _item_list_minus_metadata_file(
         item_list.append(item)
         logger.info("new item %s", item.path_rel_to_watch_dir)
     return item_list
-
-
-def register_directory_finding_data_items(
-    config: Config, wait_after_finish: bool = False, dry_run_for_debug: bool = False
-):
-    """Provide a machanism to register the contents of the directory to watch."""
-    watch_dir = config.directory_to_watch
-    rg = RegistrationProcessor(config=config)
-    logger.info("\n##############################\n")
-    rg.dry_run_for_debug = dry_run_for_debug
-    for item in os.listdir(watch_dir):
-        rg.add_path(
-            absolute_path=os.path.join(watch_dir, item),
-            path_rel_to_watch_dir=item,
-        )
-        logger.info("\n\n##############################\n")
-    if wait_after_finish:
-        time.sleep(300)
-
-
-# This code provides a mechanism to test processing of data products without
-# running the full system.
-# def main():
-#    """Run main as a function."""
-#    watch_dir = "/data/product"
-#    config = Config(
-#        directory_to_watch=watch_dir,
-#        ingest_server_url="http://localhost:8001",
-#        storage_name="data",
-#        status_file_absolute_path=f"{watch_dir}/status.json",
-#        use_status_file=False,
-#        storage_root_directory="/data",
-#        rclone_access_check_on_register=False,
-#    )
-#    register_directory_finding_data_items(config, wait_after_finish=False, dry_run_for_debug=True)
-
-
-# if __name__ == "__main__":
-#    main()
