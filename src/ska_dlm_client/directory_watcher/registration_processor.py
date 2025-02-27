@@ -216,7 +216,7 @@ class RegistrationProcessor:
             self._register_container_items(item_list=item_list)
 
     def register_data_products_from_watch_directory(self, dry_run_for_debug: bool = False):
-        """Provide a machanism to register the contents of the directory to watch."""
+        """Provide a mechanism to register the contents of the directory to watch."""
         logger.info("\n##############################\n")
         self.dry_run_for_debug = dry_run_for_debug
         for item in os.listdir(self._config.directory_to_watch):
