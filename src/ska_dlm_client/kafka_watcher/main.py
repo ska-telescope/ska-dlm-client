@@ -28,12 +28,6 @@ def main():
     )
     parser.add_argument(
         "--kafka-broker-url",
-        type=str,
-        required=True,
-        help="The URL of the Kafka broker.",
-    )
-    parser.add_argument(
-        "--kafka-broker-url",
         nargs="+",
         required=True,
         help="One or more Kafka broker URLs.",

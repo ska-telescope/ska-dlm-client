@@ -33,10 +33,11 @@ def test_main(mocker: pytest_mock.MockerFixture):
     """
     # Mock the argparse.ArgumentParser to return simulated arguments
     mock_args = mock.Mock(
-        kafka_broker_url=[KAFKA_HOST],
+        kafka_broker_url=KAFKA_HOST,
         kafka_topic=[TEST_TOPIC],
         ingest_server_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
+        check_rclone_access=False,
     )
     mocker.patch(
         "src.ska_dlm_client.kafka_watcher.main.argparse.ArgumentParser.parse_args",
@@ -57,10 +58,11 @@ def test_main(mocker: pytest_mock.MockerFixture):
 
     # Verify that watch was called with the correct arguments
     mock_watch.assert_called_once_with(
-        kafka_broker_url=[KAFKA_HOST],
+        kafka_broker_url=KAFKA_HOST,
         kafka_topic=[TEST_TOPIC],
         ingest_server_url=INGEST_HOST,
-        storage_name=STORAGE_NAME,  # Expected kafka_broker_url  # Expected kafka_topic
+        storage_name=STORAGE_NAME,
+        check_rclone_access=False,
     )
 
 
@@ -104,10 +106,11 @@ async def test_watch_post_success(mock_apiingest: MagicMock, mock_kafka_consumer
     mock_kafka_consumer.start.side_effect = [False, True]
 
     await watch(
-        kafka_broker_url=[KAFKA_HOST],
+        kafka_broker_url=KAFKA_HOST,
         kafka_topic=[TEST_TOPIC],
         ingest_server_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
+        check_rclone_access=False,
     )
 
     # Assert that the HTTP call was made once
@@ -127,10 +130,11 @@ async def test_watch_http_failure(
     # Run the test and capture the logs
     with caplog.at_level("ERROR", logger="ska_dlm_client.kafka_watcher.main"):
         await watch(
-            kafka_broker_url=[KAFKA_HOST],
+            kafka_broker_url=KAFKA_HOST,
             kafka_topic=[TEST_TOPIC],
             ingest_server_url=INGEST_HOST,
             storage_name=STORAGE_NAME,
+            check_rclone_access=False,
         )
 
         # Check that the error log was captured
@@ -154,6 +158,7 @@ async def test_post_dlm_data_item_success(mock_apiingest, caplog):
         uri=KAFKA_MSG["file"],  # Assuming file is used as the URI
         storage_name=STORAGE_NAME,
         body=KAFKA_MSG["metadata"],
+        do_storage_access_check=True,
     )
 
     # Assert: No warnings or errors in logs
