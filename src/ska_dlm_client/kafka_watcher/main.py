@@ -33,6 +33,12 @@ def main():
         help="The URL of the Kafka broker.",
     )
     parser.add_argument(
+        "--kafka-broker-url",
+        nargs="+",
+        required=True,
+        help="One or more Kafka broker URLs.",
+    )
+    parser.add_argument(
         "--storage-name",
         type=str,
         required=True,
@@ -53,7 +59,7 @@ def main():
     args = parser.parse_args()
     asyncio.run(
         watch(
-            kafka_broker_url=[args.kafka_broker_url],
+            kafka_broker_url=args.kafka_broker_url,
             kafka_topic=args.kafka_topic,
             ingest_server_url=args.ingest_server_url,
             storage_name=args.storage_name,
