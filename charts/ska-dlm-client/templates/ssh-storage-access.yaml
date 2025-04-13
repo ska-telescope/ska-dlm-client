@@ -1,4 +1,23 @@
 {{- if $.Values.ssh_storage_access.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ska-dlm-client.fullname" . }}-{{ .Values.ssh_storage_access.pst.service_name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "ska-dlm-client.ssh-storage-access.labels" . | indent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: tcp-pst-ssh
+      port: 22
+      targetPort: 2222
+      protocol: TCP
+  selector:
+    component: {{ .Values.ssh_storage_access.component }}
+    subsystem: {{ .Values.ssh_storage_access.subsystem }}
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -36,8 +55,8 @@ spec:
             - name: PUBLIC_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.ssh_storage_access.secrets.pst.pub_name }}
-                  key: {{ .Values.ssh_storage_access.secrets.pst.pub_name }}
+                  name: {{ .Values.ssh_storage_access.pst.secrets.pub_name }}
+                  key: {{ .Values.ssh_storage_access.pst.secrets.pub_name }}
           volumeMounts:
             - name: ssh-config
               mountPath: /config

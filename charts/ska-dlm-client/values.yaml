@@ -1,11 +1,12 @@
 system: dlm
+subsystem: client
 
 # Global parameters
 global:
   storageClass: nfss1
   development: true
   dataProduct:
-    pvc:
+    pvc:  # NOTE: This is globally shared all data products volume
       name: test-pvc
       read_only: true
 
@@ -63,9 +64,33 @@ ssh_storage_access:
   ssh_user_name: "dlm"
   ssh_uid: "1000"
   ssh_gid: "1000"
+  daq:
+    service_name: "ssh-sa-daq"
+    secrets:
+      priv_name: "daq-priv"
+      pub_name: "daq-pub"
   pst:
     service_name: "ssh-sa-pst"
-  secrets:
-    pst:
+    secrets:
       priv_name: "pst-priv"
       pub_name: "pst-pub"
+  sdp:
+    service_name: "ssh-sa-sdp"
+    secrets:
+      priv_name: "sdp-priv"
+      pub_name: "sdp-pub"
+
+daq:
+  pvc:
+    name: daq-pvc
+    read_only: true
+
+pst:
+  pvc:
+    name: pst-pvc
+    read_only: true
+
+sdp:
+  pvc:
+    name: sdp-pvc
+    read_only: true
