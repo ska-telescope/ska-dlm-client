@@ -64,34 +64,31 @@ ssh_storage_access:
   ssh_uid: "1000"
   ssh_gid: "1000"
   daq:
-    enabled: true
+    enabled: false
     deployment_name: "ssh-sa-daq"
     service_name: "ssh-sa-daq"
     pvc:
-      # name: daq-pvc
-      name: shared
+      name: daq-pvc
       read_only: true
     secrets:
       priv_name: "daq-priv"
       pub_name: "daq-pub"
   pst:
-    enabled: true
+    enabled: false
     deployment_name: "ssh-sa-pst"
     service_name: "ssh-sa-pst"
     pvc:
-      # name: pst-pvc
-      name: shared
+      name: pst-pvc
       read_only: true
     secrets:
       priv_name: "pst-priv"
       pub_name: "pst-pub"
   sdp:
-    enabled: true
+    enabled: false
     deployment_name: "ssh-sa-sdp"
     service_name: "ssh-sa-sdp"
     pvc:
-      # name: sdp-pvc
-      name: shared
+      name: sdp-pvc
       read_only: true
     secrets:
       priv_name: "sdp-priv"
