@@ -74,3 +74,13 @@ Storage location labels
 {{- define "ska-dlm-client.setup-storage-location.labels" }}
 {{- include "ska-dlm-client.labels" . }}
 {{- end }}
+
+{{/*
+ssh storage access
+*/}}
+{{- define "ska-dlm-client.ssh-storage-access.labels" }}
+{{- include "ska-dlm-client.labels" . }}
+component: ssh-storage-access
+subsystem: {{ .Values.directory_watcher.subsystem }}
+intent: production
+{{- end }}

@@ -54,3 +54,18 @@ kafka_watcher:
   kafka_broker_url: "kafka:9092"
   kafka_topic: "ska-sdp-dataproduct-ingest"
   storage_name: data
+
+ssh_storage_access:
+  enabled: false
+  component: ssh-storage-access
+  subsystem: data-lifecycle-management
+  replicas: 1
+  ssh_user_name: "dlm"
+  ssh_uid: "1000"
+  ssh_gid: "1000"
+  pst:
+    service_name: "ssh-sa-pst"
+  secrets:
+    pst:
+      priv_name: "pst-priv"
+      pub_name: "pst-pub"

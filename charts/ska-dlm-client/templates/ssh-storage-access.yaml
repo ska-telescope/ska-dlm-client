@@ -1,38 +1,55 @@
-apiVersion: v1
-kind: ConfigMap
+{{- if $.Values.ssh_storage_access.enabled }}
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: ssh-authorized-keys
-data:
-  authorized_keys: |
-    ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDznfuAXiSBl5vSpuqo4hI9pY7EOKVN6dkpFGeoSm0wlJ/WFDEdlqc0IUMDX4KOFQJNeuWrayIPZfB+yCFyUdTMOoGQGLD8T5f9zMQaozbT5Kt6lA/jmv+d1FqE8ftD2TSqWn4ux3lCvllDkfRA7Tv4TJNlVjhlPOF/8I566Pdo/UDFb1BopKa9kSNHKvz+rAZmrMlU3KjRgnW/WKpDG3w3kATps/FRmcr1LGgEbrsRTwwjXTrCe2YnWeiHJy6tnekK5upax5nyTM4Ftq8Xyw4ZXYJU3npd9TahSgDxX1PR4XXnMuTqWfhxuxGRO8FcAX0F4KLqwbg2Y1JgrBMrdfhl
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: ssh-server
+  name: {{ include "ska-dlm-client.fullname" . }}-ssh-storage-access
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: ssh-server
+    {{- include "ska-dlm-client.ssh-storage-access.labels" . | indent 4 }}
 spec:
-  containers:
-    - name: ssh
-      image: linuxserver/openssh-server
-      ports:
-        - containerPort: 2222
-      env:
-        - name: PUID
-          value: "1000"
-        - name: PGID
-          value: "1000"
-        - name: PUBLIC_KEY
-          valueFrom:
-            configMapKeyRef:
-              name: ssh-authorized-keys
-              key: authorized_keys
-        - name: USER_NAME
-          value: "dlm"  # optional: override default "abc"
-      volumeMounts:
+  replicas: {{ .Values.directory_watcher.replicas }}
+  selector:
+    matchLabels:
+      component: {{ .Values.ssh_storage_access.component }}
+      subsystem: {{ .Values.ssh_storage_access.subsystem }}
+  template:
+    metadata:
+      labels:
+        {{- include "ska-dlm-client.ssh-storage-access.labels" . | indent 8 }}
+    spec:
+      {{- if .Values.ska_dlm_client.securityContext }}
+      securityContext:
+        {{- .Values.ska_dlm_client.securityContext | toYaml | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: ssh-storage-access
+          image: linuxserver/openssh-server
+          ports:
+            - containerPort: 2222
+          env:
+            - name: PUID
+              value: "{{ .Values.ssh_storage_access.ssh_uid }}"
+            - name: PGID
+              value: "{{ .Values.ssh_storage_access.ssh_gid }}"
+            - name: USER_NAME
+              value: "{{ .Values.ssh_storage_access.ssh_user_name }}"
+            - name: PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ssh_storage_access.secrets.pst.pub_name }}
+                  key: {{ .Values.ssh_storage_access.secrets.pst.pub_name }}
+          volumeMounts:
+            - name: ssh-config
+              mountPath: /config
+            - name: data-product-storage
+              mountPath: /data
+          {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
+              readOnly: true
+          {{- end }}
+      volumes:
         - name: ssh-config
-          mountPath: /config
-  volumes:
-    - name: ssh-config
-      emptyDir: {}
+          emptyDir: {}
+        - name: data-product-storage
+          persistentVolumeClaim:
+            claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
+{{- end }}
