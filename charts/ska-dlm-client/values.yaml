@@ -57,7 +57,6 @@ kafka_watcher:
   storage_name: data
 
 ssh_storage_access:
-  enabled: false
   component: ssh-storage-access
   subsystem: data-lifecycle-management
   replicas: 1
@@ -65,32 +64,35 @@ ssh_storage_access:
   ssh_uid: "1000"
   ssh_gid: "1000"
   daq:
+    enabled: true
+    deployment_name: "ssh-sa-daq"
     service_name: "ssh-sa-daq"
+    pvc:
+      # name: daq-pvc
+      name: shared
+      read_only: true
     secrets:
       priv_name: "daq-priv"
       pub_name: "daq-pub"
   pst:
+    enabled: true
+    deployment_name: "ssh-sa-pst"
     service_name: "ssh-sa-pst"
+    pvc:
+      # name: pst-pvc
+      name: shared
+      read_only: true
     secrets:
       priv_name: "pst-priv"
       pub_name: "pst-pub"
   sdp:
+    enabled: true
+    deployment_name: "ssh-sa-sdp"
     service_name: "ssh-sa-sdp"
+    pvc:
+      # name: sdp-pvc
+      name: shared
+      read_only: true
     secrets:
       priv_name: "sdp-priv"
       pub_name: "sdp-pub"
-
-daq:
-  pvc:
-    name: daq-pvc
-    read_only: true
-
-pst:
-  pvc:
-    name: pst-pvc
-    read_only: true
-
-sdp:
-  pvc:
-    name: sdp-pvc
-    read_only: true
