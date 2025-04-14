@@ -1,12 +1,8 @@
 {{- if $.Values.ssh_storage_access.sdp.enabled }}
-apiVersion: v1
-kind: Service
 {{ include "ska-dlm-client.ssh-storage-access.service"
             (dict "root" . "svc_name" .Values.ssh_storage_access.sdp.service_name ) }}
 
 ---
-apiVersion: apps/v1
-kind: Deployment
 {{ include "ska-dlm-client.ssh-storage-access.deployment"
             (dict "root" . "deployment" .Values.ssh_storage_access.sdp ) }}
 {{- end }}
