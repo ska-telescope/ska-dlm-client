@@ -142,8 +142,8 @@ spec:
             - name: PUBLIC_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .deployment.secrets.pub_name }}
-                  key: {{ .deployment.secrets.pub_name }}
+                  name: {{ .deployment.secret.pub_name }}
+                  key: {{ .deployment.secret.pub_name }}
           volumeMounts:
             - name: ssh-config
               mountPath: /config

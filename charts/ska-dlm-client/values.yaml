@@ -70,8 +70,7 @@ ssh_storage_access:
     pvc:
       name: daq-pvc
       read_only: true
-    secrets:
-      priv_name: "daq-priv"
+    secret:
       pub_name: "daq-pub"
   pst:
     enabled: false
@@ -80,8 +79,7 @@ ssh_storage_access:
     pvc:
       name: pst-pvc
       read_only: true
-    secrets:
-      priv_name: "pst-priv"
+    secret:
       pub_name: "pst-pub"
   sdp:
     enabled: false
@@ -90,6 +88,5 @@ ssh_storage_access:
     pvc:
       name: sdp-pvc
       read_only: true
-    secrets:
-      priv_name: "sdp-priv"
+    secret:
       pub_name: "sdp-pub"
