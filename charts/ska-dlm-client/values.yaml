@@ -69,6 +69,7 @@ ssh_storage_access:
     service_name: "ssh-sa-daq"
     pvc:
       name: daq-pvc
+      mount_path: /data
       read_only: true
     secret:
       pub_name: "daq-pub"
@@ -78,6 +79,7 @@ ssh_storage_access:
     service_name: "ssh-sa-pst"
     pvc:
       name: pst-pvc
+      mount_path: /data
       read_only: true
     secret:
       pub_name: "pst-pub"
@@ -87,6 +89,7 @@ ssh_storage_access:
     service_name: "ssh-sa-sdp"
     pvc:
       name: sdp-pvc
+      mount_path: /data
       read_only: true
     secret:
       pub_name: "sdp-pub"

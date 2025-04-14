@@ -45,7 +45,7 @@ spec:
             - name: ssh-config
               mountPath: /config
             - name: data-product-storage
-              mountPath: /data
+              mountPath: {{ .deployment.pvc.mount_path }}
           {{- if eq $.deployment.pvc.read_only true }}
               readOnly: true
           {{- end }}
