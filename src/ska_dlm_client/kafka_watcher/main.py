@@ -128,7 +128,7 @@ async def watch(
 
     try:
         async for msg in consumer:
-            logger.info("Incoming message")
+            logger.debug("Incoming message")
             try:
                 ingest_event_data = json.loads(msg.value)
                 logger.info("Consuming JSON message: %s", ingest_event_data)
