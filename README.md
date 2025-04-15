@@ -136,6 +136,23 @@ Defining in multiple locations will be required.
   * ingest_server_url: URL of the ingest server.
   * storage_server_url: URL of the storage server.
 
+#### ssh-storage-access Related Values
+
+ * `ssh_storage_access`:
+    * `ssh_user_name`: the username to be used for remote ssh connections
+    * `ssh_uid`: the user ID of the user to be used for remote ssh connection
+    * `ssh_gid`: the group ID of the user to be used for remote ssh connection
+    * `xxx`: this needs to be one of `daq`, `pst` or `sdp`. All three can exist.
+        * `enabled`: value is either `true` or `false`
+        * `deployment_name`: the name to be used for the Kubernetes deployment
+        * `service_name`: the name to be used for the Kubernetes service
+        * `pvc`:
+            * `name`: the name of the pvc to mounted
+            * `mount_path`: the path to mount pvc inside the pod
+            * `read_only`: should it be mounted read only
+        * `secret`:
+            * `pub_name`: the name of the "ssh public key" Kubernetes secret.
+
 
 ## Testing
 

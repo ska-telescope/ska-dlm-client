@@ -1,0 +1,5 @@
+global:
+  dataProduct:
+    pvc:
+      name: shared
+      read_only: true

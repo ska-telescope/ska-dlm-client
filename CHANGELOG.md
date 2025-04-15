@@ -9,6 +9,7 @@
 * Added support for skip rclone access check.
 * Added helm chart gitlab-ci support.
 * Added option to register the contents of the watch directory at startup.
+* Added ssh storage access pods for each of DAQ, PST and SDP. These are end points for rclone to migrate data.
 
 ### Changed
 
