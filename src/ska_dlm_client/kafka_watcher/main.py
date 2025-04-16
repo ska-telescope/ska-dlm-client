@@ -134,6 +134,14 @@ async def watch(
                 logger.info("Consuming JSON message: %s", ingest_event_data)
 
                 # Call the DLM (to be handled separately)
+                logger.debug(
+                    "calling DLM with ingest_server_url=%s, storage_name=%s, "
+                    "ingest_event_data=%s, check_rclone_access=%s",
+                    ingest_server_url,
+                    storage_name,
+                    ingest_event_data,
+                    check_rclone_access,
+                )
                 await post_dlm_data_item(
                     ingest_server_url=ingest_server_url,
                     storage_name=storage_name,
