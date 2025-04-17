@@ -89,7 +89,15 @@ async def post_dlm_data_item(
     with api_client.ApiClient(ingest_configuration) as ingest_api_client:
         api_ingest = ingest_api.IngestApi(ingest_api_client)
         try:
-            logger.info("Calling DLM with check_rclone_access = %s", check_rclone_access)
+            logger.info(
+                "Calling DLM with item_name=%s, uri=%s, storage_name=%s, body=%s, \
+                check_rclone_access=%s",
+                os.path.basename(ingest_event_data["file"].rstrip("/")),
+                ingest_event_data["file"],
+                storage_name,
+                ingest_event_data["metadata"],
+                check_rclone_access,
+            )
             response = api_ingest.register_data_item(
                 item_name=os.path.basename(ingest_event_data["file"].rstrip("/")),
                 uri=ingest_event_data["file"],

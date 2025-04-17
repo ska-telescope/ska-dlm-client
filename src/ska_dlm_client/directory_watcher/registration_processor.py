@@ -111,7 +111,7 @@ class RegistrationProcessor:
                 if isinstance(err, ApiException):
                     logger.error("ApiException: %s", err.body)
                 logger.error("%s", err)
-                logger.error("Ignoring and continueing.....")
+                logger.error("Ignoring and continuing.....")
                 return None
 
         dlm_registration_uuid = str(response)
@@ -163,7 +163,7 @@ class RegistrationProcessor:
                     if isinstance(err, ApiException):
                         logger.error("ApiException: %s", err.body)
                     logger.error("%s", err)
-                    logger.error("Ignoring and continueing.....")
+                    logger.error("Ignoring and continuing.....")
                     return
 
                 dlm_registration_uuid = str(response)
