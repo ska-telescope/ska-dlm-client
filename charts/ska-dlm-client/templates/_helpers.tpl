@@ -12,7 +12,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "ska-dlm-client.fullname" -}}
-{{- if .Values.fullnameOverride -}}
+{{- if not ( eq .Values.fullnameOverride "" ) -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
@@ -73,4 +73,14 @@ Storage location labels
 */}}
 {{- define "ska-dlm-client.setup-storage-location.labels" }}
 {{- include "ska-dlm-client.labels" . }}
+{{- end }}
+
+{{/*
+ssh storage access
+*/}}
+{{- define "ska-dlm-client.ssh-storage-access.labels" }}
+{{- include "ska-dlm-client.labels" . }}
+component: ssh-storage-access
+subsystem: {{ .Values.ssh_storage_access.subsystem }}
+intent: production
 {{- end }}

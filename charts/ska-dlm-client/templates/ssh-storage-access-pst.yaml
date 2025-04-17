@@ -1,0 +1,8 @@
+{{- if $.Values.ssh_storage_access.pst.enabled }}
+{{ include "ska-dlm-client.ssh-storage-access.service"
+            (dict "root" . "svc_name" .Values.ssh_storage_access.pst.service_name ) }}
+
+---
+{{ include "ska-dlm-client.ssh-storage-access.deployment"
+            (dict "root" . "deployment" .Values.ssh_storage_access.pst ) }}
+{{- end }}

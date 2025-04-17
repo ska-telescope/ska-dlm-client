@@ -1,11 +1,12 @@
 system: dlm
+subsystem: client
 
 # Global parameters
 global:
   storageClass: nfss1
   development: true
   dataProduct:
-    pvc:
+    pvc:  # NOTE: This is globally shared all data products volume
       name: test-pvc
       read_only: true
 
@@ -55,3 +56,41 @@ kafka_watcher:
   kafka_topic: "ska-sdp-dataproduct-ingest"
   storage_name: data
   check_rclone_access: false
+
+ssh_storage_access:
+  component: ssh-storage-access
+  subsystem: data-lifecycle-management
+  replicas: 1
+  ssh_user_name: "dlm"
+  ssh_uid: "1000"
+  ssh_gid: "1000"
+  daq:
+    enabled: false
+    deployment_name: "ssh-sa-daq"
+    service_name: "ssh-sa-daq"
+    pvc:
+      name: daq-pvc
+      mount_path: /data
+      read_only: true
+    secret:
+      pub_name: "daq-pub"
+  pst:
+    enabled: false
+    deployment_name: "ssh-sa-pst"
+    service_name: "ssh-sa-pst"
+    pvc:
+      name: pst-pvc
+      mount_path: /data
+      read_only: true
+    secret:
+      pub_name: "pst-pub"
+  sdp:
+    enabled: false
+    deployment_name: "ssh-sa-sdp"
+    service_name: "ssh-sa-sdp"
+    pvc:
+      name: sdp-pvc
+      mount_path: /data
+      read_only: true
+    secret:
+      pub_name: "sdp-pub"
