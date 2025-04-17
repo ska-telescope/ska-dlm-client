@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: kafka-watcher
-        image: {{ .Values.kafka_watcher.image }}:{{ .Values.kafka_watcher.version }}
+        image: {{ .Values.ska_dlm_client.image }}:{{ .Values.ska_dlm_client.version }}
         imagePullPolicy: {{ .Values.kafka_watcher.imagePullPolicy }}
         command:
         - "dlm-kafka-watcher"

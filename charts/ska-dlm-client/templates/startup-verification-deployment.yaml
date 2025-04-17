@@ -22,34 +22,31 @@ spec:
         {{- .Values.ska_dlm_client.securityContext | toYaml | nindent 8 }}
       {{- end }}
       containers:
-      - name: directory-watcher
-        image: {{ .Values.ska_dlm_client.image}}:{{ .Values.ska_dlm_client.version }}
+      - name: startup-verification
+        image: {{ .Values.ska_dlm_client.image}}:{{ .Values.directory_watcher.version }}
         imagePullPolicy: {{ .Values.directory_watcher.imagePullPolicy }}
         command:
-        - dlm-directory-watcher
-        - "--directory-to-watch"
-        - {{ .Values.directory_watcher.directory_to_watch }}
+        - dlm-startup-verification
         - "--storage-name"
         - {{ .Values.directory_watcher.storage_name }}
         - "--storage-root-directory"
         - {{ .Values.directory_watcher.storage_root_directory }}
-        {{- if eq $.Values.directory_watcher.use_polling_watcher true }}
-        - "--use-polling-watcher"
-        {{- end }}
-        {{- if eq $.Values.directory_watcher.skip_rclone_access_check_on_register true }}
-        - "--skip-rclone-access-check-on-register"
-        {{- end }}
         - "--ingest-server-url"
         - {{ .Values.ska_dlm_client.ingest_server_url }}
-        {{- if eq $.Values.directory_watcher.register_contents_of_watch_directory true }}
-        - "--register-contents-of-watch-directory"
-        {{- end }}
+        {{- include "ska-dlm-client.readiness-probe" . | indent 8 }}
         volumeMounts:
         - name: data-product-storage
           mountPath: /data
           {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
           readOnly: true
           {{- end }}
+        readinessProbe:
+          exec:
+            command:
+              - cat
+              - /tmp/dlm-client-ready
+          initialDelaySeconds: 10
+          periodSeconds: 5
       dnsPolicy: ClusterFirstWithHostNet
       volumes:
       - name: data-product-storage
