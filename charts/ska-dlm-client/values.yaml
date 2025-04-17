@@ -55,6 +55,7 @@ kafka_watcher:
   kafka_broker_url: "kafka:9092"
   kafka_topic: "ska-sdp-dataproduct-ingest"
   storage_name: data
+  check_rclone_access: false
 
 ssh_storage_access:
   component: ssh-storage-access

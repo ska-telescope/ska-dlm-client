@@ -28,7 +28,7 @@ kafka_watcher:
   enabled: false
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
   version: "0.1.0-dev.c156442ed"
-  kafka_broker_url: "ska-sdp-kafka.dp-shared.svc.cluster.local:9092"
+  kafka_broker_url: "ska-sdp-kafka.dp-shared:9092"
   kafka_topic: "ska-sdp-dataproduct-ingest"
 
 ska_dlm:

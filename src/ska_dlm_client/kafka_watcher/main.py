@@ -28,9 +28,9 @@ def main():
     )
     parser.add_argument(
         "--kafka-broker-url",
-        type=str,
+        nargs="+",
         required=True,
-        help="The URL of the Kafka broker.",
+        help="One or more Kafka broker URLs.",
     )
     parser.add_argument(
         "--storage-name",
@@ -44,6 +44,11 @@ def main():
         required=True,
         help="Ingest server URL including the service port.",
     )
+    parser.add_argument(
+        "--check-rclone-access",
+        action="store_true",  # Set to True if the flag is present, else this will be False.
+        help="Optionally, check if DLM has rclone access to the data item.",
+    )
 
     args = parser.parse_args()
     asyncio.run(
@@ -52,6 +57,7 @@ def main():
             kafka_topic=args.kafka_topic,
             ingest_server_url=args.ingest_server_url,
             storage_name=args.storage_name,
+            check_rclone_access=args.check_rclone_access,
         )
     )
 
@@ -72,17 +78,32 @@ async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int 
             await asyncio.sleep(1)
 
 
-async def post_dlm_data_item(ingest_server_url: str, storage_name: str, ingest_event_data: dict):
+async def post_dlm_data_item(
+    ingest_server_url: str,
+    storage_name: str,
+    ingest_event_data: dict,
+    check_rclone_access: bool = True,
+):
     """Call DLM via the OpenAPI spec."""
     ingest_configuration = configuration.Configuration(host=ingest_server_url)
     with api_client.ApiClient(ingest_configuration) as ingest_api_client:
         api_ingest = ingest_api.IngestApi(ingest_api_client)
         try:
+            logger.info(
+                "Calling DLM with item_name=%s, uri=%s, storage_name=%s, body=%s, \
+                check_rclone_access=%s",
+                os.path.basename(ingest_event_data["file"].rstrip("/")),
+                ingest_event_data["file"],
+                storage_name,
+                ingest_event_data["metadata"],
+                check_rclone_access,
+            )
             response = api_ingest.register_data_item(
                 item_name=os.path.basename(ingest_event_data["file"].rstrip("/")),
                 uri=ingest_event_data["file"],
                 storage_name=storage_name,
                 body=ingest_event_data["metadata"],
+                do_storage_access_check=check_rclone_access,
             )
             logger.info("item posted successfully with response %s", response)
         except OpenApiException as err:
@@ -92,7 +113,11 @@ async def post_dlm_data_item(ingest_server_url: str, storage_name: str, ingest_e
 
 
 async def watch(
-    kafka_broker_url: list[str], kafka_topic: list[str], ingest_server_url: str, storage_name: str
+    kafka_broker_url: list[str],
+    kafka_topic: list[str],
+    ingest_server_url: str,
+    storage_name: str,
+    check_rclone_access: bool,
 ):
     """
     Asynchronously consumes data product, create events from data queues, and notifies DLM.
@@ -111,15 +136,25 @@ async def watch(
 
     try:
         async for msg in consumer:
+            logger.debug("Incoming message")
             try:
                 ingest_event_data = json.loads(msg.value)
                 logger.info("Consuming JSON message: %s", ingest_event_data)
 
                 # Call the DLM (to be handled separately)
+                logger.debug(
+                    "calling DLM with ingest_server_url=%s, storage_name=%s, "
+                    "ingest_event_data=%s, check_rclone_access=%s",
+                    ingest_server_url,
+                    storage_name,
+                    ingest_event_data,
+                    check_rclone_access,
+                )
                 await post_dlm_data_item(
                     ingest_server_url=ingest_server_url,
                     storage_name=storage_name,
                     ingest_event_data=ingest_event_data,
+                    check_rclone_access=check_rclone_access,
                 )
 
             except json.JSONDecodeError:
