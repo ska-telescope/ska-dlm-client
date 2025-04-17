@@ -22,7 +22,7 @@ spec:
     - "--storage-name"
     - "data"
     - "--storage-server-url"
-    - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}.svc.cluster.local:80"
+    - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}:80"
     - "--storage-root-directory"
     - "/data"
   volumes:
