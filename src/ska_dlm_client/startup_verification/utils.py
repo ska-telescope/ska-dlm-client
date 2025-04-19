@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+import os
 from pathlib import Path
 
 logging.basicConfig(level=logging.DEBUG)
@@ -49,9 +50,10 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             self.add_readiness_probe_file_arguments(parser)
             self.add_readiness_probe_file = True
 
-    def parse_arguments(self):
+    def parse_arguments(self, args: argparse.Namespace = None):
         """Parse command line arguments and assign to class parameters."""
-        args = self._parser.parse_args()
+        if args is None:
+            args = self._parser.parse_args()
         self.directory_to_watch = args.directory_to_watch if self.add_directory_to_watch else None
         self.storage_name = args.storage_name if self.add_storage_name else None
         self.ingest_server_url = args.ingest_server_url if self.add_ingest_server_url else None
@@ -113,3 +115,9 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         if self.readiness_probe_file:
             Path(self.readiness_probe_file).touch()
             logger.info("The readiness probe file has been created %s.", self.readiness_probe_file)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Delete the readiness file on deletion of the class."""
+        if self.readiness_probe_file:
+            os.remove(self.readiness_probe_file)
+            logger.info("The readiness probe file has been deleted %s.", self.readiness_probe_file)
