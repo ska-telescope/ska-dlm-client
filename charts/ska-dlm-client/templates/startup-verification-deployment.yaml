@@ -33,5 +33,12 @@ spec:
         - {{ .Values.directory_watcher.storage_name }}
         - "--request-server-url"
         - {{ .Values.ska_dlm_client.request_server_url }}
+        volumeMounts:
+        - name: data-product-storage
+          mountPath: /data
       dnsPolicy: ClusterFirstWithHostNet
+      volumes:
+      - name: data-product-storage
+        persistentVolumeClaim:
+          claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
 {{- end }}
