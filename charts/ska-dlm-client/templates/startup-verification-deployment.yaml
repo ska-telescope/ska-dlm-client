@@ -21,6 +21,19 @@ spec:
       securityContext:
         {{- .Values.ska_dlm_client.securityContext | toYaml | nindent 8 }}
       {{- end }}
+      initContainers:
+      - name: wait-for-directory-watcher
+        image: {{ .Values.kubectl.image }}:{{ .Values.kubectl.version }}
+        imagePullPolicy: {{ .Values.kubectl.imagePullPolicy }}
+        command:
+          - kubectl
+          - wait
+          - pod
+          - kubectl wait deployment <deployment-name> -n <deployment-namespace> --for condition=Available=True --timeout=120s
+          - --for=condition=ready
+          - {{ include "ska-dlm.directory-watcher.name" . }}-0
+          - --timeout
+          - 120s
       containers:
       - name: startup-verification
         image: {{ .Values.ska_dlm_client.image}}:{{ .Values.ska_dlm_client.version }}

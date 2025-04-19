@@ -94,3 +94,8 @@ component: ssh-storage-access
 subsystem: {{ .Values.ssh_storage_access.subsystem }}
 intent: production
 {{- end }}
+
+{{/* Directory watcher pod name */}}
+{{- define "ska-dlm.directory-watcher.name" }}
+{{- printf "%s-%s" .Release.Name .Values.directory_watcher. -}}
+{{- end}}
