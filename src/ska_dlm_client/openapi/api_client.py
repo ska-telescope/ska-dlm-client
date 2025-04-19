@@ -492,12 +492,7 @@ class ApiClient:
             if klass in self.NATIVE_TYPES_MAPPING:
                 klass = self.NATIVE_TYPES_MAPPING[klass]
             else:
-                if klass.startswith("Optional["):
-                    m = re.match(r"Optional\[(.*)]", klass)
-                    assert m is not None, "Malformed Optional type definition"
-                    klass = m.group(1)
-                else:
-                    klass = getattr(ska_dlm_client.openapi.models, klass)
+                klass = getattr(ska_dlm_client.openapi.models, klass)
 
         if klass in self.PRIMITIVE_TYPES:
             return self.__deserialize_primitive(data, klass)
