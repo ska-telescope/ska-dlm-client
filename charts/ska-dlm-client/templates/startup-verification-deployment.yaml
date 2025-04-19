@@ -1,21 +1,21 @@
-{{- if $.Values.directory_watcher.enabled }}
+{{- if $.Values.startup_verification.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "ska-dlm-client.fullname" . }}-directory-watcher
+  name: {{ include "ska-dlm-client.fullname" . }}-startup-verification
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "ska-dlm-client.directory-watcher.labels" . | indent 4 }}
+    {{- include "ska-dlm-client.startup-verification.labels" . | indent 4 }}
 spec:
-  replicas: {{ .Values.directory_watcher.replicas }}
+  replicas: {{ .Values.startup_verification.replicas }}
   selector:
     matchLabels:
-      component: {{ .Values.directory_watcher.component }}
-      subsystem: {{ .Values.directory_watcher.subsystem }}
+      component: {{ .Values.startup_verification.component }}
+      subsystem: {{ .Values.startup_verification.subsystem }}
   template:
     metadata:
       labels:
-        {{- include "ska-dlm-client.directory-watcher.labels" . | indent 8 }}
+        {{- include "ska-dlm-client.startup-verification.labels" . | indent 8 }}
     spec:
       {{- if .Values.ska_dlm_client.securityContext }}
       securityContext:
@@ -23,33 +23,15 @@ spec:
       {{- end }}
       containers:
       - name: startup-verification
-        image: {{ .Values.ska_dlm_client.image}}:{{ .Values.directory_watcher.version }}
-        imagePullPolicy: {{ .Values.directory_watcher.imagePullPolicy }}
+        image: {{ .Values.ska_dlm_client.image}}:{{ .Values.ska_dlm_client.version }}
+        imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
         command:
         - dlm-startup-verification
+        - "--directory-to-watch"
+        - {{ .Values.directory_watcher.directory_to_watch }}
         - "--storage-name"
         - {{ .Values.directory_watcher.storage_name }}
-        - "--storage-root-directory"
-        - {{ .Values.directory_watcher.storage_root_directory }}
-        - "--ingest-server-url"
-        - {{ .Values.ska_dlm_client.ingest_server_url }}
-        {{- include "ska-dlm-client.readiness-probe" . | indent 8 }}
-        volumeMounts:
-        - name: data-product-storage
-          mountPath: /data
-          {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
-          readOnly: true
-          {{- end }}
-        readinessProbe:
-          exec:
-            command:
-              - cat
-              - /tmp/dlm-client-ready
-          initialDelaySeconds: 10
-          periodSeconds: 5
+        - "--request-server-url"
+        - {{ .Values.ska_dlm_client.request_server_url }}
       dnsPolicy: ClusterFirstWithHostNet
-      volumes:
-      - name: data-product-storage
-        persistentVolumeClaim:
-          claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
 {{- end }}

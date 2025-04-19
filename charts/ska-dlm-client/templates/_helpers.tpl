@@ -69,6 +69,16 @@ intent: production
 {{- end }}
 
 {{/*
+Directory watcher labels
+*/}}
+{{- define "ska-dlm-client.startup-verification.labels" }}
+{{- include "ska-dlm-client.labels" . }}
+component: {{ .Values.startup_verification.component }}
+subsystem: {{ .Values.startup_verification.subsystem }}
+intent: production
+{{- end }}
+
+{{/*
 Storage location labels
 */}}
 {{- define "ska-dlm-client.setup-storage-location.labels" }}

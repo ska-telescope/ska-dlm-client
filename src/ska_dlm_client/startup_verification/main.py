@@ -34,6 +34,9 @@ class StartupVerification:  # pylint: disable=too-few-public-methods
         self._storage_name = storage_name
         now = datetime.now()
         timestamp: int = int(now.timestamp())
+        if not os.path.isdir(self._dir_to_watch):
+            logger.error("The directory %s does not exist, quitting.", self._dir_to_watch)
+            exit(1)
         with tempfile.TemporaryDirectory(dir=directory_to_watch, prefix=".") as temp_dir:
             logger.info("Created temp dir %s", temp_dir)
             test_file = os.path.join(temp_dir, TEST_FILE_NAME)
