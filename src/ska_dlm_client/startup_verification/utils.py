@@ -81,6 +81,15 @@ class CmdLineParameters:
             help="Ingest server URL including the service port.",
         )
 
+    def add_request_server_url_arguments(self, parser: argparse.ArgumentParser) -> None:
+        """Update a parser to a add request server url argument."""
+        parser.add_argument(
+            "--request-server-url",
+            type=str,
+            required=True,
+            help="Request server URL including the service port.",
+        )
+
     def add_readiness_probe_arguments(self, parser: argparse.ArgumentParser) -> None:
         """Update a parser to a readiness probe file path."""
         parser.add_argument(
