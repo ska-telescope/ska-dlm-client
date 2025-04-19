@@ -1,96 +1,99 @@
 """Application to verify the state of the DLM client, intended for startup."""
 
 import argparse
-import asyncio
+import datetime
 import logging
-import signal
+import os
+import tempfile
+import time
+from datetime import datetime
 
 import ska_dlm_client.startup_verification.utils as utils
-from ska_dlm_client.openapi import configuration
+from ska_dlm_client.openapi import ApiException, api_client, configuration
+from ska_dlm_client.openapi.dlm_api import request_api
+from ska_dlm_client.openapi.exceptions import OpenApiException
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def create_parser() -> argparse.ArgumentParser:
-    """Define a parser for all the command line parameters."""
-    parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
+class StartupVerification:
+    """Class to perform the startup verification."""
 
-    # Adding optional argument.
-    utils.add_storage_name_arguments(parser)
-    utils.add_ingest_server_arguments(parser)
-    return parser
+    _dir_to_watch: str
+    _request_server_url: str
+    _storage_name: str
+    data_item_name: str = None
 
+    def __init__(self, directory_to_watch: str, storage_name: str, request_server_url: str):
+        """Initialize the StartupVerification class."""
+        TEST_FILE_NAME = "testfile"
+        self._dir_to_watch = directory_to_watch
+        self._request_server_url = request_server_url
+        self._storage_name = storage_name
+        now = datetime.now()
+        timestamp: int = int(now.timestamp())
+        with tempfile.TemporaryDirectory(dir=directory_to_watch, prefix=".") as temp_dir:
+            logger.info("Created temp dir %s", temp_dir)
+            test_file = os.path.join(temp_dir, TEST_FILE_NAME)
+            logger.info("testfile name is %s", test_file)
+            with open(test_file, "w", encoding="utf-8") as the_file:
+                the_file.write(f"Test data item for dlm.startup_verification, {now}")
+            logger.info("before setting new_dir")
+            new_dir = temp_dir.replace("/.", f"/{timestamp}_dlm_startup_verification-")
+            logger.info("Renamed to new dir %s", new_dir)
+            os.rename(src=temp_dir, dst=new_dir)
+            # wait enough time for
+            time.sleep(5)
+            # TODO: put back
+            # self.data_item_name = os.path.join(new_dir, TEST_FILE_NAME).replace(f"{directory_to_watch}/", "")
+            self.data_item_name = os.path.join(new_dir, TEST_FILE_NAME).replace(
+                f"{directory_to_watch}/", ""
+            )
+            os.rename(src=new_dir, dst=temp_dir)
+        logger.info("watch directory after cleanup: %s", os.listdir(directory_to_watch))
+        logger.info("data item to look for has name %s", self.data_item_name)
 
-def process_args(args: argparse.Namespace) -> Config:
-    """Collect up all command line parameters and return a Config."""
-    config = Config(
-        directory_to_watch=args.directory_to_watch,
-        ingest_server_url=args.ingest_server_url,
-        storage_name=args.storage_name,
-        status_file_absolute_path=f"{args.directory_to_watch}/{args.status_file_filename}",
-        storage_root_directory=args.storage_root_directory,
-        reload_status_file=args.reload_status_file,
-        use_status_file=args.use_status_file,
-        rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,
-    )
-    return config
-
-
-def create_directory_watcher() -> DirectoryWatcher:
-    """Create a `DirectoryWatcher` factory from the CLI arguments."""
-    parser = create_parser()
-    args = parser.parse_args()
-    config = process_args(args=args)
-    registration_processor = RegistrationProcessor(config)
-    if args.register_contents_of_watch_directory:
-        registration_processor.register_data_products_from_watch_directory(dry_run_for_debug=False)
-    if args.use_polling_watcher:  # pylint: disable=no-else-return"
-        return PollingDirectoryWatcher(
-            config=config, registration_processor=registration_processor
-        )
-    else:
-        return INotifyDirectoryWatcher(
-            config=config, registration_processor=registration_processor
-        )
-
-
-def _setup_async_graceful_termination(
-    signals=(signal.SIGINT, signal.SIGTERM),
-):
-    """
-    Gracefully handles shutdown signals by cancelling all pending tasks.
-
-    Can only be called from an async function.
-    """
-
-    async def _shutdown(sig: signal.Signals):
-        """Canel the required tasks."""
-        logger.info("handling %s", sig)
-        for task in [task for task in asyncio.all_tasks() if task is not asyncio.current_task()]:
-            task.cancel()
-
-    loop = asyncio.get_running_loop()
-    for signame in signals:
-        loop.add_signal_handler(
-            signame,
-            lambda the_signame=signame: asyncio.create_task(_shutdown(sig=the_signame)),
-        )
-
-
+    def verify_registration(self) -> bool:
+        """Verify the data item was adding by querying the DLM."""
+        request_configuration = configuration.Configuration(host=self._request_server_url)
+        with api_client.ApiClient(request_configuration) as request_api_client:
+            api_request = request_api.RequestApi(request_api_client)
+            try:
+                logger.info("Verifying startup verification for %s", self.data_item_name)
+                data_item_exists = api_request.query_exists(item_name=self.data_item_name)
+                return data_item_exists
+            except OpenApiException as err:
+                logger.error("OpenApiException caught during request.query_data_item: %s", err)
+                if isinstance(err, ApiException):
+                    logger.error("ApiException: %s", err.body)
+                logger.error("%s", err)
+                return False
 
 
 def main():
     """Run main in its own function."""
-    parser = create_parser()
-    args = parser.parse_args()
-    directory_to_watch = args.directory_to_watch
-    ingest_server_url = args.ingest_server_url
-    storage_name = args.storage_name
+    verification_passed: bool = False
+    try:
+        parser = argparse.ArgumentParser(prog="dlm_startup_verification")
+        cmd_line_parameters = utils.CmdLineParameters(
+            parser, add_directory_to_watch=True, add_storage_name=True, add_request_server_url=True
+        )
+        cmd_line_parameters.parse_arguments()
 
-    ingest_configuration = configuration.Configuration(host=ingest_server_url)
-
-
+        startup_verification = StartupVerification(
+            directory_to_watch=cmd_line_parameters.directory_to_watch,
+            storage_name=cmd_line_parameters.storage_name,
+            request_server_url=cmd_line_parameters.request_server_url,
+        )
+        verification_passed = startup_verification.verify_registration()
+    except Exception as err:
+        logger.error(err)
+    if verification_passed:
+        logger.info("\n\nPASSED startup tests\n")
+    else:
+        logger.error("\n\nFAILED startup tests\n")
+    logger.info("Startup verification completed.")
 
 
 if __name__ == "__main__":

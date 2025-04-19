@@ -3,24 +3,30 @@
 import argparse
 
 
-class CmdLineParameters():
+class CmdLineParameters:
     """Class to contain the common/required command line parameters."""
 
     add_directory_to_watch: bool = False
     add_storage_name: bool = False
     add_ingest_server_url: bool = False
+    add_request_server_url: bool = False
     add_readiness_probe: bool = False
     directory_to_watch: str = None
     storage_name: str = None
     ingest_server_url: str = None
+    request_server_url: str = None
     readiness_probe: bool = False
 
-    def __init__(self, parser: argparse.ArgumentParser,
-                 add_directory_to_watch: bool = False,
-                 add_storage_name: bool = False,
-                 add_ingest_server_url: bool = False,
-                 add_readiness_probe: bool = False):
-        self.parser = parser
+    def __init__(
+        self,
+        parser: argparse.ArgumentParser,
+        add_directory_to_watch: bool = False,
+        add_storage_name: bool = False,
+        add_ingest_server_url: bool = False,
+        add_request_server_url: bool = False,
+        add_readiness_probe: bool = False,
+    ):
+        self._parser = parser
         if add_directory_to_watch:
             self.add_directory_to_watch_arguments(parser)
             self.add_directory_to_watch = True
@@ -30,15 +36,19 @@ class CmdLineParameters():
         if add_ingest_server_url:
             self.add_ingest_server_url_arguments(parser)
             self.add_ingest_server_url = True
+        if add_request_server_url:
+            self.add_request_server_url_arguments(parser)
+            self.add_request_server_url = True
         if add_readiness_probe:
             self.add_readiness_probe_arguments(parser)
             self.add_readiness_probe = True
 
     def parse_arguments(self):
-        args = self.parser.parse_args()
+        args = self._parser.parse_args()
         self.directory_to_watch = args.directory_to_watch if self.add_directory_to_watch else None
         self.storage_name = args.storage_name if self.add_storage_name else None
         self.ingest_server_url = args.ingest_server_url if self.add_ingest_server_url else None
+        self.request_server_url = args.request_server_url if self.add_request_server_url else None
         self.readiness_probe = args.readiness_probe if self.add_readiness_probe else False
 
     def add_directory_to_watch_arguments(self, parser: argparse.ArgumentParser) -> None:

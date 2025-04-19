@@ -201,6 +201,7 @@ class RegistrationProcessor:
         logger.info("data_item_relative_path_list %s", item_list)
         if item_list is None or len(item_list) == 0:
             logger.error("No data items found, NOT added to DLM!")
+            return
         if len(item_list) == 1:
             item = item_list[0]
             if item.item_type is ItemType.FILE:
