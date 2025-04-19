@@ -112,12 +112,12 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
 
     def set_application_ready(self):
         """Create the required file to indicate the application ready."""
-        if self.readiness_probe_file:
+        if self.add_readiness_probe_file:
             Path(self.readiness_probe_file).touch()
             logger.info("The readiness probe file has been created %s.", self.readiness_probe_file)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Delete the readiness file on deletion of the class."""
-        if self.readiness_probe_file:
+        if self.add_readiness_probe_file:
             os.remove(self.readiness_probe_file)
             logger.info("The readiness probe file has been deleted %s.", self.readiness_probe_file)
