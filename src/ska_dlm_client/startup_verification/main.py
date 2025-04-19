@@ -1,23 +1,25 @@
 """Application to verify the state of the DLM client, intended for startup."""
 
 import argparse
-import datetime
 import logging
 import os
 import tempfile
 import time
 from datetime import datetime
 
-import ska_dlm_client.startup_verification.utils as utils
 from ska_dlm_client.openapi import ApiException, api_client, configuration
 from ska_dlm_client.openapi.dlm_api import request_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
+from ska_dlm_client.startup_verification.utils import CmdLineParameters
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+# Used as a data item for testing directory_watcher
+TEST_FILE_NAME = "testfile"
 
-class StartupVerification:
+
+class StartupVerification:  # pylint: disable=too-few-public-methods
     """Class to perform the startup verification."""
 
     _dir_to_watch: str
@@ -27,7 +29,6 @@ class StartupVerification:
 
     def __init__(self, directory_to_watch: str, storage_name: str, request_server_url: str):
         """Initialize the StartupVerification class."""
-        TEST_FILE_NAME = "testfile"
         self._dir_to_watch = directory_to_watch
         self._request_server_url = request_server_url
         self._storage_name = storage_name
@@ -45,8 +46,6 @@ class StartupVerification:
             os.rename(src=temp_dir, dst=new_dir)
             # wait enough time for
             time.sleep(5)
-            # TODO: put back
-            # self.data_item_name = os.path.join(new_dir, TEST_FILE_NAME).replace(f"{directory_to_watch}/", "")
             self.data_item_name = os.path.join(new_dir, TEST_FILE_NAME).replace(
                 f"{directory_to_watch}/", ""
             )
@@ -76,7 +75,7 @@ def main():
     verification_passed: bool = False
     try:
         parser = argparse.ArgumentParser(prog="dlm_startup_verification")
-        cmd_line_parameters = utils.CmdLineParameters(
+        cmd_line_parameters = CmdLineParameters(
             parser, add_directory_to_watch=True, add_storage_name=True, add_request_server_url=True
         )
         cmd_line_parameters.parse_arguments()
@@ -87,13 +86,12 @@ def main():
             request_server_url=cmd_line_parameters.request_server_url,
         )
         verification_passed = startup_verification.verify_registration()
-    except Exception as err:
-        logger.error(err)
-    if verification_passed:
-        logger.info("\n\nPASSED startup tests\n")
-    else:
-        logger.error("\n\nFAILED startup tests\n")
-    logger.info("Startup verification completed.")
+    finally:
+        if verification_passed:
+            logger.info("\n\nPASSED startup tests\n")
+        else:
+            logger.error("\n\nFAILED startup tests\n")
+        logger.info("Startup verification completed.")
 
 
 if __name__ == "__main__":
