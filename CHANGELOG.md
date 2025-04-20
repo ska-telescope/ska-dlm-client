@@ -2,6 +2,14 @@
 
 ## Development
 
+### Added
+
+* Added a startup verification automated process for directory watcher.
+
+### Changed
+
+* Continued to consolidate the helm values.
+
 ## 0.1.0
 
 ### Added

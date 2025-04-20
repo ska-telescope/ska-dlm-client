@@ -7,7 +7,7 @@ Client(s) for the SKA Data Lifecycle Manager
 
 [![Documentation Status](https://readthedocs.org/projects/ska-telescope-ska-dlm-client/badge/?version=latest)](https://developer.skao.int/projects/ska-dlm-client/en/latest/?badge=latest)
 
-The documentation for this project, including how to get started with it, can be found in the `docs` folder, or browsed in the SKA development portal:
+Additional documentation for this project, particularly the OpenAPI libraries, can be found in the `docs` folder, or browsed in the SKA development portal:
 
 * [ska-dlm-client documentation](https://developer.skatelescope.org/projects/ska-dlm-client/en/latest/index.html "SKA Developer Portal: ska-dlm-client documentation")
 
@@ -55,6 +55,31 @@ The SKA DLM client can run in two modes:
 
 In both cases, once triggered, the SKA DLM client proceeds to ingest (register) the new data product
 into a DLM service.
+
+## Startup Verification
+
+A `startup verification` can be enabled during the deployment of the watcher helm chart. This will exercise
+the `directory watcher` by
+* adding a `data item` to the `watch directory`
+* give the `directory watcher` a short amount of time to detect and register the `data item`
+* query the DLM `request` service for the `data item` name
+* report a `PASSED` or `FAILED` response (based on the response) to the logs and exit
+
+It is then possible for anyone to check the logs of the `startup verication` pod to see the status reported, ie
+
+```sh
+kubectl logs <ska dlm client startup-verification pod name>
+```
+
+With sample output
+
+```
+2025-04-21 13:08:33,187 - INFO -
+
+PASSED startup tests
+
+2025-04-21 13:08:33,187 - INFO - Startup verification completed.
+```
 
 ## Configuration
 
@@ -127,14 +152,15 @@ NOTE: More production specific values (values files) will be added in a future r
 
 NOTE: There is currently an overlap between ska_dlm_client, directory_watcher and kafka_watcher
 Defining in multiple locations will be required.
-* ska_dlm_client
-  * image: image location URL and name.
-  * version: the version to be used.
-  * storage_name: used by DLM to identify storage resource.
-  * storage_root_directory: used as the root directory when generating URIs for DLM DB.
-  * securityContext: Kubernetes context updated during deployment.
-  * ingest_server_url: URL of the ingest server.
-  * storage_server_url: URL of the storage server.
+* `ska_dlm_client`:
+  * `image`: image location URL and name.
+  * `version`: the version to be used.
+  * `storage_name`: used by DLM to identify storage resource.
+  * `storage_root_directory`: used as the root directory when generating URIs for DLM DB.
+  * `securityContext`: Kubernetes context updated during deployment.
+  * `ingest_server_url`: URL of the DLM ingest server.
+  * `storage_server_url`: URL of the DLM storage server.
+  * `request_server_url`: URL of the DLM request server.
 
 #### ssh-storage-access Related Values
 
@@ -153,6 +179,12 @@ Defining in multiple locations will be required.
         * `secret`:
             * `pub_name`: the name of the "ssh public key" Kubernetes secret.
 
+#### startup-verifcation Related Values
+
+ * `startup_verification`:
+    * `enabled`: the username to be used for remote ssh connections
+
+ * `kubectl`: values related to the kubectl image used for k8s readiness testing
 
 ## Testing
 

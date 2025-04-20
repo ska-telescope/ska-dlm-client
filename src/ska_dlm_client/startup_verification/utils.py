@@ -1,4 +1,9 @@
-"""Code to provide the watchers with support functions to integrate a k8s readiness probe."""
+"""
+Code to provide the watchers with support functions to integrate a k8s readiness probe.
+
+NOTE: In the future the CmdLineParameters should be broken out into its own module for
+use by other applications making up the DLM Client.
+"""
 
 import argparse
 import logging
@@ -117,7 +122,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             logger.info("The readiness probe file has been created %s.", self.readiness_probe_file)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Delete the readiness file on deletion of the class."""
+        """Delete the readiness file on deletion of the instance."""
         if self.add_readiness_probe_file:
             os.remove(self.readiness_probe_file)
             logger.info("The readiness probe file has been deleted %s.", self.readiness_probe_file)

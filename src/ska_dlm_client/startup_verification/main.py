@@ -1,4 +1,16 @@
-"""Application to verify the state of the DLM client, intended for startup."""
+"""
+Application to verify the state of the DLM client, intended for startup.
+
+This application will generate a directory with a single file in it. This directory will
+be placed in the directory watchers "watch" directory.
+
+The directory will be left there for a period of seconds and then be deleted.
+
+At this point the DLM Request API is used to see if the just added (hopefully) data item is
+in the DLM database.
+
+A failed or passed message is logged based on the response.
+"""
 
 import argparse
 import logging
@@ -18,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 # Used as a data item for testing directory_watcher
 TEST_FILE_NAME = "testfile"
+DELAY_BEFORE_DELETING_DIRECTORY = 5
 
 
 class StartupVerification:  # pylint: disable=too-few-public-methods
@@ -44,12 +57,11 @@ class StartupVerification:  # pylint: disable=too-few-public-methods
             logger.info("testfile name is %s", test_file)
             with open(test_file, "w", encoding="utf-8") as the_file:
                 the_file.write(f"Test data item for dlm.startup_verification, {now}")
-            logger.info("before setting new_dir")
             new_dir = temp_dir.replace("/.", f"/{timestamp}_dlm_startup_verification-")
             logger.info("Renamed to new dir %s", new_dir)
             os.rename(src=temp_dir, dst=new_dir)
             # wait enough time for
-            time.sleep(5)
+            time.sleep(DELAY_BEFORE_DELETING_DIRECTORY)
             self.data_item_name = os.path.join(new_dir, TEST_FILE_NAME).replace(
                 f"{directory_to_watch}/", ""
             )
@@ -67,7 +79,7 @@ class StartupVerification:  # pylint: disable=too-few-public-methods
                 data_item_exists = api_request.query_exists(item_name=self.data_item_name)
                 return data_item_exists
             except OpenApiException as err:
-                logger.error("OpenApiException caught during request.query_data_item: %s", err)
+                logger.error("OpenApiException caught during request.query_exists: %s", err)
                 if isinstance(err, ApiException):
                     logger.error("ApiException: %s", err.body)
                 logger.error("%s", err)
