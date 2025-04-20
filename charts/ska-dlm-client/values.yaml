@@ -102,4 +102,3 @@ ssh_storage_access:
 kubectl:
   image: bitnami/kubectl
   version: 1.28.6
-  imagePullPolicy: Always
