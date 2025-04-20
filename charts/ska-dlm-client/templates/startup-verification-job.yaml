@@ -1,27 +1,24 @@
 {{- if $.Values.startup_verification.enabled }}
 {{- $rbac_name := printf "%s-dlm-client-sv" .Release.Name -}}
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: {{ include "ska-dlm-client.fullname" . }}-startup-verification
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "ska-dlm-client.startup-verification.labels" . | indent 4 }}
 spec:
-  replicas: {{ .Values.startup_verification.replicas }}
-  selector:
-    matchLabels:
-      component: {{ .Values.startup_verification.component }}
-      subsystem: {{ .Values.startup_verification.subsystem }}
   template:
     metadata:
       labels:
         {{- include "ska-dlm-client.startup-verification.labels" . | indent 8 }}
     spec:
+      restartPolicy: Never
       {{- if .Values.ska_dlm_client.securityContext }}
       securityContext:
         {{- .Values.ska_dlm_client.securityContext | toYaml | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ $rbac_name }}
       containers:
       - name: startup-verification
         image: {{ .Values.ska_dlm_client.image}}:{{ .Values.ska_dlm_client.version }}
@@ -48,13 +45,11 @@ spec:
             - condition=Available=True
             - --timeout
             - 60s
-      serviceAccountName: {{ $rbac_name }}
       dnsPolicy: ClusterFirstWithHostNet
       volumes:
       - name: data-product-storage
         persistentVolumeClaim:
           claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
-
 ---
 apiVersion: v1
 kind: ServiceAccount

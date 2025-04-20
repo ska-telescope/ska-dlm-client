@@ -59,7 +59,6 @@ startup_verification:
   enabled: false
   component: startup-verification
   subsystem: data-lifecycle-management
-  replicas: 1
 
 ssh_storage_access:
   component: ssh-storage-access
