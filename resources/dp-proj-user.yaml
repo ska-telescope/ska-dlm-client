@@ -14,7 +14,6 @@ ska_dlm_client:
   ingest_server_url: "http://ska-dlm-dev-ingest:80"
   storage_server_url: "http://ska-dlm-dev-storage:80"
   request_server_url: "http://ska-dlm-dev-request:80"
-  readiness_file: /tmp/dlm-client-ready  # used for k8s readiness probe
 
 startup_verification:
   enabled: true

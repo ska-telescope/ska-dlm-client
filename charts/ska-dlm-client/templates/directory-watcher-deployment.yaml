@@ -1,4 +1,5 @@
 {{- if $.Values.directory_watcher.enabled }}
+{{- $readiness_file := "/tmp/dlm-client-ready" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -45,12 +46,12 @@ spec:
         - "--register-contents-of-watch-directory"
         {{- end }}
         - "--readiness-probe-file"
-        - {{ .Values.ska_dlm_client.readiness_file }}
+        - {{ $readiness_file }}
         readinessProbe:
           exec:
             command:
               - cat
-              - /tmp/dlm-client-ready
+              - {{ $readiness_file }}
         volumeMounts:
         - name: data-product-storage
           mountPath: /data

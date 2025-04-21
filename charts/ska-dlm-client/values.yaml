@@ -30,7 +30,6 @@ ska_dlm_client:
   ingest_server_url: "http://ska-dlm-dev-ingest-example"
   storage_server_url: "http://ska-dlm-dev-storage-example"
   request_server_url: "http://ska-dlm-dev-storage-example"
-  readiness_file: ""
 
 directory_watcher:
   enabled: false
