@@ -52,7 +52,7 @@ directory_watcher:
 kafka_watcher:
   # Enabling this will allow the kafka watcher to be activated.
   # Leave false if the SDP receivers and kafka have not been deployed to this cluster.
-  enabled: True
+  enabled: False
   # These values set the kafka URL service endpoint along with the kafka topic.
   kafka_broker_url: "ska-sdp-kafka.dp-shared:9092"
   kafka_topic: "ska-sdp-dataproduct-ingest"
