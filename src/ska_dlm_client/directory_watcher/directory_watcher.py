@@ -40,7 +40,7 @@ class LStatPollingEmitter(PollingEmitter):
         )
 
 
-class DirectoryWatcher(ABC):  # pylint: disable=too-few-public-methods
+class DirectoryWatcher(ABC):
     """Class for the running of the directory_watcher."""
 
     def __init__(self, config: Config, registration_processor: RegistrationProcessor):
@@ -49,13 +49,18 @@ class DirectoryWatcher(ABC):  # pylint: disable=too-few-public-methods
         self._event_handler = WatcherEventHandler(
             config=config, registration_processor=registration_processor
         )
+        self._stop_event = asyncio.Event()
 
     @abstractmethod
     async def watch(self) -> None:
         """Abstract method to watch, wait and take action on directory entry changes."""
 
+    def stop(self) -> None:
+        """Signals this watcher to stop."""
+        self._stop_event.set()
 
-class PollingDirectoryWatcher(DirectoryWatcher):  # pylint: disable=too-few-public-methods
+
+class PollingDirectoryWatcher(DirectoryWatcher):
     """DirectoryWatcher using filesystem polling."""
 
     async def watch(self):
@@ -73,16 +78,13 @@ class PollingDirectoryWatcher(DirectoryWatcher):  # pylint: disable=too-few-publ
         )
         observer.start()
         try:
-            while True:
-                # What is really needed here is "asyncio suspend" as not expected to ever return
-                await asyncio.sleep(1)
-        except asyncio.CancelledError:
+            await self._stop_event.wait()
+        finally:
             observer.stop()
             observer.join()
-            raise
 
 
-class INotifyDirectoryWatcher(DirectoryWatcher):  # pylint: disable=too-few-public-methods
+class INotifyDirectoryWatcher(DirectoryWatcher):
     """Directory watcher using INotify filesytem events."""
 
     def _process_directory_entry_change(self, entry: tuple[Change, str]):
@@ -109,7 +111,7 @@ class INotifyDirectoryWatcher(DirectoryWatcher):  # pylint: disable=too-few-publ
             "NOTE: watchfiles.awatch has recursive=False, in case this matters in the futuer."
         )
         async for changes in awatch(
-            self._config.directory_to_watch, recursive=False
+            self._config.directory_to_watch, recursive=False, stop_event=self._stop_event
         ):  # type: Set[tuple[Change, str]]
             for change in changes:
                 logger.info("in main %s", change)
