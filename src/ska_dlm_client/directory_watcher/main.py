@@ -2,6 +2,7 @@
 
 import argparse
 import asyncio
+import functools
 import logging
 import signal
 
@@ -125,33 +126,17 @@ def create_directory_watcher() -> DirectoryWatcher:
         )
 
 
-def _setup_async_graceful_termination(
-    signals=(signal.SIGINT, signal.SIGTERM),
-):
-    """
-    Gracefully handles shutdown signals by cancelling all pending tasks.
-
-    Can only be called from an async function.
-    """
-
-    async def _shutdown(sig: signal.Signals):
-        """Canel the required tasks."""
-        logger.info("handling %s", sig)
-        for task in [task for task in asyncio.all_tasks() if task is not asyncio.current_task()]:
-            task.cancel()
-
-    loop = asyncio.get_running_loop()
-    for signame in signals:
-        loop.add_signal_handler(
-            signame,
-            lambda the_signame=signame: asyncio.create_task(_shutdown(sig=the_signame)),
-        )
-
-
 async def amain():
     """Run main in asyncio."""
-    _setup_async_graceful_termination()
     directory_watcher = create_directory_watcher()
+
+    def stop_watcher(signo: signal.Signals):
+        logger.info("Received %s, stopping directory watcher", signo.name)
+        directory_watcher.stop()
+
+    loop = asyncio.get_running_loop()
+    for signo in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(signo, functools.partial(stop_watcher, signo))
     await directory_watcher.watch()
 
 
