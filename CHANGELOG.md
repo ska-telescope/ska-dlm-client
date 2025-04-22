@@ -2,8 +2,11 @@
 
 ## Development
 
+## 1.0.0
+
 ### Added
 
+* Added rclone access check cmd line arg to kafka watcher.
 * Added a startup verification automated process for directory watcher.
 
 ### Changed
