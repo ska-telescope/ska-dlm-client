@@ -78,7 +78,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         )
 
     def add_storage_name_arguments(self, parser: argparse.ArgumentParser) -> None:
-        """Update a parser to a add storage name argument."""
+        """Update a parser to add a storage name argument."""
         parser.add_argument(
             "-n",
             "--storage-name",
@@ -88,7 +88,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         )
 
     def add_ingest_server_url_arguments(self, parser: argparse.ArgumentParser) -> None:
-        """Update a parser to a add ingest server url argument."""
+        """Update a parser to add an ingest server url argument."""
         parser.add_argument(
             "-i",
             "--ingest-server-url",
@@ -98,7 +98,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         )
 
     def add_request_server_url_arguments(self, parser: argparse.ArgumentParser) -> None:
-        """Update a parser to a add request server url argument."""
+        """Update a parser to add a request server url argument."""
         parser.add_argument(
             "--request-server-url",
             type=str,
@@ -116,7 +116,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         )
 
     def set_application_ready(self):
-        """Create the required file to indicate the application ready."""
+        """Create the required file to indicate the application is ready."""
         if self.add_readiness_probe_file:
             Path(self.readiness_probe_file).touch()
             logger.info("The readiness probe file has been created %s.", self.readiness_probe_file)

@@ -70,7 +70,7 @@ class StartupVerification:  # pylint: disable=too-few-public-methods
         logger.info("data item to look for has name %s", self.data_item_name)
 
     def verify_registration(self) -> bool:
-        """Verify the data item was adding by querying the DLM."""
+        """Verify the data item was added by querying the DLM."""
         request_configuration = configuration.Configuration(host=self._request_server_url)
         with api_client.ApiClient(request_configuration) as request_api_client:
             api_request = request_api.RequestApi(request_api_client)
