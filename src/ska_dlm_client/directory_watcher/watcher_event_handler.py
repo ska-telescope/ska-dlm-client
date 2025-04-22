@@ -37,9 +37,12 @@ class WatcherEventHandler(FileSystemEventHandler):
         self._registration_processor = registration_processor
 
     def _ignore_event(self, event: FileSystemEvent) -> bool:
-        """An event is ignored if:
-    - It targets a directory whose name starts with a dot ('.'), or
-    - The event's path matches the configured status file path exactly.."""
+        """Determine if an event should be ignored.
+
+        An event is ignored if:
+        - It targets a directory whose name starts with a dot ('.'), or
+        - The event's path matches the configured status file path exactly.
+        """
         basename = os.path.basename(event.src_path)
         logger.info("basename is %s", basename)
         if event.is_directory and os.path.basename(event.src_path).startswith("."):
