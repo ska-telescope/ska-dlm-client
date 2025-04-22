@@ -9,25 +9,25 @@ setupStorageLocation: False
 
 ska_dlm_client:
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
-  version: "0.1.0-dev.c156442ed"
-  storage_root_directory: "/data"
+  version: "0.1.0-dev.c787abc90"
+  storage_root_directory: "/data/dlmw"
   ingest_server_url: "http://ska-dlm-dev-ingest:80"
   storage_server_url: "http://ska-dlm-dev-storage:80"
+  request_server_url: "http://ska-dlm-dev-request:80"
+
+startup_verification:
+  enabled: true
 
 directory_watcher:
   enabled: true
-  image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
-  version: "0.1.0-dev.c156442ed"
   directory_to_watch: "/data/dlmw"
-  storage_root_directory: "/data"
+  storage_root_directory: "/data/dlmw"
   use_polling_watcher: true
   skip_rclone_access_check_on_register: true
   register_contents_of_watch_directory: true
 
 kafka_watcher:
   enabled: false
-  image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
-  version: "0.1.0-dev.c156442ed"
   kafka_broker_url: "ska-sdp-kafka.dp-shared:9092"
   kafka_topic: "ska-sdp-dataproduct-ingest"
 

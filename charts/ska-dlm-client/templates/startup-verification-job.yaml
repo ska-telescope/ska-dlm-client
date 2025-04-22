@@ -1,0 +1,83 @@
+{{- if $.Values.startup_verification.enabled }}
+{{- $rbac_name := printf "%s-dlm-client-sv" .Release.Name -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "ska-dlm-client.fullname" . }}-startup-verification
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ska-dlm-client.startup-verification.labels" . | indent 4 }}
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "ska-dlm-client.startup-verification.labels" . | indent 8 }}
+    spec:
+      restartPolicy: Never
+      {{- if .Values.ska_dlm_client.securityContext }}
+      securityContext:
+        {{- .Values.ska_dlm_client.securityContext | toYaml | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ $rbac_name }}
+      containers:
+      - name: startup-verification
+        image: {{ .Values.ska_dlm_client.image}}:{{ .Values.ska_dlm_client.version }}
+        imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
+        command:
+        - dlm-startup-verification
+        - "--directory-to-watch"
+        - {{ .Values.directory_watcher.directory_to_watch }}
+        - "--storage-name"
+        - {{ .Values.directory_watcher.storage_name }}
+        - "--request-server-url"
+        - {{ .Values.ska_dlm_client.request_server_url }}
+        volumeMounts:
+        - name: data-product-storage
+          mountPath: /data
+      initContainers:
+        - name: wait-for-directory-watcher
+          image: {{ .Values.kubectl.image }}:{{ .Values.kubectl.version }}
+          args:
+            - wait
+            - deployment
+            - {{ include "ska-dlm-client.fullname" . }}-directory-watcher
+            - --for
+            - condition=Available=True
+            - --timeout
+            - 60s
+      dnsPolicy: ClusterFirstWithHostNet
+      volumes:
+      - name: data-product-storage
+        persistentVolumeClaim:
+          claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $rbac_name }}
+  namespace: {{ .Release.Namespace }}
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ $rbac_name }}
+  namespace: {{ .Release.Namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ $rbac_name }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ $rbac_name }}
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ $rbac_name }}
+  namespace: {{ .Release.Namespace }}
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch"]
+{{- end }}

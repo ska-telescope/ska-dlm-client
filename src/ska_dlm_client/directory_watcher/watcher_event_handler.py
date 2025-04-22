@@ -1,6 +1,7 @@
 """Class to process watcher directory change events."""
 
 import logging
+import os.path
 
 from watchdog.events import (
     DirCreatedEvent,
@@ -36,6 +37,16 @@ class WatcherEventHandler(FileSystemEventHandler):
         self._registration_processor = registration_processor
 
     def _ignore_event(self, event: FileSystemEvent) -> bool:
+        """Determine if an event should be ignored.
+
+        An event is ignored if:
+        - It targets a directory whose name starts with a dot ('.'), or
+        - The event's path matches the configured status file path exactly.
+        """
+        basename = os.path.basename(event.src_path)
+        logger.info("basename is %s", basename)
+        if event.is_directory and os.path.basename(event.src_path).startswith("."):
+            return True
         return self._config.status_file_absolute_path == event.src_path
 
     def on_moved(self, event: DirMovedEvent | FileMovedEvent) -> None:
@@ -53,8 +64,9 @@ class WatcherEventHandler(FileSystemEventHandler):
     def on_created(self, event: DirCreatedEvent | FileCreatedEvent) -> None:
         """Take action when a create event is captured."""
         super().on_created(event)
+        logger.info("event is %s and is_dir %s", event, event.is_directory)
         what = "directory" if event.is_directory else "file"
-        logger.info("Created %s: %s", what, event.src_path)
+        logger.info("In event 'created' for %s: %s", what, event.src_path)
         if self._ignore_event(event):
             return
         absolute_path = event.src_path

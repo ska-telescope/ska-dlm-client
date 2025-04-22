@@ -23,19 +23,18 @@ ska_dlm:
 ska_dlm_client:
   image: artefact.skao.int/ska-dlm-client
   version: "0.1.0"
+  imagePullPolicy: Always
   storage_name: data
   storage_root_directory: /data
   securityContext: {}
   ingest_server_url: "http://ska-dlm-dev-ingest-example"
   storage_server_url: "http://ska-dlm-dev-storage-example"
+  request_server_url: "http://ska-dlm-dev-request-example"
 
 directory_watcher:
   enabled: false
   component: directory-watcher
   subsystem: data-lifecycle-management
-  image: artefact.skao.int/ska-dlm-client
-  version: "0.1.0"
-  imagePullPolicy: Always
   replicas: 1
   directory_to_watch: /data/dlm/watch_dir
   storage_root_directory: /data
@@ -48,14 +47,16 @@ kafka_watcher:
   enabled: false
   component: kafka-watcher
   subsystem: data-lifecycle-management
-  image: artefact.skao.int/ska-dlm-client
-  version: "0.1.0"
-  imagePullPolicy: Always
   replicas: 1
   kafka_broker_url: "kafka:9092"
   kafka_topic: "ska-sdp-dataproduct-ingest"
   storage_name: data
   check_rclone_access: false
+
+startup_verification:
+  enabled: false
+  component: startup-verification
+  subsystem: data-lifecycle-management
 
 ssh_storage_access:
   component: ssh-storage-access
@@ -94,3 +95,7 @@ ssh_storage_access:
       read_only: true
     secret:
       pub_name: "sdp-pub"
+
+kubectl:
+  image: bitnami/kubectl
+  version: 1.28.6

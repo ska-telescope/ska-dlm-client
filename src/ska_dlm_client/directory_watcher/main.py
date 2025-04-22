@@ -14,6 +14,7 @@ from ska_dlm_client.directory_watcher.directory_watcher import (
     PollingDirectoryWatcher,
 )
 from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
+from ska_dlm_client.startup_verification.utils import CmdLineParameters
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -111,18 +112,25 @@ def process_args(args: argparse.Namespace) -> Config:
 def create_directory_watcher() -> DirectoryWatcher:
     """Create a `DirectoryWatcher` factory from the CLI arguments."""
     parser = create_parser()
+    cmd_line_parameters = CmdLineParameters(parser, add_readiness_probe_file=True)
     args = parser.parse_args()
     config = process_args(args=args)
+    cmd_line_parameters.parse_arguments(args)
     registration_processor = RegistrationProcessor(config)
     if args.register_contents_of_watch_directory:
         registration_processor.register_data_products_from_watch_directory(dry_run_for_debug=False)
+    # We want the watcher to set readiness probe file when ready so pass class during creation
     if args.use_polling_watcher:  # pylint: disable=no-else-return"
         return PollingDirectoryWatcher(
-            config=config, registration_processor=registration_processor
+            config=config,
+            registration_processor=registration_processor,
+            cmd_line_parameters=cmd_line_parameters,
         )
     else:
         return INotifyDirectoryWatcher(
-            config=config, registration_processor=registration_processor
+            config=config,
+            registration_processor=registration_processor,
+            cmd_line_parameters=cmd_line_parameters,
         )
 
 

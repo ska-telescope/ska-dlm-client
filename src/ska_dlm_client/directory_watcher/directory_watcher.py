@@ -13,6 +13,7 @@ from watchfiles import Change, awatch
 from ska_dlm_client.directory_watcher.config import Config
 from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
 from ska_dlm_client.directory_watcher.watcher_event_handler import WatcherEventHandler
+from ska_dlm_client.startup_verification.utils import CmdLineParameters
 
 logger = logging.getLogger(__name__)
 
@@ -43,13 +44,19 @@ class LStatPollingEmitter(PollingEmitter):
 class DirectoryWatcher(ABC):
     """Class for the running of the directory_watcher."""
 
-    def __init__(self, config: Config, registration_processor: RegistrationProcessor):
+    def __init__(
+        self,
+        config: Config,
+        registration_processor: RegistrationProcessor,
+        cmd_line_parameters: CmdLineParameters = None,
+    ):
         """Initialise with the given Config."""
         self._config = config
         self._event_handler = WatcherEventHandler(
             config=config, registration_processor=registration_processor
         )
         self._stop_event = asyncio.Event()
+        self._cmd_line_parameters = cmd_line_parameters
 
     @abstractmethod
     async def watch(self) -> None:
@@ -77,6 +84,9 @@ class PollingDirectoryWatcher(DirectoryWatcher):
             recursive=False,
         )
         observer.start()
+        # Last opportunity to call post startup func before we sleep.
+        if self._cmd_line_parameters:
+            self._cmd_line_parameters.set_application_ready()
         try:
             await self._stop_event.wait()
         finally:
@@ -110,6 +120,9 @@ class INotifyDirectoryWatcher(DirectoryWatcher):
         logger.info(
             "NOTE: watchfiles.awatch has recursive=False, in case this matters in the futuer."
         )
+        # Last opportunity to call post startup func before we wait.
+        if self._cmd_line_parameters:
+            self._cmd_line_parameters.set_application_ready()
         async for changes in awatch(
             self._config.directory_to_watch, recursive=False, stop_event=self._stop_event
         ):  # type: Set[tuple[Change, str]]
