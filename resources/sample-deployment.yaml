@@ -1,0 +1,62 @@
+# Sample values used when integration testing DLM Directory Watch on DP Cluster.
+#
+# The values being assigned here should be considered the most likely that will need
+# to be set for a deployment into any environment. An explanation of the values can also
+# be found in the documentation.
+#
+global:
+  dataProduct:
+    pvc:
+      # PVC will be mounted as /data
+      name: shared  # PVC name of the volume containing the directory to be watched.
+      read_only: true  # Unless required elsewhere set to true for best data protection.
+
+setupStorageLocation: False  # Only set this to True if needing to setup test storage location.
+
+ska_dlm_client:
+  # During testing point these at gitlab build being tested otherwise artefact repo with the
+  # latest version will be used.
+  image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
+  version: "0.1.0-dev.c4b71bc45"
+  # The path under the data directory that all data will be referenced from. This must match
+  # the configuration when the storage location was originally created in the DLM.
+  storage_root_directory: "/data/dlmw"
+  # The URLS of the various DLM services. The "ska-dlm-dev" is the helm deployment name assigned
+  # to DLM when it was deployed.
+  ingest_server_url: "http://ska-dlm-dev-ingest:80"
+  storage_server_url: "http://ska-dlm-dev-storage:80"
+  request_server_url: "http://ska-dlm-dev-request:80"
+
+startup_verification:
+  # Enabling this will force a startup verification to be performed. This is recommended to catch
+  # any configuration/system issues early.
+  enabled: true
+
+directory_watcher:
+  # Enabling this will allow the directory watcher to be activated.
+  enabled: true
+  # The root directory and watch directory will normally be the same. One of these may be removed
+  # in a future version.
+  directory_to_watch: "/data/dlmw"
+  storage_root_directory: "/data/dlmw"
+  # This would normally always be true unless the watch directory is not a networked drive as the
+  # alternative iNotify based watcher does not work with networked filesystems.
+  use_polling_watcher: true
+  # Typically used during testing or if the watch directory is the final storage location so no
+  # immediate migration will be required.
+  skip_rclone_access_check_on_register: True
+  # Normally set to False, when True the directory watch will try to register any/all data in the
+  # watch directory.
+  register_contents_of_watch_directory: False
+
+kafka_watcher:
+  # Enabling this will allow the kafka watcher to be activated.
+  # Leave false if the SDP receivers and kafka have not been deployed to this cluster.
+  enabled: True
+  # These values set the kafka URL service endpoint along with the kafka topic.
+  kafka_broker_url: "ska-sdp-kafka.dp-shared:9092"
+  kafka_topic: "ska-sdp-dataproduct-ingest"
+
+ska_dlm:
+  # The helm deployment name of the DLM environment
+  fullname: "ska-dlm-dev"
