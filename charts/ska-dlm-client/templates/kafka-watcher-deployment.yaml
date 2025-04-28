@@ -24,7 +24,7 @@ spec:
         command:
         - "dlm-kafka-watcher"
         - "--kafka-broker-url"
-        - "{{ .Values.kafka_watcher.kafka_broker_url }}"
+        - "{{ .Values.kafka.fullnameOverride }}{{ .Values.Release }}"
         - "--kafka-topic"
         - "{{ .Values.kafka_watcher.kafka_topic }}"
         - "--storage-name"

@@ -53,6 +53,25 @@ kafka_watcher:
   storage_name: data
   check_rclone_access: false
 
+kafka:
+  enabled: true
+  fullnameOverride: ska-dlm-kafka
+  maxMessageBytes: '524288000' # Allow for ~500MB messages
+  socketRequestMaxBytes: '524288000' # Allow for ~500MB messages
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2048Mi
+    requests:
+      cpu: 1000m
+      memory: 1024Mi
+  persistence:
+    enabled: false
+  zookeeper:
+    fullnameOverride: ska-dlm-zookeeper
+    persistence:
+      enabled: false
+
 startup_verification:
   enabled: false
   component: startup-verification
