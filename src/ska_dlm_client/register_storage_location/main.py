@@ -145,7 +145,12 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
     storage_configuration = Configuration(host=args.storage_server_url)
-    setup_testing(args.storage_name, storage_configuration, args.storage_root_directory)
+    try:
+        setup_testing(args.storage_name, storage_configuration, args.storage_root_directory)
+    except Exception as ex:  # pylint: disable=broad-exception-caught
+        # We want to exit with 0 so k8s doesn't try to restart
+        logger.error(ex)
+        sys.exit(0)
 
 
 if __name__ == "__main__":
