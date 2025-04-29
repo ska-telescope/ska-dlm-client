@@ -44,7 +44,7 @@ directory_watcher:
   register_contents_of_watch_directory: false
 
 kafka_watcher:
-  enabled: false
+  enabled: false  # kafka-watcher OFF by default
   component: kafka-watcher
   subsystem: data-lifecycle-management
   replicas: 1
@@ -54,7 +54,7 @@ kafka_watcher:
   check_rclone_access: false
 
 kafka:
-  enabled: true
+  enabled: false # Kafka service OFF for production. Only for local developement.
   fullnameOverride: ska-dlm-kafka
   maxMessageBytes: '524288000' # Allow for ~500MB messages
   socketRequestMaxBytes: '524288000' # Allow for ~500MB messages

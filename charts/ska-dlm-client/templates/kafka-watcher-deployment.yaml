@@ -1,4 +1,4 @@
-{{- if $.Values.kafka_watcher.enabled }}
+{{- if .Values.kafka_watcher.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -24,7 +24,7 @@ spec:
         command:
         - "dlm-kafka-watcher"
         - "--kafka-broker-url"
-        - "{{ .Values.kafka.fullnameOverride }}{{ .Values.Release }}"
+        - "{{ .Values.kafka.fullnameOverride }}.{{ .Release.Namespace }}:9092"
         - "--kafka-topic"
         - "{{ .Values.kafka_watcher.kafka_topic }}"
         - "--storage-name"
