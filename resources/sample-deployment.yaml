@@ -17,7 +17,7 @@ ska_dlm_client:
   # During testing point these at gitlab build being tested otherwise artefact repo with the
   # latest version will be used.
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
-  version: "0.1.0-dev.c787abc90"
+  version: "1.0.0-dev.c848f6a19"
   # The path under the data directory that all data will be referenced from. This must match
   # the configuration when the storage location was originally created in the DLM.
   storage_root_directory: "/data/dlmw"
@@ -56,6 +56,18 @@ kafka_watcher:
   # These values set the kafka URL service endpoint along with the kafka topic.
   kafka_broker_url: "ska-sdp-kafka.dp-shared:9092"
   kafka_topic: "ska-sdp-dataproduct-ingest"
+
+ssh_storage_access:
+  pst:
+    enabled: true
+    deployment_name: "ssh-sa-pst"
+    service_name: "ssh-sa-pst"
+    pvc:
+      name: shared
+      mount_path: /data
+      read_only: true
+    secret:
+      pub_name: "pst-pub"
 
 ska_dlm:
   # The helm deployment name of the DLM environment

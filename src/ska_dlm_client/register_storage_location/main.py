@@ -17,7 +17,21 @@ LOCATION_TYPE = "ThisDLMClientLocationType"
 LOCATION_COUNTRY = "Australia"
 LOCATION_CITY = "Kensington"
 LOCATION_FACILITY = "SKA-Test"
-STORAGE_CONFIG = {"name": "data", "type": "alias", "parameters": {"remote": "/"}}
+# STORAGE_CONFIG = {"name": "data", "type": "alias", "parameters": {"remote": "/"}}
+STORAGE_CONFIG = {
+    "name": "pst-rt-data",
+    "type": "sftp",
+    "parameters": {
+        "host": "ska-dlm-client-ssh-sa-pst",
+        "user": "dlm",
+        "key_file": "/secrets/pst",
+        "set_modtime": "false",
+        "shell_type": "unix",
+        "idle_timeout": "20s",
+        "chunk_size": "254Ki",
+        "ciphers": "aes256-ctr",
+    },
+}
 STORAGE_INTERFACE = "posix"
 STORAGE_TYPE = "disk"
 

@@ -15,6 +15,13 @@
 action=$1
 dir=$2
 
+if [[ $action != "add" && $action != "rm" ]]; then
+    echo command line option \"$action\" is invalid
+    echo "$0 <add|rm> <directory location of keys>"
+    echo "dir must contain daq|pst|sdp-priv|pub"
+    exit 1
+fi
+
 if [ -d $dir ]; then
     cd $dir
     for filename in `ls -1 *pub`; do
