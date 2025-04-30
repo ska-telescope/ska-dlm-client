@@ -123,7 +123,7 @@ def init_storage_for_testing(
             config_type="rclone",
         )
         storage_config_id = response
-        logger.info("storage_config_id: %s", storage_config_id)
+        logger.info("working storage_config_id: %s", storage_config_id)
         logger.info("Now creating final store create_storage_config")
         response = api_storage.create_storage_config(
             body=STORAGE_CONFIG_FINAL_STORE,
@@ -132,7 +132,7 @@ def init_storage_for_testing(
             config_type="rclone",
         )
         storage_config_id = response
-        logger.info("storage_config_id: %s", storage_config_id)
+        logger.info("final storage_config_id: %s", storage_config_id)
     return the_storage_id_pst
 
 
