@@ -20,7 +20,7 @@ LOCATION_FACILITY = "SKA-Test"
 STORAGE_CONFIG_FINAL_STORE = {
     "name": "final-store",
     "type": "alias",
-    "parameters": {"remote": "/data"},
+    "parameters": {"remote": "/"},
 }
 STORAGE_CONFIG_PST_RT_DATA = {
     "name": "pst-rt-data",
