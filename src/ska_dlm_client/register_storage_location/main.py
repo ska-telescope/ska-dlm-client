@@ -17,8 +17,8 @@ LOCATION_TYPE = "ThisDLMClientLocationType"
 LOCATION_COUNTRY = "Australia"
 LOCATION_CITY = "Kensington"
 LOCATION_FACILITY = "SKA-Test"
-# STORAGE_CONFIG = {"name": "data", "type": "alias", "parameters": {"remote": "/"}}
-STORAGE_CONFIG = {
+STORAGE_CONFIG_FINAL_STORE = {"name": "final-store", "type": "alias", "parameters": {"remote": "/data"}}
+STORAGE_CONFIG_PST_RT_DATA = {
     "name": "pst-rt-data",
     "type": "sftp",
     "parameters": {
@@ -34,6 +34,7 @@ STORAGE_CONFIG = {
 }
 STORAGE_INTERFACE = "posix"
 STORAGE_TYPE = "disk"
+STORAGE_NAME_FINAL = "final"
 
 
 def init_location_for_testing(storage_configuration: Configuration) -> str:
@@ -84,6 +85,7 @@ def init_storage_for_testing(
             the_storage_id = response[0]["storage_id"]
             logger.info("storage_id already exists in DLM")
         else:
+            # Create the storage from the command line
             response = api_storage.init_storage(
                 storage_name=storage_name,
                 storage_type=STORAGE_TYPE,
@@ -92,15 +94,35 @@ def init_storage_for_testing(
                 location_id=the_location_id,
                 location_name=LOCATION_NAME,
             )
-            the_storage_id = response
+            the_storage_id_pst = response
+            logger.info("Storage created in DLM")
+            logger.info("Now creating final store init_storage")
+            response = api_storage.init_storage(
+                storage_name="final-store",
+                storage_type=STORAGE_TYPE,
+                storage_interface=STORAGE_INTERFACE,
+                root_directory="/data",
+                location_id=the_location_id,
+                location_name=LOCATION_NAME,
+            )
+            the_storage_id_final = response
             logger.info("Storage created in DLM")
         logger.info("storage_id: %s", the_storage_id)
 
         # Setup the storage config. Doesn't matter if it has been set before.
         response = api_storage.create_storage_config(
-            body=STORAGE_CONFIG,
-            storage_id=the_storage_id,
+            body=STORAGE_CONFIG_PST_RT_DATA,
+            storage_id=the_storage_id_pst,
             storage_name=storage_name,
+            config_type="rclone",
+        )
+        storage_config_id = response
+        logger.info("storage_config_id: %s", storage_config_id)
+        logger.info("Now creating final store create_storage_config")
+        response = api_storage.create_storage_config(
+            body=STORAGE_CONFIG_FINAL_STORE,
+            storage_id=the_storage_id_final,
+            storage_name=STORAGE_NAME_FINAL,
             config_type="rclone",
         )
         storage_config_id = response
