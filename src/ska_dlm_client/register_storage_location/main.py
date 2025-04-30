@@ -103,7 +103,7 @@ def init_storage_for_testing(
             logger.info("Storage created in DLM")
             logger.info("Now creating final store init_storage")
             response = api_storage.init_storage(
-                storage_name="final-store",
+                storage_name=STORAGE_NAME_FINAL,
                 storage_type=STORAGE_TYPE,
                 storage_interface=STORAGE_INTERFACE,
                 root_directory="/data",
