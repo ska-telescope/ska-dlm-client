@@ -17,7 +17,11 @@ LOCATION_TYPE = "ThisDLMClientLocationType"
 LOCATION_COUNTRY = "Australia"
 LOCATION_CITY = "Kensington"
 LOCATION_FACILITY = "SKA-Test"
-STORAGE_CONFIG_FINAL_STORE = {"name": "final-store", "type": "alias", "parameters": {"remote": "/data"}}
+STORAGE_CONFIG_FINAL_STORE = {
+    "name": "final-store",
+    "type": "alias",
+    "parameters": {"remote": "/data"},
+}
 STORAGE_CONFIG_PST_RT_DATA = {
     "name": "pst-rt-data",
     "type": "sftp",
@@ -82,7 +86,8 @@ def init_storage_for_testing(
             logger.error("Unexpected response from query_storage_storage")
             sys.exit(1)
         if len(response) == 1:
-            the_storage_id = response[0]["storage_id"]
+            the_storage_id_pst = response[0]["storage_id"]
+            the_storage_id_final = response[0]["storage_id"]
             logger.info("storage_id already exists in DLM")
         else:
             # Create the storage from the command line
@@ -107,7 +112,8 @@ def init_storage_for_testing(
             )
             the_storage_id_final = response
             logger.info("Storage created in DLM")
-        logger.info("storage_id: %s", the_storage_id)
+        logger.info("storage_id_pst: %s", the_storage_id_pst)
+        logger.info("storage_id_final: %s", the_storage_id_final)
 
         # Setup the storage config. Doesn't matter if it has been set before.
         response = api_storage.create_storage_config(
@@ -127,7 +133,7 @@ def init_storage_for_testing(
         )
         storage_config_id = response
         logger.info("storage_config_id: %s", storage_config_id)
-    return the_storage_id
+    return the_storage_id_pst
 
 
 def setup_testing(
