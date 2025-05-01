@@ -1,0 +1,72 @@
+1. Add ssh public and private keys as k8s secrets
+
+2. Start DLM server services
+
+3. Setup location, storage and additional rclone storge configs
+
+4. Start directory watcher includes
+	a. directory watcher - monitor/watch given directory and register data items
+	b. startup verification - tests operation of directory watcher
+	c. ssh storage access pod - pod with access to PVC of directory being watched
+
+5. mv a sample PST dataset to the "watch" directory for ingest
+
+6. use DLM migration to copy the data from temporary storage to final storage
+	In this case final storage is just a local directory on the rclone pod
+
+
+
+# list of ssh public and private keys for each system
+# -rw-------   1 user  group  411 13 Apr 15:48 daq-priv
+# -rw-r--r--   1 user  group   99 13 Apr 15:48 daq-pub
+# -rw-------   1 user  group  411 13 Apr 15:48 pst-priv
+# -rw-r--r--   1 user  group   99 13 Apr 15:48 pst-pub
+# -rw-------   1 user  group  411 13 Apr 15:48 sdp-priv
+# -rw-r--r--   1 user  group   99 13 Apr 15:48 sdp-pub
+
+
+# Create required secrets
+ls -al;kubectl get secret | grep "priv\|pub";../ska-dlm-client/resources/manage_keys_for_testing.sh add ./;sleep 1;kubectl get secret | grep "priv\|pub"
+
+
+# Start DLM server
+helm install -f resources/cluster-sdhp-values.yaml -f resources/setup-postgresql-values.yaml -f resources/mboulton-values.yaml ska-dlm-dev charts/ska-dlm/
+
+
+# Configure DLM storage and rclone config
+helm install -f resources/sample-deployment.yaml --set setupStorageLocation=true --set startup_verification.enabled=false --set directory_watcher.enabled=false --set ssh_storage_access.pst.enabled=false ska-dlm-client charts/ska-dlm-client/;sleep 15;helm uninstall ska-dlm-client
+
+
+# rlcone pod
+kubectl exec --stdin --tty ska-dlm-dev-rclone-7657c94f4c-sl4zq -- /bin/sh
+rclone config show
+
+
+# Deply directory watcher
+helm install -f resources/sample-deployment.yaml ska-dlm-client charts/ska-dlm-client/
+
+
+# pseudo-pst-writer
+kubectl apply -f pseudo-pst-writer.yaml
+kubectl exec --stdin --tty pseudo-pst-writer -- /bin/bash
+cd /data/dlm/product
+mv eb-notebook-20250221-21194 /data/dlmw/
+
+
+# storage
+kubectl exec --stdin --tty ska-dlm-dev-migration-5dc9cdfcfd-pncf6 -- /bin/bash
+ska-dlm data-item query-data-item --item-name eb-notebook-20250221-21194/pst-low/1
+ska-dlm migration copy-data-item --item-name eb-notebook-20250221-21194/pst-low/1 --destination-name final
+
+
+
+#
+# Cleanup
+#
+helm uninstall ska-dlm-client
+
+helm uninstall ska-dlm-dev
+
+
+# in pseudo-pst-writer
+mv /data/dlmw/eb-notebook-20250221-21194 ./
