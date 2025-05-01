@@ -62,7 +62,7 @@ kafka_watcher:
   replicas: 1
   kafka_server_local: false
   kafka_server_local_port: 9092
-  kafka_broker_url: "kafka:9092" # production to override with the full service DNS, e.g., ska-sdp-kafka.dp-shared:9092
+  kafka_broker_url: "ska-dlm-kafka:9092" # production to override with the full service DNS, e.g., ska-sdp-kafka.dp-shared:9092
   ingest_server_local: false
   ingest_server_local_port: 80
   kafka_topic: "ska-sdp-dataproduct-ingest"
