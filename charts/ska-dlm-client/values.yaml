@@ -1,3 +1,16 @@
+# ----------------------------------------------------------------------------------
+# Default Helm configuration for ska-dlm-client
+#
+# Production users must override:
+#   - kafka_watcher.kafka_broker_url
+#   - ska_dlm_client.ingest_server_url
+#   - ska_dlm_client.storage_server_url
+#   - ska_dlm_client.request_server_url
+#
+# All services are disabled by default.
+# Local developers may use --set to enable kafka / kafka_watcher / directory watcher
+# ----------------------------------------------------------------------------------
+
 system: dlm
 subsystem: client
 
@@ -16,7 +29,6 @@ setupStorageLocation: false
 
 ska_dlm:
   fullname: "ska-dlm"
-  ingest_service_port: 80
 
 ska_dlm_client:
   image: artefact.skao.int/ska-dlm-client
@@ -27,9 +39,9 @@ ska_dlm_client:
   securityContext: {}
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace
-  ingest_server_url: "http://ska-dlm-dev-ingest"
-  storage_server_url: "http://ska-dlm-dev-storage"
-  request_server_url: "http://ska-dlm-dev-request"
+  ingest_server_url: "http://ska-dlm-dev-ingest" # override for production
+  storage_server_url: "http://ska-dlm-dev-storage" # override for production
+  request_server_url: "http://ska-dlm-dev-request" # override for production
 
 directory_watcher:
   enabled: false
@@ -48,7 +60,11 @@ kafka_watcher:
   component: kafka-watcher
   subsystem: data-lifecycle-management
   replicas: 1
-  kafka_broker_url: "kafka:9092"
+  kafka_server_local: false
+  kafka_server_local_port: 9092
+  kafka_broker_url: "kafka:9092" # production to override with the full service DNS, e.g., ska-sdp-kafka.dp-shared:9092
+  ingest_server_local: false
+  ingest_server_local_port: 80
   kafka_topic: "ska-sdp-dataproduct-ingest"
   storage_name: data
   check_rclone_access: false
