@@ -179,13 +179,11 @@ Values like `storage_name` and `storage_root_directory` appear in multiple secti
   * `storage_name`: The DLM storage location name to use when registering data items.
   * `check_rclone_access`: If `true`, verifies rclone access before attempting registration. Optional.
   * `kafka_broker_url`: The Kafka bootstrap server to connect to. Required in production.
-
   - **In production:**
     - Keep `kafka_server_local` as `false`
     - Provide the following explicitly:
       - `kafka_broker_url` as `<service>.<namespace>:<port>` (e.g., `ska-sdp-kafka.dp-shared:9092`)
       - `ska_dlm_client.ingest_server_url` as `http://<service>.<namespace>:<port>` (e.g., `http://ska-dlm-dev-ingest.dp-shared:80`)
-
   - **In local development:**
     - Set `kafka_server_local: true`
     - Set `ska_dlm_client.ingest_server_url` to a local service (e.g., `http://ska-dlm-dev-ingest:80`)

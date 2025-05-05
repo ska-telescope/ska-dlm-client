@@ -38,7 +38,7 @@ ska_dlm_client:
   storage_root_directory: /data
   securityContext: {}
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
-  # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace
+  # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace:port
   ingest_server_url: "http://ska-dlm-dev-ingest:80" # override for production
   storage_server_url: "http://ska-dlm-dev-storage:80" # override for production
   request_server_url: "http://ska-dlm-dev-request:80" # override for production
