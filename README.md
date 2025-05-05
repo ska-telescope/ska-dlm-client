@@ -137,7 +137,7 @@ This is based on [ADR-55 Definition of metadata for data management at AA0.5](ht
 An example deployment of the ska-dlm-client would look like:
 
 ```sh
-helm install -f resources/dp-proj-user.yaml -n <namespace> ska-dlm-client charts/ska-dlm-client
+helm install -f resources/dp-proj-user.yaml [-n <namespace>] ska-dlm-client charts/ska-dlm-client
 ```
 
 This will deploy to the currently configured cluster and namespace.
