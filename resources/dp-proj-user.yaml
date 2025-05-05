@@ -9,7 +9,7 @@ setupStorageLocation: False
 
 ska_dlm_client:
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
-  version: "0.1.0-dev.c787abc90"
+  version: "1.0.0"
   storage_root_directory: "/data/dlmw"
   ingest_server_url: "http://ska-dlm-dev-ingest:80"
   storage_server_url: "http://ska-dlm-dev-storage:80"
@@ -17,6 +17,9 @@ ska_dlm_client:
 
 startup_verification:
   enabled: true
+
+ska_dlm:
+  fullname: "ska-dlm-dev"
 
 directory_watcher:
   enabled: true
@@ -31,5 +34,6 @@ kafka_watcher:
   kafka_broker_url: "ska-sdp-kafka.dp-shared:9092"
   kafka_topic: "ska-sdp-dataproduct-ingest"
 
-ska_dlm:
-  fullname: "ska-dlm-dev"
+kafka:
+  enabled: false # Kafka service OFF for production. Only for local developement.
+  fullnameOverride: ska-dlm-kafka
