@@ -2,6 +2,10 @@
 
 ## Development
 
+### Added
+
+* Added optional Kafka service to the Helm chart for local development support.
+
 ## 1.0.0
 
 ### Added
