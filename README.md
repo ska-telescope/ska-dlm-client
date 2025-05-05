@@ -151,7 +151,7 @@ NOTE: More production specific values (values files) will be added in a future r
 * `setupStorageLocation`: Set to `true` if a test location/storage is needed.
 
 **Note:** There is currently overlap between `ska_dlm_client`, `directory_watcher`, and `kafka_watcher`.
-Values like `storage_name` and `storage_root_directory` must be defined in multiple sections where needed.
+Values like `storage_name` and `storage_root_directory` appear in multiple sections because different components may reference different storage locations.
 
 #### ska_dlm_client
 
@@ -177,18 +177,18 @@ Values like `storage_name` and `storage_root_directory` must be defined in multi
   * `enabled`: Whether to deploy the `kafka-watcher` component.
   * `kafka_topic`: Kafka topic(s) to subscribe to for ingest event messages.
   * `storage_name`: The DLM storage location name to use when registering data items.
-  * `check_rclone_access`: If true, verifies rclone access before attempting registration. Optional.
+  * `check_rclone_access`: If `true`, verifies rclone access before attempting registration. Optional.
+  * `kafka_broker_url`: The Kafka bootstrap server to connect to. Required in production.
+
   - **In production:**
     - Keep `kafka_server_local` as `false`
-    - Keep `ingest_server_local` as `false`
     - Provide the following explicitly:
-      - `kafka_broker_url` (e.g. `ska-sdp-kafka.dp-shared:9092`)
-      - `ska_dlm_client.ingest_server_url` (e.g. `http://ska-dlm-dev-ingest.dp-shared`)
+      - `kafka_broker_url` as `<service>.<namespace>:<port>` (e.g., `ska-sdp-kafka.dp-shared:9092`)
+      - `ska_dlm_client.ingest_server_url` as `http://<service>.<namespace>:<port>` (e.g., `http://ska-dlm-dev-ingest.dp-shared:80`)
+
   - **In local development:**
     - Set `kafka_server_local: true`
-    - Set `ingest_server_local: true`
-    - `kafka_server_local_port`: Port to use for the local Kafka broker. Default is 9092.
-    - `ingest_server_local_port`: Port to use for the local ingest server. Default is 80.
+    - Set `ska_dlm_client.ingest_server_url` to a local service (e.g., `http://ska-dlm-dev-ingest:80`)
     - The Helm chart will automatically construct internal URLs using Kubernetes DNS:
       - Kafka broker URL: `<service>.<namespace>:<port>`
       - Ingest URL: `http://<service>.<namespace>:<port>`

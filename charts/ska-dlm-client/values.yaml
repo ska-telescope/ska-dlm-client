@@ -39,9 +39,9 @@ ska_dlm_client:
   securityContext: {}
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace
-  ingest_server_url: "http://ska-dlm-dev-ingest" # override for production
-  storage_server_url: "http://ska-dlm-dev-storage" # override for production
-  request_server_url: "http://ska-dlm-dev-request" # override for production
+  ingest_server_url: "http://ska-dlm-dev-ingest:80" # override for production
+  storage_server_url: "http://ska-dlm-dev-storage:80" # override for production
+  request_server_url: "http://ska-dlm-dev-request:80" # override for production
 
 directory_watcher:
   enabled: false
@@ -63,8 +63,6 @@ kafka_watcher:
   kafka_server_local: false
   kafka_server_local_port: 9092
   kafka_broker_url: "ska-dlm-kafka:9092" # production to override with the full service DNS, e.g., ska-sdp-kafka.dp-shared:9092
-  ingest_server_local: false
-  ingest_server_local_port: 80
   kafka_topic: "ska-sdp-dataproduct-ingest"
   storage_name: data
   check_rclone_access: false
@@ -72,21 +70,6 @@ kafka_watcher:
 kafka:
   enabled: false # Kafka service OFF for production. Only for local developement.
   fullnameOverride: ska-dlm-kafka
-  maxMessageBytes: '524288000' # Allow for ~500MB messages
-  socketRequestMaxBytes: '524288000' # Allow for ~500MB messages
-  resources:
-    limits:
-      cpu: 2000m
-      memory: 2048Mi
-    requests:
-      cpu: 1000m
-      memory: 1024Mi
-  persistence:
-    enabled: false
-  zookeeper:
-    fullnameOverride: ska-dlm-zookeeper
-    persistence:
-      enabled: false
 
 startup_verification:
   enabled: false

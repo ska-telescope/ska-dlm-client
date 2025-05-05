@@ -34,11 +34,7 @@ spec:
         - "--storage-name"
         - "{{ .Values.kafka_watcher.storage_name }}"
         - "--ingest-server-url"
-        {{- if .Values.kafka_watcher.ingest_server_local }}
-        - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}:{{ .Values.kafka_watcher.ingest_server_local_port }}"
-        {{- else }}
         - "{{ .Values.ska_dlm_client.ingest_server_url }}"
-        {{- end }}
         # Optional flag to enable rclone access check:
         {{- if .Values.kafka_watcher.check_rclone_access }}
         - "--check-rclone-access"
