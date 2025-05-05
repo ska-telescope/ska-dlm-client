@@ -93,7 +93,7 @@ async def post_dlm_data_item(
                 "Calling DLM with item_name=%s, uri=%s, storage_name=%s, body=%s, \
                 check_rclone_access=%s",
                 os.path.basename(ingest_event_data["file"].rstrip("/")),
-                ingest_event_data["file"],
+                ingest_event_data["file"],  # TODO: Kafka message content must be validated DMAN-74
                 storage_name,
                 ingest_event_data["metadata"],
                 check_rclone_access,
