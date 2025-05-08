@@ -17,7 +17,7 @@ ska_dlm_client:
   # During testing point these at gitlab build being tested otherwise artefact repo with the
   # latest version will be used.
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
-  version: "1.0.0-dev.cbccccaec"
+  version: "1.0.0-dev.c007ebb18"
   # The path under the data directory that all data will be referenced from. This must match
   # the configuration when the storage location was originally created in the DLM.
   storage_root_directory: "/data/dlmw"

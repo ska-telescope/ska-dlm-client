@@ -217,6 +217,8 @@ class RegistrationProcessor:
             time.sleep(2)
             item_list.remove(parent_item)
             self._register_container_items(item_list=item_list)
+            logger.info("Finished adding data items %s", parent_item)
+        logger.info("Finished add_path %s", path_rel_to_watch_dir)
 
     def register_data_products_from_watch_directory(self, dry_run_for_debug: bool = False):
         """Provide a mechanism to register the contents of the directory to watch."""
