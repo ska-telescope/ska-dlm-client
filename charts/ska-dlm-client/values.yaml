@@ -19,7 +19,7 @@ global:
   storageClass: nfss1
   development: true
   dataProduct:
-    pvc:  # NOTE: This is globally shared all data products volume
+    pvc:  # NOTE: This is globally shared all data products volume, mounted on /data
       name: test-pvc
       read_only: true
 

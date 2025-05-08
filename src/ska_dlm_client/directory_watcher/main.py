@@ -111,7 +111,7 @@ def process_args(args: argparse.Namespace) -> Config:
         reload_status_file=args.reload_status_file,
         use_status_file=args.use_status_file,
         rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,
-        no_dlm_service_services=args.no_dlm_service_services,
+        no_dlm_server_services=args.no_dlm_server_services,
     )
     return config
 
