@@ -69,6 +69,8 @@ class RegistrationProcessor:
     def __init__(self, config: Config):
         """Initialise the RegistrationProcessor with the given config."""
         self._config = config
+        if self._config.no_dlm_service_services:
+            self.dry_run_for_debug = True
 
     def get_config(self):
         """Get the Config being used by the RegistrationProcessor."""

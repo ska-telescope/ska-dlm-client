@@ -91,6 +91,12 @@ def create_parser() -> argparse.ArgumentParser:
         default=False,
         help="First register each file/directory in the watch directory as a data product.",
     )
+    parser.add_argument(
+        "--no-dlm-server-services",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Testing only option, watcher will NOT register data items with any DLM services.",
+    )
     return parser
 
 
@@ -105,6 +111,7 @@ def process_args(args: argparse.Namespace) -> Config:
         reload_status_file=args.reload_status_file,
         use_status_file=args.use_status_file,
         rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,
+        no_dlm_service_services=args.no_dlm_service_services,
     )
     return config
 

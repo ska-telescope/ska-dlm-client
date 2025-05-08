@@ -45,6 +45,9 @@ spec:
         {{- if eq $.Values.directory_watcher.register_contents_of_watch_directory true }}
         - "--register-contents-of-watch-directory"
         {{- end }}
+        {{- if eq $.Values.directory_watcher.no_dlm_server_services true }}
+        - "--no-dlm-server-services"
+        {{- end }}
         - "--readiness-probe-file"
         - {{ $readiness_file }}
         readinessProbe:
