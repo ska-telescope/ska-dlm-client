@@ -28,7 +28,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
     directory_watcher_entries: DirectoryWatcherEntries
     ingest_configuration: Configuration
     ingest_register_path_to_add: str
-    no_dlm_server_services: bool
+    ignore_dlm_server_services: bool
 
     def __init__(  # pylint: disable=too-many-arguments, disable=too-many-positional-arguments
         self,
@@ -40,7 +40,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         reload_status_file: bool = False,
         use_status_file: bool = False,
         rclone_access_check_on_register: bool = True,
-        no_dlm_server_services: bool = False,
+        ignore_dlm_server_services: bool = False,
     ):
         """Init the values required for correct operation of directory_watcher."""
         self.directory_to_watch = directory_to_watch
@@ -51,7 +51,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         self.reload_status_file = reload_status_file
         self.use_status_file = use_status_file
         self.rclone_access_check_on_register = rclone_access_check_on_register
-        self.no_dlm_server_services = no_dlm_server_services
+        self.ignore_dlm_server_services = ignore_dlm_server_services
         self.directory_watcher_entries = DirectoryWatcherEntries(
             entries_file=self.status_file_absolute_path,
             reload_from_status_file=self.reload_status_file,
@@ -78,5 +78,5 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
             f"ingest_configuration {self.ingest_configuration}\n"
             f"directory_watcher_entries {self.directory_watcher_entries}\n"
             f"ingest_register_path_to_add {self.ingest_register_path_to_add}\n"
-            f"no_dlm_server_services {self.no_dlm_server_services}\n"
+            f"ignore_dlm_server_services {self.ignore_dlm_server_services}\n"
         )

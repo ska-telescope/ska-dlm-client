@@ -17,7 +17,7 @@ ska_dlm_client:
   # During testing point these at gitlab build being tested otherwise artefact repo with the
   # latest version will be used.
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
-  version: "1.0.0-dev.c63801d16"
+  version: "1.0.0-dev.cbccccaec"
   # The path under the data directory that all data will be referenced from. This must match
   # the configuration when the storage location was originally created in the DLM.
   storage_root_directory: "/data/dlmw"
@@ -34,14 +34,14 @@ startup_verification:
 
 directory_watcher:
   # Enabling this will allow the directory watcher to be activated.
-  enabled: true
+  enabled: True
   # The root directory and watch directory will normally be the same. One of these may be removed
   # in a future version.
   directory_to_watch: "/data/dlmw"
   storage_root_directory: "/data/dlmw"
   # This would normally always be true unless the watch directory is not a networked drive as the
   # alternative iNotify based watcher does not work with networked filesystems.
-  use_polling_watcher: true
+  use_polling_watcher: True
   # Typically used during testing or if the watch directory is the final storage location so no
   # immediate migration will be required.
   skip_rclone_access_check_on_register: True
@@ -50,7 +50,7 @@ directory_watcher:
   register_contents_of_watch_directory: False
   # New for dman-29-psi-low branch - if true go through all the steps to register a data item
   # but DO NOT call DLM to register the data item.
-  no_dlm_server_services: true
+  ignore_dlm_server_services: True
 
 kafka_watcher:
   # Enabling this will allow the kafka watcher to be activated.

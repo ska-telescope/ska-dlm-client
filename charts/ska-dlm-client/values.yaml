@@ -55,7 +55,7 @@ directory_watcher:
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false
   # Only set this to true if testing without a DLM
-  no_dlm_server_services: false
+  ignore_dlm_server_services: false
 
 kafka_watcher:
   enabled: false  # kafka-watcher OFF by default
