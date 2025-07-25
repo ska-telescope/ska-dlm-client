@@ -3,20 +3,6 @@ Directory Watcher
 
 The directory_watcher will watch a given directory and add the file or directory to the DLM.
 
-The directory_watcher requires the following parameters:
-
-* A directory to watch
-* The storage name to use for registering the files
-* The URL to the DLM server
-
-Optional parameters include:
-
-* Prefix to add to uri of data items being registered
-* Use a polling watcher instead of the iNotify event based watcher
-* Whether to use the status file
-* Reload the status file
-* An alternative name for the status file
-
 CLI call example::
 
 
@@ -30,10 +16,22 @@ CLI call example::
     dlm_directory_watcher: error: the following arguments are required: -d/--directory-to-watch, -i/--ingest-server-url, -n/--storage-name
 
 
-The additional parameters allow for greater flexibility.
+The directory_watcher requires the following parameters:
 
-Package level documentation
-'''''''''''''''''''''''''''
+* A directory to watch (``-d``)
+* The storage name to use for registering the files (``-n``)
+* The URL to the DLM server (``-i``)
+
+Optional parameters include:
+
+* Prefix to add to uri of data items being registered (``-p``)
+* Use a polling watcher instead of the iNotify event based watcher (``--use-polling-watcher``)
+* Whether to use the status file (``--use-status-file``)
+* Reload the status file (``--reload-status-file``)
+* An alternative name for the status file (``--status-file-filename``)
+
+Module documentation
+''''''''''''''''''''
 
 .. automodule:: ska_dlm_client.directory_watcher.main
     :members:
