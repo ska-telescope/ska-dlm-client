@@ -1,7 +1,7 @@
 Directory Watcher
 -------------------
 
-The directory_watcher will watch a given directory and add the file or directory to the DLM.
+The directory_watcher will watch a given directory and add any files or directories that are created after startup to the DLM.
 
 CLI call example::
 

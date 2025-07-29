@@ -28,6 +28,9 @@ The Kafka watcher subscribes to a specified Kafka topic and triggers an ingestio
 - Reload the status file. (``--reload-status-file``)
 - An alternative name for the status file. (``--status-file-filename``)
 
+.. note::
+   As part of the Kafka message a directory is given to the data product needing to be added. This path must accessible to DLM services to perform the eventual file transfer.
+
 **Module Documentation:**
 
 .. automodule:: ska_dlm_client.kafka_watcher.main
