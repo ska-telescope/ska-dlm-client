@@ -134,10 +134,10 @@ This is based on [ADR-55 Definition of metadata for data management at AA0.5](ht
 
 ## Deployment
 
-An example deployment of the ska-dlm-client directory watcher would look like
+An example deployment of the ska-dlm-client would look like:
 
 ```sh
-helm install -f resources/dp-proj-user.yaml ska-dlm-client charts/ska-dlm-client
+helm install -f resources/dp-proj-user.yaml [-n <namespace>] ska-dlm-client charts/ska-dlm-client
 ```
 
 This will deploy to the currently configured cluster and namespace.
@@ -146,21 +146,51 @@ NOTE: More production specific values (values files) will be added in a future r
 
 ### Values
 
-* global.dataProduct.pvc.name is name of the location of the data products or where directory to watched is located.
-* global.dataProduct.pvc.read_only should be set to True for now. This limits the scope of what directory_watcher can do.
-* setupStorageLocation set to True if a test location/storage is needed.
+* global.dataProduct.pvc.name is the name of the location of the data products or the location of the directory to be watched.
+* global.dataProduct.pvc.read_only should be set to `true` for now. This limits the scope of what directory_watcher can do.
+* `setupStorageLocation`: Set to `true` if a test location/storage is needed.
 
-NOTE: There is currently an overlap between ska_dlm_client, directory_watcher and kafka_watcher
-Defining in multiple locations will be required.
-* `ska_dlm_client`:
-  * `image`: image location URL and name.
-  * `version`: the version to be used.
-  * `storage_name`: used by DLM to identify storage resource.
+**Note:** There is currently overlap between `ska_dlm_client`, `directory_watcher`, and `kafka_watcher`.
+Values like `storage_name` and `storage_root_directory` appear in multiple sections because different components may reference different storage locations.
+
+#### ska_dlm_client
+
+  * `image`: Container image to use for all watcher components (e.g., `artefact.skao.int/ska-dlm-client`).
+  * `version`: Image tag or version (e.g., `"1.0.0"`).
+  * `storage_name`: The DLM storage location name used during data registration.
   * `storage_root_directory`: used as the root directory when generating URIs for DLM DB.
   * `securityContext`: Kubernetes context updated during deployment.
-  * `ingest_server_url`: URL of the DLM ingest server.
-  * `storage_server_url`: URL of the DLM storage server.
-  * `request_server_url`: URL of the DLM request server.
+  * `ingest_server_url`: Full HTTP URL of the ingest server.
+  * `storage_server_url`: Full HTTP URL of the storage server.
+  * `request_server_url`: Full HTTP URL of the request server.
+
+#### directory_watcher
+
+  * `enabled`: Whether to deploy the `directory-watcher` component.
+  * `directory_to_watch`: Filesystem path to monitor for new data products. Must exist within the mounted storage (e.g., `/data/dlm/watch_dir`).
+  * `storage_root_directory`: Root directory used to generate URIs for the DLM database. Should match `ska_dlm_client.storage_root_directory`.
+  * `skip_rclone_access_check_on_register`: If `true`, skips verifying rclone access before attempting to register the file.
+  * `register_contents_of_watch_directory`: If `true`, registers all contents of the watch directory at startup, not just newly detected files.
+
+#### kafka_watcher
+
+  * `enabled`: Whether to deploy the `kafka-watcher` component.
+  * `kafka_topic`: Kafka topic(s) to subscribe to for ingest event messages.
+  * `storage_name`: The DLM storage location name to use when registering data items.
+  * `check_rclone_access`: If `true`, verifies rclone access before attempting registration. Optional.
+  * `kafka_broker_url`: The Kafka bootstrap server to connect to. Required in production.
+  - **In production:**
+    - Keep `kafka_server_local` as `false`
+    - Provide the following explicitly:
+      - `kafka_broker_url` as `<service>.<namespace>:<port>` (e.g., `ska-sdp-kafka.dp-shared:9092`)
+      - `ska_dlm_client.ingest_server_url` as `http://<service>.<namespace>:<port>` (e.g., `http://ska-dlm-dev-ingest.dp-shared:80`)
+  - **In local development:**
+    - Set `kafka_server_local: true`
+    - Set `ska_dlm_client.ingest_server_url` to a local service (e.g., `http://ska-dlm-dev-ingest:80`)
+    - The Helm chart will automatically construct internal URLs using Kubernetes DNS:
+      - Kafka broker URL: `<service>.<namespace>:<port>`
+      - Ingest URL: `http://<service>.<namespace>:<port>`
+
 
 #### ssh-storage-access Related Values
 

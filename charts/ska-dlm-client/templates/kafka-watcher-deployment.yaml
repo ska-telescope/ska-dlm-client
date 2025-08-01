@@ -1,4 +1,4 @@
-{{- if $.Values.kafka_watcher.enabled }}
+{{- if .Values.kafka_watcher.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -24,13 +24,17 @@ spec:
         command:
         - "dlm-kafka-watcher"
         - "--kafka-broker-url"
+        {{- if .Values.kafka_watcher.kafka_server_local }}
+        - "{{ .Values.kafka.fullnameOverride }}.{{ .Release.Namespace }}:{{ .Values.kafka_watcher.kafka_server_local_port }}"
+        {{- else }}
         - "{{ .Values.kafka_watcher.kafka_broker_url }}"
+        {{- end }}
         - "--kafka-topic"
         - "{{ .Values.kafka_watcher.kafka_topic }}"
         - "--storage-name"
         - "{{ .Values.kafka_watcher.storage_name }}"
         - "--ingest-server-url"
-        - "http://{{ .Values.ska_dlm.fullname }}-ingest.{{ .Release.Namespace }}:{{ .Values.ska_dlm.ingest_service_port }}"
+        - "{{ .Values.ska_dlm_client.ingest_server_url }}"
         # Optional flag to enable rclone access check:
         {{- if .Values.kafka_watcher.check_rclone_access }}
         - "--check-rclone-access"
