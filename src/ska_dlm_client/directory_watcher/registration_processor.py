@@ -15,7 +15,7 @@ from ska_dlm_client.directory_watcher.config import Config
 from ska_dlm_client.directory_watcher.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntry
 from ska_dlm_client.openapi import ApiException, api_client
-from ska_dlm_client.openapi.dlm_api import ingest_api
+from ska_dlm_client.openapi.dlm_api import ingest_api, migration_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
 
 logging.basicConfig(level=logging.DEBUG)
@@ -28,9 +28,8 @@ class ItemType(str, Enum):
     UNKOWN = "unknown"
     """A single file."""
     FILE = "file"
-    """A single file."""
-    CONTAINER = "container"
     """A directory superset with parents."""
+    CONTAINER = "container"
 
 
 @dataclass
@@ -64,7 +63,6 @@ class RegistrationProcessor:
     """The class used for processing of the registration."""
 
     _config: Config
-    dry_run_for_debug: bool = False
 
     def __init__(self, config: Config):
         """Initialise the RegistrationProcessor with the given config."""
@@ -84,6 +82,40 @@ class RegistrationProcessor:
             path.resolve()
         return path
 
+    def _copy_data_item_to_new_storage(self, uid: str) -> str | None:
+        """Send migration request to DLM.
+
+        Args:
+            uid: The unique identifier of the data item to copy.
+
+        Returns:
+            The UUID of the migrated data item, or None if migration was skipped or failed.
+        """
+        if not self._config.migration_destination_storage_name:
+            logger.warning("Skipping migration due to missing destination storage name")
+            return None
+        with api_client.ApiClient(self._config.migration_configuration) as migration_api_client:
+            api_migration = migration_api.MigrationApi(migration_api_client)
+            try:
+                if self._config.perform_actual_ingest_and_migration:
+                    response = api_migration.copy_data_item(
+                        uid=uid,
+                        destination_name=self._config.migration_destination_storage_name
+                    )
+                    logger.info("Migration response: %s", response)
+                    return str(response)
+                else:
+                    logger.warning("Skipping migration due to config")
+                    return None
+            except OpenApiException as err:
+                logger.error("OpenApiException caught during copy_data_item")
+                if isinstance(err, ApiException):
+                    logger.error("ApiException: %s", err.body)
+                logger.error("%s", err)
+                logger.error("Ignoring and continuing.....")
+                return None
+
+
     def _register_single_item(self, item: Item) -> str | None:
         """Register the given item returning its uuid in the DLM."""
         with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
@@ -97,7 +129,7 @@ class RegistrationProcessor:
                     else f"{self._config.ingest_register_path_to_add}/{item_path_rel_to_watch_dir}"
                 )
                 response = None
-                if not self.dry_run_for_debug:
+                if self._config.perform_actual_ingest_and_migration:
                     response = api_ingest.register_data_item(
                         item_name=item_path_rel_to_watch_dir,
                         uri=uri,
@@ -106,6 +138,9 @@ class RegistrationProcessor:
                         do_storage_access_check=self._config.rclone_access_check_on_register,
                         body=None if item.metadata is None else item.metadata.as_dict(),
                     )
+                    logger.info("register_data_item response: %s", response)
+                else:
+                    logger.warning("Skipping register_data_item due to config")
             except OpenApiException as err:
                 logger.error("OpenApiException caught during register_container_parent_item")
                 if isinstance(err, ApiException):
@@ -115,6 +150,8 @@ class RegistrationProcessor:
                 return None
 
         dlm_registration_uuid = str(response)
+        # Attempt to migrate the data item to the new storage
+        migration_result = self._copy_data_item_to_new_storage(uid=dlm_registration_uuid)
         time_registered = time.time()
 
         directory_watcher_entry = DirectoryWatcherEntry(
@@ -126,10 +163,11 @@ class RegistrationProcessor:
         self._config.directory_watcher_entries.add(directory_watcher_entry)
         self._config.directory_watcher_entries.save_to_file()
         logger.info(
-            "Added to DLM %s %s metadata and path %s",
+            "Added to DLM %s %s metadata, path %s, migration result: %s",
             item.item_type,
             "without" if item.metadata is None else "with",
             item_path_rel_to_watch_dir,
+            migration_result
         )
         return dlm_registration_uuid
 
@@ -148,7 +186,7 @@ class RegistrationProcessor:
                         f"{item_path_rel_to_watch_dir}"
                     )
                     response = None
-                    if not self.dry_run_for_debug:
+                    if self._config.perform_actual_ingest_and_migration:
                         response = api_ingest.register_data_item(
                             item_name=item_path_rel_to_watch_dir,
                             uri=uri,
@@ -158,6 +196,9 @@ class RegistrationProcessor:
                             parents=None if item.parent is None else item.parent.uuid,
                             body=None if item.metadata is None else item.metadata.as_dict(),
                         )
+                        logger.info("register_data_item response: %s", response)
+                    else:
+                        logger.warning("Skipping register_data_item due to config")
                 except OpenApiException as err:
                     logger.error("OpenApiException caught during _register_container_items")
                     if isinstance(err, ApiException):
@@ -167,6 +208,8 @@ class RegistrationProcessor:
                     return
 
                 dlm_registration_uuid = str(response)
+                # Attempt to migrate the data item to the new storage
+                migration_result = self._copy_data_item_to_new_storage(uid=dlm_registration_uuid)
                 time_registered = time.time()
 
                 directory_watcher_entry = DirectoryWatcherEntry(
@@ -178,10 +221,11 @@ class RegistrationProcessor:
                 self._config.directory_watcher_entries.add(directory_watcher_entry)
                 self._config.directory_watcher_entries.save_to_file()
                 logger.info(
-                    "Added to DLM %s %s metadata and path %s",
+                    "Added to DLM %s %s metadata, path %s, migration result: %s",
                     item.item_type,
                     "without" if item.metadata is None else "with",
                     item_path_rel_to_watch_dir,
+                    migration_result
                 )
                 time.sleep(0.01)
 
@@ -216,10 +260,9 @@ class RegistrationProcessor:
             item_list.remove(parent_item)
             self._register_container_items(item_list=item_list)
 
-    def register_data_products_from_watch_directory(self, dry_run_for_debug: bool = False):
+    def register_data_products_from_watch_directory(self):
         """Provide a mechanism to register the contents of the directory to watch."""
         logger.info("\n##############################\n")
-        self.dry_run_for_debug = dry_run_for_debug
         for item in os.listdir(self._config.directory_to_watch):
             self.add_path(
                 absolute_path=os.path.join(self._config.directory_to_watch, item),

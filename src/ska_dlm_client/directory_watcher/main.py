@@ -128,7 +128,7 @@ def create_directory_watcher() -> DirectoryWatcher:
     config = process_args(args=args, cmd_line_parameters=cmd_line_parameters)
     registration_processor = RegistrationProcessor(config)
     if args.register_contents_of_watch_directory:
-        registration_processor.register_data_products_from_watch_directory(dry_run_for_debug=False)
+        registration_processor.register_data_products_from_watch_directory()
     # We want the watcher to set readiness probe file when ready so pass class during creation
     if args.use_polling_watcher:  # pylint: disable=no-else-return"
         return PollingDirectoryWatcher(

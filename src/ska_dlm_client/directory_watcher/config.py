@@ -74,6 +74,7 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         self.migration_server_url = migration_server_url
         self.migration_configuration = configuration.Configuration(host=migration_server_url)
         self.migration_destination_storage_name = migration_destination_storage_name
+
         self.perform_actual_ingest_and_migration = perform_actual_ingest_and_migration
 
     def __str__(self):
