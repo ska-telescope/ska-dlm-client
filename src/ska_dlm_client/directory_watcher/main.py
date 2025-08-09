@@ -94,7 +94,7 @@ def create_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def process_args(args: argparse.Namespace) -> Config:
+def process_args(args: argparse.Namespace, cmd_line_parameters: CmdLineParameters) -> Config:
     """Collect up all command line parameters and return a Config."""
     config = Config(
         directory_to_watch=args.directory_to_watch,
@@ -105,6 +105,9 @@ def process_args(args: argparse.Namespace) -> Config:
         reload_status_file=args.reload_status_file,
         use_status_file=args.use_status_file,
         rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,
+        migration_server_url=cmd_line_parameters.migration_server_url,
+        migration_destination_storage_name=cmd_line_parameters.migration_destination_storage_name,
+        perform_actual_ingest_and_migration=cmd_line_parameters.perform_actual_ingest_and_migration,
     )
     return config
 
@@ -121,8 +124,8 @@ def create_directory_watcher() -> DirectoryWatcher:
         add_do_not_perform_actual_ingest_and_migration=True
     )
     args = parser.parse_args()
-    config = process_args(args=args)
     cmd_line_parameters.parse_arguments(args)
+    config = process_args(args=args, cmd_line_parameters=cmd_line_parameters)
     registration_processor = RegistrationProcessor(config)
     if args.register_contents_of_watch_directory:
         registration_processor.register_data_products_from_watch_directory(dry_run_for_debug=False)
