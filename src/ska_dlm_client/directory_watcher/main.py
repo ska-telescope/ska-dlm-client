@@ -112,7 +112,14 @@ def process_args(args: argparse.Namespace) -> Config:
 def create_directory_watcher() -> DirectoryWatcher:
     """Create a `DirectoryWatcher` factory from the CLI arguments."""
     parser = create_parser()
-    cmd_line_parameters = CmdLineParameters(parser, add_readiness_probe_file=True)
+    cmd_line_parameters = CmdLineParameters(
+        parser=parser,
+        add_migration_server_url=True,
+        add_migration_destination_storage_name=True,
+        add_readiness_probe_file=True,
+        add_dev_test_mode=True,
+        add_do_not_perform_actual_ingest_and_migration=True
+    )
     args = parser.parse_args()
     config = process_args(args=args)
     cmd_line_parameters.parse_arguments(args)
