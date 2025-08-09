@@ -60,24 +60,49 @@ class Item:
 
 
 class RegistrationProcessor:
-    """The class used for processing of the registration."""
+    """Processes the registration of data items with the DLM.
+
+    This class handles the registration of data items with the DLM system,
+    including sending registration requests to the DLM API and handling
+    the migration of data items between storage locations.
+    """
 
     _config: Config
 
     def __init__(self, config: Config):
-        """Initialise the RegistrationProcessor with the given config."""
+        """Initialize the RegistrationProcessor with the given configuration.
+
+        Args:
+            config: The configuration object containing DLM connection settings
+                   and other parameters needed for registration and migration.
+        """
         self._config = config
 
-    def get_config(self):
-        """Get the Config being used by the RegistrationProcessor."""
+    def get_config(self) -> Config:
+        """Get the configuration being used by the RegistrationProcessor.
+
+        Returns:
+            The current configuration object.
+        """
         return self._config
 
     def set_config(self, config: Config):
-        """Set/reset the config."""
+        """Set or reset the configuration used by the RegistrationProcessor.
+
+        Args:
+            config: The new configuration object to use.
+        """
         self._config = config
 
     def _follow_sym_link(self, path: Path) -> Path:
-        """Return the real path after following the symlink."""
+        """Return the real path after following the symlink.
+
+        Args:
+            path: The path that might be a symlink.
+
+        Returns:
+            The resolved path if it was a symlink, otherwise the original path.
+        """
         if path.is_symlink():
             path.resolve()
         return path
@@ -117,7 +142,17 @@ class RegistrationProcessor:
 
 
     def _register_single_item(self, item: Item) -> str | None:
-        """Register the given item returning its uuid in the DLM."""
+        """Register a single data item with the DLM.
+
+        Sends a registration request to the DLM API for the given item,
+        and optionally migrates the registered item to a new storage location.
+
+        Args:
+            item: The data item to register with the DLM.
+
+        Returns:
+            The UUID of the registered data item, or None if registration failed.
+        """
         with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
             try:
@@ -172,7 +207,14 @@ class RegistrationProcessor:
         return dlm_registration_uuid
 
     def _register_container_items(self, item_list: list[Item]):
-        """Register the given item returning its uuid in the DLM."""
+        """Register a list of data items with the DLM.
+
+        Sends registration requests to the DLM API for each item in the list,
+        and optionally migrates each registered item to a new storage location.
+
+        Args:
+            item_list: A list of data items to register with the DLM.
+        """
         with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
             for item in item_list:
@@ -230,13 +272,17 @@ class RegistrationProcessor:
                 time.sleep(0.01)
 
     def add_path(self, absolute_path: str, path_rel_to_watch_dir: str):
-        """Add the given path_rel_to_watch_dir to the DLM.
+        """Add the given path to the DLM.
 
         If absolute_path is a file, a single file will be registered with the DLM.
         If absolute_path is a directory, and it is an MS, then ingest a single data
         item for the whole directory.
         If absolute_path is a directory, and it is NOT an MS, then recursively ingest
-        all files and subdirectories
+        all files and subdirectories.
+
+        Args:
+            absolute_path: The absolute path to the file or directory to register.
+            path_rel_to_watch_dir: The path relative to the watch directory.
         """
         logger.info("in add_path with %s and %s", absolute_path, path_rel_to_watch_dir)
         item_list = _generate_paths_and_metadata(
@@ -261,7 +307,11 @@ class RegistrationProcessor:
             self._register_container_items(item_list=item_list)
 
     def register_data_products_from_watch_directory(self):
-        """Provide a mechanism to register the contents of the directory to watch."""
+        """Register all data products found in the watch directory with the DLM.
+
+        Iterates through all items in the configured watch directory and registers
+        each one with the DLM using the add_path method.
+        """
         logger.info("\n##############################\n")
         for item in os.listdir(self._config.directory_to_watch):
             self.add_path(
@@ -274,7 +324,18 @@ class RegistrationProcessor:
 def _generate_item_list_for_data_product(
     absolute_path: str, path_rel_to_watch_dir: str
 ) -> list[Item]:
-    """Return the list of relative paths to data items given a directory."""
+    """Generate a list of Item objects for a data product directory.
+
+    Analyzes the directory structure and metadata to create Item objects
+    representing the data product and its components.
+
+    Args:
+        absolute_path: The absolute path to the data product directory.
+        path_rel_to_watch_dir: The path relative to the watch directory.
+
+    Returns:
+        A list of Item objects representing the data product and its components.
+    """
     item_list: list[Item] = []
     # Case with metadata being at same level as container directory
 
@@ -322,7 +383,18 @@ def _generate_item_list_for_data_product(
 def _generate_paths_and_metadata_for_direcotry(
     absolute_path: str, path_rel_to_watch_dir: str
 ) -> list[Item]:
-    """Return the list of relative paths to data items given a directory."""
+    """Generate a list of Item objects for a directory.
+
+    Analyzes the directory structure to determine if it contains data products
+    and creates appropriate Item objects.
+
+    Args:
+        absolute_path: The absolute path to the directory.
+        path_rel_to_watch_dir: The path relative to the watch directory.
+
+    Returns:
+        A list of Item objects representing the directory contents.
+    """
     item_list: list[Item] = []
     # Determine first if the given path is the head of a data item or of a directory containing
     # other data items. Exclude any configurations not currently supported
@@ -391,7 +463,18 @@ def _generate_paths_and_metadata_for_direcotry(
 
 
 def _generate_paths_and_metadata(absolute_path: str, path_rel_to_watch_dir: str) -> list[Item]:
-    """Return the list of relative paths to data items and their associated metadata."""
+    """Generate a list of Item objects with their associated metadata.
+
+    Determines whether the path is a file or directory and creates appropriate
+    Item objects with metadata.
+
+    Args:
+        absolute_path: The absolute path to the file or directory.
+        path_rel_to_watch_dir: The path relative to the watch directory.
+
+    Returns:
+        A list of Item objects with their associated metadata.
+    """
     logger.info("working with path %s", absolute_path)
     item_list: list[Item] = []
     if isfile(absolute_path):
@@ -421,7 +504,17 @@ def _generate_paths_and_metadata(absolute_path: str, path_rel_to_watch_dir: str)
 
 
 def _item_for_single_file_with_metadata(absolute_path: str, path_rel_to_watch_dir: str) -> Item:
-    """Create an Item for a file by itself adding any metadata to it."""
+    """Create an Item object for a single file with its metadata.
+
+    Extracts metadata for the file and creates an Item object of type FILE.
+
+    Args:
+        absolute_path: The absolute path to the file.
+        path_rel_to_watch_dir: The path relative to the watch directory.
+
+    Returns:
+        An Item object representing the file with its metadata.
+    """
     metadata = DataProductMetadata(absolute_path)
     item = Item(
         path_rel_to_watch_dir=path_rel_to_watch_dir,
@@ -433,7 +526,14 @@ def _item_for_single_file_with_metadata(absolute_path: str, path_rel_to_watch_di
 
 
 def _directory_contains_only_directories(absolute_path: str) -> bool:
-    """Return True if the given directory contains only directories."""
+    """Check if a directory contains only subdirectories and no files.
+
+    Args:
+        absolute_path: The absolute path to the directory to check.
+
+    Returns:
+        True if the directory contains only subdirectories, False otherwise.
+    """
     for entry in os.listdir(absolute_path):
         if not os.path.isdir(os.path.join(absolute_path, entry)):
             return False
@@ -441,7 +541,14 @@ def _directory_contains_only_directories(absolute_path: str) -> bool:
 
 
 def _directory_contains_only_files(absolute_path: str) -> bool:
-    """Return True if the given directory contains only files."""
+    """Check if a directory contains only files and no subdirectories.
+
+    Args:
+        absolute_path: The absolute path to the directory to check.
+
+    Returns:
+        True if the directory contains only files, False otherwise.
+    """
     for entry in os.listdir(absolute_path):
         if not os.path.isfile(os.path.join(absolute_path, entry)):
             return False
@@ -449,7 +556,17 @@ def _directory_contains_only_files(absolute_path: str) -> bool:
 
 
 def _directory_contains_metadata_file(absolute_path: str) -> bool:
-    """Return True if the given directory contains only files."""
+    """Check if a directory contains a metadata file.
+
+    Looks for the presence of a file with the name defined in
+    ska_dlm_client.directory_watcher.config.METADATA_FILENAME.
+
+    Args:
+        absolute_path: The absolute path to the directory to check.
+
+    Returns:
+        True if the directory contains a metadata file, False otherwise.
+    """
     for entry in os.listdir(absolute_path):
         if entry == ska_dlm_client.directory_watcher.config.METADATA_FILENAME:
             return True
@@ -457,7 +574,17 @@ def _directory_contains_metadata_file(absolute_path: str) -> bool:
 
 
 def _measurement_set_directory_in(absolute_path: str) -> str | None:
-    """Return the name of the measurement set directory or None if nothing found."""
+    """Find a measurement set directory within the given directory.
+
+    Looks for a directory with a name ending with the suffix defined in
+    ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX.
+
+    Args:
+        absolute_path: The absolute path to the directory to search in.
+
+    Returns:
+        The name of the measurement set directory if found, None otherwise.
+    """
     for entry in os.listdir(absolute_path):
         if entry.lower().endswith(
             ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
@@ -467,7 +594,18 @@ def _measurement_set_directory_in(absolute_path: str) -> str | None:
 
 
 def _directory_list_minus_metadata_file(absolute_path: str) -> list[str]:
-    """Return the list of relative minus the metadata file name."""
+    """Get a list of directory contents excluding the metadata file.
+
+    Returns a list of all files and directories in the given directory,
+    excluding the metadata file defined in
+    ska_dlm_client.directory_watcher.config.METADATA_FILENAME.
+
+    Args:
+        absolute_path: The absolute path to the directory to list.
+
+    Returns:
+        A list of filenames in the directory, excluding the metadata file.
+    """
     dir_list = os.listdir(absolute_path)
     if ska_dlm_client.directory_watcher.config.METADATA_FILENAME in dir_list:
         dir_list.remove(ska_dlm_client.directory_watcher.config.METADATA_FILENAME)
@@ -477,7 +615,19 @@ def _directory_list_minus_metadata_file(absolute_path: str) -> list[str]:
 def _item_list_minus_metadata_file(
     container_item: Item, absolute_path: str, path_rel_to_watch_dir: str
 ) -> list[Item]:
-    """Return a listing of the given absolute_path directory without the metadata file."""
+    """Create Item objects for all files in a directory, excluding the metadata file.
+
+    Creates Item objects of type FILE for each file in the directory, excluding
+    the metadata file. Each Item is linked to the provided container_item as its parent.
+
+    Args:
+        container_item: The parent Item object representing the container directory.
+        absolute_path: The absolute path to the directory to process.
+        path_rel_to_watch_dir: The path relative to the watch directory.
+
+    Returns:
+        A list of Item objects representing the files in the directory, excluding the metadata file.
+    """
     item_list: list[Item] = []
     for entry in _directory_list_minus_metadata_file(absolute_path):
         item = Item(

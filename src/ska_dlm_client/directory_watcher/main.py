@@ -21,7 +21,14 @@ logger = logging.getLogger(__name__)
 
 
 def create_parser() -> argparse.ArgumentParser:
-    """Define a parser for all the command line parameters."""
+    """Define a parser for all the command line parameters.
+
+    Creates and configures an ArgumentParser with all the command line options
+    needed for the ska-dlm-clinet's various components.
+
+    Returns:
+        An ArgumentParser instance configured with all required and optional arguments.
+    """
     parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
 
     # Adding optional argument.
@@ -95,7 +102,15 @@ def create_parser() -> argparse.ArgumentParser:
 
 
 def process_args(args: argparse.Namespace, cmd_line_parameters: CmdLineParameters) -> Config:
-    """Collect up all command line parameters and return a Config."""
+    """Collect all command line parameters and create a Config object.
+
+    Args:
+        args: The parsed command line arguments from argparse.
+        cmd_line_parameters: Additional command line parameters processed by CmdLineParameters.
+
+    Returns:
+        A Config object initialized with all the command line parameters.
+    """
     config = Config(
         directory_to_watch=args.directory_to_watch,
         ingest_server_url=args.ingest_server_url,
@@ -113,7 +128,15 @@ def process_args(args: argparse.Namespace, cmd_line_parameters: CmdLineParameter
 
 
 def create_directory_watcher() -> DirectoryWatcher:
-    """Create a `DirectoryWatcher` factory from the CLI arguments."""
+    """Create a DirectoryWatcher instance from the command line arguments.
+
+    Parses command line arguments, creates a Config object, and initializes
+    a DirectoryWatcher (either INotifyDirectoryWatcher or PollingDirectoryWatcher
+    depending on the arguments).
+
+    Returns:
+        A DirectoryWatcher instance configured with the parsed command line arguments.
+    """
     parser = create_parser()
     cmd_line_parameters = CmdLineParameters(
         parser=parser,
@@ -145,7 +168,11 @@ def create_directory_watcher() -> DirectoryWatcher:
 
 
 async def amain():
-    """Run main in asyncio."""
+    """Run the main application logic in an asyncio context.
+
+    Creates a DirectoryWatcher, sets up signal handlers for graceful shutdown,
+    and starts the directory watching process.
+    """
     directory_watcher = create_directory_watcher()
 
     def stop_watcher(signo: signal.Signals):
@@ -159,7 +186,11 @@ async def amain():
 
 
 def main():
-    """Run amain function in a new loop."""
+    """Run the application's main entry point.
+
+    Creates a new asyncio event loop and runs the amain coroutine in it.
+    This function is the entry point when the module is executed directly.
+    """
     asyncio.run(amain())
 
 

@@ -15,7 +15,11 @@ METADATA_EXECUTION_BLOCK_KEY = "execution_block"
 
 
 class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instance-attributes
-    """Running configuration of the SKA DLM client directory watcher."""
+    """Running configuration of the SKA DLM client directory watcher.
+
+    This class holds all configuration parameters needed for the directory watcher
+    to monitor directories and register data items with the DLM.
+    """
 
     directory_to_watch: str
     ingest_server_url: str
@@ -49,7 +53,21 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         migration_destination_storage_name: str = None,
         perform_actual_ingest_and_migration: bool = True,
     ):
-        """Init the values required for correct operation of directory_watcher."""
+        """Initialize the configuration with values required for directory_watcher operation.
+
+        Args:
+            directory_to_watch: The directory path to monitor for new files/directories.
+            ingest_server_url: The URL of the DLM ingest server.
+            storage_name: The name of the storage location in DLM.
+            status_file_absolute_path: The absolute path to the status file.
+            storage_root_directory: The root directory of the storage location.
+            reload_status_file: Whether to reload the status file on startup.
+            use_status_file: Whether to use and update the status file.
+            rclone_access_check_on_register: Whether to perform rclone access check during registration.
+            migration_server_url: The URL of the DLM migration server.
+            migration_destination_storage_name: The name of the destination storage for migration.
+            perform_actual_ingest_and_migration: Whether to actually perform ingest and migration operations.
+        """
         self.directory_to_watch = directory_to_watch
         self.ingest_server_url = f"{ingest_server_url}"
         self.storage_name = storage_name
@@ -78,7 +96,11 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
         self.perform_actual_ingest_and_migration = perform_actual_ingest_and_migration
 
     def __str__(self):
-        """Create a string from this class."""
+        """Create a string representation of this configuration.
+
+        Returns:
+            A string containing all configuration parameters and their values.
+        """
         return (
             f"directory_to_watch {self.directory_to_watch}\n"
             f"ingest_server_url {self.ingest_server_url}\n"
