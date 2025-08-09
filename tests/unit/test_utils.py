@@ -2,6 +2,7 @@
 """Unit tests for the CmdLineParameters class in the startup_verification.utils module."""
 
 import argparse
+
 import pytest
 
 from src.ska_dlm_client.startup_verification.utils import CmdLineParameters
@@ -36,7 +37,7 @@ def test_cmdline_parameters_initialization(parser: argparse.ArgumentParser) -> N
         add_readiness_probe_file=True,
         add_migration_destination_storage_name=True,
         add_dev_test_mode=True,
-        add_do_not_perform_actual_ingest_and_migration=True
+        add_do_not_perform_actual_ingest_and_migration=True,
     )
 
     # Test that all attributes are set correctly
@@ -71,9 +72,9 @@ def test_cmdline_parameters_default_values(parser: argparse.ArgumentParser) -> N
 
     # Check if attributes exist, if not, they're expected to be False by default
     # when initialized with their respective parameters set to False
-    assert getattr(cmd_params, 'add_migration_destination_storage_name', False) is False
-    assert getattr(cmd_params, 'add_dev_test_mode', False) is False
-    assert getattr(cmd_params, 'add_do_not_perform_actual_ingest_and_migration', False) is False
+    assert getattr(cmd_params, "add_migration_destination_storage_name", False) is False
+    assert getattr(cmd_params, "add_dev_test_mode", False) is False
+    assert getattr(cmd_params, "add_do_not_perform_actual_ingest_and_migration", False) is False
 
 
 @pytest.fixture(name="cmd_params_all_enabled")
@@ -93,7 +94,7 @@ def cmd_params_all_enabled_fixture(parser: argparse.ArgumentParser) -> CmdLinePa
         add_readiness_probe_file=True,
         add_migration_destination_storage_name=True,
         add_dev_test_mode=True,
-        add_do_not_perform_actual_ingest_and_migration=True
+        add_do_not_perform_actual_ingest_and_migration=True,
     )
 
 
@@ -112,11 +113,13 @@ def test_args_fixture() -> argparse.Namespace:
         readiness_probe_file="/tmp/ready",
         migration_destination_storage_name="dest-storage",
         dev_test_mode=True,
-        do_not_perform_actual_ingest_and_migration=True
+        do_not_perform_actual_ingest_and_migration=True,
     )
 
 
-def test_parse_arguments(cmd_params_all_enabled: CmdLineParameters, test_args: argparse.Namespace) -> None:
+def test_parse_arguments(
+    cmd_params_all_enabled: CmdLineParameters, test_args: argparse.Namespace
+) -> None:
     """Test that arguments are correctly parsed and assigned to class attributes.
 
     This test verifies that:
@@ -145,8 +148,8 @@ def test_parse_arguments(cmd_params_all_enabled: CmdLineParameters, test_args: a
 def test_do_not_perform_requires_dev_test_mode(cmd_params_all_enabled: CmdLineParameters) -> None:
     """Test that do_not_perform_actual_ingest_and_migration requires dev_test_mode to be True.
 
-    This test verifies that:
-    - A ValueError is raised when do_not_perform_actual_ingest_and_migration is True and dev_test_mode is False
+    This test verifies that a ValueError is raised when do_not_perform_actual_ingest_and_migration
+    is True and dev_test_mode is False.
 
     :param cmd_params_all_enabled: CmdLineParameters fixture with all parameters enabled
     """
@@ -160,19 +163,27 @@ def test_do_not_perform_requires_dev_test_mode(cmd_params_all_enabled: CmdLinePa
         readiness_probe_file="/tmp/ready",
         migration_destination_storage_name="dest-storage",
         dev_test_mode=False,
-        do_not_perform_actual_ingest_and_migration=True
+        do_not_perform_actual_ingest_and_migration=True,
     )
 
     # Verify that a ValueError is raised
-    with pytest.raises(ValueError, match="do_not_perform_actual_ingest_and_migration can only be used when dev_test_mode is True"):
+    with pytest.raises(
+        ValueError,
+        match=(
+            "do_not_perform_actual_ingest_and_migration can only be used when "
+            "dev_test_mode is True"
+        ),
+    ):
         cmd_params_all_enabled.parse_arguments(args)
 
 
-def test_migration_destination_storage_name_requires_migration_server_url(cmd_params_all_enabled: CmdLineParameters) -> None:
+def test_migration_destination_storage_name_requires_migration_server_url(
+    cmd_params_all_enabled: CmdLineParameters,
+) -> None:
     """Test that migration_destination_storage_name requires migration_server_url to be set.
 
-    This test verifies that:
-    - A ValueError is raised when migration_destination_storage_name is set but migration_server_url is not
+    This test verifies that a ValueError is raised when migration_destination_storage_name
+    is set but migration_server_url is not.
 
     :param cmd_params_all_enabled: CmdLineParameters fixture with all parameters enabled
     """
@@ -186,20 +197,28 @@ def test_migration_destination_storage_name_requires_migration_server_url(cmd_pa
         migration_destination_storage_name="dest-storage",
         migration_server_url=None,
         dev_test_mode=True,
-        do_not_perform_actual_ingest_and_migration=True
+        do_not_perform_actual_ingest_and_migration=True,
     )
 
     # Verify that a ValueError is raised
-    with pytest.raises(ValueError, match="migration_destination_storage_name can only be used when migration_server_url is set"):
+    with pytest.raises(
+        ValueError,
+        match=(
+            "migration_destination_storage_name can only be used when "
+            "migration_server_url is set"
+        ),
+    ):
         cmd_params_all_enabled.parse_arguments(args)
 
 
-def test_perform_actual_ingest_and_migration_setting(cmd_params_all_enabled: CmdLineParameters) -> None:
-    """Test that perform_actual_ingest_and_migration is set correctly based on do_not_perform_actual_ingest_and_migration.
+def test_perform_actual_ingest_and_migration_setting(
+    cmd_params_all_enabled: CmdLineParameters,
+) -> None:
+    """Test that perform_actual_ingest_and_migration is set correctly.
 
-    This test verifies that:
-    - perform_actual_ingest_and_migration is set to False when do_not_perform_actual_ingest_and_migration is True
-    - perform_actual_ingest_and_migration is set to True when do_not_perform_actual_ingest_and_migration is False
+    This test verifies that perform_actual_ingest_and_migration is set to False when
+    do_not_perform_actual_ingest_and_migration is True, and set to True when
+    do_not_perform_actual_ingest_and_migration is False.
 
     :param cmd_params_all_enabled: CmdLineParameters fixture with all parameters enabled
     """
@@ -213,7 +232,7 @@ def test_perform_actual_ingest_and_migration_setting(cmd_params_all_enabled: Cmd
         migration_destination_storage_name="dest-storage",
         migration_server_url="http://migration-server:8080",
         dev_test_mode=True,
-        do_not_perform_actual_ingest_and_migration=True
+        do_not_perform_actual_ingest_and_migration=True,
     )
     cmd_params_all_enabled.parse_arguments(args_true)
     assert cmd_params_all_enabled.do_not_perform_actual_ingest_and_migration is True
@@ -229,7 +248,7 @@ def test_perform_actual_ingest_and_migration_setting(cmd_params_all_enabled: Cmd
         migration_destination_storage_name="dest-storage",
         migration_server_url="http://migration-server:8080",
         dev_test_mode=True,
-        do_not_perform_actual_ingest_and_migration=False
+        do_not_perform_actual_ingest_and_migration=False,
     )
     cmd_params_all_enabled.parse_arguments(args_false)
     assert cmd_params_all_enabled.do_not_perform_actual_ingest_and_migration is False

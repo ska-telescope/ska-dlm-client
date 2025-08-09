@@ -9,7 +9,7 @@ __author__ = """Mark Boulton"""
 __email__ = "mark.boulton@uwa.edu.au"
 __version__ = "1.0.0"
 
-from ska_dlm_client.startup_verification.main import main, StartupVerification
+from ska_dlm_client.startup_verification.main import StartupVerification, main
 from ska_dlm_client.startup_verification.utils import CmdLineParameters
 
 __all__ = [

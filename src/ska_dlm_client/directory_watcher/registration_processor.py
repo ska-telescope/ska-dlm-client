@@ -119,19 +119,17 @@ class RegistrationProcessor:
         if not self._config.migration_destination_storage_name:
             logger.warning("Skipping migration due to missing destination storage name")
             return None
+        if not self._config.perform_actual_ingest_and_migration:
+            logger.warning("Skipping migration due to config")
+            return None
         with api_client.ApiClient(self._config.migration_configuration) as migration_api_client:
             api_migration = migration_api.MigrationApi(migration_api_client)
             try:
-                if self._config.perform_actual_ingest_and_migration:
-                    response = api_migration.copy_data_item(
-                        uid=uid,
-                        destination_name=self._config.migration_destination_storage_name
-                    )
-                    logger.info("Migration response: %s", response)
-                    return str(response)
-                else:
-                    logger.warning("Skipping migration due to config")
-                    return None
+                response = api_migration.copy_data_item(
+                    uid=uid, destination_name=self._config.migration_destination_storage_name
+                )
+                logger.info("Migration response: %s", response)
+                return str(response)
             except OpenApiException as err:
                 logger.error("OpenApiException caught during copy_data_item")
                 if isinstance(err, ApiException):
@@ -139,7 +137,6 @@ class RegistrationProcessor:
                 logger.error("%s", err)
                 logger.error("Ignoring and continuing.....")
                 return None
-
 
     def _register_single_item(self, item: Item) -> str | None:
         """Register a single data item with the DLM.
@@ -202,7 +199,7 @@ class RegistrationProcessor:
             item.item_type,
             "without" if item.metadata is None else "with",
             item_path_rel_to_watch_dir,
-            migration_result
+            migration_result,
         )
         return dlm_registration_uuid
 
@@ -267,7 +264,7 @@ class RegistrationProcessor:
                     item.item_type,
                     "without" if item.metadata is None else "with",
                     item_path_rel_to_watch_dir,
-                    migration_result
+                    migration_result,
                 )
                 time.sleep(0.01)
 
@@ -626,7 +623,8 @@ def _item_list_minus_metadata_file(
         path_rel_to_watch_dir: The path relative to the watch directory.
 
     Returns:
-        A list of Item objects representing the files in the directory, excluding the metadata file.
+        A list of Item objects representing the files in the directory, excluding the
+        metadata file.
     """
     item_list: list[Item] = []
     for entry in _directory_list_minus_metadata_file(absolute_path):

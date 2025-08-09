@@ -28,7 +28,10 @@ def read_config(user_config_file: Path = DLM_CLIENT_HOME / "config.yaml") -> ben
         if Path(default_user_config_file).exists():
             shutil.copy(default_user_config_file, user_config_file)
         else:
-            print(f"Default DLM client config {default_user_config_file} does not exit, ignoring.")
+            print(
+                f"Default DLM client config {default_user_config_file} "
+                f"does not exist, ignoring."
+            )
             return None
 
     with open(user_config_file, "r", encoding="utf-8") as file:

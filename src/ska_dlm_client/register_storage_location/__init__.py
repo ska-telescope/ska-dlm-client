@@ -10,10 +10,10 @@ __email__ = "mark.boulton@uwa.edu.au"
 __version__ = "1.0.0"
 
 from ska_dlm_client.register_storage_location.main import (
-    main,
-    setup_testing,
     init_location_for_testing,
     init_storage_for_testing,
+    main,
+    setup_testing,
 )
 
 __all__ = [

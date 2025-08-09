@@ -63,10 +63,10 @@ class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instan
             storage_root_directory: The root directory of the storage location.
             reload_status_file: Whether to reload the status file on startup.
             use_status_file: Whether to use and update the status file.
-            rclone_access_check_on_register: Whether to perform rclone access check during registration.
+            rclone_access_check_on_register: Whether to perform rclone access check.
             migration_server_url: The URL of the DLM migration server.
-            migration_destination_storage_name: The name of the destination storage for migration.
-            perform_actual_ingest_and_migration: Whether to actually perform ingest and migration operations.
+            migration_destination_storage_name: The name of the destination storage.
+            perform_actual_ingest_and_migration: Whether to perform ingest and migration.
         """
         self.directory_to_watch = directory_to_watch
         self.ingest_server_url = f"{ingest_server_url}"

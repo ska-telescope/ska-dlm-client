@@ -28,11 +28,9 @@ class MockCmdLineParameters:
 
     def parse_arguments(self, args):
         """Mock method that does nothing."""
-        pass
 
     def set_application_ready(self):
         """Mock method that does nothing."""
-        pass
 
 
 class TestDirectoryWatcher:
@@ -109,13 +107,13 @@ class TestDirectoryWatcher:
             directory_watcher = PollingDirectoryWatcher(
                 config=self.config,
                 registration_processor=registration_processor,
-                cmd_line_parameters=self.cmd_line_parameters
+                cmd_line_parameters=self.cmd_line_parameters,
             )
         else:
             directory_watcher = INotifyDirectoryWatcher(
                 config=self.config,
                 registration_processor=registration_processor,
-                cmd_line_parameters=self.cmd_line_parameters
+                cmd_line_parameters=self.cmd_line_parameters,
             )
         asyncio.get_event_loop().create_task(directory_watcher.watch())
         # Now let the directory_watcher start and listen on given directory

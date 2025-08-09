@@ -122,7 +122,9 @@ def process_args(args: argparse.Namespace, cmd_line_parameters: CmdLineParameter
         rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,
         migration_server_url=cmd_line_parameters.migration_server_url,
         migration_destination_storage_name=cmd_line_parameters.migration_destination_storage_name,
-        perform_actual_ingest_and_migration=cmd_line_parameters.perform_actual_ingest_and_migration,
+        perform_actual_ingest_and_migration=(
+            cmd_line_parameters.perform_actual_ingest_and_migration
+        ),
     )
     return config
 
@@ -144,7 +146,7 @@ def create_directory_watcher() -> DirectoryWatcher:
         add_migration_destination_storage_name=True,
         add_readiness_probe_file=True,
         add_dev_test_mode=True,
-        add_do_not_perform_actual_ingest_and_migration=True
+        add_do_not_perform_actual_ingest_and_migration=True,
     )
     args = parser.parse_args()
     cmd_line_parameters.parse_arguments(args)
