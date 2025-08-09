@@ -5,7 +5,7 @@ import argparse
 
 import pytest
 
-from src.ska_dlm_client.startup_verification.utils import CmdLineParameters
+from ska_dlm_client.utils import CmdLineParameters
 
 
 @pytest.fixture(name="parser")

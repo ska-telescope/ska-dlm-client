@@ -13,7 +13,7 @@ from watchfiles import Change, awatch
 from ska_dlm_client.directory_watcher.config import Config
 from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
 from ska_dlm_client.directory_watcher.watcher_event_handler import WatcherEventHandler
-from ska_dlm_client.startup_verification.utils import CmdLineParameters
+from ska_dlm_client.utils import CmdLineParameters
 
 logger = logging.getLogger(__name__)
 

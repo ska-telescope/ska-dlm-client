@@ -6,6 +6,8 @@ from pathlib import Path
 import yaml
 from benedict import benedict
 
+from ska_dlm_client.utils import CmdLineParameters
+
 __author__ = """Mark Boulton"""
 __email__ = "mark.boulton@uwa.edu.au"
 __version__ = "1.0.0"
@@ -44,4 +46,5 @@ __all__ = [
     "DLM_CLIENT_HOME",
     "DLM_CLIENT_LIB_DIR",
     "CONFIG",
+    "CmdLineParameters",
 ]

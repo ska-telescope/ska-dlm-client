@@ -14,7 +14,7 @@ from ska_dlm_client.directory_watcher.directory_watcher import (
     PollingDirectoryWatcher,
 )
 from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
-from ska_dlm_client.startup_verification.utils import CmdLineParameters
+from ska_dlm_client.utils import CmdLineParameters
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
