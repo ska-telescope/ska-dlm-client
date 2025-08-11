@@ -84,7 +84,7 @@ disable = [
 enable = ["useless-suppression"]
 
 [tool.pylint.MASTER]
-ignore = "openapi"
+ignore-paths = ["tests/openapi", "src/ska_dlm_client/openapi"]
 
 [tool.isort]
 line_length = 99

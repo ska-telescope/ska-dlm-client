@@ -116,6 +116,9 @@ class RegistrationProcessor:
         Returns:
             The UUID of the migrated data item, or None if migration was skipped or failed.
         """
+        if not uid:
+            logger.warning("Skipping migration due to missing uid")
+            return None
         if not self._config.migration_destination_storage_name:
             logger.warning("Skipping migration due to missing destination storage name")
             return None
@@ -181,7 +184,7 @@ class RegistrationProcessor:
                 logger.error("Ignoring and continuing.....")
                 return None
 
-        dlm_registration_uuid = str(response)
+        dlm_registration_uuid = str(response) if response is not None else None
         # Attempt to migrate the data item to the new storage
         migration_result = self._copy_data_item_to_new_storage(uid=dlm_registration_uuid)
         time_registered = time.time()
@@ -246,7 +249,7 @@ class RegistrationProcessor:
                     logger.error("Ignoring and continuing.....")
                     return
 
-                dlm_registration_uuid = str(response)
+                dlm_registration_uuid = str(response) if response is not None else None
                 # Attempt to migrate the data item to the new storage
                 migration_result = self._copy_data_item_to_new_storage(uid=dlm_registration_uuid)
                 time_registered = time.time()
