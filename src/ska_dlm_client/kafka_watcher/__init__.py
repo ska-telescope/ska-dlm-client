@@ -8,10 +8,6 @@ __author__ = """Nadia Steyn"""
 __email__ = "nadia.steyn@uwa.edu.au"
 __version__ = "1.0.0"
 
-from ska_dlm_client.kafka_watcher.main import main, post_dlm_data_item, watch
+#from ska_dlm_client.kafka_watcher.main import main, post_dlm_data_item, watch
 
-__all__ = [
-    "main",
-    "watch",
-    "post_dlm_data_item",
-]
+__all__ = []
