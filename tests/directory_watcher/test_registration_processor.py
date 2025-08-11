@@ -18,7 +18,7 @@ from ska_dlm_client.directory_watcher.registration_processor import (
     _directory_list_minus_metadata_file,
     _generate_item_list_for_data_product,
     _generate_paths_and_metadata,
-    _generate_paths_and_metadata_for_direcotry,
+    _generate_paths_and_metadata_for_directory,
     _item_for_single_file_with_metadata,
     _item_list_minus_metadata_file,
     _measurement_set_directory_in,
@@ -263,7 +263,7 @@ def test_generate_item_list_for_data_product(request):
 
 
 def test_generate_paths_and_metadata_for_directory(request):
-    """Test the _generate_paths_and_metadata_for_direcotry function."""
+    """Test the _generate_paths_and_metadata_for_directory function."""
     # Determine path where test files are stored.
     filename = request.module.__file__
     test_dir, _ = os.path.splitext(filename)
@@ -275,7 +275,7 @@ def test_generate_paths_and_metadata_for_directory(request):
     directory_path = os.path.join(watch_dir, "directory_entry")
     rel_path = os.path.split(directory_path)[1]
 
-    item_list = _generate_paths_and_metadata_for_direcotry(directory_path, rel_path)
+    item_list = _generate_paths_and_metadata_for_directory(directory_path, rel_path)
 
     assert len(item_list) == 3
     assert item_list[0].item_type == ItemType.CONTAINER

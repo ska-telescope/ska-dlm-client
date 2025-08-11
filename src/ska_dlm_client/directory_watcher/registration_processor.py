@@ -382,7 +382,7 @@ def _generate_item_list_for_data_product(
     return item_list
 
 
-def _generate_paths_and_metadata_for_direcotry(
+def _generate_paths_and_metadata_for_directory(
     absolute_path: str, path_rel_to_watch_dir: str
 ) -> list[Item]:
     """Generate a list of Item objects for a directory.
@@ -402,7 +402,7 @@ def _generate_paths_and_metadata_for_direcotry(
     # other data items. Exclude any configurations not currently supported
     if not _directory_contains_only_files(absolute_path):
         if _directory_contains_only_directories(absolute_path):
-            logger.info("Direcory %s contains only directories, processing.", absolute_path)
+            logger.info("Directory %s contains only directories, processing.", absolute_path)
         elif _directory_contains_metadata_file(absolute_path):
             item_list = _generate_item_list_for_data_product(
                 absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
@@ -457,7 +457,7 @@ def _generate_paths_and_metadata_for_direcotry(
         for entry in os.listdir(absolute_path):
             local_abs_path = os.path.join(absolute_path, entry)
             local_rel_path = os.path.join(path_rel_to_watch_dir, entry)
-            new_items = _generate_paths_and_metadata_for_direcotry(
+            new_items = _generate_paths_and_metadata_for_directory(
                 absolute_path=local_abs_path, path_rel_to_watch_dir=local_rel_path
             )
             item_list.extend(new_items)
@@ -495,7 +495,7 @@ def _generate_paths_and_metadata(absolute_path: str, path_rel_to_watch_dir: str)
         else:
             logger.info("entry is directory")
 
-        item_list = _generate_paths_and_metadata_for_direcotry(
+        item_list = _generate_paths_and_metadata_for_directory(
             absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
         )
     elif islink(absolute_path):
