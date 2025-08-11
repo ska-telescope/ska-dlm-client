@@ -2,9 +2,17 @@
 
 ## Development
 
+### Notes
+
+* Still aimed at integration with 1.1.x of DLM server services.
+
 ### Added
 
 * Added optional Kafka service to the Helm chart for local development support.
+* Documentation updates, particularly around class/method docstrings.
+* An offline test mode is added to allow dev testing without full DLM server deployment.
+* Added migration ability to directory-watcher that will call copy_data after an ingest.
+* Added old documentation related to DLM Client demo in PI26.
 
 ## 1.0.0
 
