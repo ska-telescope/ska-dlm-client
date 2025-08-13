@@ -22,6 +22,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
     add_ingest_server_url: bool = False
     add_request_server_url: bool = False
     add_readiness_probe_file: bool = False
+    add_dev_test_mode: bool = False
     directory_to_watch: str = None
     storage_name: str = None
     ingest_server_url: str = None
@@ -31,10 +32,12 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
     migration_destination_storage_name: str = None
     dev_test_mode: bool = False
     do_not_perform_actual_ingest_and_migration: bool = False
+    dir_updates_wait_time: int = 0
     # This is not a settable command line param but required for code convenience
     perform_actual_ingest_and_migration: bool = True
 
-    def __init__(  # pylint: disable=too-many-arguments, disable=too-many-positional-arguments
+    def __init__(  # noqa: C901
+        # pylint: disable=too-many-arguments, disable=too-many-positional-arguments
         self,
         parser: argparse.ArgumentParser,
         add_directory_to_watch: bool = False,
@@ -44,8 +47,8 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         add_request_server_url: bool = False,
         add_readiness_probe_file: bool = False,
         add_migration_destination_storage_name: bool = False,
-        add_dev_test_mode: bool = False,
         add_do_not_perform_actual_ingest_and_migration: bool = False,
+        add_dir_updates_wait_time: bool = False,
     ):
         """Initiale with which parameters to include on the command line."""
         self._parser = parser
@@ -70,12 +73,15 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         if add_migration_destination_storage_name:
             self.add_migration_destination_storage_name_arguments(parser)
             self.add_migration_destination_storage_name = True
-        if add_dev_test_mode:
-            self.add_dev_test_mode_arguments(parser)
-            self.add_dev_test_mode = True
         if add_do_not_perform_actual_ingest_and_migration:
+            if not self.add_dev_test_mode:
+                self.add_dev_test_mode_arguments(parser)
+                self.add_dev_test_mode = True
             self.add_do_not_perform_actual_ingest_and_migration_arguments(parser)
             self.add_do_not_perform_actual_ingest_and_migration = True
+        if add_dir_updates_wait_time:
+            self.add_dir_updates_wait_time_argument(parser)
+            self.add_dir_updates_wait_time = True
 
     def parse_arguments(self, args: argparse.Namespace = None):
         """Parse command line arguments and assign to class parameters."""
@@ -124,6 +130,11 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             self.perform_actual_ingest_and_migration = False
         else:
             self.perform_actual_ingest_and_migration = True
+
+        if self.add_dir_updates_wait_time:
+            self.dir_updates_wait_time = (
+                args.dir_updates_wait_time if self.add_dir_updates_wait_time else 0
+            )
 
     def add_directory_to_watch_arguments(self, parser: argparse.ArgumentParser) -> None:
         """Update a parser to a directory watcher file path."""
@@ -212,6 +223,16 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             required=False,
             action="store_true",
             help="If set, do not perform actual ingest and migration operations.",
+        )
+
+    def add_dir_updates_wait_time_argument(self, parser: argparse.ArgumentParser) -> None:
+        """Update a parser to add a flag to disable actual ingest and migration."""
+        parser.add_argument(
+            "--dir-updates-wait-time",
+            default=0,
+            required=False,
+            help="If set, a directory will only be added once its contents has been static "
+            + "for at least the given number of seconds.",
         )
 
     def set_application_ready(self):

@@ -36,8 +36,8 @@ def test_cmdline_parameters_initialization(parser: argparse.ArgumentParser) -> N
         add_request_server_url=True,
         add_readiness_probe_file=True,
         add_migration_destination_storage_name=True,
-        add_dev_test_mode=True,
         add_do_not_perform_actual_ingest_and_migration=True,
+        add_dir_updates_wait_time=True,
     )
 
     # Test that all attributes are set correctly
@@ -49,6 +49,7 @@ def test_cmdline_parameters_initialization(parser: argparse.ArgumentParser) -> N
     assert cmd_params.add_migration_destination_storage_name is True
     assert cmd_params.add_dev_test_mode is True
     assert cmd_params.add_do_not_perform_actual_ingest_and_migration is True
+    assert cmd_params.add_dir_updates_wait_time is True
 
 
 def test_cmdline_parameters_default_values(parser: argparse.ArgumentParser) -> None:
@@ -93,8 +94,8 @@ def cmd_params_all_enabled_fixture(parser: argparse.ArgumentParser) -> CmdLinePa
         add_request_server_url=True,
         add_readiness_probe_file=True,
         add_migration_destination_storage_name=True,
-        add_dev_test_mode=True,
         add_do_not_perform_actual_ingest_and_migration=True,
+        add_dir_updates_wait_time=True,
     )
 
 
@@ -114,6 +115,7 @@ def test_args_fixture() -> argparse.Namespace:
         migration_destination_storage_name="dest-storage",
         dev_test_mode=True,
         do_not_perform_actual_ingest_and_migration=True,
+        dir_updates_wait_time=30,
     )
 
 
@@ -141,6 +143,7 @@ def test_parse_arguments(
     assert cmd_params_all_enabled.migration_destination_storage_name == "dest-storage"
     assert cmd_params_all_enabled.dev_test_mode is True
     assert cmd_params_all_enabled.do_not_perform_actual_ingest_and_migration is True
+    assert cmd_params_all_enabled.dir_updates_wait_time == 30
     # Verify that perform_actual_ingest_and_migration is set correctly
     assert cmd_params_all_enabled.perform_actual_ingest_and_migration is False
 
@@ -164,6 +167,7 @@ def test_do_not_perform_requires_dev_test_mode(cmd_params_all_enabled: CmdLinePa
         migration_destination_storage_name="dest-storage",
         dev_test_mode=False,
         do_not_perform_actual_ingest_and_migration=True,
+        dir_updates_wait_time=30,
     )
 
     # Verify that a ValueError is raised
@@ -198,6 +202,7 @@ def test_migration_destination_storage_name_requires_migration_server_url(
         migration_server_url=None,
         dev_test_mode=True,
         do_not_perform_actual_ingest_and_migration=True,
+        dir_updates_wait_time=30,
     )
 
     # Verify that a ValueError is raised
@@ -233,6 +238,7 @@ def test_perform_actual_ingest_and_migration_setting(
         migration_server_url="http://migration-server:8080",
         dev_test_mode=True,
         do_not_perform_actual_ingest_and_migration=True,
+        dir_updates_wait_time=30,
     )
     cmd_params_all_enabled.parse_arguments(args_true)
     assert cmd_params_all_enabled.do_not_perform_actual_ingest_and_migration is True
@@ -249,6 +255,7 @@ def test_perform_actual_ingest_and_migration_setting(
         migration_server_url="http://migration-server:8080",
         dev_test_mode=True,
         do_not_perform_actual_ingest_and_migration=False,
+        dir_updates_wait_time=30,
     )
     cmd_params_all_enabled.parse_arguments(args_false)
     assert cmd_params_all_enabled.do_not_perform_actual_ingest_and_migration is False

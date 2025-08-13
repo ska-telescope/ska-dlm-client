@@ -145,8 +145,8 @@ def create_directory_watcher() -> DirectoryWatcher:
         add_migration_server_url=True,
         add_migration_destination_storage_name=True,
         add_readiness_probe_file=True,
-        add_dev_test_mode=True,
         add_do_not_perform_actual_ingest_and_migration=True,
+        add_dir_updates_wait_time=True,
     )
     args = parser.parse_args()
     cmd_line_parameters.parse_arguments(args)

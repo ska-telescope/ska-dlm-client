@@ -129,13 +129,6 @@ def log_changes_with_diff(  # noqa: C901
     the snapshots and handles exceptions that might occur when trying to access
     file information (such as FileNotFoundError or PermissionError).
 
-    The function contains several helper functions that are only used within this method:
-    - log_file_created: Logs details about newly created files
-    - log_dir_created: Logs details about newly created directories
-    - log_files_modified: Logs details about modified files with size and time changes
-    - log_dirs_modified: Logs details about modified directories with time changes
-    - log_list_with_messages: Generic function for logging deleted and moved items
-
     Args:
         old_snapshot: The previous directory snapshot containing information about
                      files and directories at an earlier point in time
