@@ -1,17 +1,15 @@
 """Tests for the directory_utils module."""
 
 import os
-import time
-import tempfile
 import shutil
+import tempfile
 import threading
+import time
+
 import pytest
-from pathlib import Path
 from watchdog.utils.dirsnapshot import DirectorySnapshot
 
-from ska_dlm_client.directory_watcher.directory_utils import (
-    monitor_directory_with_watchdog,
-)
+from ska_dlm_client.directory_watcher.directory_utils import monitor_directory_with_watchdog
 
 
 @pytest.fixture
@@ -22,10 +20,10 @@ def temp_dir():
     shutil.rmtree(dir_path)
 
 
-def test_monitor_directory_with_watchdog(temp_dir):
+def test_monitor_directory_with_watchdog(temp_dir):  # pylint: disable=redefined-outer-name
     """Test monitoring a directory with watchdog until it's stable."""
     # Create initial file
-    with open(os.path.join(temp_dir, "file.txt"), "w") as f:
+    with open(os.path.join(temp_dir, "file.txt"), "w", encoding="utf-8") as f:
         f.write("initial content")
 
     # Create an event to signal when the thread has completed its work
@@ -37,14 +35,14 @@ def test_monitor_directory_with_watchdog(temp_dir):
         time.sleep(0.2)
 
         # Make some changes
-        with open(os.path.join(temp_dir, "file.txt"), "w") as f:
+        with open(os.path.join(temp_dir, "file.txt"), "w", encoding="utf-8") as f:
             f.write("modified content")
 
         # Wait again
         time.sleep(0.2)
 
         # Make more changes
-        with open(os.path.join(temp_dir, "new_file.txt"), "w") as f:
+        with open(os.path.join(temp_dir, "new_file.txt"), "w", encoding="utf-8") as f:
             f.write("new file content")
 
         # Signal that the thread has completed its work
@@ -61,9 +59,7 @@ def test_monitor_directory_with_watchdog(temp_dir):
     time.sleep(0.5)
 
     # Monitor the directory with a short wait time
-    final_snapshot = monitor_directory_with_watchdog(
-        temp_dir, wait_time=0.5, recursive=True
-    )
+    final_snapshot = monitor_directory_with_watchdog(temp_dir, wait_time=0.5, recursive=True)
 
     # Check that the final snapshot is a DirectorySnapshot object
     assert isinstance(final_snapshot, DirectorySnapshot)
