@@ -1,6 +1,5 @@
 """Kafka unit tests."""
 
-import asyncio
 import json
 import logging
 from unittest import mock
