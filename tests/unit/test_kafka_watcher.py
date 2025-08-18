@@ -20,6 +20,11 @@ KAFKA_MSG = {
     "time": "2025-02-05T14:23:45.678901",
     "metadata": {"eb_id": "eb-meta-20240723-00000"},
 }
+KAFKA_MSG2 = {
+    "file": "/a/path/to/remove/data/file_name2",
+    "time": "2025-02-05T14:23:45.678902",
+    "metadata": {"eb_id": "eb-meta-20240723-00001"},
+}
 
 
 def test_main(mocker: pytest_mock.MockerFixture):
@@ -37,6 +42,7 @@ def test_main(mocker: pytest_mock.MockerFixture):
         kafka_topic=[TEST_TOPIC],
         ingest_server_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
+        kafka_base_dir="",
         check_rclone_access=False,
     )
     mocker.patch(
@@ -62,6 +68,7 @@ def test_main(mocker: pytest_mock.MockerFixture):
         kafka_topic=[TEST_TOPIC],
         ingest_server_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
+        kafka_base_dir="",
         check_rclone_access=False,
     )
 
@@ -110,6 +117,7 @@ async def test_watch_post_success(mock_apiingest: MagicMock, mock_kafka_consumer
         kafka_topic=[TEST_TOPIC],
         ingest_server_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
+        kafka_base_dir="",
         check_rclone_access=False,
     )
 
@@ -134,6 +142,7 @@ async def test_watch_http_failure(
             kafka_topic=[TEST_TOPIC],
             ingest_server_url=INGEST_HOST,
             storage_name=STORAGE_NAME,
+            kafka_base_dir="",
             check_rclone_access=False,
         )
 
@@ -150,11 +159,11 @@ async def test_post_dlm_data_item_success(mock_apiingest, caplog):
     """Test that post_dlm_data_item successfully calls the API and logs the success message."""
     caplog.set_level(logging.INFO)
 
-    await post_dlm_data_item(INGEST_HOST, STORAGE_NAME, KAFKA_MSG)
+    await post_dlm_data_item(INGEST_HOST, STORAGE_NAME, KAFKA_MSG, "")
 
     # Ensure API call was made with correct parameters
     mock_apiingest.assert_called_once_with(
-        item_name="file_name",
+        item_name="data/file_name",
         uri=KAFKA_MSG["file"],  # Assuming file is used as the URI
         storage_name=STORAGE_NAME,
         body=KAFKA_MSG["metadata"],
@@ -178,7 +187,7 @@ async def test_post_dlm_data_item_failure(mock_apiingest, caplog):
     mock_apiingest.side_effect = OpenApiException("API Error")
 
     # Call function
-    await post_dlm_data_item(INGEST_HOST, STORAGE_NAME, KAFKA_MSG)
+    await post_dlm_data_item(INGEST_HOST, STORAGE_NAME, KAFKA_MSG, "")
 
     # Ensure the function attempted the call
     mock_apiingest.assert_called_once()
