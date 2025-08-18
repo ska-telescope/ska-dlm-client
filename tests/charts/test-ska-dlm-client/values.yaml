@@ -6,6 +6,6 @@ ska_dlm:
 # Definite directory watcher details for use in testing.
 directory_watcher:
   image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client
-  version: "1.0.0"
+  version: "1.0.1"
   imagePullPolicy: Always
   replicas: 1
