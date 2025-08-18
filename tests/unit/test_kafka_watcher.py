@@ -20,11 +20,6 @@ KAFKA_MSG = {
     "time": "2025-02-05T14:23:45.678901",
     "metadata": {"eb_id": "eb-meta-20240723-00000"},
 }
-KAFKA_MSG2 = {
-    "file": "/a/path/to/remove/data/file_name2",
-    "time": "2025-02-05T14:23:45.678902",
-    "metadata": {"eb_id": "eb-meta-20240723-00001"},
-}
 
 
 def test_main(mocker: pytest_mock.MockerFixture):
@@ -164,6 +159,30 @@ async def test_post_dlm_data_item_success(mock_apiingest, caplog):
     # Ensure API call was made with correct parameters
     mock_apiingest.assert_called_once_with(
         item_name="data/file_name",
+        uri=KAFKA_MSG["file"],  # Assuming file is used as the URI
+        storage_name=STORAGE_NAME,
+        body=KAFKA_MSG["metadata"],
+        do_storage_access_check=True,
+    )
+
+    # Assert: No warnings or errors in logs
+    for record in caplog.records:
+        assert record.levelname not in [
+            "WARNING",
+            "ERROR",
+        ], f"Unexpected log level {record.levelname}: {record.message}"
+
+
+@pytest.mark.asyncio
+async def test_post_dlm_data_item_success_with_kafka_base_dir(mock_apiingest, caplog):
+    """Test that post_dlm_data_item successfully calls the API and logs the success message."""
+    caplog.set_level(logging.INFO)
+
+    await post_dlm_data_item(INGEST_HOST, STORAGE_NAME, KAFKA_MSG, "data/")
+
+    # Ensure API call was made with correct parameters
+    mock_apiingest.assert_called_once_with(
+        item_name="file_name",
         uri=KAFKA_MSG["file"],  # Assuming file is used as the URI
         storage_name=STORAGE_NAME,
         body=KAFKA_MSG["metadata"],
