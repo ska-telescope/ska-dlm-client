@@ -2,6 +2,10 @@
 
 ## Development
 
+### Fixed
+
+* kafka-watcher now uses path of file to help ensure unique data_item.
+
 ## 1.0.0
 
 ### Added

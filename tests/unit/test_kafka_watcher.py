@@ -37,6 +37,7 @@ def test_main(mocker: pytest_mock.MockerFixture):
         kafka_topic=[TEST_TOPIC],
         ingest_server_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
+        kafka_base_dir="",
         check_rclone_access=False,
     )
     mocker.patch(
@@ -62,6 +63,7 @@ def test_main(mocker: pytest_mock.MockerFixture):
         kafka_topic=[TEST_TOPIC],
         ingest_server_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
+        kafka_base_dir="",
         check_rclone_access=False,
     )
 
@@ -110,6 +112,7 @@ async def test_watch_post_success(mock_apiingest: MagicMock, mock_kafka_consumer
         kafka_topic=[TEST_TOPIC],
         ingest_server_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
+        kafka_base_dir="",
         check_rclone_access=False,
     )
 
@@ -134,6 +137,7 @@ async def test_watch_http_failure(
             kafka_topic=[TEST_TOPIC],
             ingest_server_url=INGEST_HOST,
             storage_name=STORAGE_NAME,
+            kafka_base_dir="",
             check_rclone_access=False,
         )
 
@@ -150,7 +154,31 @@ async def test_post_dlm_data_item_success(mock_apiingest, caplog):
     """Test that post_dlm_data_item successfully calls the API and logs the success message."""
     caplog.set_level(logging.INFO)
 
-    await post_dlm_data_item(INGEST_HOST, STORAGE_NAME, KAFKA_MSG)
+    await post_dlm_data_item(INGEST_HOST, STORAGE_NAME, KAFKA_MSG, "")
+
+    # Ensure API call was made with correct parameters
+    mock_apiingest.assert_called_once_with(
+        item_name="data/file_name",
+        uri=KAFKA_MSG["file"],  # Assuming file is used as the URI
+        storage_name=STORAGE_NAME,
+        body=KAFKA_MSG["metadata"],
+        do_storage_access_check=True,
+    )
+
+    # Assert: No warnings or errors in logs
+    for record in caplog.records:
+        assert record.levelname not in [
+            "WARNING",
+            "ERROR",
+        ], f"Unexpected log level {record.levelname}: {record.message}"
+
+
+@pytest.mark.asyncio
+async def test_post_dlm_data_item_success_with_kafka_base_dir(mock_apiingest, caplog):
+    """Test that post_dlm_data_item successfully calls the API and logs the success message."""
+    caplog.set_level(logging.INFO)
+
+    await post_dlm_data_item(INGEST_HOST, STORAGE_NAME, KAFKA_MSG, "data/")
 
     # Ensure API call was made with correct parameters
     mock_apiingest.assert_called_once_with(
@@ -178,7 +206,7 @@ async def test_post_dlm_data_item_failure(mock_apiingest, caplog):
     mock_apiingest.side_effect = OpenApiException("API Error")
 
     # Call function
-    await post_dlm_data_item(INGEST_HOST, STORAGE_NAME, KAFKA_MSG)
+    await post_dlm_data_item(INGEST_HOST, STORAGE_NAME, KAFKA_MSG, "")
 
     # Ensure the function attempted the call
     mock_apiingest.assert_called_once()
@@ -196,3 +224,76 @@ async def test_post_dlm_data_item_failure(mock_apiingest, caplog):
         assert any(
             expected in msg for msg in error_messages
         ), f"Expected log message not found: {expected}"
+
+
+@pytest.mark.asyncio
+async def test_kafka_base_dir_command_line_parameter(mocker: pytest_mock.MockerFixture):
+    """
+    Test that the --kafka-base-dir command line parameter is correctly passed through \
+    to where it's used in the code (around lines 102-105 in main.py).
+
+    This test verifies that:
+    1. The command-line argument --kafka-base-dir is parsed correctly
+    2. The value is passed to the watch function
+    3. The value is used in post_dlm_data_item to modify the file path
+    """
+    # Define a non-empty kafka_base_dir value
+    test_kafka_base_dir = "data/"
+
+    # First part: Test that the command-line argument is correctly passed to the watch function
+    # Mock the argparse.ArgumentParser to return simulated arguments with non-empty kafka_base_dir
+    mock_args = mock.Mock(
+        kafka_broker_url=KAFKA_HOST,
+        kafka_topic=[TEST_TOPIC],
+        ingest_server_url=INGEST_HOST,
+        storage_name=STORAGE_NAME,
+        kafka_base_dir=test_kafka_base_dir,
+        check_rclone_access=False,
+    )
+    mocker.patch(
+        "src.ska_dlm_client.kafka_watcher.main.argparse.ArgumentParser.parse_args",
+        return_value=mock_args,
+    )
+
+    # Mock the watch function to capture its arguments
+    mock_watch = mocker.patch("src.ska_dlm_client.kafka_watcher.main.watch")
+
+    # Mock asyncio.run to prevent actual execution
+    mocker.patch("src.ska_dlm_client.kafka_watcher.main.asyncio.run")
+
+    # Call the main function
+    main()
+
+    # Verify that watch was called with the correct kafka_base_dir argument
+    mock_watch.assert_called_once()
+    assert mock_watch.call_args[1]["kafka_base_dir"] == test_kafka_base_dir
+
+    # Second part: Test that the kafka_base_dir parameter is used correctly in post_dlm_data_item
+    # We'll create a test message and call post_dlm_data_item directly
+    test_msg = {"file": "data/test_file", "metadata": {"test": "metadata"}}
+
+    # Mock the API client and IngestApi
+    mocker.patch("ska_dlm_client.openapi.api_client.ApiClient", return_value=mock.MagicMock())
+    mock_ingest_api_instance = mock.MagicMock()
+    mock_ingest_api_instance.register_data_item = AsyncMock(return_value={"Success": True})
+    mocker.patch(
+        "ska_dlm_client.openapi.dlm_api.ingest_api.IngestApi",
+        return_value=mock_ingest_api_instance,
+    )
+
+    # Call post_dlm_data_item with our test message and the kafka_base_dir
+    await post_dlm_data_item(
+        ingest_server_url=INGEST_HOST,
+        storage_name=STORAGE_NAME,
+        ingest_event_data=test_msg,
+        kafka_base_dir=test_kafka_base_dir,
+    )
+
+    # Verify that register_data_item was called with the correct item_name
+    # The kafka_base_dir should be removed from the file path
+    mock_ingest_api_instance.register_data_item.assert_called_once()
+    call_args = mock_ingest_api_instance.register_data_item.call_args[1]
+
+    # Verify that the kafka_base_dir was removed from the file path
+    assert call_args["item_name"] == "test_file"
+    assert call_args["uri"] == "data/test_file"
