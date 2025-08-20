@@ -160,6 +160,7 @@ async def test_post_dlm_data_item_success(mock_apiingest, caplog):
     mock_apiingest.assert_called_once_with(
         item_name="data/file_name",
         uri=KAFKA_MSG["file"],  # Assuming file is used as the URI
+        item_type="container",
         storage_name=STORAGE_NAME,
         body=KAFKA_MSG["metadata"],
         do_storage_access_check=True,
@@ -184,6 +185,7 @@ async def test_post_dlm_data_item_success_with_kafka_base_dir(mock_apiingest, ca
     mock_apiingest.assert_called_once_with(
         item_name="file_name",
         uri=KAFKA_MSG["file"],  # Assuming file is used as the URI
+        item_type="container",
         storage_name=STORAGE_NAME,
         body=KAFKA_MSG["metadata"],
         do_storage_access_check=True,
