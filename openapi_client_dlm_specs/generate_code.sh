@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# fail the script if a command fails
+# Fail the script if a command fails
 set -e
 
 handle_error() {
