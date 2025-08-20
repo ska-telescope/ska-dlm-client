@@ -6,6 +6,12 @@
 
 * Added optional Kafka service to the Helm chart for local development support.
 
+## 1.0.1
+
+### Fixed
+
+* kafka-watcher now uses path of file to help ensure unique data_item.
+
 ## 1.0.0
 
 ### Added

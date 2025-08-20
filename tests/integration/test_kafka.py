@@ -99,6 +99,7 @@ async def test_kafka_watcher(producer: AIOKafkaProducer, caplog):
                 kafka_topic=[TEST_TOPIC],
                 ingest_server_url="http://mockserver:8000",
                 storage_name="test-storage",
+                kafka_base_dir="",
                 check_rclone_access=False,
             )
         )
