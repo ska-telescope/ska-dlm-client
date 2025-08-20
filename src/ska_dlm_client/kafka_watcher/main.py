@@ -8,6 +8,7 @@ import os
 
 import aiokafka
 
+from ska_dlm_client.directory_watcher.registration_processor import ItemType
 from ska_dlm_client.openapi import api_client, configuration
 from ska_dlm_client.openapi.dlm_api import ingest_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
@@ -116,6 +117,7 @@ async def post_dlm_data_item(
             response = api_ingest.register_data_item(
                 item_name=item_name,
                 uri=ingest_event_data["file"],
+                item_type=ItemType.CONTAINER,
                 storage_name=storage_name,
                 body=ingest_event_data["metadata"],
                 do_storage_access_check=check_rclone_access,
