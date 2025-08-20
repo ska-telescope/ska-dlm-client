@@ -1,10 +1,10 @@
 # Version History
 
-## Development
+## 1.0.2
 
 ### Fixed
 
-* kafka-watcher now passes item_type of container or register_data_item call.
+* kafka-watcher now passes item_type of container on register_data_item call.
 
 ## 1.0.1
 
