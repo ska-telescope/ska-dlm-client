@@ -6,6 +6,10 @@
 
 * Added optional Kafka service to the Helm chart for local development support.
 
+### Fixed
+
+* kafka-watcher now passes item_type of container or register_data_item call.
+
 ## 1.0.1
 
 ### Fixed
