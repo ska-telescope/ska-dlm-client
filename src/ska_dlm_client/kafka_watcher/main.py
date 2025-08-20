@@ -30,7 +30,7 @@ def main():
         "--kafka-broker-url",
         nargs="+",
         required=True,
-        help="One or more Kafka broker URLs.",
+        help="One or more Kafka broker URLs. E.g., ska-sdp-kafka.dp-shared:9092",
     )
     parser.add_argument(
         "--storage-name",
@@ -42,7 +42,7 @@ def main():
         "--ingest-server-url",
         type=str,
         required=True,
-        help="Ingest server URL including the service port.",
+        help="Ingest server URL including the service port. E.g., http://ska-dlm-dev-ingest:80",
     )
     parser.add_argument(
         "--kafka-base-dir",
@@ -107,7 +107,7 @@ async def post_dlm_data_item(
                 "Calling DLM with item_name=%s, uri=%s, storage_name=%s, body=%s, \
                 item_name=%s, check_rclone_access=%s",
                 os.path.basename(ingest_event_data["file"].rstrip("/")),
-                ingest_event_data["file"],
+                ingest_event_data["file"],  # TODO: Kafka message content must be validated DMAN-74
                 storage_name,
                 ingest_event_data["metadata"],
                 item_name,

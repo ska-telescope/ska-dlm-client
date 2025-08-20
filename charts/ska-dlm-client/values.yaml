@@ -1,3 +1,16 @@
+# ----------------------------------------------------------------------------------
+# Default Helm configuration for ska-dlm-client
+#
+# Production users must override:
+#   - kafka_watcher.kafka_broker_url
+#   - ska_dlm_client.ingest_server_url
+#   - ska_dlm_client.storage_server_url
+#   - ska_dlm_client.request_server_url
+#
+# All services are disabled by default.
+# Local developers may use --set to enable kafka / kafka_watcher / directory watcher
+# ----------------------------------------------------------------------------------
+
 system: dlm
 subsystem: client
 
@@ -16,9 +29,6 @@ setupStorageLocation: false
 
 ska_dlm:
   fullname: "ska-dlm"
-  ingest_service_port: 80
-
-# DLM
 
 ska_dlm_client:
   image: artefact.skao.int/ska-dlm-client
@@ -27,9 +37,11 @@ ska_dlm_client:
   storage_name: data
   storage_root_directory: /data
   securityContext: {}
-  ingest_server_url: "http://ska-dlm-dev-ingest-example"
-  storage_server_url: "http://ska-dlm-dev-storage-example"
-  request_server_url: "http://ska-dlm-dev-request-example"
+  # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
+  # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace:port
+  ingest_server_url: "http://ska-dlm-dev-ingest:80" # override for production
+  storage_server_url: "http://ska-dlm-dev-storage:80" # override for production
+  request_server_url: "http://ska-dlm-dev-request:80" # override for production
 
 directory_watcher:
   enabled: false
@@ -44,14 +56,20 @@ directory_watcher:
   register_contents_of_watch_directory: false
 
 kafka_watcher:
-  enabled: false
+  enabled: false  # kafka-watcher OFF by default
   component: kafka-watcher
   subsystem: data-lifecycle-management
   replicas: 1
-  kafka_broker_url: "kafka:9092"
+  kafka_server_local: false
+  kafka_server_local_port: 9092
+  kafka_broker_url: "ska-dlm-kafka:9092" # production to override with the full service DNS, e.g., ska-sdp-kafka.dp-shared:9092
   kafka_topic: "ska-sdp-dataproduct-ingest"
   storage_name: data
   check_rclone_access: false
+
+kafka:
+  enabled: false # Kafka service OFF for production. Only for local developement.
+  fullnameOverride: ska-dlm-kafka
 
 startup_verification:
   enabled: false
