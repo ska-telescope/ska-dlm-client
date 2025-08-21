@@ -1,10 +1,12 @@
 # Version History
 
-## 1.0.2
+## Development
 
 ### Added
 
 * Added optional Kafka service to the Helm chart for local development support.
+
+## 1.0.2
 
 ### Fixed
 
