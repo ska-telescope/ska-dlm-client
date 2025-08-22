@@ -8,7 +8,7 @@ from benedict import benedict
 
 __author__ = """Mark Boulton"""
 __email__ = "mark.boulton@uwa.edu.au"
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 DLM_CLIENT_LIB_DIR = Path(__file__).parent
 """The library install path of dlm-client."""

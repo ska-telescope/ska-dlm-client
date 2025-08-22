@@ -4,10 +4,10 @@ import argparse
 import asyncio
 import json
 import logging
-import os
 
 import aiokafka
 
+from ska_dlm_client.directory_watcher.registration_processor import ItemType
 from ska_dlm_client.openapi import api_client, configuration
 from ska_dlm_client.openapi.dlm_api import ingest_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
@@ -105,17 +105,17 @@ async def post_dlm_data_item(
                 item_name = ingest_event_data["file"].replace(f"{kafka_base_dir}", "")
             logger.info(
                 "Calling DLM with item_name=%s, uri=%s, storage_name=%s, body=%s, \
-                item_name=%s, check_rclone_access=%s",
-                os.path.basename(ingest_event_data["file"].rstrip("/")),
+                check_rclone_access=%s",
+                item_name,
                 ingest_event_data["file"],  # TODO: Kafka message content must be validated DMAN-74
                 storage_name,
                 ingest_event_data["metadata"],
-                item_name,
                 check_rclone_access,
             )
             response = api_ingest.register_data_item(
                 item_name=item_name,
                 uri=ingest_event_data["file"],
+                item_type=ItemType.CONTAINER,
                 storage_name=storage_name,
                 body=ingest_event_data["metadata"],
                 do_storage_access_check=check_rclone_access,
