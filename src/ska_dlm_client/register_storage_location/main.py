@@ -84,7 +84,7 @@ def init_storage_for_testing(
 
         # Setup the storage config. Doesn't matter if it has been set before.
         response = api_storage.create_storage_config(
-            body=STORAGE_CONFIG,
+            request_body=STORAGE_CONFIG,
             storage_id=the_storage_id,
             storage_name=storage_name,
             config_type="rclone",

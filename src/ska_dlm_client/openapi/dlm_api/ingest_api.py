@@ -51,16 +51,11 @@ class IngestApi:
                 description="the item_name, can be empty, but then json_data has to be specified."
             ),
         ] = None,
-        phase: Annotated[
-            Optional[StrictStr],
-            Field(
-                description="the phase this item is set to (usually inherited from the storage)"
-            ),
-        ] = None,
+        uid_phase: Optional[StrictStr] = None,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -73,19 +68,17 @@ class IngestApi:
     ) -> str:
         """Init Data Item
 
-        Initialize a new data_item.  item_name or json_data is required.
+        Initialise a new data_item.  item_name or json_data is required.
 
         Parameters
         ----------
         item_name : str
             the item_name, can be empty, but then json_data has to be
             specified.
-        phase : str
-            the phase this item is set to (usually inherited from the
-            storage)
+        uid_phase : str
         authorization : str
             Validated Bearer token with UserInfo
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -114,9 +107,9 @@ class IngestApi:
 
         _param = self._init_data_item_serialize(
             item_name=item_name,
-            phase=phase,
+            uid_phase=uid_phase,
             authorization=authorization,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -143,16 +136,11 @@ class IngestApi:
                 description="the item_name, can be empty, but then json_data has to be specified."
             ),
         ] = None,
-        phase: Annotated[
-            Optional[StrictStr],
-            Field(
-                description="the phase this item is set to (usually inherited from the storage)"
-            ),
-        ] = None,
+        uid_phase: Optional[StrictStr] = None,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -165,19 +153,17 @@ class IngestApi:
     ) -> ApiResponse[str]:
         """Init Data Item
 
-        Initialize a new data_item.  item_name or json_data is required.
+        Initialise a new data_item.  item_name or json_data is required.
 
         Parameters
         ----------
         item_name : str
             the item_name, can be empty, but then json_data has to be
             specified.
-        phase : str
-            the phase this item is set to (usually inherited from the
-            storage)
+        uid_phase : str
         authorization : str
             Validated Bearer token with UserInfo
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -206,9 +192,9 @@ class IngestApi:
 
         _param = self._init_data_item_serialize(
             item_name=item_name,
-            phase=phase,
+            uid_phase=uid_phase,
             authorization=authorization,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -235,16 +221,11 @@ class IngestApi:
                 description="the item_name, can be empty, but then json_data has to be specified."
             ),
         ] = None,
-        phase: Annotated[
-            Optional[StrictStr],
-            Field(
-                description="the phase this item is set to (usually inherited from the storage)"
-            ),
-        ] = None,
+        uid_phase: Optional[StrictStr] = None,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -257,19 +238,17 @@ class IngestApi:
     ) -> RESTResponseType:
         """Init Data Item
 
-        Initialize a new data_item.  item_name or json_data is required.
+        Initialise a new data_item.  item_name or json_data is required.
 
         Parameters
         ----------
         item_name : str
             the item_name, can be empty, but then json_data has to be
             specified.
-        phase : str
-            the phase this item is set to (usually inherited from the
-            storage)
+        uid_phase : str
         authorization : str
             Validated Bearer token with UserInfo
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -298,9 +277,9 @@ class IngestApi:
 
         _param = self._init_data_item_serialize(
             item_name=item_name,
-            phase=phase,
+            uid_phase=uid_phase,
             authorization=authorization,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -317,9 +296,9 @@ class IngestApi:
     def _init_data_item_serialize(
         self,
         item_name,
-        phase,
+        uid_phase,
         authorization,
-        body,
+        request_body,
         _request_auth,
         _content_type,
         _headers,
@@ -343,17 +322,17 @@ class IngestApi:
 
             _query_params.append(("item_name", item_name))
 
-        if phase is not None:
+        if uid_phase is not None:
 
-            _query_params.append(("phase", phase))
+            _query_params.append(("uid_phase", uid_phase))
 
         # process the header parameters
         if authorization is not None:
             _header_params["authorization"] = authorization
         # process the form parameters
         # process the body parameter
-        if body is not None:
-            _body_params = body
+        if request_body is not None:
+            _body_params = request_body
 
         # set the HTTP header `Accept`
         if "Accept" not in _header_params:
@@ -410,7 +389,7 @@ class IngestApi:
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -423,7 +402,7 @@ class IngestApi:
     ) -> str:
         """Register Data Item
 
-        Ingest a data_item (register function is an alias).  This high level function is a combination of init_data_item, set_uri and set_state(READY). It also checks whether a data_item is already registered on the requested storage.  (1) check whether requested storage is known and accessible (2) check, if required, whether item is accessible/exists on that storage (3) check whether item is already registered on that storage (4) initialize the item on the storage (5) set the access path to the payload (6) set state to READY (7) save metadata in the data_item table
+        Ingest a data_item (register function is an alias).  This high level function is a combination of init_data_item, set_uri and set_state(READY). It also checks whether a data_item is already registered on the requested storage.  (1) check whether requested storage is known and accessible (2) check, if required, whether item is accessible/exists on that storage (3) check whether item is already registered on that storage (4) initialise the item on the storage (5) set the access path to the payload (6) set state to READY (7) save metadata in the data_item table
 
         Parameters
         ----------
@@ -445,7 +424,7 @@ class IngestApi:
             uri
         authorization : str
             Validated Bearer token with UserInfo
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -481,7 +460,7 @@ class IngestApi:
             parents=parents,
             do_storage_access_check=do_storage_access_check,
             authorization=authorization,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -522,7 +501,7 @@ class IngestApi:
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -535,7 +514,7 @@ class IngestApi:
     ) -> ApiResponse[str]:
         """Register Data Item
 
-        Ingest a data_item (register function is an alias).  This high level function is a combination of init_data_item, set_uri and set_state(READY). It also checks whether a data_item is already registered on the requested storage.  (1) check whether requested storage is known and accessible (2) check, if required, whether item is accessible/exists on that storage (3) check whether item is already registered on that storage (4) initialize the item on the storage (5) set the access path to the payload (6) set state to READY (7) save metadata in the data_item table
+        Ingest a data_item (register function is an alias).  This high level function is a combination of init_data_item, set_uri and set_state(READY). It also checks whether a data_item is already registered on the requested storage.  (1) check whether requested storage is known and accessible (2) check, if required, whether item is accessible/exists on that storage (3) check whether item is already registered on that storage (4) initialise the item on the storage (5) set the access path to the payload (6) set state to READY (7) save metadata in the data_item table
 
         Parameters
         ----------
@@ -557,7 +536,7 @@ class IngestApi:
             uri
         authorization : str
             Validated Bearer token with UserInfo
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -593,7 +572,7 @@ class IngestApi:
             parents=parents,
             do_storage_access_check=do_storage_access_check,
             authorization=authorization,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -634,7 +613,7 @@ class IngestApi:
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -647,7 +626,7 @@ class IngestApi:
     ) -> RESTResponseType:
         """Register Data Item
 
-        Ingest a data_item (register function is an alias).  This high level function is a combination of init_data_item, set_uri and set_state(READY). It also checks whether a data_item is already registered on the requested storage.  (1) check whether requested storage is known and accessible (2) check, if required, whether item is accessible/exists on that storage (3) check whether item is already registered on that storage (4) initialize the item on the storage (5) set the access path to the payload (6) set state to READY (7) save metadata in the data_item table
+        Ingest a data_item (register function is an alias).  This high level function is a combination of init_data_item, set_uri and set_state(READY). It also checks whether a data_item is already registered on the requested storage.  (1) check whether requested storage is known and accessible (2) check, if required, whether item is accessible/exists on that storage (3) check whether item is already registered on that storage (4) initialise the item on the storage (5) set the access path to the payload (6) set state to READY (7) save metadata in the data_item table
 
         Parameters
         ----------
@@ -669,7 +648,7 @@ class IngestApi:
             uri
         authorization : str
             Validated Bearer token with UserInfo
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -705,7 +684,7 @@ class IngestApi:
             parents=parents,
             do_storage_access_check=do_storage_access_check,
             authorization=authorization,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -729,7 +708,7 @@ class IngestApi:
         parents,
         do_storage_access_check,
         authorization,
-        body,
+        request_body,
         _request_auth,
         _content_type,
         _headers,
@@ -782,8 +761,8 @@ class IngestApi:
             _header_params["authorization"] = authorization
         # process the form parameters
         # process the body parameter
-        if body is not None:
-            _body_params = body
+        if request_body is not None:
+            _body_params = request_body
 
         # set the HTTP header `Accept`
         if "Accept" not in _header_params:

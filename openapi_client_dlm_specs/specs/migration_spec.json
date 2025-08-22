@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "1.0.0"
+        "version": "1.1.3"
     },
     "paths": {
         "/migration/query_migrations": {
@@ -16,9 +16,63 @@
                 "tags": [
                     "migration"
                 ],
-                "description": "Query for all migrations by a given user.",
+                "description": "Query for all migrations by a given user, with optional filters.",
                 "operationId": "query_migrations",
                 "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filter migrations that started after this date (YYYY-MM-DD or YYYYMMDD)",
+                            "title": "Start Date"
+                        },
+                        "description": "Filter migrations that started after this date (YYYY-MM-DD or YYYYMMDD)"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filter migrations that ended before this date (YYYY-MM-DD or YYYYMMDD)",
+                            "title": "End Date"
+                        },
+                        "description": "Filter migrations that ended before this date (YYYY-MM-DD or YYYYMMDD)"
+                    },
+                    {
+                        "name": "storage_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filter migrations by a specific storage location",
+                            "title": "Storage Id"
+                        },
+                        "description": "Filter migrations by a specific storage location"
+                    },
                     {
                         "name": "authorization",
                         "in": "header",
@@ -46,7 +100,8 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "type": "object"
+                                        "type": "object",
+                                        "additionalProperties": true
                                     },
                                     "title": "Response Query Migrations"
                                 }
@@ -115,7 +170,7 @@
                 "tags": [
                     "migration"
                 ],
-                "description": "Copy a data_item from source to destination.\n\nSteps\n(1) get the current storage_id(s) of the item\n(2) convert one (first) storage_id to a configured rclone backend\n(3) initialize the new item with the same OID on the new storage\n(4) use the rclone copy command to copy it to the new location\n(5) set the access path to the payload\n(6) set state to READY\n(7) save metadata in the data_item table",
+                "description": "Copy a data_item from source to destination.\n\nSteps\n(1) get the current storage_id(s) of the item\n(2) convert one (first) storage_id to a configured rclone backend\n(3) initialise the new item with the same OID on the new storage\n(4) use the rclone copy command to copy it to the new location\n(5) set the access path to the payload\n(6) set state to READY\n(7) save metadata in the data_item table",
                 "operationId": "copy_data_item",
                 "parameters": [
                     {
@@ -216,6 +271,7 @@
                             "application/json": {
                                 "schema": {
                                     "type": "object",
+                                    "additionalProperties": true,
                                     "title": "Response Copy Data Item"
                                 }
                             }

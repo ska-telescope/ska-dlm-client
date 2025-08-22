@@ -14,7 +14,15 @@ Do not edit the class manually.
 import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr, validate_call
+from pydantic import (
+    Field,
+    StrictBool,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+    field_validator,
+    validate_call,
+)
 from typing_extensions import Annotated
 
 from ska_dlm_client.openapi.api_client import ApiClient, RequestSerialized
@@ -39,7 +47,7 @@ class RequestApi:
         self,
         item_name: Annotated[
             Optional[StrictStr],
-            Field(description="could be empty, in which case the first 1000 items are returned."),
+            Field(description="Could be empty, in which case the first 1000 items are returned"),
         ] = None,
         oid: Annotated[
             Optional[StrictStr],
@@ -65,16 +73,16 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Optional[object]]:
+    ) -> List[Optional[Dict[str, object]]]:
         """Query Data Item
 
-        Query a data_item.  At least one of item_name, oid, uid, or params is required.
+        Query a data_item.  params or item_name/oid/uid is required.
 
         Parameters
         ----------
         item_name : str
-            could be empty, in which case the first 1000 items are
-            returned.
+            Could be empty, in which case the first 1000 items are
+            returned
         oid : str
             Return data_items referred to by the OID provided.
         uid : str
@@ -122,7 +130,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -137,7 +145,7 @@ class RequestApi:
         self,
         item_name: Annotated[
             Optional[StrictStr],
-            Field(description="could be empty, in which case the first 1000 items are returned."),
+            Field(description="Could be empty, in which case the first 1000 items are returned"),
         ] = None,
         oid: Annotated[
             Optional[StrictStr],
@@ -163,16 +171,16 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Optional[object]]]:
+    ) -> ApiResponse[List[Optional[Dict[str, object]]]]:
         """Query Data Item
 
-        Query a data_item.  At least one of item_name, oid, uid, or params is required.
+        Query a data_item.  params or item_name/oid/uid is required.
 
         Parameters
         ----------
         item_name : str
-            could be empty, in which case the first 1000 items are
-            returned.
+            Could be empty, in which case the first 1000 items are
+            returned
         oid : str
             Return data_items referred to by the OID provided.
         uid : str
@@ -220,7 +228,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -235,7 +243,7 @@ class RequestApi:
         self,
         item_name: Annotated[
             Optional[StrictStr],
-            Field(description="could be empty, in which case the first 1000 items are returned."),
+            Field(description="Could be empty, in which case the first 1000 items are returned"),
         ] = None,
         oid: Annotated[
             Optional[StrictStr],
@@ -264,13 +272,13 @@ class RequestApi:
     ) -> RESTResponseType:
         """Query Data Item
 
-        Query a data_item.  At least one of item_name, oid, uid, or params is required.
+        Query a data_item.  params or item_name/oid/uid is required.
 
         Parameters
         ----------
         item_name : str
-            could be empty, in which case the first 1000 items are
-            returned.
+            Could be empty, in which case the first 1000 items are
+            returned
         oid : str
             Return data_items referred to by the OID provided.
         uid : str
@@ -318,7 +326,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -411,7 +419,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Optional[object]]:
+    ) -> List[Optional[Dict[str, object]]]:
         """Query Deleted
 
         Query for all deleted data_items using the deleted state.
@@ -455,7 +463,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -480,7 +488,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Optional[object]]]:
+    ) -> ApiResponse[List[Optional[Dict[str, object]]]]:
         """Query Deleted
 
         Query for all deleted data_items using the deleted state.
@@ -524,7 +532,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -593,7 +601,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -662,7 +670,7 @@ class RequestApi:
             Optional[StrictStr], Field(description="this returns only one storage_id")
         ] = None,
         ready: Annotated[
-            Optional[StrictBool], Field(description="whether the item must be in ready state.")
+            Optional[StrictBool], Field(description="whether the item must be in READY state.")
         ] = None,
         _request_timeout: Union[
             None,
@@ -687,7 +695,7 @@ class RequestApi:
         uid : str
             this returns only one storage_id
         ready : bool
-            whether the item must be in ready state.
+            whether the item must be in READY state.
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -747,7 +755,7 @@ class RequestApi:
             Optional[StrictStr], Field(description="this returns only one storage_id")
         ] = None,
         ready: Annotated[
-            Optional[StrictBool], Field(description="whether the item must be in ready state.")
+            Optional[StrictBool], Field(description="whether the item must be in READY state.")
         ] = None,
         _request_timeout: Union[
             None,
@@ -772,7 +780,7 @@ class RequestApi:
         uid : str
             this returns only one storage_id
         ready : bool
-            whether the item must be in ready state.
+            whether the item must be in READY state.
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -832,7 +840,7 @@ class RequestApi:
             Optional[StrictStr], Field(description="this returns only one storage_id")
         ] = None,
         ready: Annotated[
-            Optional[StrictBool], Field(description="whether the item must be in ready state.")
+            Optional[StrictBool], Field(description="whether the item must be in READY state.")
         ] = None,
         _request_timeout: Union[
             None,
@@ -857,7 +865,7 @@ class RequestApi:
         uid : str
             this returns only one storage_id
         ready : bool
-            whether the item must be in ready state.
+            whether the item must be in READY state.
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -991,7 +999,7 @@ class RequestApi:
     ) -> bool:
         """Query Exists And Ready
 
-        Check whether a data_item exists and is in ready state.
+        Check whether a data_item exists and is in READY state.
 
         Parameters
         ----------
@@ -1070,7 +1078,7 @@ class RequestApi:
     ) -> ApiResponse[bool]:
         """Query Exists And Ready
 
-        Check whether a data_item exists and is in ready state.
+        Check whether a data_item exists and is in READY state.
 
         Parameters
         ----------
@@ -1149,7 +1157,7 @@ class RequestApi:
     ) -> RESTResponseType:
         """Query Exists And Ready
 
-        Check whether a data_item exists and is in ready state.
+        Check whether a data_item exists and is in READY state.
 
         Parameters
         ----------
@@ -1279,7 +1287,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Optional[object]]:
+    ) -> List[Optional[Dict[str, object]]]:
         """Query Expired
 
         Query for all expired data_items using the uid_expiration timestamp.
@@ -1323,7 +1331,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1348,7 +1356,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Optional[object]]]:
+    ) -> ApiResponse[List[Optional[Dict[str, object]]]]:
         """Query Expired
 
         Query for all expired data_items using the uid_expiration timestamp.
@@ -1392,7 +1400,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1461,7 +1469,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1538,7 +1546,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Optional[object]]:
+    ) -> List[Optional[Dict[str, object]]]:
         """Query Item Storage
 
         Query for the storage_ids of all backends holding a copy of a data_item.  Either an item_name or a OID have to be provided.
@@ -1588,7 +1596,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1617,7 +1625,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Optional[object]]]:
+    ) -> ApiResponse[List[Optional[Dict[str, object]]]]:
         """Query Item Storage
 
         Query for the storage_ids of all backends holding a copy of a data_item.  Either an item_name or a OID have to be provided.
@@ -1667,7 +1675,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1746,7 +1754,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1830,7 +1838,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[object]:
+    ) -> List[Dict[str, object]]:
         """Query New
 
         Query for all data_items newer than the date provided.
@@ -1877,7 +1885,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[object]",
+            "200": "List[Dict[str, object]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1903,7 +1911,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[object]]:
+    ) -> ApiResponse[List[Dict[str, object]]]:
         """Query New
 
         Query for all data_items newer than the date provided.
@@ -1950,7 +1958,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[object]",
+            "200": "List[Dict[str, object]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2023,7 +2031,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[object]",
+            "200": "List[Dict[str, object]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2107,7 +2115,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> Dict[str, object]:
         """Set Acl
 
         Set the user field of the data_item(s) with the given OID or UID.
@@ -2157,7 +2165,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2188,7 +2196,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Set Acl
 
         Set the user field of the data_item(s) with the given OID or UID.
@@ -2238,7 +2246,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2319,7 +2327,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2408,7 +2416,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> Dict[str, object]:
         """Set Group
 
         Set the user field of the data_item(s) with the given OID or UID.
@@ -2458,7 +2466,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2489,7 +2497,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Set Group
 
         Set the user field of the data_item(s) with the given OID or UID.
@@ -2539,7 +2547,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2620,7 +2628,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2692,7 +2700,7 @@ class RequestApi:
     def set_metadata(
         self,
         uid: Annotated[StrictStr, Field(description="the UID of the data_item to be updated")],
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2702,7 +2710,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> Dict[str, object]:
         """Set Metadata
 
         Populate the metadata column for a data_item with the metadata.
@@ -2711,7 +2719,7 @@ class RequestApi:
         ----------
         uid : str
             the UID of the data_item to be updated (required)
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -2740,7 +2748,7 @@ class RequestApi:
 
         _param = self._set_metadata_serialize(
             uid=uid,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2748,7 +2756,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2762,7 +2770,7 @@ class RequestApi:
     def set_metadata_with_http_info(
         self,
         uid: Annotated[StrictStr, Field(description="the UID of the data_item to be updated")],
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2772,7 +2780,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Set Metadata
 
         Populate the metadata column for a data_item with the metadata.
@@ -2781,7 +2789,7 @@ class RequestApi:
         ----------
         uid : str
             the UID of the data_item to be updated (required)
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -2810,7 +2818,7 @@ class RequestApi:
 
         _param = self._set_metadata_serialize(
             uid=uid,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2818,7 +2826,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2832,7 +2840,7 @@ class RequestApi:
     def set_metadata_without_preload_content(
         self,
         uid: Annotated[StrictStr, Field(description="the UID of the data_item to be updated")],
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2851,7 +2859,7 @@ class RequestApi:
         ----------
         uid : str
             the UID of the data_item to be updated (required)
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -2880,7 +2888,7 @@ class RequestApi:
 
         _param = self._set_metadata_serialize(
             uid=uid,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2888,7 +2896,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2897,7 +2905,7 @@ class RequestApi:
     def _set_metadata_serialize(
         self,
         uid,
-        body,
+        request_body,
         _request_auth,
         _content_type,
         _headers,
@@ -2924,8 +2932,8 @@ class RequestApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if body is not None:
-            _body_params = body
+        if request_body is not None:
+            _body_params = request_body
 
         # set the HTTP header `Accept`
         if "Accept" not in _header_params:
@@ -2975,7 +2983,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> Dict[str, object]:
         """Set Oid Expiration
 
         Set the oid_expiration field of the data_items with the given OID.
@@ -3022,7 +3030,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -3048,7 +3056,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Set Oid Expiration
 
         Set the oid_expiration field of the data_items with the given OID.
@@ -3095,7 +3103,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -3168,7 +3176,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -3245,7 +3253,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> Dict[str, object]:
         """Set Phase
 
         Set the phase field of the data_item(s) with given UID.
@@ -3292,7 +3300,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -3316,7 +3324,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Set Phase
 
         Set the phase field of the data_item(s) with given UID.
@@ -3363,7 +3371,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -3434,7 +3442,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -3501,7 +3509,7 @@ class RequestApi:
     def set_state(
         self,
         uid: Annotated[StrictStr, Field(description="the uid of the data_item to be updated")],
-        state: Annotated[StrictStr, Field(description="the new state for the data_item")],
+        state: StrictStr,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3511,7 +3519,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> Dict[str, object]:
         """Set State
 
         Set the state field of the uid data_item.
@@ -3521,7 +3529,7 @@ class RequestApi:
         uid : str
             the uid of the data_item to be updated (required)
         state : str
-            the new state for the data_item (required)
+            (required)
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -3558,7 +3566,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -3572,7 +3580,7 @@ class RequestApi:
     def set_state_with_http_info(
         self,
         uid: Annotated[StrictStr, Field(description="the uid of the data_item to be updated")],
-        state: Annotated[StrictStr, Field(description="the new state for the data_item")],
+        state: StrictStr,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3582,7 +3590,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Set State
 
         Set the state field of the uid data_item.
@@ -3592,7 +3600,7 @@ class RequestApi:
         uid : str
             the uid of the data_item to be updated (required)
         state : str
-            the new state for the data_item (required)
+            (required)
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -3629,7 +3637,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -3643,7 +3651,7 @@ class RequestApi:
     def set_state_without_preload_content(
         self,
         uid: Annotated[StrictStr, Field(description="the uid of the data_item to be updated")],
-        state: Annotated[StrictStr, Field(description="the new state for the data_item")],
+        state: StrictStr,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3663,7 +3671,7 @@ class RequestApi:
         uid : str
             the uid of the data_item to be updated (required)
         state : str
-            the new state for the data_item (required)
+            (required)
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -3700,7 +3708,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -3779,7 +3787,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> Dict[str, object]:
         """Set Uid Expiration
 
         Set the uid_expiration field of the data_item with the given UID.
@@ -3826,7 +3834,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -3852,7 +3860,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Set Uid Expiration
 
         Set the uid_expiration field of the data_item with the given UID.
@@ -3899,7 +3907,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -3972,7 +3980,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -4052,7 +4060,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> Dict[str, object]:
         """Set Uri
 
         Set the URI field of the uid data_item.
@@ -4102,7 +4110,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -4129,7 +4137,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Set Uri
 
         Set the URI field of the uid data_item.
@@ -4179,7 +4187,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -4256,7 +4264,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -4345,7 +4353,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> Dict[str, object]:
         """Set User
 
         Set the user field of the data_item(s) with the given OID or UID.
@@ -4395,7 +4403,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -4426,7 +4434,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Set User
 
         Set the user field of the data_item(s) with the given OID or UID.
@@ -4476,7 +4484,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -4557,7 +4565,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -4637,7 +4645,7 @@ class RequestApi:
         uid: Annotated[
             Optional[StrictStr], Field(description="the UID of the data_item to be updated")
         ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4647,7 +4655,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> Dict[str, object]:
         """Update Data Item
 
         Update fields of an existing data_item.  This is mostly used by the other convenience functions. In general when specifying an OID or an item_name, multiple entries will be updated at the same time.
@@ -4660,7 +4668,7 @@ class RequestApi:
             the OID of the data_items to be updated
         uid : str
             the UID of the data_item to be updated
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -4691,7 +4699,7 @@ class RequestApi:
             item_name=item_name,
             oid=oid,
             uid=uid,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -4699,7 +4707,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -4721,7 +4729,7 @@ class RequestApi:
         uid: Annotated[
             Optional[StrictStr], Field(description="the UID of the data_item to be updated")
         ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4731,7 +4739,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Update Data Item
 
         Update fields of an existing data_item.  This is mostly used by the other convenience functions. In general when specifying an OID or an item_name, multiple entries will be updated at the same time.
@@ -4744,7 +4752,7 @@ class RequestApi:
             the OID of the data_items to be updated
         uid : str
             the UID of the data_item to be updated
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -4775,7 +4783,7 @@ class RequestApi:
             item_name=item_name,
             oid=oid,
             uid=uid,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -4783,7 +4791,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -4805,7 +4813,7 @@ class RequestApi:
         uid: Annotated[
             Optional[StrictStr], Field(description="the UID of the data_item to be updated")
         ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4828,7 +4836,7 @@ class RequestApi:
             the OID of the data_items to be updated
         uid : str
             the UID of the data_item to be updated
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -4859,7 +4867,7 @@ class RequestApi:
             item_name=item_name,
             oid=oid,
             uid=uid,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -4867,7 +4875,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -4878,7 +4886,7 @@ class RequestApi:
         item_name,
         oid,
         uid,
-        body,
+        request_body,
         _request_auth,
         _content_type,
         _headers,
@@ -4913,8 +4921,8 @@ class RequestApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if body is not None:
-            _body_params = body
+        if request_body is not None:
+            _body_params = request_body
 
         # set the HTTP header `Accept`
         if "Accept" not in _header_params:
@@ -4957,7 +4965,7 @@ class RequestApi:
         oid: Annotated[
             Optional[StrictStr], Field(description="the OID of the data_item to be updated")
         ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4967,7 +4975,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> Dict[str, object]:
         """Update Item Tags
 
         Update/set the item_tags field of a data_item with given item_name/OID.  This will update all records for a data_item at the same time. Updating a single UID does not make sense.
@@ -4978,7 +4986,7 @@ class RequestApi:
             the name of the data_item
         oid : str
             the OID of the data_item to be updated
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -5008,7 +5016,7 @@ class RequestApi:
         _param = self._update_item_tags_serialize(
             item_name=item_name,
             oid=oid,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -5016,7 +5024,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -5035,7 +5043,7 @@ class RequestApi:
         oid: Annotated[
             Optional[StrictStr], Field(description="the OID of the data_item to be updated")
         ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -5045,7 +5053,7 @@ class RequestApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Update Item Tags
 
         Update/set the item_tags field of a data_item with given item_name/OID.  This will update all records for a data_item at the same time. Updating a single UID does not make sense.
@@ -5056,7 +5064,7 @@ class RequestApi:
             the name of the data_item
         oid : str
             the OID of the data_item to be updated
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -5086,7 +5094,7 @@ class RequestApi:
         _param = self._update_item_tags_serialize(
             item_name=item_name,
             oid=oid,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -5094,7 +5102,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -5113,7 +5121,7 @@ class RequestApi:
         oid: Annotated[
             Optional[StrictStr], Field(description="the OID of the data_item to be updated")
         ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -5134,7 +5142,7 @@ class RequestApi:
             the name of the data_item
         oid : str
             the OID of the data_item to be updated
-        body : object
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -5164,7 +5172,7 @@ class RequestApi:
         _param = self._update_item_tags_serialize(
             item_name=item_name,
             oid=oid,
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -5172,7 +5180,7 @@ class RequestApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -5182,7 +5190,7 @@ class RequestApi:
         self,
         item_name,
         oid,
-        body,
+        request_body,
         _request_auth,
         _content_type,
         _headers,
@@ -5213,8 +5221,8 @@ class RequestApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if body is not None:
-            _body_params = body
+        if request_body is not None:
+            _body_params = request_body
 
         # set the HTTP header `Accept`
         if "Accept" not in _header_params:

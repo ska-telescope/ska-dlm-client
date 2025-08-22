@@ -18,7 +18,7 @@ import logging
 import multiprocessing
 import sys
 from logging import FileHandler
-from typing import Any, ClassVar, Dict, List, Literal, Optional, TypedDict
+from typing import Any, ClassVar, Dict, List, Literal, Optional, TypedDict, Union
 
 import urllib3
 from typing_extensions import NotRequired, Self
@@ -174,6 +174,9 @@ class Configuration:
         format.
     retries
         Number of retries for API requests.
+    ca_cert_data
+        verify the peer using concatenated CA certificate data in PEM
+        (str) or DER (bytes) format.
 
 
     :param ignore_operation_servers
@@ -198,6 +201,7 @@ class Configuration:
         ignore_operation_servers: bool = False,
         ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
+        ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
     ) -> None:
@@ -260,6 +264,10 @@ class Configuration:
         """
         self.ssl_ca_cert = ssl_ca_cert
         """Set this to customize the certificate file to verify the peer."""
+        self.ca_cert_data = ca_cert_data
+        """Set this to verify the peer using PEM (str) or DER (bytes)
+           certificate data.
+        """
         self.cert_file = None
         """client certificate file"""
         self.key_file = None

@@ -68,6 +68,13 @@ class TestStorageApi(unittest.TestCase):
         """
         pass
 
+    def test_query_location_facility(self) -> None:
+        """Test case for query_location_facility
+
+        Query Location Facility
+        """
+        pass
+
     def test_query_storage(self) -> None:
         """Test case for query_storage
 
