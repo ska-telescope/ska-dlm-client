@@ -66,6 +66,7 @@ kafka_watcher:
   kafka_topic: "ska-sdp-dataproduct-ingest"
   storage_name: data
   check_rclone_access: false
+  kafka_base_dir: "" # Base directory string removed from path to generate item_name
 
 kafka:
   enabled: false # Kafka service OFF for production. Only for local developement.
