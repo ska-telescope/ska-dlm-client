@@ -1,6 +1,6 @@
 # Version History
 
-## Development
+## 1.1.0
 
 ### Added
 
