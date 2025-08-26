@@ -14,7 +14,15 @@ Do not edit the class manually.
 import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr, validate_call
+from pydantic import (
+    Field,
+    StrictBool,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+    field_validator,
+    validate_call,
+)
 from typing_extensions import Annotated
 
 from ska_dlm_client.openapi.api_client import ApiClient, RequestSerialized
@@ -37,7 +45,7 @@ class StorageApi:
     @validate_call
     def create_rclone_config(
         self,
-        body: Dict[str, Any],
+        request_body: Dict[str, Any],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -54,7 +62,7 @@ class StorageApi:
 
         Parameters
         ----------
-        body : object
+        request_body : Dict[str, object]
             (required)
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
@@ -83,7 +91,7 @@ class StorageApi:
         # noqa: E501
 
         _param = self._create_rclone_config_serialize(
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -104,7 +112,7 @@ class StorageApi:
     @validate_call
     def create_rclone_config_with_http_info(
         self,
-        body: Dict[str, Any],
+        request_body: Dict[str, Any],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -121,7 +129,7 @@ class StorageApi:
 
         Parameters
         ----------
-        body : object
+        request_body : Dict[str, object]
             (required)
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
@@ -150,7 +158,7 @@ class StorageApi:
         # noqa: E501
 
         _param = self._create_rclone_config_serialize(
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -171,7 +179,7 @@ class StorageApi:
     @validate_call
     def create_rclone_config_without_preload_content(
         self,
-        body: Dict[str, Any],
+        request_body: Dict[str, Any],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -188,7 +196,7 @@ class StorageApi:
 
         Parameters
         ----------
-        body : object
+        request_body : Dict[str, object]
             (required)
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
@@ -217,7 +225,7 @@ class StorageApi:
         # noqa: E501
 
         _param = self._create_rclone_config_serialize(
-            body=body,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -233,7 +241,7 @@ class StorageApi:
 
     def _create_rclone_config_serialize(
         self,
-        body,
+        request_body,
         _request_auth,
         _content_type,
         _headers,
@@ -256,8 +264,8 @@ class StorageApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if body is not None:
-            _body_params = body
+        if request_body is not None:
+            _body_params = request_body
 
         # set the HTTP header `Accept`
         if "Accept" not in _header_params:
@@ -294,7 +302,7 @@ class StorageApi:
     @validate_call
     def create_storage_config(
         self,
-        body: Dict[str, Any],
+        request_body: Dict[str, Any],
         storage_id: Annotated[
             Optional[StrictStr], Field(description="the storage_id for which to create the entry.")
         ] = None,
@@ -302,10 +310,7 @@ class StorageApi:
             Optional[StrictStr],
             Field(description="the name of the storage for which the config is provided."),
         ] = None,
-        config_type: Annotated[
-            Optional[StrictStr],
-            Field(description="default is rclone, but could be something else in the future."),
-        ] = None,
+        config_type: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -322,15 +327,13 @@ class StorageApi:
 
         Parameters
         ----------
-        body : object
+        request_body : Dict[str, object]
             (required)
         storage_id : str
             the storage_id for which to create the entry.
         storage_name : str
             the name of the storage for which the config is provided.
         config_type : str
-            default is rclone, but could be something else in the
-            future.
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -358,7 +361,7 @@ class StorageApi:
         # noqa: E501
 
         _param = self._create_storage_config_serialize(
-            body=body,
+            request_body=request_body,
             storage_id=storage_id,
             storage_name=storage_name,
             config_type=config_type,
@@ -382,7 +385,7 @@ class StorageApi:
     @validate_call
     def create_storage_config_with_http_info(
         self,
-        body: Dict[str, Any],
+        request_body: Dict[str, Any],
         storage_id: Annotated[
             Optional[StrictStr], Field(description="the storage_id for which to create the entry.")
         ] = None,
@@ -390,10 +393,7 @@ class StorageApi:
             Optional[StrictStr],
             Field(description="the name of the storage for which the config is provided."),
         ] = None,
-        config_type: Annotated[
-            Optional[StrictStr],
-            Field(description="default is rclone, but could be something else in the future."),
-        ] = None,
+        config_type: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -410,15 +410,13 @@ class StorageApi:
 
         Parameters
         ----------
-        body : object
+        request_body : Dict[str, object]
             (required)
         storage_id : str
             the storage_id for which to create the entry.
         storage_name : str
             the name of the storage for which the config is provided.
         config_type : str
-            default is rclone, but could be something else in the
-            future.
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -446,7 +444,7 @@ class StorageApi:
         # noqa: E501
 
         _param = self._create_storage_config_serialize(
-            body=body,
+            request_body=request_body,
             storage_id=storage_id,
             storage_name=storage_name,
             config_type=config_type,
@@ -470,7 +468,7 @@ class StorageApi:
     @validate_call
     def create_storage_config_without_preload_content(
         self,
-        body: Dict[str, Any],
+        request_body: Dict[str, Any],
         storage_id: Annotated[
             Optional[StrictStr], Field(description="the storage_id for which to create the entry.")
         ] = None,
@@ -478,10 +476,7 @@ class StorageApi:
             Optional[StrictStr],
             Field(description="the name of the storage for which the config is provided."),
         ] = None,
-        config_type: Annotated[
-            Optional[StrictStr],
-            Field(description="default is rclone, but could be something else in the future."),
-        ] = None,
+        config_type: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -498,15 +493,13 @@ class StorageApi:
 
         Parameters
         ----------
-        body : object
+        request_body : Dict[str, object]
             (required)
         storage_id : str
             the storage_id for which to create the entry.
         storage_name : str
             the name of the storage for which the config is provided.
         config_type : str
-            default is rclone, but could be something else in the
-            future.
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -534,7 +527,7 @@ class StorageApi:
         # noqa: E501
 
         _param = self._create_storage_config_serialize(
-            body=body,
+            request_body=request_body,
             storage_id=storage_id,
             storage_name=storage_name,
             config_type=config_type,
@@ -553,7 +546,7 @@ class StorageApi:
 
     def _create_storage_config_serialize(
         self,
-        body,
+        request_body,
         storage_id,
         storage_name,
         config_type,
@@ -591,8 +584,8 @@ class StorageApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if body is not None:
-            _body_params = body
+        if request_body is not None:
+            _body_params = request_body
 
         # set the HTTP header `Accept`
         if "Accept" not in _header_params:
@@ -635,10 +628,7 @@ class StorageApi:
         storage_name: Annotated[
             Optional[StrictStr], Field(description='the name of the storage volume, by default ""')
         ] = None,
-        config_type: Annotated[
-            Optional[StrictStr],
-            Field(description='query only the specified type, by default "rclone"'),
-        ] = None,
+        config_type: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -648,7 +638,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Optional[str]]:
+    ) -> List[Optional[Dict[str, object]]]:
         """Get Storage Config
 
         Get the storage configuration entry for a particular storage backend.
@@ -660,7 +650,6 @@ class StorageApi:
         storage_name : str
             the name of the storage volume, by default \"\"
         config_type : str
-            query only the specified type, by default \"rclone\"
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -698,7 +687,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[str]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -717,10 +706,7 @@ class StorageApi:
         storage_name: Annotated[
             Optional[StrictStr], Field(description='the name of the storage volume, by default ""')
         ] = None,
-        config_type: Annotated[
-            Optional[StrictStr],
-            Field(description='query only the specified type, by default "rclone"'),
-        ] = None,
+        config_type: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -730,7 +716,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Optional[str]]]:
+    ) -> ApiResponse[List[Optional[Dict[str, object]]]]:
         """Get Storage Config
 
         Get the storage configuration entry for a particular storage backend.
@@ -742,7 +728,6 @@ class StorageApi:
         storage_name : str
             the name of the storage volume, by default \"\"
         config_type : str
-            query only the specified type, by default \"rclone\"
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -780,7 +765,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[str]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -799,10 +784,7 @@ class StorageApi:
         storage_name: Annotated[
             Optional[StrictStr], Field(description='the name of the storage volume, by default ""')
         ] = None,
-        config_type: Annotated[
-            Optional[StrictStr],
-            Field(description='query only the specified type, by default "rclone"'),
-        ] = None,
+        config_type: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -824,7 +806,6 @@ class StorageApi:
         storage_name : str
             the name of the storage volume, by default \"\"
         config_type : str
-            query only the specified type, by default \"rclone\"
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -862,7 +843,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[str]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -937,15 +918,14 @@ class StorageApi:
             StrictStr,
             Field(description="the orgization or owner's name managing the storage location."),
         ],
-        location_type: Annotated[StrictStr, Field(description='the location type, e.g. "server"')],
-        location_country: Annotated[
-            Optional[StrictStr], Field(description="the location country name")
-        ] = None,
+        location_type: StrictStr,
+        location_country: Optional[StrictStr] = None,
         location_city: Annotated[
             Optional[StrictStr], Field(description="the location city name")
         ] = None,
         location_facility: Annotated[
-            Optional[StrictStr], Field(description="the location facility name")
+            Optional[StrictStr],
+            Field(description="the location facility name, from table location_facility"),
         ] = None,
         _request_timeout: Union[
             None,
@@ -959,7 +939,7 @@ class StorageApi:
     ) -> str:
         """Init Location
 
-        Initialize a new storage location.
+        Initialise a new location for a storage by specifying the location_name and location_type.
 
         Parameters
         ----------
@@ -967,13 +947,12 @@ class StorageApi:
             the orgization or owner's name managing the storage
             location. (required)
         location_type : str
-            the location type, e.g. \"server\" (required)
+            (required)
         location_country : str
-            the location country name
         location_city : str
             the location city name
         location_facility : str
-            the location facility name
+            the location facility name, from table location_facility
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -1030,15 +1009,14 @@ class StorageApi:
             StrictStr,
             Field(description="the orgization or owner's name managing the storage location."),
         ],
-        location_type: Annotated[StrictStr, Field(description='the location type, e.g. "server"')],
-        location_country: Annotated[
-            Optional[StrictStr], Field(description="the location country name")
-        ] = None,
+        location_type: StrictStr,
+        location_country: Optional[StrictStr] = None,
         location_city: Annotated[
             Optional[StrictStr], Field(description="the location city name")
         ] = None,
         location_facility: Annotated[
-            Optional[StrictStr], Field(description="the location facility name")
+            Optional[StrictStr],
+            Field(description="the location facility name, from table location_facility"),
         ] = None,
         _request_timeout: Union[
             None,
@@ -1052,7 +1030,7 @@ class StorageApi:
     ) -> ApiResponse[str]:
         """Init Location
 
-        Initialize a new storage location.
+        Initialise a new location for a storage by specifying the location_name and location_type.
 
         Parameters
         ----------
@@ -1060,13 +1038,12 @@ class StorageApi:
             the orgization or owner's name managing the storage
             location. (required)
         location_type : str
-            the location type, e.g. \"server\" (required)
+            (required)
         location_country : str
-            the location country name
         location_city : str
             the location city name
         location_facility : str
-            the location facility name
+            the location facility name, from table location_facility
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -1123,15 +1100,14 @@ class StorageApi:
             StrictStr,
             Field(description="the orgization or owner's name managing the storage location."),
         ],
-        location_type: Annotated[StrictStr, Field(description='the location type, e.g. "server"')],
-        location_country: Annotated[
-            Optional[StrictStr], Field(description="the location country name")
-        ] = None,
+        location_type: StrictStr,
+        location_country: Optional[StrictStr] = None,
         location_city: Annotated[
             Optional[StrictStr], Field(description="the location city name")
         ] = None,
         location_facility: Annotated[
-            Optional[StrictStr], Field(description="the location facility name")
+            Optional[StrictStr],
+            Field(description="the location facility name, from table location_facility"),
         ] = None,
         _request_timeout: Union[
             None,
@@ -1145,7 +1121,7 @@ class StorageApi:
     ) -> RESTResponseType:
         """Init Location
 
-        Initialize a new storage location.
+        Initialise a new location for a storage by specifying the location_name and location_type.
 
         Parameters
         ----------
@@ -1153,13 +1129,12 @@ class StorageApi:
             the orgization or owner's name managing the storage
             location. (required)
         location_type : str
-            the location type, e.g. \"server\" (required)
+            (required)
         location_country : str
-            the location country name
         location_city : str
             the location city name
         location_facility : str
-            the location facility name
+            the location facility name, from table location_facility
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -1283,16 +1258,12 @@ class StorageApi:
         storage_name: Annotated[
             StrictStr, Field(description="An organisation or owner name for the storage.")
         ],
-        storage_type: Annotated[
-            StrictStr, Field(description='high level type of the storage, e.g. "disk", "s3"')
-        ],
-        storage_interface: Annotated[
-            StrictStr, Field(description='storage interface for rclone access, e.g. "posix", "s3"')
-        ],
+        storage_type: StrictStr,
         root_directory: Annotated[
             StrictStr,
             Field(description="data directory as an absolute path on the remote storage endpoint"),
         ],
+        storage_interface: StrictStr,
         location_id: Annotated[
             Optional[StrictStr], Field(description="a dlm registered location id")
         ] = None,
@@ -1302,10 +1273,8 @@ class StorageApi:
         storage_capacity: Annotated[
             Optional[StrictInt], Field(description="reserved storage capacity in bytes")
         ] = None,
-        storage_phase_level: Annotated[
-            Optional[StrictStr], Field(description='one of "GAS", "LIQUID", "SOLID"')
-        ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        storage_phase: Optional[StrictStr] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1318,30 +1287,27 @@ class StorageApi:
     ) -> str:
         """Init Storage
 
-        Initialize a new storage.
+        Initialise a new storage. Either location_id or location_name is required.
 
         Parameters
         ----------
         storage_name : str
             An organisation or owner name for the storage. (required)
         storage_type : str
-            high level type of the storage, e.g. \"disk\", \"s3\"
-            (required)
-        storage_interface : str
-            storage interface for rclone access, e.g. \"posix\", \"s3\"
             (required)
         root_directory : str
             data directory as an absolute path on the remote storage
             endpoint (required)
+        storage_interface : str
+            (required)
         location_id : str
             a dlm registered location id
         location_name : str
             a dlm registered location name
         storage_capacity : int
             reserved storage capacity in bytes
-        storage_phase_level : str
-            one of \"GAS\", \"LIQUID\", \"SOLID\"
-        body : object
+        storage_phase : str
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -1371,13 +1337,13 @@ class StorageApi:
         _param = self._init_storage_serialize(
             storage_name=storage_name,
             storage_type=storage_type,
-            storage_interface=storage_interface,
             root_directory=root_directory,
+            storage_interface=storage_interface,
             location_id=location_id,
             location_name=location_name,
             storage_capacity=storage_capacity,
-            storage_phase_level=storage_phase_level,
-            body=body,
+            storage_phase=storage_phase,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1401,16 +1367,12 @@ class StorageApi:
         storage_name: Annotated[
             StrictStr, Field(description="An organisation or owner name for the storage.")
         ],
-        storage_type: Annotated[
-            StrictStr, Field(description='high level type of the storage, e.g. "disk", "s3"')
-        ],
-        storage_interface: Annotated[
-            StrictStr, Field(description='storage interface for rclone access, e.g. "posix", "s3"')
-        ],
+        storage_type: StrictStr,
         root_directory: Annotated[
             StrictStr,
             Field(description="data directory as an absolute path on the remote storage endpoint"),
         ],
+        storage_interface: StrictStr,
         location_id: Annotated[
             Optional[StrictStr], Field(description="a dlm registered location id")
         ] = None,
@@ -1420,10 +1382,8 @@ class StorageApi:
         storage_capacity: Annotated[
             Optional[StrictInt], Field(description="reserved storage capacity in bytes")
         ] = None,
-        storage_phase_level: Annotated[
-            Optional[StrictStr], Field(description='one of "GAS", "LIQUID", "SOLID"')
-        ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        storage_phase: Optional[StrictStr] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1436,30 +1396,27 @@ class StorageApi:
     ) -> ApiResponse[str]:
         """Init Storage
 
-        Initialize a new storage.
+        Initialise a new storage. Either location_id or location_name is required.
 
         Parameters
         ----------
         storage_name : str
             An organisation or owner name for the storage. (required)
         storage_type : str
-            high level type of the storage, e.g. \"disk\", \"s3\"
-            (required)
-        storage_interface : str
-            storage interface for rclone access, e.g. \"posix\", \"s3\"
             (required)
         root_directory : str
             data directory as an absolute path on the remote storage
             endpoint (required)
+        storage_interface : str
+            (required)
         location_id : str
             a dlm registered location id
         location_name : str
             a dlm registered location name
         storage_capacity : int
             reserved storage capacity in bytes
-        storage_phase_level : str
-            one of \"GAS\", \"LIQUID\", \"SOLID\"
-        body : object
+        storage_phase : str
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -1489,13 +1446,13 @@ class StorageApi:
         _param = self._init_storage_serialize(
             storage_name=storage_name,
             storage_type=storage_type,
-            storage_interface=storage_interface,
             root_directory=root_directory,
+            storage_interface=storage_interface,
             location_id=location_id,
             location_name=location_name,
             storage_capacity=storage_capacity,
-            storage_phase_level=storage_phase_level,
-            body=body,
+            storage_phase=storage_phase,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1519,16 +1476,12 @@ class StorageApi:
         storage_name: Annotated[
             StrictStr, Field(description="An organisation or owner name for the storage.")
         ],
-        storage_type: Annotated[
-            StrictStr, Field(description='high level type of the storage, e.g. "disk", "s3"')
-        ],
-        storage_interface: Annotated[
-            StrictStr, Field(description='storage interface for rclone access, e.g. "posix", "s3"')
-        ],
+        storage_type: StrictStr,
         root_directory: Annotated[
             StrictStr,
             Field(description="data directory as an absolute path on the remote storage endpoint"),
         ],
+        storage_interface: StrictStr,
         location_id: Annotated[
             Optional[StrictStr], Field(description="a dlm registered location id")
         ] = None,
@@ -1538,10 +1491,8 @@ class StorageApi:
         storage_capacity: Annotated[
             Optional[StrictInt], Field(description="reserved storage capacity in bytes")
         ] = None,
-        storage_phase_level: Annotated[
-            Optional[StrictStr], Field(description='one of "GAS", "LIQUID", "SOLID"')
-        ] = None,
-        body: Optional[Dict[str, Any]] = None,
+        storage_phase: Optional[StrictStr] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1554,30 +1505,27 @@ class StorageApi:
     ) -> RESTResponseType:
         """Init Storage
 
-        Initialize a new storage.
+        Initialise a new storage. Either location_id or location_name is required.
 
         Parameters
         ----------
         storage_name : str
             An organisation or owner name for the storage. (required)
         storage_type : str
-            high level type of the storage, e.g. \"disk\", \"s3\"
-            (required)
-        storage_interface : str
-            storage interface for rclone access, e.g. \"posix\", \"s3\"
             (required)
         root_directory : str
             data directory as an absolute path on the remote storage
             endpoint (required)
+        storage_interface : str
+            (required)
         location_id : str
             a dlm registered location id
         location_name : str
             a dlm registered location name
         storage_capacity : int
             reserved storage capacity in bytes
-        storage_phase_level : str
-            one of \"GAS\", \"LIQUID\", \"SOLID\"
-        body : object
+        storage_phase : str
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -1607,13 +1555,13 @@ class StorageApi:
         _param = self._init_storage_serialize(
             storage_name=storage_name,
             storage_type=storage_type,
-            storage_interface=storage_interface,
             root_directory=root_directory,
+            storage_interface=storage_interface,
             location_id=location_id,
             location_name=location_name,
             storage_capacity=storage_capacity,
-            storage_phase_level=storage_phase_level,
-            body=body,
+            storage_phase=storage_phase,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1631,13 +1579,13 @@ class StorageApi:
         self,
         storage_name,
         storage_type,
-        storage_interface,
         root_directory,
+        storage_interface,
         location_id,
         location_name,
         storage_capacity,
-        storage_phase_level,
-        body,
+        storage_phase,
+        request_body,
         _request_auth,
         _content_type,
         _headers,
@@ -1665,13 +1613,13 @@ class StorageApi:
 
             _query_params.append(("storage_type", storage_type))
 
-        if storage_interface is not None:
-
-            _query_params.append(("storage_interface", storage_interface))
-
         if root_directory is not None:
 
             _query_params.append(("root_directory", root_directory))
+
+        if storage_interface is not None:
+
+            _query_params.append(("storage_interface", storage_interface))
 
         if location_id is not None:
 
@@ -1685,15 +1633,15 @@ class StorageApi:
 
             _query_params.append(("storage_capacity", storage_capacity))
 
-        if storage_phase_level is not None:
+        if storage_phase is not None:
 
-            _query_params.append(("storage_phase_level", storage_phase_level))
+            _query_params.append(("storage_phase", storage_phase))
 
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if body is not None:
-            _body_params = body
+        if request_body is not None:
+            _body_params = request_body
 
         # set the HTTP header `Accept`
         if "Accept" not in _header_params:
@@ -1747,7 +1695,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Optional[object]]:
+    ) -> List[Optional[Dict[str, object]]]:
         """Query Location
 
         Query a location.
@@ -1795,7 +1743,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1825,7 +1773,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Optional[object]]]:
+    ) -> ApiResponse[List[Optional[Dict[str, object]]]]:
         """Query Location
 
         Query a location.
@@ -1873,7 +1821,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1951,7 +1899,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2015,6 +1963,235 @@ class StorageApi:
         )
 
     @validate_call
+    def query_location_facility(
+        self,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> List[Optional[str]]:
+        """Query Location Facility
+
+        Query the location_facility table for valid facilities.
+
+        Parameters
+        ----------
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._query_location_facility_serialize(
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "List[Optional[str]]",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def query_location_facility_with_http_info(
+        self,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[List[Optional[str]]]:
+        """Query Location Facility
+
+        Query the location_facility table for valid facilities.
+
+        Parameters
+        ----------
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._query_location_facility_serialize(
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "List[Optional[str]]",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def query_location_facility_without_preload_content(
+        self,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Query Location Facility
+
+        Query the location_facility table for valid facilities.
+
+        Parameters
+        ----------
+        _request_timeout : int, tuple(int, int), optional
+            timeout setting for this request. If one number provided, it
+            will be total request timeout. It can also be a pair (tuple)
+            of (connection, read) timeouts.
+        _request_auth : dict, optional
+            set to override the auth_settings for an a single request;
+            this effectively ignores the authentication in the spec for
+            a single request.
+        _content_type : str, Optional
+            force content-type for the request.
+        _headers : dict, optional
+            set to override the headers for a single request; this
+            effectively ignores the headers in the spec for a single
+            request.
+        _host_index : int, optional
+            set to override the host_index for a single request; this
+            effectively ignores the host_index in the spec for a single
+            request.
+
+        Returns
+        -------
+        unknown
+            Returns the result object.
+        """
+        # noqa: E501
+
+        _param = self._query_location_facility_serialize(
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": "List[Optional[str]]",
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _query_location_facility_serialize(
+        self,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+        # set the HTTP header `Accept`
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method="GET",
+            resource_path="/storage/query_location_facility",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
     def query_storage(
         self,
         storage_name: Annotated[
@@ -2036,7 +2213,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Optional[object]]:
+    ) -> List[Optional[Dict[str, object]]]:
         """Query Storage
 
         Query storage locations.
@@ -2085,7 +2262,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2117,7 +2294,7 @@ class StorageApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Optional[object]]]:
+    ) -> ApiResponse[List[Optional[Dict[str, object]]]]:
         """Query Storage
 
         Query storage locations.
@@ -2166,7 +2343,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -2247,7 +2424,7 @@ class StorageApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)

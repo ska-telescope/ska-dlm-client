@@ -11,7 +11,7 @@
                 "tags": [
                     "gateway"
                 ],
-                "description": "Redirect to IDP for user authorisation",
+                "description": "Redirect to IDP for user authorisation.",
                 "operationId": "token_by_auth_flow_token_by_auth_flow_get",
                 "responses": {
                     "200": {
@@ -31,7 +31,7 @@
                 "tags": [
                     "gateway"
                 ],
-                "description": "Auth callback from Provider",
+                "description": "Auth callback from Provider.",
                 "operationId": "auth_callback_auth_callback_get",
                 "responses": {
                     "200": {
@@ -51,7 +51,7 @@
                 "tags": [
                     "gateway"
                 ],
-                "description": "Endpoint to check if Gateway is contactable",
+                "description": "Endpoint to check if Gateway is contactable.",
                 "operationId": "heartbeat_heartbeat_get",
                 "responses": {
                     "200": {
@@ -71,7 +71,7 @@
                 "tags": [
                     "gateway"
                 ],
-                "description": "Get OAUTH token based on username and password",
+                "description": "Get OAUTH token based on username and password.",
                 "operationId": "token_by_username_password_token_by_username_password_get",
                 "parameters": [
                     {
@@ -98,7 +98,11 @@
                         "description": "Successful Response",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Token By Username Password Token By Username Password Get"
+                                }
                             }
                         }
                     },
@@ -121,7 +125,7 @@
                 "tags": [
                     "gateway"
                 ],
-                "description": "Get UMA scopes",
+                "description": "Get UMA scopes.",
                 "operationId": "has_scope_scope_get",
                 "parameters": [
                     {

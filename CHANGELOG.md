@@ -5,6 +5,11 @@
 ### Added
 
 * Added optional Kafka service to the Helm chart for local development support.
+* Added setting of kafka-watcher's command line parameter kafka-base-dir in the helm chart.
+
+### Updated
+
+* Updated OpenAPI spec to match DLM Server Services 1.2.0 release. Minor fixes associated with this.
 
 ## 1.0.2
 

@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "1.0.0"
+        "version": "1.2.0"
     },
     "paths": {
         "/ingest/init_data_item": {
@@ -16,7 +16,7 @@
                 "tags": [
                     "ingest"
                 ],
-                "description": "Initialize a new data_item.\n\nitem_name or json_data is required.",
+                "description": "Initialise a new data_item.\n\nitem_name or json_data is required.",
                 "operationId": "init_data_item",
                 "parameters": [
                     {
@@ -38,16 +38,13 @@
                         "description": "the item_name, can be empty, but then json_data has to be specified."
                     },
                     {
-                        "name": "phase",
+                        "name": "uid_phase",
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "type": "string",
-                            "description": "the phase this item is set to (usually inherited from the storage)",
-                            "default": "GAS",
-                            "title": "Phase"
-                        },
-                        "description": "the phase this item is set to (usually inherited from the storage)"
+                            "$ref": "#/components/schemas/PhaseType",
+                            "default": "GAS"
+                        }
                     },
                     {
                         "name": "authorization",
@@ -74,7 +71,8 @@
                             "schema": {
                                 "anyOf": [
                                     {
-                                        "type": "object"
+                                        "type": "object",
+                                        "additionalProperties": true
                                     },
                                     {
                                         "type": "null"
@@ -117,7 +115,7 @@
                 "tags": [
                     "ingest"
                 ],
-                "description": "Ingest a data_item (register function is an alias).\n\nThis high level function is a combination of init_data_item, set_uri and set_state(READY).\nIt also checks whether a data_item is already registered on the requested storage.\n\n(1) check whether requested storage is known and accessible\n(2) check, if required, whether item is accessible/exists on that storage\n(3) check whether item is already registered on that storage\n(4) initialize the item on the storage\n(5) set the access path to the payload\n(6) set state to READY\n(7) save metadata in the data_item table",
+                "description": "Ingest a data_item (register function is an alias).\n\nThis high level function is a combination of init_data_item, set_uri and set_state(READY).\nIt also checks whether a data_item is already registered on the requested storage.\n\n(1) check whether requested storage is known and accessible\n(2) check, if required, whether item is accessible/exists on that storage\n(3) check whether item is already registered on that storage\n(4) initialise the item on the storage\n(5) set the access path to the payload\n(6) set state to READY\n(7) save metadata in the data_item table",
                 "operationId": "register_data_item",
                 "parameters": [
                     {
@@ -230,7 +228,8 @@
                             "schema": {
                                 "anyOf": [
                                     {
-                                        "type": "object"
+                                        "type": "object",
+                                        "additionalProperties": true
                                     },
                                     {
                                         "type": "null"
@@ -292,6 +291,17 @@
                 ],
                 "title": "ItemType",
                 "description": "Data Item on the filesystem."
+            },
+            "PhaseType": {
+                "type": "string",
+                "enum": [
+                    "GAS",
+                    "LIQUID",
+                    "SOLID",
+                    "PLASMA"
+                ],
+                "title": "PhaseType",
+                "description": "Phase type / resilience level."
             },
             "ValidationError": {
                 "properties": {

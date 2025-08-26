@@ -16,7 +16,7 @@ Method | HTTP request | Description
 
 Auth Callback
 
-Auth callback from Provider
+Auth callback from Provider.
 
 ### Example
 
@@ -79,7 +79,7 @@ No authorization required
 
 Has Scope
 
-Get UMA scopes
+Get UMA scopes.
 
 ### Example
 
@@ -149,7 +149,7 @@ No authorization required
 
 Heartbeat
 
-Endpoint to check if Gateway is contactable
+Endpoint to check if Gateway is contactable.
 
 ### Example
 
@@ -212,7 +212,7 @@ No authorization required
 
 Token By Auth Flow
 
-Redirect to IDP for user authorisation
+Redirect to IDP for user authorisation.
 
 ### Example
 
@@ -271,11 +271,11 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **token_by_username_password_token_by_username_password_get**
-> object token_by_username_password_token_by_username_password_get(username, password)
+> Dict[str, object] token_by_username_password_token_by_username_password_get(username, password)
 
 Token By Username Password
 
-Get OAUTH token based on username and password
+Get OAUTH token based on username and password.
 
 ### Example
 
@@ -320,7 +320,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+**Dict[str, object]**
 
 ### Authorization
 
