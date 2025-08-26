@@ -117,7 +117,7 @@ async def post_dlm_data_item(
                 uri=ingest_event_data["file"],
                 item_type=ItemType.CONTAINER,
                 storage_name=storage_name,
-                body=ingest_event_data["metadata"],
+                request_body=ingest_event_data["metadata"],
                 do_storage_access_check=check_rclone_access,
             )
             logger.info("item posted successfully with response %s", response)

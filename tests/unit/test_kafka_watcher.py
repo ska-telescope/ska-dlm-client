@@ -8,6 +8,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 import pytest_mock
 
+from ska_dlm_client.common_types import ItemType
 from ska_dlm_client.openapi.exceptions import OpenApiException
 from src.ska_dlm_client.kafka_watcher.main import main, post_dlm_data_item, watch
 
@@ -108,7 +109,7 @@ async def test_watch_post_success(mock_apiingest: MagicMock, mock_kafka_consumer
     mock_kafka_consumer.start.side_effect = [False, True]
 
     await watch(
-        kafka_broker_url=KAFKA_HOST,
+        kafka_broker_url=[KAFKA_HOST],
         kafka_topic=[TEST_TOPIC],
         ingest_server_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
@@ -133,7 +134,7 @@ async def test_watch_http_failure(
     # Run the test and capture the logs
     with caplog.at_level("ERROR", logger="ska_dlm_client.kafka_watcher.main"):
         await watch(
-            kafka_broker_url=KAFKA_HOST,
+            kafka_broker_url=[KAFKA_HOST],
             kafka_topic=[TEST_TOPIC],
             ingest_server_url=INGEST_HOST,
             storage_name=STORAGE_NAME,
@@ -160,9 +161,9 @@ async def test_post_dlm_data_item_success(mock_apiingest, caplog):
     mock_apiingest.assert_called_once_with(
         item_name="data/file_name",
         uri=KAFKA_MSG["file"],  # Assuming file is used as the URI
-        item_type="container",
+        item_type=ItemType.CONTAINER,
         storage_name=STORAGE_NAME,
-        body=KAFKA_MSG["metadata"],
+        request_body=KAFKA_MSG["metadata"],
         do_storage_access_check=True,
     )
 
@@ -185,9 +186,9 @@ async def test_post_dlm_data_item_success_with_kafka_base_dir(mock_apiingest, ca
     mock_apiingest.assert_called_once_with(
         item_name="file_name",
         uri=KAFKA_MSG["file"],  # Assuming file is used as the URI
-        item_type="container",
+        item_type=ItemType.CONTAINER,
         storage_name=STORAGE_NAME,
-        body=KAFKA_MSG["metadata"],
+        request_body=KAFKA_MSG["metadata"],
         do_storage_access_check=True,
     )
 

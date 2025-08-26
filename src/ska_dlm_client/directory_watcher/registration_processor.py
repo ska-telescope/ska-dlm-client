@@ -4,13 +4,13 @@ import logging
 import os
 import time
 from dataclasses import dataclass
-from enum import Enum
 from os.path import isdir, isfile, islink
 from pathlib import Path
 
 from typing_extensions import Self
 
 import ska_dlm_client.directory_watcher.config
+from ska_dlm_client.common_types import ItemType
 from ska_dlm_client.directory_watcher.config import Config
 from ska_dlm_client.directory_watcher.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntry
@@ -20,17 +20,6 @@ from ska_dlm_client.openapi.exceptions import OpenApiException
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-
-class ItemType(str, Enum):
-    """Data Item on the filesystem."""
-
-    UNKOWN = "unknown"
-    """A single file."""
-    FILE = "file"
-    """A single file."""
-    CONTAINER = "container"
-    """A directory superset with parents."""
 
 
 @dataclass
@@ -104,7 +93,7 @@ class RegistrationProcessor:
                         item_type=item.item_type,
                         storage_name=self._config.storage_name,
                         do_storage_access_check=self._config.rclone_access_check_on_register,
-                        body=None if item.metadata is None else item.metadata.as_dict(),
+                        request_body=None if item.metadata is None else item.metadata.as_dict(),
                     )
             except OpenApiException as err:
                 logger.error("OpenApiException caught during register_container_parent_item")
@@ -156,7 +145,9 @@ class RegistrationProcessor:
                             storage_name=self._config.storage_name,
                             do_storage_access_check=self._config.rclone_access_check_on_register,
                             parents=None if item.parent is None else item.parent.uuid,
-                            body=None if item.metadata is None else item.metadata.as_dict(),
+                            request_body=(
+                                None if item.metadata is None else item.metadata.as_dict()
+                            ),
                         )
                 except OpenApiException as err:
                     logger.error("OpenApiException caught during _register_container_items")

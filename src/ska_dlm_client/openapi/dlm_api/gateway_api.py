@@ -49,7 +49,7 @@ class GatewayApi:
     ) -> object:
         """Auth Callback
 
-        Auth callback from Provider
+        Auth callback from Provider.
 
         Parameters
         ----------
@@ -111,7 +111,7 @@ class GatewayApi:
     ) -> ApiResponse[object]:
         """Auth Callback
 
-        Auth callback from Provider
+        Auth callback from Provider.
 
         Parameters
         ----------
@@ -173,7 +173,7 @@ class GatewayApi:
     ) -> RESTResponseType:
         """Auth Callback
 
-        Auth callback from Provider
+        Auth callback from Provider.
 
         Parameters
         ----------
@@ -280,7 +280,7 @@ class GatewayApi:
     ) -> object:
         """Has Scope
 
-        Get UMA scopes
+        Get UMA scopes.
 
         Parameters
         ----------
@@ -351,7 +351,7 @@ class GatewayApi:
     ) -> ApiResponse[object]:
         """Has Scope
 
-        Get UMA scopes
+        Get UMA scopes.
 
         Parameters
         ----------
@@ -422,7 +422,7 @@ class GatewayApi:
     ) -> RESTResponseType:
         """Has Scope
 
-        Get UMA scopes
+        Get UMA scopes.
 
         Parameters
         ----------
@@ -544,7 +544,7 @@ class GatewayApi:
     ) -> object:
         """Heartbeat
 
-        Endpoint to check if Gateway is contactable
+        Endpoint to check if Gateway is contactable.
 
         Parameters
         ----------
@@ -606,7 +606,7 @@ class GatewayApi:
     ) -> ApiResponse[object]:
         """Heartbeat
 
-        Endpoint to check if Gateway is contactable
+        Endpoint to check if Gateway is contactable.
 
         Parameters
         ----------
@@ -668,7 +668,7 @@ class GatewayApi:
     ) -> RESTResponseType:
         """Heartbeat
 
-        Endpoint to check if Gateway is contactable
+        Endpoint to check if Gateway is contactable.
 
         Parameters
         ----------
@@ -773,7 +773,7 @@ class GatewayApi:
     ) -> object:
         """Token By Auth Flow
 
-        Redirect to IDP for user authorisation
+        Redirect to IDP for user authorisation.
 
         Parameters
         ----------
@@ -835,7 +835,7 @@ class GatewayApi:
     ) -> ApiResponse[object]:
         """Token By Auth Flow
 
-        Redirect to IDP for user authorisation
+        Redirect to IDP for user authorisation.
 
         Parameters
         ----------
@@ -897,7 +897,7 @@ class GatewayApi:
     ) -> RESTResponseType:
         """Token By Auth Flow
 
-        Redirect to IDP for user authorisation
+        Redirect to IDP for user authorisation.
 
         Parameters
         ----------
@@ -1001,10 +1001,10 @@ class GatewayApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> Dict[str, object]:
         """Token By Username Password
 
-        Get OAUTH token based on username and password
+        Get OAUTH token based on username and password.
 
         Parameters
         ----------
@@ -1048,7 +1048,7 @@ class GatewayApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1072,10 +1072,10 @@ class GatewayApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Token By Username Password
 
-        Get OAUTH token based on username and password
+        Get OAUTH token based on username and password.
 
         Parameters
         ----------
@@ -1119,7 +1119,7 @@ class GatewayApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -1146,7 +1146,7 @@ class GatewayApi:
     ) -> RESTResponseType:
         """Token By Username Password
 
-        Get OAUTH token based on username and password
+        Get OAUTH token based on username and password.
 
         Parameters
         ----------
@@ -1190,7 +1190,7 @@ class GatewayApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)

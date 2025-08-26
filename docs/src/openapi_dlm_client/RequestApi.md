@@ -25,11 +25,13 @@ Method | HTTP request | Description
 
 
 # **query_data_item**
-> List[Optional[object]] query_data_item(item_name=item_name, oid=oid, uid=uid, storage_id=storage_id, params=params)
+> List[Optional[Dict[str, object]]] query_data_item(item_name=item_name, oid=oid, uid=uid, storage_id=storage_id, params=params)
 
 Query Data Item
 
-Query a data_item.  At least one of item_name, oid, uid, or params is required.
+Query a data_item.
+
+params or item_name/oid/uid is required.
 
 ### Example
 
@@ -50,7 +52,7 @@ configuration = ska_dlm_client.openapi.Configuration(
 with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = ska_dlm_client.openapi.RequestApi(api_client)
-    item_name = '' # str | could be empty, in which case the first 1000 items are returned. (optional) (default to '')
+    item_name = '' # str | Could be empty, in which case the first 1000 items are returned (optional) (default to '')
     oid = '' # str | Return data_items referred to by the OID provided. (optional) (default to '')
     uid = '' # str | Return data_item referred to by the UID provided. (optional) (default to '')
     storage_id = '' # str | Return data_item referred to by a given storage_id. (optional) (default to '')
@@ -72,7 +74,7 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **item_name** | **str**| could be empty, in which case the first 1000 items are returned. | [optional] [default to &#39;&#39;]
+ **item_name** | **str**| Could be empty, in which case the first 1000 items are returned | [optional] [default to &#39;&#39;]
  **oid** | **str**| Return data_items referred to by the OID provided. | [optional] [default to &#39;&#39;]
  **uid** | **str**| Return data_item referred to by the UID provided. | [optional] [default to &#39;&#39;]
  **storage_id** | **str**| Return data_item referred to by a given storage_id. | [optional] [default to &#39;&#39;]
@@ -80,7 +82,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**List[Optional[object]]**
+**List[Optional[Dict[str, object]]]**
 
 ### Authorization
 
@@ -101,7 +103,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_deleted**
-> List[Optional[object]] query_deleted(uid=uid)
+> List[Optional[Dict[str, object]]] query_deleted(uid=uid)
 
 Query Deleted
 
@@ -148,7 +150,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**List[Optional[object]]**
+**List[Optional[Dict[str, object]]]**
 
 ### Authorization
 
@@ -197,7 +199,7 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     item_name = '' # str | optional item_name (optional) (default to '')
     oid = '' # str | the oid to be searched for (optional) (default to '')
     uid = '' # str | this returns only one storage_id (optional) (default to '')
-    ready = False # bool | whether the item must be in ready state. (optional) (default to False)
+    ready = False # bool | whether the item must be in READY state. (optional) (default to False)
 
     try:
         # Query Exists
@@ -218,7 +220,7 @@ Name | Type | Description  | Notes
  **item_name** | **str**| optional item_name | [optional] [default to &#39;&#39;]
  **oid** | **str**| the oid to be searched for | [optional] [default to &#39;&#39;]
  **uid** | **str**| this returns only one storage_id | [optional] [default to &#39;&#39;]
- **ready** | **bool**| whether the item must be in ready state. | [optional] [default to False]
+ **ready** | **bool**| whether the item must be in READY state. | [optional] [default to False]
 
 ### Return type
 
@@ -247,7 +249,7 @@ No authorization required
 
 Query Exists And Ready
 
-Check whether a data_item exists and is in ready state.
+Check whether a data_item exists and is in READY state.
 
 ### Example
 
@@ -315,7 +317,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_expired**
-> List[Optional[object]] query_expired(offset=offset)
+> List[Optional[Dict[str, object]]] query_expired(offset=offset)
 
 Query Expired
 
@@ -362,7 +364,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**List[Optional[object]]**
+**List[Optional[Dict[str, object]]]**
 
 ### Authorization
 
@@ -383,11 +385,13 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_item_storage**
-> List[Optional[object]] query_item_storage(item_name=item_name, oid=oid, uid=uid)
+> List[Optional[Dict[str, object]]] query_item_storage(item_name=item_name, oid=oid, uid=uid)
 
 Query Item Storage
 
-Query for the storage_ids of all backends holding a copy of a data_item.  Either an item_name or a OID have to be provided.
+Query for the storage_ids of all backends holding a copy of a data_item.
+
+Either an item_name or a OID have to be provided.
 
 ### Example
 
@@ -434,7 +438,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**List[Optional[object]]**
+**List[Optional[Dict[str, object]]]**
 
 ### Authorization
 
@@ -455,7 +459,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_new**
-> List[object] query_new(check_date, uid=uid)
+> List[Dict[str, object]] query_new(check_date, uid=uid)
 
 Query New
 
@@ -504,7 +508,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**List[object]**
+**List[Dict[str, object]]**
 
 ### Authorization
 
@@ -525,7 +529,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_acl**
-> object set_acl(oid=oid, uid=uid, acl=acl)
+> Dict[str, object] set_acl(oid=oid, uid=uid, acl=acl)
 
 Set Acl
 
@@ -576,7 +580,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+**Dict[str, object]**
 
 ### Authorization
 
@@ -597,7 +601,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_group**
-> object set_group(oid=oid, uid=uid, group=group)
+> Dict[str, object] set_group(oid=oid, uid=uid, group=group)
 
 Set Group
 
@@ -648,7 +652,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+**Dict[str, object]**
 
 ### Authorization
 
@@ -669,7 +673,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_metadata**
-> object set_metadata(uid, body=body)
+> Dict[str, object] set_metadata(uid, request_body=request_body)
 
 Set Metadata
 
@@ -695,11 +699,11 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = ska_dlm_client.openapi.RequestApi(api_client)
     uid = 'uid_example' # str | the UID of the data_item to be updated
-    body = None # object |  (optional)
+    request_body = None # Dict[str, object] |  (optional)
 
     try:
         # Set Metadata
-        api_response = api_instance.set_metadata(uid, body=body)
+        api_response = api_instance.set_metadata(uid, request_body=request_body)
         print("The response of RequestApi->set_metadata:\n")
         pprint(api_response)
     except Exception as e:
@@ -714,11 +718,11 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **uid** | **str**| the UID of the data_item to be updated | 
- **body** | **object**|  | [optional] 
+ **request_body** | [**Dict[str, object]**](object.md)|  | [optional] 
 
 ### Return type
 
-**object**
+**Dict[str, object]**
 
 ### Authorization
 
@@ -739,7 +743,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_oid_expiration**
-> object set_oid_expiration(oid, expiration)
+> Dict[str, object] set_oid_expiration(oid, expiration)
 
 Set Oid Expiration
 
@@ -788,7 +792,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+**Dict[str, object]**
 
 ### Authorization
 
@@ -809,7 +813,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_phase**
-> object set_phase(uid, phase)
+> Dict[str, object] set_phase(uid, phase)
 
 Set Phase
 
@@ -858,7 +862,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+**Dict[str, object]**
 
 ### Authorization
 
@@ -879,7 +883,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_state**
-> object set_state(uid, state)
+> Dict[str, object] set_state(uid, state)
 
 Set State
 
@@ -905,7 +909,7 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = ska_dlm_client.openapi.RequestApi(api_client)
     uid = 'uid_example' # str | the uid of the data_item to be updated
-    state = 'state_example' # str | the new state for the data_item
+    state = 'state_example' # str | 
 
     try:
         # Set State
@@ -924,11 +928,11 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **uid** | **str**| the uid of the data_item to be updated | 
- **state** | **str**| the new state for the data_item | 
+ **state** | **str**|  | 
 
 ### Return type
 
-**object**
+**Dict[str, object]**
 
 ### Authorization
 
@@ -949,7 +953,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_uid_expiration**
-> object set_uid_expiration(uid, expiration)
+> Dict[str, object] set_uid_expiration(uid, expiration)
 
 Set Uid Expiration
 
@@ -998,7 +1002,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+**Dict[str, object]**
 
 ### Authorization
 
@@ -1019,7 +1023,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_uri**
-> object set_uri(uid, uri, storage_id)
+> Dict[str, object] set_uri(uid, uri, storage_id)
 
 Set Uri
 
@@ -1070,7 +1074,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+**Dict[str, object]**
 
 ### Authorization
 
@@ -1091,7 +1095,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_user**
-> object set_user(oid=oid, uid=uid, user=user)
+> Dict[str, object] set_user(oid=oid, uid=uid, user=user)
 
 Set User
 
@@ -1142,7 +1146,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+**Dict[str, object]**
 
 ### Authorization
 
@@ -1163,11 +1167,14 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **update_data_item**
-> object update_data_item(item_name=item_name, oid=oid, uid=uid, body=body)
+> Dict[str, object] update_data_item(item_name=item_name, oid=oid, uid=uid, request_body=request_body)
 
 Update Data Item
 
-Update fields of an existing data_item.  This is mostly used by the other convenience functions. In general when specifying an OID or an item_name, multiple entries will be updated at the same time.
+Update fields of an existing data_item.
+
+This is mostly used by the other convenience functions. In general when specifying
+an OID or an item_name, multiple entries will be updated at the same time.
 
 ### Example
 
@@ -1191,11 +1198,11 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     item_name = '' # str | the name of the data_items to be updated (optional) (default to '')
     oid = '' # str | the OID of the data_items to be updated (optional) (default to '')
     uid = '' # str | the UID of the data_item to be updated (optional) (default to '')
-    body = None # object |  (optional)
+    request_body = None # Dict[str, object] |  (optional)
 
     try:
         # Update Data Item
-        api_response = api_instance.update_data_item(item_name=item_name, oid=oid, uid=uid, body=body)
+        api_response = api_instance.update_data_item(item_name=item_name, oid=oid, uid=uid, request_body=request_body)
         print("The response of RequestApi->update_data_item:\n")
         pprint(api_response)
     except Exception as e:
@@ -1212,11 +1219,11 @@ Name | Type | Description  | Notes
  **item_name** | **str**| the name of the data_items to be updated | [optional] [default to &#39;&#39;]
  **oid** | **str**| the OID of the data_items to be updated | [optional] [default to &#39;&#39;]
  **uid** | **str**| the UID of the data_item to be updated | [optional] [default to &#39;&#39;]
- **body** | **object**|  | [optional] 
+ **request_body** | [**Dict[str, object]**](object.md)|  | [optional] 
 
 ### Return type
 
-**object**
+**Dict[str, object]**
 
 ### Authorization
 
@@ -1237,11 +1244,14 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **update_item_tags**
-> object update_item_tags(item_name=item_name, oid=oid, body=body)
+> Dict[str, object] update_item_tags(item_name=item_name, oid=oid, request_body=request_body)
 
 Update Item Tags
 
-Update/set the item_tags field of a data_item with given item_name/OID.  This will update all records for a data_item at the same time. Updating a single UID does not make sense.
+Update/set the item_tags field of a data_item with given item_name/OID.
+
+This will update all records for a data_item at the same time.
+Updating a single UID does not make sense.
 
 ### Example
 
@@ -1264,11 +1274,11 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     api_instance = ska_dlm_client.openapi.RequestApi(api_client)
     item_name = '' # str | the name of the data_item (optional) (default to '')
     oid = '' # str | the OID of the data_item to be updated (optional) (default to '')
-    body = None # object |  (optional)
+    request_body = None # Dict[str, object] |  (optional)
 
     try:
         # Update Item Tags
-        api_response = api_instance.update_item_tags(item_name=item_name, oid=oid, body=body)
+        api_response = api_instance.update_item_tags(item_name=item_name, oid=oid, request_body=request_body)
         print("The response of RequestApi->update_item_tags:\n")
         pprint(api_response)
     except Exception as e:
@@ -1284,11 +1294,11 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **item_name** | **str**| the name of the data_item | [optional] [default to &#39;&#39;]
  **oid** | **str**| the OID of the data_item to be updated | [optional] [default to &#39;&#39;]
- **body** | **object**|  | [optional] 
+ **request_body** | [**Dict[str, object]**](object.md)|  | [optional] 
 
 ### Return type
 
-**object**
+**Dict[str, object]**
 
 ### Authorization
 
