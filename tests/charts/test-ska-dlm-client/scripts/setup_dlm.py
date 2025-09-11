@@ -25,13 +25,13 @@ logger = logging.getLogger(__name__)
 
 # Constants that can be used for testing.
 LOCATION_NAME = "ThisDLMClientLocationName"
-LOCATION_TYPE = "ThisDLMClientLocation"
-LOCATION_COUNTRY = "Australia"
+LOCATION_TYPE = "local-dev"
+LOCATION_COUNTRY = "AU"
 LOCATION_CITY = "Marksville"
-LOCATION_FACILITY = "ICRAR"
+LOCATION_FACILITY = "local"
 STORAGE_CONFIG = {"name": "data", "type": "local", "parameters": {}}
 STORAGE_INTERFACE = "posix"
-STORAGE_TYPE = "disk"
+STORAGE_TYPE = "filesystem"
 
 
 def init_location_for_testing(storage_configuration: Configuration) -> str:

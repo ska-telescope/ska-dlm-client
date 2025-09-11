@@ -118,7 +118,7 @@ class INotifyDirectoryWatcher(DirectoryWatcher):
         logger.info("with config parameters %s", self._config)
         logger.info("starting to watch %s", self._config.directory_to_watch)
         logger.info(
-            "NOTE: watchfiles.awatch has recursive=False, in case this matters in the futuer."
+            "NOTE: watchfiles.awatch has recursive=False, in case this matters in the future."
         )
         # Last opportunity to call post startup func before we wait.
         if self._cmd_line_parameters:
