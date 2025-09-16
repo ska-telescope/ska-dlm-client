@@ -22,7 +22,7 @@ maintainers:
   email: andreas.wicenec@icrar.org
 dependencies:
 - name: kafka
-  version: 23.0.1
-  repository: https://charts.bitnami.com/bitnami
+  version: 3.8.0
+  repository: https://kafka.apache.org/
   condition: kafka.enabled
 

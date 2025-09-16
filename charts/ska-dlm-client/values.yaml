@@ -116,5 +116,5 @@ ssh_storage_access:
       pub_name: "sdp-pub"
 
 kubectl:
-  image: bitnami/kubectl
-  version: 1.28.6
+  image: artefact.skao.int/ska-ser-utils
+  version: 0.1.0
