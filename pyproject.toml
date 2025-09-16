@@ -64,7 +64,12 @@ docconvert = "^2.2.0"
 myst-parser = "^4.0.0"
 
 [tool.pytest.ini_options]
-addopts = "-v"
+addopts = "-v -s"
+# Stream logging to the terminal during tests
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s %(levelname)s %(message)s"
+log_cli_date_format = "%H:%M:%S"
 
 [tool.flake8]
 docstring-style = "google"
