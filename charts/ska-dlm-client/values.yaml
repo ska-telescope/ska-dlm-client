@@ -68,9 +68,15 @@ kafka_watcher:
   check_rclone_access: false
   kafka_base_dir: "" # Base directory string removed from path to generate item_name
 
-kafka:
-  enabled: false # Kafka service OFF for production. Only for local developement.
+redpanda:
+  enabled: true
   fullnameOverride: ska-dlm-kafka
+  statefulset:
+    replicas: 1
+  listeners:
+    kafka:
+      external:
+        enabled: false # in-cluster only; change if we later enable authentication/TLS
 
 startup_verification:
   enabled: false
