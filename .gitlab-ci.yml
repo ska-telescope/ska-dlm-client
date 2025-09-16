@@ -39,9 +39,9 @@ include:
 python-test:
   services:
     # Keep in sync with tests/test-services.docker-compose.yml
-    - name: apache/kafka:3.8.0
-      # Based off https://hub.docker.com/r/apache/kafka
     - alias: kafka
+      name: apache/kafka:3.8.0
+      # Based off https://hub.docker.com/r/apache/kafka
       variables:
         ALLOW_PLAINTEXT_LISTENER: "yes"
         KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
@@ -53,7 +53,7 @@ python-test:
         KAFKA_PROCESS_ROLES: controller,broker
         KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
         KAFKA_MESSAGE_MAX_BYTES: 134217728
-  variables:
-    # To debug the above services, uncomment the below line. For more info see
+    # To debug the above services, uncomment the lines below. For more info see
     # https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2119#note_1142144587
-    # CI_DEBUG_SERVICES: trace
+  # variables:
+  #   CI_DEBUG_SERVICES: trace
