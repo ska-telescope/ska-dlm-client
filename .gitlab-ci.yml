@@ -1,9 +1,14 @@
-image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  CI_POETRY_VERSION: 1.8.2
+
+# Enable caching for python
 cache:
+  key: $CI_COMMIT_REF_SLUG
   paths:
-    - build
+    - .cache/pip
+
 stages:
   - build
   - test
@@ -11,6 +16,7 @@ stages:
   - publish
   - pages
   - scan
+
 include:
     # Python
   - project: 'ska-telescope/templates-repository'
@@ -60,3 +66,36 @@ python-test:
     # To debug the above services, uncomment the below line. For more info see
     # https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2119#note_1142144587
     # CI_DEBUG_SERVICES: trace
+
+integration_tests:
+  stage: test
+  image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
+  services:
+    - docker:27.0.2-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: "" # Tells the DinD service to run without TLS
+    DOCKER_BUILDKIT: "1"
+
+    # server repo to clone for compose files
+    DLM_SERVER_REPO: https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/ska-telescope/ska-data-lifecycle.git
+    DLM_SERVER_REF: "1.2.0"
+
+    # URLs must point to the DinD host, not localhost
+    STORAGE_URL:  http://docker:8003
+    POSTGREST_URL: http://docker:3000
+    RCLONE_BASE:   https://docker:5572
+
+    COMPOSE_PROJECT_NAME: integration-tests
+
+  before_script:
+    - docker --version && docker compose version || true
+    - poetry --version || pip install "poetry==${CI_POETRY_VERSION:-1.8.2}"
+    - poetry install --no-interaction
+    - git clone --depth 1 --branch "$DLM_SERVER_REF" "$DLM_SERVER_REPO" ../ska-data-lifecycle
+    - export DLM_SERVER_DIR="$(readlink -f ../ska-data-lifecycle)"
+  script:
+    - poetry run pytest -m integration -vv -s
+  artifacts:
+    when: on_failure
+    paths: [.pytest_cache, build]
