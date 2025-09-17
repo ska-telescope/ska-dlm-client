@@ -68,15 +68,21 @@ kafka_watcher:
   check_rclone_access: false
   kafka_base_dir: "" # Base directory string removed from path to generate item_name
 
+# top-level toggle used by the dependency condition
+redpandaEnabled: true
+
 redpanda:
-  enabled: true
   fullnameOverride: ska-dlm-kafka
   statefulset:
     replicas: 1
   listeners:
     kafka:
       external:
-        enabled: false # in-cluster only; change if we later enable authentication/TLS
+        default:
+          enabled: false # in-cluster only; change if we later enable authentication/TLS
+  storage:
+    persistentVolume:
+      enabled: false
 
 startup_verification:
   enabled: false
