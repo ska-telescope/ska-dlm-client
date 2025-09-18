@@ -42,15 +42,20 @@ include:
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
 
-python-test:
+python-test: # Unit tests
+  stage: test
   variables:
-    # Run only unit tests: don't collect integration folder and skip the marker
+    # Don't collect integration folder and skip the marker
     PYTHON_VARS_AFTER_PYTEST: '--ignore=tests/integration -m "not integration"'
+
+integration_tests:
+  stage: test
+  image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
+
   services:
-    # Keep in sync with tests/test-services.docker-compose.yml
+    - docker:27.0.2-dind # DinD service
     - alias: kafka
       name: apache/kafka:3.8.0
-      # Based off https://hub.docker.com/r/apache/kafka
       variables:
         ALLOW_PLAINTEXT_LISTENER: "yes"
         KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
@@ -62,31 +67,19 @@ python-test:
         KAFKA_PROCESS_ROLES: controller,broker
         KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
         KAFKA_MESSAGE_MAX_BYTES: 134217728
-    # To debug the above services, uncomment the lines below. For more info see
-    # https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2119#note_1142144587
-  # variables:
-  #   CI_DEBUG_SERVICES: trace
 
-integration_tests:
-  stage: test
-  image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
-  services:
-    - docker:27.0.2-dind
-  variables:
+  variables: # Job-wide env
     DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: "" # Tells the DinD service to run without TLS
-    DOCKER_BUILDKIT: "1"
-
-    # server repo to clone for compose files
+    DOCKER_TLS_CERTDIR: ""
     DLM_SERVER_REPO: https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/ska-telescope/ska-data-lifecycle.git
     DLM_SERVER_REF: "1.2.0"
-
-    # URLs must point to the DinD host, not localhost
     STORAGE_URL:  http://docker:8003
     POSTGREST_URL: http://docker:3000
     RCLONE_BASE:   https://docker:5572
-
     COMPOSE_PROJECT_NAME: integration-tests
+    # To debug services, uncomment the line below. For more info see
+    # https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2119#note_1142144587
+    # CI_DEBUG_SERVICES: trace
 
   before_script:
     - docker --version && docker compose version || true
@@ -94,9 +87,6 @@ integration_tests:
     - poetry install --no-interaction
     - git clone --depth 1 --single-branch --branch "$DLM_SERVER_REF" "$DLM_SERVER_REPO" "$CI_PROJECT_DIR/../ska-data-lifecycle"
     - export DLM_SERVER_DIR="$(readlink -f "$CI_PROJECT_DIR/../ska-data-lifecycle")"
+
   script:
     - poetry run pytest -vv -s tests/integration
-  artifacts:
-    when: on_failure
-    paths: [.pytest_cache, build]
-
