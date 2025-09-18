@@ -60,7 +60,7 @@ setattr(_dlm_api_client.ApiClient, "_ApiClient__deserialize", __lenient_deserial
 # Figure out repo roots in both local and CI layouts.
 # For local, default to sibling: x/ska-dlm-client -> x/ska-data-lifecycle
 CLIENT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_BASE = Path(os.getenv("CI_PROJECT_DIR", CLIENT_ROOT)).parent
+DEFAULT_BASE = Path(os.getenv("CI_PROJECT_DIR", str(CLIENT_ROOT))).parent
 DEFAULT_SERVER_DIR = (DEFAULT_BASE / "ska-data-lifecycle").resolve()
 
 # Allow CI/job to override explicitly
@@ -76,13 +76,14 @@ COMPOSE_FILES = [
 ]
 
 # URLs can be overridden in CI to hit the DinD host
-STORAGE_URL  = os.getenv("STORAGE_URL",  "http://127.0.0.1:8003")
+STORAGE_URL = os.getenv("STORAGE_URL", "http://127.0.0.1:8003")
 POSTGREST_URL = os.getenv("POSTGREST_URL", "http://127.0.0.1:3000")
 RCLONE_BASE = os.getenv("RCLONE_BASE", "https://127.0.0.1:5572")
 
 CERT_DIR = SERVER_TESTS / "integration" / "certs"
 KEY_PATH = CERT_DIR / "selfsigned.key"
 CRT_PATH = CERT_DIR / "selfsigned.cert"
+
 
 def _require_server_repo() -> None:
     """Fail only when the integration stack is actually used."""
@@ -92,6 +93,7 @@ def _require_server_repo() -> None:
             "Set DLM_SERVER_DIR to your ska-data-lifecycle repo, or clone it as a sibling."
             "Skipping integration tests..."
         )
+
 
 def _ensure_rclone_certs() -> None:
     """

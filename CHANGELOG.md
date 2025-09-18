@@ -2,6 +2,10 @@
 
 ## Development
 
+### Added
+
+* Integration test harness to start DLM services (via Docker Compose)
+
 ### Changed
 
 * Kafka Docker image switched from bitnami/kafka to apache/kafka
