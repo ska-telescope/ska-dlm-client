@@ -24,8 +24,6 @@ from ska_dlm_client.openapi.configuration import Configuration
 logging.basicConfig(level=os.getenv("PYTEST_LOGLEVEL", "INFO"))
 log = logging.getLogger(__name__)
 
-pytestmark = pytest.mark.integration
-
 PROJECT_NAME = os.environ.get("COMPOSE_PROJECT_NAME", "integration-tests")
 
 # --- OpenAPI client deserialization patch (handles Optional[Dict[str, object]]) ---
