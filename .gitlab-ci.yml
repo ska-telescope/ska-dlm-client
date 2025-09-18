@@ -39,24 +39,21 @@ include:
 python-test:
   services:
     # Keep in sync with tests/test-services.docker-compose.yml
-    - name: bitnami/kafka:3.5.0-debian-11-r1
-      alias: kafka
+    - alias: kafka
+      name: apache/kafka:3.8.0
+      # Based off https://hub.docker.com/r/apache/kafka
       variables:
         ALLOW_PLAINTEXT_LISTENER: "yes"
-        KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-        KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
-        KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
-        KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-        KAFKA_CFG_LISTENERS_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-        KAFKA_CFG_NODE_ID: 0
-        KAFKA_CFG_PROCESS_ROLES: controller,broker
-        KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
-        KAFKA_CFG_MESSAGE_MAX_BYTES: 134217728
-  variables:
-    KAFKA_CFG_MESSAGE_MAX_BYTES: 134217728
-    # Needed to allow kafka & zookeeper to talk to each other
-    # See https://docs.gitlab.com/runner/configuration/feature-flags.html
-    FF_NETWORK_PER_BUILD: "true"
-    # To debug the above services, uncomment the below line. For more info see
+        KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+        KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+        KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+        KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+        KAFKA_LISTENERS_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+        KAFKA_NODE_ID: 0
+        KAFKA_PROCESS_ROLES: controller,broker
+        KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+        KAFKA_MESSAGE_MAX_BYTES: 134217728
+    # To debug the above services, uncomment the lines below. For more info see
     # https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2119#note_1142144587
-    # CI_DEBUG_SERVICES: trace
+  # variables:
+  #   CI_DEBUG_SERVICES: trace

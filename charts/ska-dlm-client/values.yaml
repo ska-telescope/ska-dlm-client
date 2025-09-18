@@ -68,9 +68,21 @@ kafka_watcher:
   check_rclone_access: false
   kafka_base_dir: "" # Base directory string removed from path to generate item_name
 
-kafka:
-  enabled: false # Kafka service OFF for production. Only for local developement.
+# top-level toggle used by the dependency condition
+redpandaEnabled: true
+
+redpanda:
   fullnameOverride: ska-dlm-kafka
+  statefulset:
+    replicas: 1
+  listeners:
+    kafka:
+      external:
+        default:
+          enabled: false # in-cluster only; change if we later enable authentication/TLS
+  storage:
+    persistentVolume:
+      enabled: false
 
 startup_verification:
   enabled: false
@@ -116,5 +128,5 @@ ssh_storage_access:
       pub_name: "sdp-pub"
 
 kubectl:
-  image: bitnami/kubectl
-  version: 1.28.6
+  image: artefact.skao.int/ska-ser-utils
+  version: 0.1.0
