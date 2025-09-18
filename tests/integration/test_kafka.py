@@ -3,6 +3,7 @@
 import asyncio
 import json
 import logging
+import os
 from unittest import mock
 
 import pytest
@@ -13,7 +14,7 @@ from ska_dlm_client.kafka_watcher.main import watch
 
 logger = logging.getLogger(__name__)
 
-KAFKA_HOST = "localhost:9092"
+KAFKA_HOST = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 TEST_TOPIC = "test-events"
 
 
