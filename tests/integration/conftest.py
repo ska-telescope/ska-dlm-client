@@ -24,6 +24,8 @@ from ska_dlm_client.openapi.configuration import Configuration
 logging.basicConfig(level=os.getenv("PYTEST_LOGLEVEL", "INFO"))
 log = logging.getLogger(__name__)
 
+pytestmark = pytest.mark.integration
+
 PROJECT_NAME = os.environ.get("COMPOSE_PROJECT_NAME", "integration-tests")
 
 # --- OpenAPI client deserialization patch (handles Optional[Dict[str, object]]) ---
@@ -55,16 +57,14 @@ setattr(_dlm_api_client.ApiClient, "_ApiClient__deserialize", __lenient_deserial
 # returns raw JSON for 'object' types; remove this test-time patch after regen.
 # --- end patch ---
 
-# Point to the dlm-server repo. Default to sibling: x/ska-dlm-client -> x/ska-data-lifecycle
-CLIENT_ROOT = Path(__file__).resolve().parents[2]  # repo root (x/ska-dlm-client)
-DEFAULT_SERVER_DIR = CLIENT_ROOT.parent / "ska-data-lifecycle"  # (x/ska-data-lifecycle)
-DLM_SERVER_DIR = Path(os.environ.get("DLM_SERVER_DIR", str(DEFAULT_SERVER_DIR))).resolve()
+# Figure out repo roots in both local and CI layouts.
+# For local, default to sibling: x/ska-dlm-client -> x/ska-data-lifecycle
+CLIENT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_BASE = Path(os.getenv("CI_PROJECT_DIR", CLIENT_ROOT)).parent
+DEFAULT_SERVER_DIR = (DEFAULT_BASE / "ska-data-lifecycle").resolve()
 
-if not DLM_SERVER_DIR.exists():
-    raise RuntimeError(
-        f"DLM_SERVER_DIR not found at {DLM_SERVER_DIR}. "
-        "Please set DLM_SERVER_DIR to your ska-data-lifecycle repo."
-    )
+# Allow CI/job to override explicitly
+DLM_SERVER_DIR = Path(os.getenv("DLM_SERVER_DIR", str(DEFAULT_SERVER_DIR))).resolve()
 
 SERVER_TESTS = DLM_SERVER_DIR / "tests"
 OVERRIDE = Path(__file__).with_name("docker-compose.override.yaml")
@@ -75,13 +75,23 @@ COMPOSE_FILES = [
     OVERRIDE,
 ]
 
-STORAGE_URL = "http://127.0.0.1:8003"  # ensure this matches your override mapping
-POSTGREST_URL = "http://127.0.0.1:3000"
+# URLs can be overridden in CI to hit the DinD host
+STORAGE_URL  = os.getenv("STORAGE_URL",  "http://127.0.0.1:8003")
+POSTGREST_URL = os.getenv("POSTGREST_URL", "http://127.0.0.1:3000")
+RCLONE_BASE = os.getenv("RCLONE_BASE", "https://127.0.0.1:5572")
 
 CERT_DIR = SERVER_TESTS / "integration" / "certs"
 KEY_PATH = CERT_DIR / "selfsigned.key"
 CRT_PATH = CERT_DIR / "selfsigned.cert"
 
+def _require_server_repo() -> None:
+    """Fail only when the integration stack is actually used."""
+    if not DLM_SERVER_DIR.exists():
+        pytest.skip(
+            f"DLM_SERVER_DIR not found at {DLM_SERVER_DIR}. "
+            "Set DLM_SERVER_DIR to your ska-data-lifecycle repo, or clone it as a sibling."
+            "Skipping integration tests..."
+        )
 
 def _ensure_rclone_certs() -> None:
     """
@@ -191,6 +201,9 @@ def dlm_stack():
     if missing:
         pytest.skip("Compose file(s) not found: " + ", ".join(map(str, missing)))
 
+    # We need the dlm server repo
+    _require_server_repo()
+
     # Just-in-time cert generation
     _ensure_rclone_certs()
 
@@ -208,7 +221,7 @@ def dlm_stack():
     try:
         _wait_for_http(POSTGREST_URL, timeout_s=30)
         _wait_for_http(f"{STORAGE_URL}/openapi.json", timeout_s=30)
-        _wait_for_rclone(timeout_s=30)
+        _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
         yield
     finally:  # teardown
         _compose("down", "-v")

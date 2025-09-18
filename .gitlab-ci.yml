@@ -43,6 +43,9 @@ include:
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
 
 python-test:
+  variables:
+    # Run only unit tests: don't collect integration folder and skip the marker
+    PYTHON_VARS_AFTER_PYTEST: '--ignore=tests/integration -m "not integration"'
   services:
     # Keep in sync with tests/test-services.docker-compose.yml
     - alias: kafka
@@ -89,10 +92,10 @@ integration_tests:
     - docker --version && docker compose version || true
     - poetry --version || pip install "poetry==${CI_POETRY_VERSION:-1.8.2}"
     - poetry install --no-interaction
-    - git clone --depth 1 --branch "$DLM_SERVER_REF" "$DLM_SERVER_REPO" ../ska-data-lifecycle
-    - export DLM_SERVER_DIR="$(readlink -f ../ska-data-lifecycle)"
+    - git clone --depth 1 --single-branch --branch "$DLM_SERVER_REF" "$DLM_SERVER_REPO" "$CI_PROJECT_DIR/../ska-data-lifecycle"
+    - export DLM_SERVER_DIR="$(readlink -f "$CI_PROJECT_DIR/../ska-data-lifecycle")"
   script:
-    - poetry run pytest -m integration -vv -s
+    - poetry run pytest -vv -s tests/integration
   artifacts:
     when: on_failure
     paths: [.pytest_cache, build]
