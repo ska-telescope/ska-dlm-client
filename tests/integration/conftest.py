@@ -34,7 +34,7 @@ __orig_deserialize = getattr(_dlm_api_client.ApiClient, "_ApiClient__deserialize
 
 
 def __lenient_deserialize(self, data, klass):
-    """OpenAPI client deserialization patch.
+    """Lenient deserializer patch for the OpenAPI client.
 
     Unwraps Optional[...] so Dict[...] / List[...] logic can run, and treats
     'object' as a passthrough (return raw JSON). This works around the
@@ -45,7 +45,7 @@ def __lenient_deserialize(self, data, klass):
     if isinstance(klass, str) and klass.startswith("Optional[") and klass.endswith("]"):
         if data is None:
             return None
-        klass = klass[len("Optional[") : -1]
+        klass = klass[len("Optional["): -1]
     # Treat 'object' as a passthrough (no model lookup)
     if klass == "object":
         return data
