@@ -57,14 +57,21 @@ integration_tests:
     - alias: kafka
       name: apache/kafka:3.8.0
       variables:
-        ALLOW_PLAINTEXT_LISTENER: "yes"
-        KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-        KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
-        KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+        # Internal listeners (inside the container)
         KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
         KAFKA_LISTENERS_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-        KAFKA_NODE_ID: 0
+        KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
         KAFKA_PROCESS_ROLES: controller,broker
+        KAFKA_NODE_ID: 0
+
+        # Controller should talk to *itself* via localhost
+        KAFKA_CONTROLLER_QUORUM_VOTERS: 0@localhost:9093
+
+        # External clients (your job) will connect to the alias
+        KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+
+        # QoL
+        ALLOW_PLAINTEXT_LISTENER: "yes"
         KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
         KAFKA_MESSAGE_MAX_BYTES: 134217728
 
