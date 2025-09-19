@@ -1,10 +1,10 @@
-# This overrides only a few settings on services defined in the server repo’s
-# tests/integration/dlm.docker-compose.yaml.
+# This overrides only a few settings on services defined in
+# ska-data-lifecycle/tests/dlm.docker-compose.yaml (server repo)
 
 services:
   dlm_db: # Optional: expose Postgres locally for debugging (psql, etc.)
     ports:
-      - "5432:5432"   # host:container
+      - "5432:5432" # host:container
 
   dlm_postgrest: # Optional: expose PostgREST if you want to poke it from your browser/curl
     ports:
@@ -30,8 +30,6 @@ services:
     ports:
       - 8003:8003
     environment:
-      # ensure storage talks to rclone over HTTPS
-      # adjust to whatever var your storage service uses:
       RCLONE_RC_URL: "https://dlm_rclone:5572"
     depends_on:
       dlm_rclone:
