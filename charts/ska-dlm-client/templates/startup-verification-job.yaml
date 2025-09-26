@@ -1,4 +1,5 @@
-{{- if $.Values.startup_verification.enabled }}
+{{- $sv := .Values.startup_verification | default (dict) -}}
+{{- if $sv.enabled }}
 {{- $rbac_name := printf "%s-dlm-client-sv" .Release.Name -}}
 apiVersion: batch/v1
 kind: Job
