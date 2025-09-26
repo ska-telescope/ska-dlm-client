@@ -5,7 +5,6 @@
 ### Changed
 
 * Kafka Docker image switched from bitnami/kafka to apache/kafka
-* Kafka Helm chart dependency switched from Bitnami Kafka to Redpanda
 
 ## 1.1.0
 

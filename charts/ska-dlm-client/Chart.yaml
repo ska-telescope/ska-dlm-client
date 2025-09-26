@@ -21,8 +21,8 @@ maintainers:
 - name: Andreas Wicenec
   email: andreas.wicenec@icrar.org
 dependencies:
-- name: redpanda
-  version: 25.1.1
-  repository: https://charts.redpanda.com/
-  condition: redpandaEnabled
+- name: kafka
+  version: 32.4.3
+  repository: https://charts.bitnami.com/bitnami
+  condition: kafka.enabled
 
