@@ -5,6 +5,7 @@
 ### Changed
 
 * Kafka Docker image switched from bitnami/kafka to apache/kafka
+* kubectl image switched from bitnami/kubectl to artefact.skao.int/ska-ser-utils
 
 ## 1.1.0
 
