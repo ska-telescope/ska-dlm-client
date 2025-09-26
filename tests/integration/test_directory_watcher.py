@@ -4,15 +4,15 @@ import logging
 
 import pytest
 
-from ska_dlm_client.openapi import api_client
-from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.dlm_api import storage_api
 from ska_dlm_client.common_types import (
     LocationCountry,
     LocationType,
-    StorageType,
     StorageInterface,
+    StorageType,
 )
+from ska_dlm_client.openapi import api_client
+from ska_dlm_client.openapi.configuration import Configuration
+from ska_dlm_client.openapi.dlm_api import storage_api
 
 log = logging.getLogger(__name__)
 
