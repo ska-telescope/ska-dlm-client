@@ -7,18 +7,23 @@ import pytest
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
+from ska_dlm_client.common_types import (
+    LocationCountry,
+    LocationType,
+    StorageType,
+    StorageInterface,
+)
 
 log = logging.getLogger(__name__)
 
 LOCATION_NAME = "ThisDLMClientLocationName"
-LOCATION_TYPE = "local-dev"
-LOCATION_COUNTRY = "AU"
+LOCATION_TYPE = LocationType.LOCAL_DEV
+LOCATION_COUNTRY = LocationCountry.AU
 LOCATION_CITY = "Marksville"
-LOCATION_FACILITY = "local"
-
+LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
 STORAGE_NAME = "MyDisk"
-STORAGE_TYPE = "filesystem"
-STORAGE_INTERFACE = "posix"
+STORAGE_TYPE = StorageType.FILESYSTEM
+STORAGE_INTERFACE = StorageInterface.POSIX
 ROOT_DIRECTORY = "/data"
 STORAGE_CONFIG = {"name": "data", "type": "local", "parameters": {}}
 
