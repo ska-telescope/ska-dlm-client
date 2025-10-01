@@ -26,11 +26,6 @@ def watch_dependency_status(config: Config, status: str):
     return DependencyStatusWatcher(config, status)
 
 
-def decorator(fn):
-    """Do stuff."""
-    return fn
-
-
 # pylint: disable=no-member
 class DependencyStatusWatcher(
     AbstractAsyncContextManager["DependencyStatusWatcher"],
@@ -68,7 +63,6 @@ class DependencyStatusWatcher(
         return await self.__aiter.__anext__()
 
     # pylint: disable=too-many-nested-blocks
-    @decorator
     @athreading.iterate
     def __awatch(self) -> Generator[Dependency.Key, str, None, None]:
         for watcher in self.__config.watcher():
@@ -90,6 +84,7 @@ class DependencyStatusWatcher(
                                 if status == self._status:
                                     states.append((key, status))
                                     sent_keys.append(key)
-                except Exception as e:
-                    raise GeneratorExit from e
+                except Exception:
+                    logger.exception("Unexpected dependency watcher exception")
+                    raise
             yield from states

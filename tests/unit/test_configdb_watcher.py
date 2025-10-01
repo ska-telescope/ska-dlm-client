@@ -4,6 +4,7 @@ import asyncio
 from contextlib import suppress
 from typing import Final
 
+import async_timeout
 import pytest
 from ska_sdp_config import Config
 from ska_sdp_config.entity import Dependency
@@ -49,7 +50,7 @@ async def test_configdb_watcher(config, create_first: bool):
             await asyncio.sleep(0.5)
 
         with suppress(asyncio.TimeoutError):
-            async with asyncio.timeout(1):
+            async with async_timeout.timeout(1):
                 # NOTE: config not threadsafe
                 async with watch_dependency_status(Config(), "FINISHED") as producer:
                     async for value in producer:
@@ -66,7 +67,7 @@ async def test_configdb_watcher(config, create_first: bool):
             txn.dependency.state(test_dep.key).update({"status": "WAITING"})
             txn.dependency.state(test_dep.key).update({"status": "FINISHED"})
 
-    async with asyncio.timeout(3):
+    async with async_timeout.timeout(3):
         await asyncio.gather(aget_single_state(), aput_dependency())
 
     assert values == [(test_dep.key, "FINISHED")]
