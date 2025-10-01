@@ -4,7 +4,8 @@
 
 ### Added
 
-* Integration test harness to start DLM services (via Docker Compose)
+* Integration test harness to start DLM services (via Docker Compose).
+* Start of integration tests for directory-watcher and kafka-watcher.
 
 ### Changed
 
