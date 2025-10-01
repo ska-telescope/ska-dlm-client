@@ -1,38 +1,95 @@
 """Configuration Database watcher client."""
 
-import asyncio
 import logging
+import threading
+from abc import ABCMeta
+from collections.abc import AsyncIterator, Generator
+from contextlib import AbstractAsyncContextManager
+
+import athreading
+from overrides import override
 from ska_sdp_config import Config
 from ska_sdp_config.entity import Dependency
-from typing import Generator
-import athreading
 
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
 
-@athreading.iterate
-def watch_dependency_state(config: Config) -> Generator[str, str | None, None]:
-    """TODO: DMAN-157
-    # must run from inside SDP cluster (try dp-shared namespace)
+def watch_dependency_status(config: Config, status: str):
+    """Create AsyncGenerator for fetching existing and updated Dependency status events.
 
     Args:
-        config: _description_
+        config: configuration database client.
+        status: desired status event.
+    """
+    return DependencyStatusWatcher(config, status)
 
-    Yields:
-        _description_
+
+def decorator(fn):
+    """Do stuff."""
+    return fn
+
+
+# pylint: disable=no-member
+class DependencyStatusWatcher(
+    AbstractAsyncContextManager["DependencyStatusWatcher"],
+    AsyncIterator[Dependency.Key, str],
+    metaclass=ABCMeta,
+):
+    """AsyncGenerator for fetching existing and updated Dependency status events.
+
+    Args:
+        config: configuration database client.
+        status: desired status event.
     """
 
-    for watcher in config.watcher():
-        states = []
-        for txn in watcher.txn():
-            try:
-                for key in txn.dependency.list_keys():
-                    dependency = txn.dependency.state(key)
+    def __init__(self, config: Config, status: str):
+        """Initialize."""
+        self._status = status
+        self.__config = config
+        self.__trigger = lambda: None
+        self.__aiter = self.__awatch()
+        self.__stopped = threading.Event()
 
-                    # apply filtering here. WORKING → FINISHED. Any others?
-                    states.append((key, dependency.state))
-            except:
-                raise
-        yield from states
+    @override
+    async def __aenter__(self):
+        await self.__aiter.__aenter__()
+        return self
+
+    @override
+    async def __aexit__(self, *exc_info):
+        self.__stopped.set()
+        self.__trigger()
+        await self.__aiter.__aexit__(*exc_info)
+
+    @override
+    async def __anext__(self) -> tuple[Dependency.Key, str]:
+        return await self.__aiter.__anext__()
+
+    # pylint: disable=too-many-nested-blocks
+    @decorator
+    @athreading.iterate
+    def __awatch(self) -> Generator[Dependency.Key, str, None, None]:
+        for watcher in self.__config.watcher():
+            # must break synchronous iterator on context exit
+            if self.__stopped.is_set():
+                break
+            self.__trigger = watcher.trigger
+
+            states = []
+            sent_keys = []
+            for txn in watcher.txn():
+                try:
+                    # NOTE: this will be very slow if dependencies are
+                    # not removed from the database
+                    for key in txn.dependency.list_keys():
+                        if key not in sent_keys:
+                            dependency_state = txn.dependency.state(key).get()
+                            if status := dependency_state.get("status"):
+                                if status == self._status:
+                                    states.append((key, status))
+                                    sent_keys.append(key)
+                except Exception as e:
+                    raise GeneratorExit from e
+            yield from states

@@ -71,12 +71,19 @@ addopts = "-v"
 [tool.flake8]
 docstring-style = "google"
 rst-directives = "literalinclude"
-ignore = ['F401', 'W503']
+ignore = [
+    'F401',  # Module imported but unused
+    'W503',  # Line break occurred before a binary operator
+    'D105',  # Missing docstring in magic method
+]
 max-complexity = 10
 max-line-length = 180
 
 # exclude for auto generated code
 exclude = ["src/ska_dlm_client/openapi", "tests/openapi"]
+
+[tool.pylint.MASTER]
+ignore = "openapi"
 
 [tool.pylint.messages_control]
 disable = [
@@ -84,9 +91,6 @@ disable = [
     "fixme",
 ]
 enable = ["useless-suppression"]
-
-[tool.pylint.MASTER]
-ignore = "openapi"
 
 [tool.isort]
 line_length = 99
