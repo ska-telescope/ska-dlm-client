@@ -37,8 +37,17 @@ include:
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
 
 python-test:
+  # Keep in sync with tests/test-services.docker-compose.yml
   services:
-    # Keep in sync with tests/test-services.docker-compose.yml
+    - name: quay.io/coreos/etcd:v3.5.9
+      alias: etcd
+      command:
+        - /usr/local/bin/etcd
+        - "--advertise-client-urls=http://0.0.0.0:2379"
+        - "--listen-client-urls=http://0.0.0.0:2379"
+        - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
+        - "--listen-peer-urls=http://0.0.0.0:2380"
+        - "--initial-cluster=default=http://0.0.0.0:2380"
     - alias: kafka
       name: apache/kafka:3.8.0
       # Based off https://hub.docker.com/r/apache/kafka
