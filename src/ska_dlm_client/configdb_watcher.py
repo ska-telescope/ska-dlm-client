@@ -39,7 +39,7 @@ class DependencyStatusWatcher(
         status: desired status event.
     """
 
-    def __init__(self, config: Config, status: str, include_existing = False):
+    def __init__(self, config: Config, status: str, include_existing=False):
         """Initialize."""
         self._status = status
         self._include_existing = include_existing
