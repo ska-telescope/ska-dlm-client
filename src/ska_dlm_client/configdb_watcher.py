@@ -16,14 +16,14 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def watch_dependency_status(config: Config, status: str):
+def watch_dependency_status(config: Config, status: str, *, include_existing: bool):
     """Create AsyncGenerator for fetching existing and updated Dependency status events.
 
     Args:
         config: configuration database client.
         status: desired status event.
     """
-    return DependencyStatusWatcher(config, status)
+    return DependencyStatusWatcher(config, status, include_existing)
 
 
 # pylint: disable=no-member
@@ -39,9 +39,10 @@ class DependencyStatusWatcher(
         status: desired status event.
     """
 
-    def __init__(self, config: Config, status: str):
+    def __init__(self, config: Config, status: str, include_existing = False):
         """Initialize."""
         self._status = status
+        self._include_existing = include_existing
         self.__config = config
         self.__trigger = lambda: None
         self.__aiter = self.__awatch()
@@ -73,9 +74,13 @@ class DependencyStatusWatcher(
 
             states = []
             sent_keys = []
+            if self._include_existing:
+                for txn in self.__config.txn():
+                    sent_keys = txn.dependency.list_keys()
+
             for txn in watcher.txn():
                 try:
-                    # NOTE: this will be very slow if dependencies are
+                    # NOTE: with include_existing, this will be very slow if dependencies are
                     # not removed from the database
                     for key in txn.dependency.list_keys():
                         if key not in sent_keys:

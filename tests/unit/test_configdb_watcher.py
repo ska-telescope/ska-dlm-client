@@ -52,7 +52,9 @@ async def test_configdb_watcher(config, create_first: bool):
         with suppress(asyncio.TimeoutError):
             async with async_timeout.timeout(1):
                 # NOTE: config not threadsafe
-                async with watch_dependency_status(Config(), "FINISHED") as producer:
+                async with watch_dependency_status(
+                    Config(), "FINISHED", include_existing=False
+                ) as producer:
                     async for value in producer:
                         values.append(value)
 
