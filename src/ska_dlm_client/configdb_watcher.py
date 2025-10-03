@@ -24,13 +24,14 @@ def watch_dataproduct_status(config: Config, status: str, *, include_existing: b
     Args:
         config: configuration database client.
         status: desired status event.
+        include_existing: first yield existing dataproduct keys with matching status.
     """
     return DataProductStatusWatcher(config, status, include_existing)
 
 
 class DataProductStatusWatcher(
     AbstractAsyncContextManager["DataProductStatusWatcher"],
-    AsyncIterator[Flow.Key, str],
+    AsyncIterator[tuple[Flow.Key, str]],
     metaclass=ABCMeta,
 ):
     """AsyncGenerator for fetching existing and updated Flow status events.
@@ -38,6 +39,7 @@ class DataProductStatusWatcher(
     Args:
         config: configuration database client.
         status: desired status event.
+        include_existing: first yield existing dataproduct keys with matching status.
     """
 
     def __init__(self, config: Config, status: str, include_existing=True):
@@ -65,21 +67,21 @@ class DataProductStatusWatcher(
         return await self.__aiter.__anext__()  # pylint: disable=no-member
 
     def _get_existing_data_products(self):
-        sent_keys = []
+        keys = []
         for txn in self.__config.txn():
-            sent_keys = txn.flow.list_keys(kind="data-product")
-        return sent_keys
+            keys = txn.flow.list_keys(kind="data-product")
+        return keys
 
     # pylint: disable=too-many-nested-blocks
     @athreading.iterate
     def __awatch(self) -> Generator[Flow.Key, str, None, None]:
+        ignored_keys = [] if self._include_existing else self._get_existing_data_products()
+
         for watcher in self.__config.watcher():
             # must break synchronous iterator on context exit
             if self.__stopped.is_set():
                 break
             self.__trigger = watcher.trigger
-
-            ignored_keys = [] if self._include_existing else self._get_existing_data_products()
 
             states = []
             for txn in watcher.txn():

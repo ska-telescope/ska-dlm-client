@@ -30,8 +30,18 @@ def sdp_config_fixture():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("create_first", [False, True])
-async def test_dataproduct_status_watcher(config, create_first: bool):
+@pytest.mark.parametrize(
+    ("create_first", "include_existing", "expected_count"),
+    [
+        (False, True, 1),
+        (True, True, 1),
+        (False, False, 1),
+        (True, False, 0),
+    ],
+)
+async def test_dataproduct_status_watcher(
+    config, create_first: bool, include_existing: bool, expected_count: int
+):
     """Test SDP ConfigDB watching.
 
     Args:
@@ -45,27 +55,16 @@ async def test_dataproduct_status_watcher(config, create_first: bool):
         data_model="Visibility",
     )
 
+    timeout_s: Final = 0.5
     values = []
 
     for txn in config.txn():
         assert txn.flow.list_keys(kind="data-product") == []
 
-    async def aget_single_state():
-        if not create_first:
-            await asyncio.sleep(0.5)
-
-        with suppress(asyncio.TimeoutError):
-            async with async_timeout.timeout(1):
-                # NOTE: config not threadsafe
-                async with watch_dataproduct_status(
-                    Config(), "FINISHED", include_existing=True
-                ) as producer:
-                    async for value in producer:
-                        values.append(value)
-
     async def aput_flow():
-        if create_first:
-            await asyncio.sleep(0.5)
+        if not create_first:
+            await asyncio.sleep(timeout_s)
+
         for txn in config.txn():
             txn.flow.create(test_dataproduct)
             txn.flow.state(test_dataproduct.key).create({"status": "WAITING"})
@@ -74,7 +73,22 @@ async def test_dataproduct_status_watcher(config, create_first: bool):
             txn.flow.state(test_dataproduct.key).update({"status": "WAITING"})
             txn.flow.state(test_dataproduct.key).update({"status": "FINISHED"})
 
-    async with async_timeout.timeout(3):
+    async def aget_single_state():
+        if create_first:
+            await asyncio.sleep(timeout_s)
+
+        with suppress(asyncio.TimeoutError):
+            async with async_timeout.timeout(2 * timeout_s):
+                # NOTE: config not threadsafe
+                async with watch_dataproduct_status(
+                    Config(), "FINISHED", include_existing=include_existing
+                ) as producer:
+                    async for value in producer:
+                        values.append(value)
+
+    async with async_timeout.timeout(5 * timeout_s):
         await asyncio.gather(aget_single_state(), aput_flow())
 
-    assert values == [(test_dataproduct.key, "FINISHED")]
+    assert len(values) == expected_count
+    if expected_count:
+        assert (test_dataproduct.key, "FINISHED") in values
