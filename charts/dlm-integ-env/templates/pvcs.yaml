@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dlm-client-daq-storage
+  labels:
+    app.kubernetes.io/name: dlm-integ-env
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: Helm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  {{- if .Values.storageClassName }}
+  storageClassName: {{ .Values.storageClassName | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dlm-client-pst-storage
+  labels:
+    app.kubernetes.io/name: dlm-integ-env
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: Helm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  {{- if .Values.storageClassName }}
+  storageClassName: {{ .Values.storageClassName | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dlm-central-storage
+  labels:
+    app.kubernetes.io/name: dlm-integ-env
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: Helm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  {{- if .Values.storageClassName }}
+  storageClassName: {{ .Values.storageClassName | quote }}
+  {{- end }}

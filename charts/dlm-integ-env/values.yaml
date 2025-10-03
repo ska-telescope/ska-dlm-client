@@ -1,0 +1,18 @@
+# ----------------------------------------------------------------------------------
+# Default Helm configuration for dlm-integ-env
+#
+# Production users must override:
+#   -
+#
+# All services are disabled by default.
+# Local developers may use --set to enable kafka / kafka_watcher / directory watcher
+# ----------------------------------------------------------------------------------
+
+system: dlm
+subsystem: test
+
+# Storage class for PVCs created by this chart. Leave empty to use the cluster default.
+storageClassName: "nfss1"
+
+# Global parameters
+global:
