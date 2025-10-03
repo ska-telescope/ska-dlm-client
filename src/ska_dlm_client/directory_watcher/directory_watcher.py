@@ -95,7 +95,7 @@ class PollingDirectoryWatcher(DirectoryWatcher):
 
 
 class INotifyDirectoryWatcher(DirectoryWatcher):
-    """Directory watcher using INotify filesytem events."""
+    """Directory watcher using INotify filesystem events."""
 
     def _process_directory_entry_change(self, entry: tuple[Change, str]):
         """Take action for the directory entry Change type given.

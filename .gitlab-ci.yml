@@ -43,10 +43,22 @@ include:
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
 
 python-test: # Unit tests
+  # Keep in sync with tests/test-services.docker-compose.yml
   stage: test
   variables:
     # Don't collect integration folder and skip the marker
     PYTHON_VARS_AFTER_PYTEST: '--ignore=tests/integration -m "not integration"'
+  services:
+    - name: quay.io/coreos/etcd:v3.5.9
+      alias: etcd
+      command:
+        - /usr/local/bin/etcd
+        - "--advertise-client-urls=http://0.0.0.0:2379"
+        - "--listen-client-urls=http://0.0.0.0:2379"
+        - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
+        - "--listen-peer-urls=http://0.0.0.0:2380"
+        - "--initial-cluster=default=http://0.0.0.0:2380"
+
 
 integration_tests:
   stage: test

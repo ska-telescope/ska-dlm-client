@@ -52,7 +52,7 @@ def create_parser() -> argparse.ArgumentParser:
         type=str,
         required=True,
         default="",
-        help="The root directory of the assocated storage, used to match relative path names.",
+        help="The root directory of the associated storage, used to match relative path names.",
     )
     parser.add_argument(
         "--use-polling-watcher",
