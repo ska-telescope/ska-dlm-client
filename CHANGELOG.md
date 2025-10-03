@@ -10,7 +10,7 @@
 ### Changed
 
 * Kafka Docker image switched from bitnami/kafka to apache/kafka
-* Kafka Helm chart dependency switched from Bitnami Kafka to Redpanda
+* kubectl image switched from bitnami/kubectl to artefact.skao.int/ska-ser-utils
 
 ## 1.1.0
 
