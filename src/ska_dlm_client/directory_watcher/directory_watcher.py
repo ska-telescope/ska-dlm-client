@@ -95,7 +95,7 @@ class PollingDirectoryWatcher(DirectoryWatcher):
 
 
 class INotifyDirectoryWatcher(DirectoryWatcher):
-    """Directory watcher using INotify filesytem events."""
+    """Directory watcher using INotify filesystem events."""
 
     def _process_directory_entry_change(self, entry: tuple[Change, str]):
         """Take action for the directory entry Change type given.
@@ -118,7 +118,7 @@ class INotifyDirectoryWatcher(DirectoryWatcher):
         logger.info("with config parameters %s", self._config)
         logger.info("starting to watch %s", self._config.directory_to_watch)
         logger.info(
-            "NOTE: watchfiles.awatch has recursive=False, in case this matters in the futuer."
+            "NOTE: watchfiles.awatch has recursive=False, in case this matters in the future."
         )
         # Last opportunity to call post startup func before we wait.
         if self._cmd_line_parameters:

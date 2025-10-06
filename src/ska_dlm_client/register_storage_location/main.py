@@ -4,6 +4,12 @@ import argparse
 import logging
 import sys
 
+from ska_dlm_client.common_types import (
+    LocationCountry,
+    LocationType,
+    StorageInterface,
+    StorageType,
+)
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
@@ -13,13 +19,13 @@ logger = logging.getLogger(__name__)
 
 # Constants that can be used for testing.
 LOCATION_NAME = "ThisDLMClientLocationName"
-LOCATION_TYPE = "ThisDLMClientLocationType"
-LOCATION_COUNTRY = "Australia"
+LOCATION_TYPE = LocationType.LOW_INTEGRATION
+LOCATION_COUNTRY = LocationCountry.AU
 LOCATION_CITY = "Kensington"
-LOCATION_FACILITY = "SKA-Test"
+LOCATION_FACILITY = "Pawsey Centre"  # TODO: query location_facility lookup table
 STORAGE_CONFIG = {"name": "data", "type": "alias", "parameters": {"remote": "/"}}
-STORAGE_INTERFACE = "posix"
-STORAGE_TYPE = "disk"
+STORAGE_INTERFACE = StorageInterface.POSIX
+STORAGE_TYPE = StorageType.FILESYSTEM
 
 
 def init_location_for_testing(storage_configuration: Configuration) -> str:
