@@ -1,13 +1,14 @@
 """Unit test module for configdb_watcher."""
 
 import asyncio
+import logging
 from contextlib import suppress
 from types import SimpleNamespace
 from typing import Final
 
 import async_timeout
 import pytest
-from ska_sdp_config import Config
+from ska_sdp_config import Config, ConfigCollision
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
@@ -16,12 +17,20 @@ from ska_dlm_client.configdb_watcher import DataProductStatusWatcher, watch_data
 # pylint: disable=protected-access
 
 
-def clear_dependencies(config: Config):
-    """Clear all SDP ConfigDB dependencies."""
+def clear_flow_dependencies(config: Config) -> None:
+    """Delete all flow Dependency entities and their state."""
     for txn in config.txn():
-        keys = txn.flow.list_keys()
-        for key in keys:
-            txn.flow.delete(key, recurse=True)
+        if not hasattr(txn.dependency, "list_keys"):
+            return  # backend doesn’t support enumeration
+        for dkey in txn.dependency.list_keys():  # server-side enumeration
+            dep = Dependency(key=dkey, expiry_time=-1, description=None)
+            with suppress(Exception):
+                txn.dependency.state(dep).delete()  # /dependency/<key>/state
+            # Some versions accept either the key or the entity:
+            with suppress(Exception):
+                txn.dependency.delete(dkey)  # /dependency/<key>
+            with suppress(Exception):
+                txn.dependency.delete(dep)  # fallback
 
 
 def clear_flows(config: Config):
@@ -35,11 +44,14 @@ def clear_flows(config: Config):
 def sdp_config_fixture():
     """Create client to a clean SDP ConfigDB."""
     cfg = Config(backend="etcd3")
+    clear_flow_dependencies(cfg)
     clear_flows(cfg)
     try:
         yield cfg
     finally:
+        clear_flow_dependencies(cfg)
         clear_flows(cfg)
+        cfg.revoke_lease()
 
 
 SCRIPT = Script.Key(kind="batch", name="unit_test", version="0.0.0")
@@ -144,57 +156,56 @@ async def test_dataproduct_status_watcher(  # noqa: C901
             assert dep_state is None
 
 
-def test_create_dlm_dependency_metadata_only(config):
-    """Build a Dependency for a product and persist it without a state."""
+PB_ID = "pb-madeup-00000000-a"
+NAME = "prod-a"
+
+
+def test_update_dependency_state(config, caplog):
+    """Persist a Dependency entity, set its state to WORKING via helper, and verify log output."""
+    caplog.set_level(logging.INFO, logger="ska_dlm_client.configdb_watcher")
+
     watcher = DataProductStatusWatcher(config, status="FINISHED", include_existing=False)
+    product_key = SimpleNamespace(pb_id=PB_ID, name=NAME)
 
-    # Minimal product key stand-in; helper only needs pb_id and name.
-    product_key = SimpleNamespace(pb_id="pb-madeup-00000000-a", name="prod-a")
-
+    # Build the Dependency (in-memory)
     dep = watcher._create_dlm_dependency(
         product_key,
         dep_kind="dlm-copy",
         origin="dlmtest1",
         expiry_time=-1,
-        description="unit: lock for copy",
-    )
-
-    # Persist the dependency by creating an *empty* state record.
-    for txn in config.txn():
-        txn.dependency.state(dep).create({})
-
-    # Verify the dependency's state exists and has no 'status' yet.
-    for txn in config.txn():
-        state = txn.dependency.state(dep).get()
-        assert state is not None
-        assert "status" not in state
-
-    # Sanity checks on the dependency we built.
-    assert dep.key.pb_id == "pb-madeup-00000000-a"
-    assert dep.key.kind == "dlm-copy"
-    assert dep.key.name == "prod-a"
-    assert dep.key.origin == "dlmtest1"
-    assert dep.expiry_time == -1
-
-
-def test_create_dlm_dependency_state_working(config):
-    """Create a Dependency and set its state to WORKING."""
-    watcher = DataProductStatusWatcher(config, status="FINISHED", include_existing=False)
-    product_key = SimpleNamespace(pb_id="pb-madeup-00000000-b", name="prod-b")
-
-    dep = watcher._create_dlm_dependency(
-        product_key,
-        dep_kind="dlm-copy",
-        origin="dlmtest2",
-        expiry_time=-1,
         description="unit: start copy",
     )
 
-    # Persist with an initial state.
+    # 1) Persist the Dependency entity so list_keys() can discover it
     for txn in config.txn():
-        txn.dependency.state(dep).create({"status": "WORKING"})
+        try:
+            txn.dependency.create(dep)
+        except ConfigCollision:
+            pass  # fine if it already exists
 
-    # Read back and assert state.
+    # 2) Create empty state, then set to WORKING via the helper
+    for txn in config.txn():
+        try:
+            txn.dependency.state(dep).create({})
+        except ConfigCollision:
+            pass
+    for txn in config.txn():
+        DataProductStatusWatcher._update_dependency_state(txn, dep, "WORKING")
+
+    # 3) Verify state once and trigger the flow-dependency logger
     for txn in config.txn():
         state = txn.dependency.state(dep).get()
         assert state["status"] == "WORKING"
+        watcher._log_flow_dependencies(txn, dep.key)
+
+    # 4) Assert the positive log line (and that it includes the status)
+    expected_log = f"Flow dependencies for {dep.key.pb_id}/{dep.key.name}"
+    assert expected_log in caplog.text
+    assert "status=WORKING" in caplog.text
+
+    # Sanity checks on what we built
+    assert dep.key.pb_id == PB_ID
+    assert dep.key.kind == "dlm-copy"
+    assert dep.key.name == NAME
+    assert dep.key.origin == "dlmtest1"
+    assert dep.expiry_time == -1

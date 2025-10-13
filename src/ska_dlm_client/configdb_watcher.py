@@ -11,7 +11,7 @@ from typing import Optional
 
 import athreading
 from overrides import override
-from ska_sdp_config import Config
+from ska_sdp_config import Config, ConfigCollision
 from ska_sdp_config.entity import Script
 from ska_sdp_config.entity.flow import Dependency, Flow
 
@@ -76,27 +76,42 @@ class DataProductStatusWatcher(
             keys = txn.flow.list_keys(kind="data-product")
         return keys
 
-    def _check_and_log_dependencies(self, txn, key: Flow.Key) -> None:
-        """Log the producing PB's dependencies (if any) for a given data-product key."""
+    def _log_flow_dependencies(self, txn, key: Flow.Key) -> None:
+        """Log any flow-level dependencies (locks) for this product (any kind/origin)."""
         pb_id = getattr(key, "pb_id", None)
-        if pb_id is None:
+        name = getattr(key, "name", None)
+        if not pb_id or not name:
             logger.info(
-                "Data-product %s has no pb_id on its key; cannot inspect PB dependencies", key
+                "Data-product %s missing pb_id or name; cannot inspect flow dependencies", key
             )
             return
 
-        pb = txn.processing_block.get(pb_id)
-        if pb is None:
-            logger.info("PB %s not found; cannot inspect dependencies", pb_id)
+        # Server-side filter by key fields
+        dkeys = txn.dependency.list_keys(pb_id=pb_id, name=name)
+
+        if not dkeys:
+            logger.info("No flow dependencies for %s/%s", pb_id, name)
             return
 
-        deps = pb.dependencies or []
-        if not deps:
-            logger.info("PB %s has no dependencies", pb_id)
-            return
+        entries = []
+        for dkey in dkeys:
+            # State (status) if present
+            dep_obj = Dependency(key=dkey, expiry_time=-1, description=None)
+            state = txn.dependency.state(dep_obj).get() or {}
+            status = state.get("status")
 
-        dep_str = ", ".join(f"{d.pb_id} (kind={getattr(d, 'kind', [])})" for d in deps)
-        logger.info("PB %s dependencies: %s", pb_id, dep_str)
+            # Entity metadata (expiry_time, description) if present
+            dep_meta = txn.dependency.get(dkey)  # may be None if only state exists
+            expiry_time = getattr(dep_meta, "expiry_time", None)
+            description = getattr(dep_meta, "description", None)
+
+            entries.append(
+                f"(pb_id={dkey.pb_id}, kind={getattr(dkey,'kind',None)}, "
+                f"name={dkey.name}, origin={getattr(dkey,'origin',None)}, "
+                f"status={status}, expiry_time={expiry_time}, description={description})"
+            )
+
+        logger.info("Flow dependencies for %s/%s: %s", pb_id, name, "; ".join(entries))
 
     @staticmethod
     def _create_dlm_dependency(
@@ -134,12 +149,13 @@ class DataProductStatusWatcher(
             description=description,
         )
 
-    def _set_dependency_state(self, txn, dep: Dependency, status: str = "WORKING") -> None:
-        """Persist the dependency's state (e.g. when migration starts).
-
-        TODO: handle collisions (use update() if state already exists).
-        """
-        txn.dependency.state(dep).create({"status": status})
+    @staticmethod
+    def _update_dependency_state(txn, dep: Dependency, status: str = "WORKING") -> None:
+        """Create or update the dependency's state to the given status."""
+        try:
+            txn.dependency.state(dep).create({"status": status})
+        except ConfigCollision:
+            txn.dependency.state(dep).update({"status": status})
 
     # pylint: disable=too-many-nested-blocks
     @athreading.iterate
@@ -172,9 +188,9 @@ class DataProductStatusWatcher(
                                 if status == self._status:
                                     states.append((key, status))
                                     # TODO: Call dlm to initialize data item
-                                    # --- log existing PB dependencies for this data-product ---
-                                    self._check_and_log_dependencies(txn, key)
-                                    # --- create DLM dependency (no state yet) ---
+                                    # log any flow-level dependencies for this data-product
+                                    self._log_flow_dependencies(txn, key) # WIP
+                                    # create DLM dependency (no state yet)
                                     dep = self._create_dlm_dependency(
                                         key,
                                         dep_kind="dlm-copy",
@@ -183,8 +199,9 @@ class DataProductStatusWatcher(
                                         description="DLM: lock data-product for copy",
                                     )
                                     if dep is not None:
-                                        # Persist the dependency without a status for now
-                                        # matches ska-sdp-config/tests/test_dependency.py pattern
+                                        # Persist the dependency
+                                        txn.dependency.create(dep)
+                                        # Persist the dependency state (with no status for now)
                                         txn.dependency.state(dep).create({})
                                         logger.info(
                                             "Created DLM dependency for %s/%s",
