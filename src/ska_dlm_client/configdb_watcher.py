@@ -189,7 +189,7 @@ class DataProductStatusWatcher(
                                     states.append((key, status))
                                     # TODO: Call dlm to initialize data item
                                     # log any flow-level dependencies for this data-product
-                                    self._log_flow_dependencies(txn, key) # WIP
+                                    self._log_flow_dependencies(txn, key)  # WIP
                                     # create DLM dependency (no state yet)
                                     dep = self._create_dlm_dependency(
                                         key,
