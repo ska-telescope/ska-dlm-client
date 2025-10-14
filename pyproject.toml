@@ -39,6 +39,7 @@ pyyaml = "^6.0.2"
 ska-sdp-dataproduct-metadata = "^0.7.0"
 watchdog = "^6.0.0"
 crc32c = "^2.7.1"
+typer = "^0.19.2"
 
 [tool.poetry.group.test.dependencies]
 black = "^24.8.0"

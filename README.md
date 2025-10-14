@@ -31,7 +31,7 @@ into the DLM system.
 
 ## Directory Watcher
 
-The directory_watcher will watch a given directory and add the file or directory to the DLM.
+The directory_watcher will watch a given directory for newly added files or directories and register them with the DLM. Optionally the watcher also initiates a migration process (copy or move) to a specified target storage volume.
 
 As parameters the directory_watcher requires
 - A directory to watch
