@@ -101,16 +101,16 @@ async def test_dataproduct_status_watcher(  # noqa: C901
         assert txn.flow.list_keys(kind="data-product") == []
 
     async def aput_flow():
-        """Create the flow, then flip its state a few times. A little “traffic generator”."""
+        """Create the flow, then flip its state a few times. A little 'traffic generator'."""
         if not create_first:
             await asyncio.sleep(timeout_s)
 
         for txn in config.txn():
             txn.flow.create(test_dataproduct)
-            txn.flow.state(test_dataproduct.key).create({"status": "WORKING"})
+            txn.flow.state(test_dataproduct.key).create({"status": "WAITING"})
             txn.flow.state(test_dataproduct.key).update({"status": "FINISHED"})
             txn.flow.state(test_dataproduct.key).update({})
-            txn.flow.state(test_dataproduct.key).update({"status": "WORKING"})
+            txn.flow.state(test_dataproduct.key).update({"status": "WAITING"})
             txn.flow.state(test_dataproduct.key).update({"status": "FINISHED"})
 
     async def aget_single_state():
