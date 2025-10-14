@@ -12,7 +12,12 @@ from ska_sdp_config import Config, ConfigCollision
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
-from ska_dlm_client.configdb_watcher import DataProductStatusWatcher, watch_dataproduct_status
+from ska_dlm_client.configdb_watcher import (
+    watch_dataproduct_status,
+    log_flow_dependencies,
+    _initialise_dependency,
+    update_dependency_state,
+)
 
 # pylint: disable=protected-access
 
@@ -55,6 +60,99 @@ def sdp_config_fixture():
 
 
 SCRIPT = Script.Key(kind="batch", name="unit_test", version="0.0.0")
+PB_ID = "pb-madeup-00000000-a"
+NAME = "prod-a"
+
+
+def test_initialise_dependency_happy_path():
+    """Test _initialise_dependency - happy path."""
+    key = SimpleNamespace(pb_id=PB_ID, name=NAME)
+    dep = _initialise_dependency(
+        key, dep_kind="dlm-copy", origin="dlmtest", expiry_time=-1, description="unit"
+    )
+    assert dep is not None
+    assert dep.key.pb_id == PB_ID
+    assert dep.key.kind == "dlm-copy"
+    assert dep.key.name == NAME
+    assert dep.key.origin == "dlmtest"
+    assert dep.expiry_time == -1
+    assert dep.description == "unit"
+
+
+@pytest.mark.parametrize(
+    "bad_key", [SimpleNamespace(pb_id=None, name=NAME), SimpleNamespace(pb_id=PB_ID, name=None)]
+)
+def test_initialise_dependency_missing_fields(bad_key, caplog):
+    """Test _initialise_dependency - bad path."""
+    caplog.set_level(logging.INFO, logger="ska_dlm_client.configdb_watcher")
+    dep = _initialise_dependency(
+        bad_key, dep_kind="dlm-copy", origin="dlmtest", expiry_time=-1, description="unit"
+    )
+    assert dep is None
+    assert "Cannot build dependency" in caplog.text
+
+
+def test_update_dependency_state(config):
+    """Test update_dependency_state creates then updates (covers ConfigCollision path)."""
+    key = SimpleNamespace(pb_id=PB_ID, name=NAME)
+    dep = _initialise_dependency(
+        key, dep_kind="dlm-copy", origin="dlmtest", expiry_time=-1, description="unit"
+    )
+    # persist entity & empty state
+    for txn in config.txn():
+        try:
+            txn.dependency.create(dep)
+        except ConfigCollision:
+            pass
+        try:
+            txn.dependency.state(dep).create({})
+        except ConfigCollision:
+            pass
+
+    # first call should create status
+    for txn in config.txn():
+        update_dependency_state(txn, dep, "WORKING")
+    for txn in config.txn():
+        assert txn.dependency.state(dep).get()["status"] == "WORKING"
+
+    # second call should hit update (ConfigCollision on create)
+    for txn in config.txn():
+        update_dependency_state(txn, dep, "FINISHED")
+    for txn in config.txn():
+        assert txn.dependency.state(dep).get()["status"] == "FINISHED"
+
+
+def test_log_flow_dependencies_none_and_then_one(config, caplog):
+    """Test log_flow_dependencies for none and one."""
+    caplog.set_level(logging.INFO, logger="ska_dlm_client.configdb_watcher")
+    key = SimpleNamespace(pb_id=PB_ID, name=NAME)
+    dep = _initialise_dependency(
+        key, dep_kind="dlm-copy", origin="dlmtest", expiry_time=-1, description="unit"
+    )
+
+    # No dependencies yet
+    for txn in config.txn():
+        log_flow_dependencies(txn, dep.key)
+    assert f"No flow dependencies for {PB_ID}/{NAME}" in caplog.text
+
+    # Create one dependency + state and log again
+    for txn in config.txn():
+        try:
+            txn.dependency.create(dep)
+        except ConfigCollision:
+            pass
+        try:
+            txn.dependency.state(dep).create({"status": "WORKING"})
+        except ConfigCollision:
+            txn.dependency.state(dep).update({"status": "WORKING"})
+
+    caplog.clear()
+    for txn in config.txn():
+        log_flow_dependencies(txn, dep.key)
+
+    # Positive log line containing status
+    assert f"Flow dependencies for {PB_ID}/{NAME}:" in caplog.text
+    assert "status=WORKING" in caplog.text
 
 
 @pytest.mark.asyncio
@@ -126,7 +224,9 @@ async def test_dataproduct_status_watcher(  # noqa: C901
 
         with suppress(asyncio.TimeoutError):
             async with async_timeout.timeout(2 * timeout_s):
-                # IMPORTANT: use the SAME config handle as the writer
+                # IMPORTANT: use the same Config handle as the writer
+                # because Config is not thread-safe; using one shared instance keeps
+                # all transactions and watcher events on the same client session
                 async with watch_dataproduct_status(
                     config, "FINISHED", include_existing=include_existing
                 ) as producer:
@@ -136,76 +236,7 @@ async def test_dataproduct_status_watcher(  # noqa: C901
     async with async_timeout.timeout(5 * timeout_s):
         await asyncio.gather(aget_single_state(), aput_flow())
 
-    # Primary assertion: did we see the FINISHED event the expected number of times?
+    # Did we see the FINISHED event the expected number of times?
     assert len(values) == expected_count
     if expected_count:
-        assert (test_dataproduct.key, "FINISHED") in values
-
-    # Side-effect assertion: dependency exists only when we emitted
-    # The watcher writes kind="dlm-copy", origin="dlm-client", and creates empty state {}
-    dep = Dependency(
-        key=Dependency.Key(pb_id=pb_id, kind="dlm-copy", name=flow_name, origin="dlm-client"),
-        expiry_time=-1,
-        description=None,
-    )
-    for txn in config.txn():
-        dep_state = txn.dependency.state(dep).get()
-        if expected_count:
-            assert dep_state is not None and "status" not in dep_state
-        else:
-            assert dep_state is None
-
-
-PB_ID = "pb-madeup-00000000-a"
-NAME = "prod-a"
-
-
-def test_update_dependency_state(config, caplog):
-    """Persist a Dependency entity, set its state to WORKING via helper, and verify log output."""
-    caplog.set_level(logging.INFO, logger="ska_dlm_client.configdb_watcher")
-
-    watcher = DataProductStatusWatcher(config, status="FINISHED", include_existing=False)
-    product_key = SimpleNamespace(pb_id=PB_ID, name=NAME)
-
-    # Build the Dependency (in-memory)
-    dep = watcher._create_dlm_dependency(
-        product_key,
-        dep_kind="dlm-copy",
-        origin="dlmtest1",
-        expiry_time=-1,
-        description="unit: start copy",
-    )
-
-    # 1) Persist the Dependency entity so list_keys() can discover it
-    for txn in config.txn():
-        try:
-            txn.dependency.create(dep)
-        except ConfigCollision:
-            pass  # fine if it already exists
-
-    # 2) Create empty state, then set to WORKING via the helper
-    for txn in config.txn():
-        try:
-            txn.dependency.state(dep).create({})
-        except ConfigCollision:
-            pass
-    for txn in config.txn():
-        DataProductStatusWatcher._update_dependency_state(txn, dep, "WORKING")
-
-    # 3) Verify state once and trigger the flow-dependency logger
-    for txn in config.txn():
-        state = txn.dependency.state(dep).get()
-        assert state["status"] == "WORKING"
-        watcher._log_flow_dependencies(txn, dep.key)
-
-    # 4) Assert the positive log line (and that it includes the status)
-    expected_log = f"Flow dependencies for {dep.key.pb_id}/{dep.key.name}"
-    assert expected_log in caplog.text
-    assert "status=WORKING" in caplog.text
-
-    # Sanity checks on what we built
-    assert dep.key.pb_id == PB_ID
-    assert dep.key.kind == "dlm-copy"
-    assert dep.key.name == NAME
-    assert dep.key.origin == "dlmtest1"
-    assert dep.expiry_time == -1
+        assert any(k == test_dataproduct.key and v.get("status") == "FINISHED" for k, v in values)
