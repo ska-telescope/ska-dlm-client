@@ -12,14 +12,11 @@ from typing import Optional
 import athreading
 from overrides import override
 from ska_sdp_config import Config, ConfigCollision
-from ska_sdp_config.entity import Script
 from ska_sdp_config.entity.flow import Dependency, Flow
 
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-
-DLM_SCRIPT = Script.Key(kind="batch", name="dlm_copy", version="0.0.0")  # WIP
 
 
 def watch_dataproduct_status(config: Config, status: str, *, include_existing: bool):

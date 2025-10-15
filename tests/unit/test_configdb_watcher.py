@@ -122,7 +122,7 @@ def test_update_dependency_state(config):
         assert txn.dependency.state(dep).get()["status"] == "FINISHED"
 
 
-def test_log_flow_dependencies_none_and_then_one(config, caplog):
+def test_log_flow_dependencies(config, caplog):
     """Test log_flow_dependencies for none and one."""
     caplog.set_level(logging.INFO, logger="ska_dlm_client.configdb_watcher")
     key = SimpleNamespace(pb_id=PB_ID, name=NAME)
