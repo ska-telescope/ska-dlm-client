@@ -12,12 +12,12 @@ from ska_sdp_config import Config, ConfigCollision
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
-from ska_dlm_client.configdb_watcher import (
+from ska_dlm_client.sdp_ingest.configdb_utils import (
     _initialise_dependency,
     log_flow_dependencies,
     update_dependency_state,
-    watch_dataproduct_status,
 )
+from ska_dlm_client.sdp_ingest.configdb_watcher import watch_dataproduct_status
 
 # pylint: disable=protected-access
 

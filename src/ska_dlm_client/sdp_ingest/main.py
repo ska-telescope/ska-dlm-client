@@ -1,14 +1,16 @@
 """Main entry-point for Configuration Database watcher."""
 
-import argparse, logging
+import argparse
 import asyncio
+import logging
 
 from ska_sdp_config import Config
 
-from ska_dlm_client.configdb_watcher import (
+from ska_dlm_client.sdp_ingest.configdb_utils import (
     create_sdp_migration_dependency,
-    watch_dataproduct_status,
+    log_flow_dependencies,
 )
+from ska_dlm_client.sdp_ingest.configdb_watcher import watch_dataproduct_status
 
 logger = logging.getLogger("ska_dlm_client.sdp_ingest")
 
@@ -23,13 +25,16 @@ async def sdp_to_dlm_ingest_and_migrate(*, include_existing: bool) -> None:
     #
     # If any DLM call fails, reliably transition state to FAILED
     config = Config()  # Share one handle between writer & watcher
-    logger.info("Starting watcher (include_existing=%s)...", include_existing)
+    logger.info("Starting SDP Config watcher (include_existing=%s)...", include_existing)
 
     async with watch_dataproduct_status(
         config, status="FINISHED", include_existing=include_existing
     ) as producer:
         logger.info("Watcher READY and listening for events.")
         async for dataproduct_key, _ in producer:
+            # log any flow-level dependencies for this data-product
+            for txn in config.txn():
+                log_flow_dependencies(txn, dataproduct_key)  # TBD if we need this func.
             # register a dlm dependency with state WORKING
             new_dep = await create_sdp_migration_dependency(config, dataproduct_key)
             # TODO: invoke dlm-ingest and dlm-migration
