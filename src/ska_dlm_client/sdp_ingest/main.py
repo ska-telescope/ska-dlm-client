@@ -32,9 +32,6 @@ async def sdp_to_dlm_ingest_and_migrate(*, include_existing: bool) -> None:
     ) as producer:
         logger.info("Watcher READY and listening for events.")
         async for dataproduct_key, _ in producer:
-            # log any flow-level dependencies for this data-product
-            for txn in config.txn():
-                log_flow_dependencies(txn, dataproduct_key)  # TBD if we need this func.
             # register a dlm dependency with state WORKING
             new_dep = await create_sdp_migration_dependency(config, dataproduct_key)
             # TODO: invoke dlm-ingest and dlm-migration
