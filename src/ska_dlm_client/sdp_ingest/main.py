@@ -6,10 +6,7 @@ import logging
 
 from ska_sdp_config import Config
 
-from ska_dlm_client.sdp_ingest.configdb_utils import (
-    create_sdp_migration_dependency,
-    log_flow_dependencies,
-)
+from ska_dlm_client.sdp_ingest.configdb_utils import create_sdp_migration_dependency
 from ska_dlm_client.sdp_ingest.configdb_watcher import watch_dataproduct_status
 
 logger = logging.getLogger("ska_dlm_client.sdp_ingest")
