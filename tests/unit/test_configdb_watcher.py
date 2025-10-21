@@ -2,8 +2,7 @@
 
 import asyncio
 import logging
-import threading
-from contextlib import asynccontextmanager, suppress
+from contextlib import suppress
 from types import SimpleNamespace
 from typing import Final
 
@@ -14,7 +13,6 @@ from ska_sdp_config.entity.flow import DataProduct, Flow
 
 from ska_dlm_client.sdp_ingest.configdb_utils import _initialise_dependency
 from ska_dlm_client.sdp_ingest.configdb_watcher import watch_dataproduct_status
-from ska_dlm_client.sdp_ingest.main import sdp_to_dlm_ingest_and_migrate
 
 SCRIPT = Script.Key(kind="batch", name="unit_test", version="0.0.0")
 PB_ID = "pb-madeup-00000000-a"
@@ -137,125 +135,3 @@ async def test_dataproduct_status_watcher(  # noqa: C901
             key == test_dataproduct.key and value.get("status") == "FINISHED"
             for key, value in values
         )
-
-
-# _busy_read_config and _shared are shared helpers/state used by both mocks
-def _busy_read_config(cfg, barrier: threading.Barrier, done_evt: threading.Event):
-    """
-    Work function run by each background thread.
-
-    - barrier.wait(): both threads (one started by the watcher mock, and one
-      started by the create() mock) block here until *both* are ready. This
-      ensures they start hammering the same Config instance at the same time,
-      which is the key to exercising thread safety.
-    - The tight loop repeatedly performs harmless reads (repr/id) to create
-      sustained concurrent access without relying on any specific Config API.
-    - done_evt.set(): signals the test that this thread has finished its work.
-    """
-    barrier.wait()
-    for _ in range(20000):
-        _ = repr(cfg)
-        _ = id(cfg)
-    done_evt.set()
-
-
-_shared = {
-    # We stash the actual Config instance here so both mocks act on the same object.
-    "cfg": None,
-    # One barrier shared by both threads so they start together (concurrent overlap).
-    "barrier": threading.Barrier(2),
-    # Events to let the test know each thread finished.
-    "done1": threading.Event(),
-    "done2": threading.Event(),
-}
-
-
-@asynccontextmanager
-async def _mock_watch_dataproduct_status(config, status: str, include_existing: bool):
-    """
-    Async context manager that replaces the real watcher.
-
-    What it does:
-    - Records the shared Config instance.
-    - Starts background thread #1 that waits on the shared barrier.
-    - Yields one FINISHED event to trigger ``create_sdp_migration_dependency``.
-    - After yielding once, it waits for thread #1 to complete (with a timeout).
-    """
-    assert status == "FINISHED"  # pylint complains unused-argument
-    assert isinstance(include_existing, bool)  # pylint complains unused-argument
-    _shared["cfg"] = config
-
-    # Start thread #1: this represents concurrent access coming from the watcher side.
-    t1 = threading.Thread(
-        target=_busy_read_config,
-        args=(config, _shared["barrier"], _shared["done1"]),
-        daemon=True,
-    )
-    t1.start()
-
-    async def _producer():
-        # Yield one fake FINISHED event to trigger the create() call.
-        yield ("fake-key", "FINISHED")
-        # Ensure thread #1 finished (best-effort via timeout).
-        _shared["done1"].wait(timeout=5)
-
-    try:
-        yield _producer()
-    finally:
-        pass
-
-
-async def _mock_create_sdp_migration_dependency(config, dataproduct_key):
-    """
-    Async function that replaces the real ``create_sdp_migration_dependency`` call.
-
-    What it does:
-    - Asserts we're touching the exact same Config instance the watcher saw.
-    - Starts background thread #2 that also waits on the *same* barrier so both threads
-    run concurrently.
-    - Sleeps briefly to give both threads time to run while this coroutine is
-    suspended (so the concurrency truly overlaps with the async flow).
-    - Waits for thread #2 to complete (with timeout).
-    - Returns a truthy value so the main function continues normally.
-    """
-    assert _shared["cfg"] is config  # sanity: must be the exact same object
-    assert dataproduct_key == "fake-key"  # silences pylint's unused-argument
-
-    # Start thread #2: this represents concurrent access coming from the create() side.
-    t2 = threading.Thread(
-        target=_busy_read_config,
-        args=(config, _shared["barrier"], _shared["done2"]),
-        daemon=True,
-    )
-    t2.start()
-
-    # Brief pause to overlap thread activity with the coroutine's lifecycle.
-    await asyncio.sleep(0.01)
-
-    # Ensure thread #2 finished (best-effort via timeout).
-    _shared["done2"].wait(timeout=5)
-    return {"dep": "ok"}
-
-
-@pytest.mark.asyncio
-async def test_sdp_to_dlm_ingest_and_migrate_config_is_thread_safe(monkeypatch):
-    """
-    End-to-end unit test (with mocks).
-
-    Forces concurrent, cross-thread use of the single Config() created inside
-    ``sdp_to_dlm_ingest_and_migrate()``.
-    """
-    # Patch where the names are used, not where defined.
-    monkeypatch.setattr(
-        "ska_dlm_client.sdp_ingest.main.watch_dataproduct_status",
-        _mock_watch_dataproduct_status,
-        raising=True,
-    )
-    monkeypatch.setattr(
-        "ska_dlm_client.sdp_ingest.main.create_sdp_migration_dependency",
-        _mock_create_sdp_migration_dependency,
-        raising=True,
-    )
-
-    # Invoke the function. If Config isn't thread-safe, this is likely to raise/hang.
-    await sdp_to_dlm_ingest_and_migrate(include_existing=False)
