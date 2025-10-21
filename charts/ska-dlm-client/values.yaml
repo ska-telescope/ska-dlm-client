@@ -44,7 +44,7 @@ ska_dlm_client:
   request_server_url: "http://ska-dlm-dev-request:80" # override for production
 
 directory_watcher:
-  enabled: false
+  enabled: true
   component: directory-watcher
   subsystem: data-lifecycle-management
   replicas: 1
