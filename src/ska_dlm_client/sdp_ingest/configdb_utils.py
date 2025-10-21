@@ -20,7 +20,7 @@ def _initialise_dependency(
     origin: str = "ska-data-lifecycle-management",
     expiry_time: int = -1,
     description: Optional[str],
-) -> Optional[Dependency]:
+) -> Dependency:
     """Build a Flow.Dependency for this product without setting state.
 
     Returns:
