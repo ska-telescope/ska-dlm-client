@@ -12,11 +12,13 @@ import athreading
 from overrides import override
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Flow
+from typing import Any, AsyncIterator, Generator, TypeAlias
 
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
+Event: TypeAlias = tuple[Flow.Key, dict[str, Any]] # alias for what we yield
 
 def watch_dataproduct_status(config: Config, status: str, *, include_existing: bool):
     """Create AsyncGenerator for fetching existing and updated Flow status events.
@@ -31,7 +33,7 @@ def watch_dataproduct_status(config: Config, status: str, *, include_existing: b
 
 class DataProductStatusWatcher(
     AbstractAsyncContextManager["DataProductStatusWatcher"],
-    AsyncIterator[tuple[Flow.Key, str]],
+    AsyncIterator[Event],
     metaclass=ABCMeta,
 ):
     """AsyncGenerator for fetching existing and updated Flow status events.
@@ -63,7 +65,7 @@ class DataProductStatusWatcher(
         await self.__aiter.__aexit__(*exc_info)  # pylint: disable=no-member
 
     @override
-    async def __anext__(self) -> tuple[Flow.Key, str]:
+    async def __anext__(self) -> Event:
         return await self.__aiter.__anext__()  # pylint: disable=no-member
 
     def _get_existing_data_products(self):
@@ -74,7 +76,7 @@ class DataProductStatusWatcher(
 
     # pylint: disable=too-many-nested-blocks
     @athreading.iterate
-    def __awatch(self) -> Generator[Flow.Key, dict, None]:  # noqa: C901
+    def __awatch(self) -> Generator[Event, None, None]:  # noqa: C901
         """Watcher loop that yields matching data-product Flow status events.
 
         - Runs synchronously (wrapped by athreading.iterate).
@@ -82,6 +84,11 @@ class DataProductStatusWatcher(
         - Yields (Flow.Key, status) when status == self._status.
         - Honours include_existing by skipping pre-existing keys via ignored_keys.
         - For each match, logs PB dependencies and creates a DLM dependency (empty state).
+
+        typing.Generator[YIELD, SEND, RETURN]
+        - We yield Event (tuple[Flow.Key, dict[...]])
+        - We never .send() into this generator -> SEND is None
+        - The generator doesn't return a final value -> RETURN is None
         """
         ignored_keys = [] if self._include_existing else self._get_existing_data_products()
 
@@ -98,11 +105,10 @@ class DataProductStatusWatcher(
                     # dependencies are not removed from the database
                     for key in txn.flow.list_keys(kind="data-product"):
                         if key not in ignored_keys:
-                            state = txn.flow.state(key).get()
-                            if status := state.get("status"):
-                                if status == self._status:
-                                    states.append((key, state))
-                                    ignored_keys.append(key)
+                            state = txn.flow.state(key).get() or {}
+                            if state.get("status") == self._status:
+                                states.append((key, state))
+                                ignored_keys.append(key)
                 except Exception:
                     logger.exception("Unexpected watcher exception")
                     raise
