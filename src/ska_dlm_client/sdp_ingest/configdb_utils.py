@@ -30,7 +30,6 @@ def _initialise_dependency(
         - `dep_kind` is the sink/destination identifier (must match [A-Za-z0-9-]{1,96}).
         - `origin` identifies who issued the lock.
     """
-
     return Dependency(
         key=Dependency.Key(
             pb_id=product_key.pb_id,  # PB that produced the flow being locked
