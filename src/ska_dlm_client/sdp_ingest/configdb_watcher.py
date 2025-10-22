@@ -7,18 +7,19 @@ import threading
 from abc import ABCMeta
 from collections.abc import AsyncIterator, Generator
 from contextlib import AbstractAsyncContextManager
+from typing import Any, TypeAlias
 
 import athreading
 from overrides import override
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Flow
-from typing import Any, AsyncIterator, Generator, TypeAlias
 
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-Event: TypeAlias = tuple[Flow.Key, dict[str, Any]] # alias for what we yield
+Event: TypeAlias = tuple[Flow.Key, dict[str, Any]]  # alias for what we yield
+
 
 def watch_dataproduct_status(config: Config, status: str, *, include_existing: bool):
     """Create AsyncGenerator for fetching existing and updated Flow status events.

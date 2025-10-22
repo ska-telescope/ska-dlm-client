@@ -24,24 +24,18 @@ def _initialise_dependency(
     """Build a Flow.Dependency for this product without setting state.
 
     Returns:
-        The Dependency object, or None if required fields are missing.
+        The Dependency object.
 
     Notes:
         - `dep_kind` is the sink/destination identifier (must match [A-Za-z0-9-]{1,96}).
         - `origin` identifies who issued the lock.
     """
-    pb_id = getattr(product_key, "pb_id", None)
-    flow_name = getattr(product_key, "name", None)
-
-    if not pb_id or not flow_name:
-        logger.info("Cannot build dependency for %s: missing pb_id or name", product_key)
-        return None
 
     return Dependency(
         key=Dependency.Key(
-            pb_id=pb_id,  # PB that produced the flow being locked
+            pb_id=product_key.pb_id,  # PB that produced the flow being locked
             kind=dep_kind,  # Kind of flow that is depended on
-            name=flow_name,  # Data product name
+            name=product_key.name,  # Data product name
             origin=origin,  # who is placing the lock
         ),
         expiry_time=expiry_time,
@@ -70,12 +64,14 @@ async def create_sdp_migration_dependency(config, dataproduct_key: Flow.Key):
     return dep
 
 
-def log_flow_dependencies(txn, key: Flow.Key) -> None:
+def log_flow_dependencies(txn, product_key: Flow.Key) -> None:
     """Log any flow-level dependencies (locks) for this product (any kind/origin)."""
-    pb_id = getattr(key, "pb_id", None)
-    name = getattr(key, "name", None)
+    pb_id = product_key.pb_id
+    name = product_key.name
     if not pb_id or not name:
-        logger.info("Data-product %s missing pb_id or name; cannot inspect flow dependencies", key)
+        logger.info(
+            "Data-product %s missing pb_id or name; cannot inspect flow dependencies", product_key
+        )
         return
 
     # Server-side filter by key fields

@@ -1,50 +1,19 @@
 """Unit test module for configdb_watcher."""
 
 import asyncio
-import logging
 from contextlib import suppress
-from types import SimpleNamespace
-from typing import Final
+from typing import Any, Final
 
 import async_timeout
 import pytest
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.flow import DataProduct, Flow
 
-from ska_dlm_client.sdp_ingest.configdb_utils import _initialise_dependency
 from ska_dlm_client.sdp_ingest.configdb_watcher import watch_dataproduct_status
 
 SCRIPT = Script.Key(kind="batch", name="unit_test", version="0.0.0")
 PB_ID = "pb-madeup-00000000-a"
 NAME = "prod-a"
-
-
-def test_initialise_dependency_happy_path():
-    """Test _initialise_dependency - happy path."""
-    key = SimpleNamespace(pb_id=PB_ID, name=NAME)
-    dep = _initialise_dependency(
-        key, dep_kind="dlm-copy", origin="dlmtest", expiry_time=-1, description="unit"
-    )
-    assert dep is not None
-    assert dep.key.pb_id == PB_ID
-    assert dep.key.kind == "dlm-copy"
-    assert dep.key.name == NAME
-    assert dep.key.origin == "dlmtest"
-    assert dep.expiry_time == -1
-    assert dep.description == "unit"
-
-
-@pytest.mark.parametrize(
-    "bad_key", [SimpleNamespace(pb_id=None, name=NAME), SimpleNamespace(pb_id=PB_ID, name=None)]
-)
-def test_initialise_dependency_missing_fields(bad_key, caplog):
-    """Test _initialise_dependency - bad path."""
-    caplog.set_level(logging.INFO, logger="ska_dlm_client.configdb_watcher")
-    dep = _initialise_dependency(
-        bad_key, dep_kind="dlm-copy", origin="dlmtest", expiry_time=-1, description="unit"
-    )
-    assert dep is None
-    assert "Cannot build dependency" in caplog.text
 
 
 @pytest.mark.asyncio
@@ -84,7 +53,7 @@ async def test_dataproduct_status_watcher(  # noqa: C901
     )
 
     timeout_s: Final = 0.5
-    values: list[tuple[Flow.Key, str]] = []
+    values: list[tuple[Flow.Key, dict[str, Any]]] = []
 
     # Sanity check: no products yet
     for txn in config.txn():
@@ -122,8 +91,8 @@ async def test_dataproduct_status_watcher(  # noqa: C901
                 async with watch_dataproduct_status(
                     config, "FINISHED", include_existing=include_existing
                 ) as producer:
-                    async for value in producer:
-                        values.append(value)
+                    async for key, state in producer:
+                        values.append((key, state))
 
     async with async_timeout.timeout(5 * timeout_s):
         await asyncio.gather(aget_single_state(), aput_flow())
@@ -132,6 +101,6 @@ async def test_dataproduct_status_watcher(  # noqa: C901
     assert len(values) == expected_count
     if expected_count:
         assert any(
-            key == test_dataproduct.key and value.get("status") == "FINISHED"
-            for key, value in values
+            key == test_dataproduct.key and state.get("status") == "FINISHED"
+            for key, state in values
         )

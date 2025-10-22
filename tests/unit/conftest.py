@@ -15,7 +15,7 @@ def clear_flow_dependencies(cfg: Config) -> None:
         for dkey in txn.dependency.list_keys():
             dep = Dependency(key=dkey, expiry_time=-1, description=None)
             with suppress(Exception):
-                txn.dependency.state(dep).delete()
+                txn.dependency.state(dep).update({})  # empties the state
             with suppress(Exception):
                 txn.dependency.delete(dkey)
             with suppress(Exception):

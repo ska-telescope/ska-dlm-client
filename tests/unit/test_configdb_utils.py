@@ -1,9 +1,9 @@
 """Unit test module for configdb_utils."""
 
 import logging
-from types import SimpleNamespace
 
 from ska_sdp_config import ConfigCollision
+from ska_sdp_config.entity.flow import Flow
 
 from ska_dlm_client.sdp_ingest.configdb_utils import (
     _initialise_dependency,
@@ -15,22 +15,32 @@ PB_ID = "pb-madeup-00000000-a"
 NAME = "prod-a"
 
 
+def test_initialise_dependency():
+    """Test _initialise_dependency - happy path."""
+    key = Flow.Key(pb_id=PB_ID, name=NAME)
+    dep = _initialise_dependency(
+        key, dep_kind="dlm-copy", origin="dlmtest", expiry_time=-1, description="unit"
+    )
+    assert dep is not None
+    assert dep.key.pb_id == PB_ID
+    assert dep.key.kind == "dlm-copy"
+    assert dep.key.name == NAME
+    assert dep.key.origin == "dlmtest"
+    assert dep.expiry_time == -1
+    assert dep.description == "unit"
+
+
 def test_update_dependency_state(config):
     """Test update_dependency_state creates then updates (covers ConfigCollision path)."""
-    key = SimpleNamespace(pb_id=PB_ID, name=NAME)
+    key = Flow.Key(pb_id=PB_ID, name=NAME)
     dep = _initialise_dependency(
         key, dep_kind="dlm-copy", origin="dlmtest", expiry_time=-1, description="unit"
     )
     # persist entity & empty state
     for txn in config.txn():
-        try:
-            txn.dependency.create(dep)
-        except ConfigCollision:
-            pass
-        try:
-            txn.dependency.state(dep).create({})
-        except ConfigCollision:
-            pass
+        txn.dependency.create_or_update(dep)
+        ops = txn.dependency.state(dep)
+        (ops.update if ops.exists() else ops.create)({})
 
     # first call should create status
     for txn in config.txn():
@@ -48,7 +58,7 @@ def test_update_dependency_state(config):
 def test_log_flow_dependencies(config, caplog):
     """Test log_flow_dependencies for none and one."""
     caplog.set_level(logging.INFO, logger="ska_dlm_client.configdb_watcher")
-    key = SimpleNamespace(pb_id=PB_ID, name=NAME)
+    key = Flow.Key(pb_id=PB_ID, name=NAME)
     dep = _initialise_dependency(
         key, dep_kind="dlm-copy", origin="dlmtest", expiry_time=-1, description="unit"
     )
