@@ -85,9 +85,6 @@ async def test_dataproduct_status_watcher(  # noqa: C901
 
         with suppress(asyncio.TimeoutError):
             async with async_timeout.timeout(2 * timeout_s):
-                # IMPORTANT: use the same Config handle as the writer
-                # because Config is not thread-safe; using one shared instance keeps
-                # all transactions and watcher events on the same client session
                 async with watch_dataproduct_status(
                     config, "FINISHED", include_existing=include_existing
                 ) as producer:
@@ -97,7 +94,7 @@ async def test_dataproduct_status_watcher(  # noqa: C901
     async with async_timeout.timeout(5 * timeout_s):
         await asyncio.gather(aget_single_state(), aput_flow())
 
-    # Did we see the FINISHED event the expected number of times?
+    # Assert the FINISHED event appeared the expected number of times
     assert len(values) == expected_count
     if expected_count:
         assert any(

@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-Event: TypeAlias = tuple[Flow.Key, dict[str, Any]]  # alias for what we yield
+DataProductKeyState: TypeAlias = tuple[Flow.Key, dict[str, Any]]
 
 
 def watch_dataproduct_status(config: Config, status: str, *, include_existing: bool):
@@ -34,7 +34,7 @@ def watch_dataproduct_status(config: Config, status: str, *, include_existing: b
 
 class DataProductStatusWatcher(
     AbstractAsyncContextManager["DataProductStatusWatcher"],
-    AsyncIterator[Event],
+    AsyncIterator[DataProductKeyState],
     metaclass=ABCMeta,
 ):
     """AsyncGenerator for fetching existing and updated Flow status events.
@@ -66,7 +66,7 @@ class DataProductStatusWatcher(
         await self.__aiter.__aexit__(*exc_info)  # pylint: disable=no-member
 
     @override
-    async def __anext__(self) -> Event:
+    async def __anext__(self) -> DataProductKeyState:
         return await self.__aiter.__anext__()  # pylint: disable=no-member
 
     def _get_existing_data_products(self):
@@ -77,7 +77,7 @@ class DataProductStatusWatcher(
 
     # pylint: disable=too-many-nested-blocks
     @athreading.iterate
-    def __awatch(self) -> Generator[Event, None, None]:  # noqa: C901
+    def __awatch(self) -> Generator[DataProductKeyState, None, None]:  # noqa: C901
         """Watcher loop that yields matching data-product Flow status events.
 
         - Runs synchronously (wrapped by athreading.iterate).
@@ -87,7 +87,7 @@ class DataProductStatusWatcher(
         - For each match, logs PB dependencies and creates a DLM dependency (empty state).
 
         typing.Generator[YIELD, SEND, RETURN]
-        - We yield Event (tuple[Flow.Key, dict[...]])
+        - We yield DataProductKeyState (tuple[Flow.Key, dict[...]])
         - We never .send() into this generator -> SEND is None
         - The generator doesn't return a final value -> RETURN is None
         """
