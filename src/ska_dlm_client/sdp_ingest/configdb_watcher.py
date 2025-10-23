@@ -106,10 +106,10 @@ class DataProductStatusWatcher(
                     # dependencies are not removed from the database
                     for key in txn.flow.list_keys(kind="data-product"):
                         if key not in ignored_keys:
-                            state = txn.flow.state(key).get() or {}
-                            if state.get("status") == self._status:
-                                states.append((key, state))
-                                ignored_keys.append(key)
+                            if state := txn.flow.state(key).get():
+                                if state.get("status") == self._status:
+                                    states.append((key, state))
+                                    ignored_keys.append(key)
                 except Exception:
                     logger.exception("Unexpected watcher exception")
                     raise
