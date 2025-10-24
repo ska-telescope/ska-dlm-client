@@ -4,6 +4,7 @@
 
 ### Added
 
+* ska-sdp-config DB watcher that yields matching data-product Flow status events.
 * Integration test harness to start DLM services (via Docker Compose).
 * Start of integration tests for directory-watcher and kafka-watcher.
 

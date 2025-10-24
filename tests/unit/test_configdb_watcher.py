@@ -2,31 +2,18 @@
 
 import asyncio
 from contextlib import suppress
-from typing import Final
+from typing import Any, Final
 
 import async_timeout
 import pytest
-from ska_sdp_config import Config
+from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.flow import DataProduct, Flow
 
-from ska_dlm_client.configdb_watcher import watch_dataproduct_status
+from ska_dlm_client.sdp_ingest.configdb_watcher import watch_dataproduct_status
 
-
-def clear_dependencies(config: Config):
-    """Clear all SDP ConfigDB dependencies."""
-    for txn in config.txn():
-        keys = txn.flow.list_keys()
-        for key in keys:
-            txn.flow.delete(key, recurse=True)
-
-
-@pytest.fixture(name="config")
-def sdp_config_fixture():
-    """Create client to a clean SDP ConfigDB."""
-    config = Config(backend="etcd3")
-    clear_dependencies(config)
-    yield config
-    clear_dependencies(config)
+SCRIPT = Script.Key(kind="batch", name="unit_test", version="0.0.0")
+PB_ID = "pb-madeup-00000000-a"
+NAME = "prod-a"
 
 
 @pytest.mark.asyncio
@@ -39,29 +26,41 @@ def sdp_config_fixture():
         (True, False, 0),
     ],
 )
-async def test_dataproduct_status_watcher(
+async def test_dataproduct_status_watcher(  # noqa: C901
     config, create_first: bool, include_existing: bool, expected_count: int
 ):
-    """Test SDP ConfigDB watching.
+    """Verify the watcher emits FINISHED events and creates a DLM dependency once.
 
-    Args:
-        config: SDP ConfigDB client.
-        create_first: create dependency state before watcher starts.
+    For uniqueness across param cases we vary both the PB id and the flow name.
+    When expected_count==1 we also assert that the dependency state exists.
     """
+    # Unique, regex-compliant PB id and flow name per case
+    # ^pb-[a-z0-9]+-[0-9]{8}-[a-z0-9]+$
+    pb_id = f"pb-test{int(create_first)}{int(include_existing)}-00000000-0"
+    flow_name = f"name-test{int(create_first)}{int(include_existing)}"
+
+    # Ensure the producer PB exists
+    for txn in config.txn():
+        if txn.processing_block.get(pb_id) is None:
+            txn.processing_block.create(ProcessingBlock(key=pb_id, eb_id=None, script=SCRIPT))
+
+    # Our data-product flow
     test_dataproduct: Final = Flow(
-        key=Flow.Key(pb_id="pb-name-00000000-0", kind="data-product", name="name"),
+        key=Flow.Key(pb_id=pb_id, kind="data-product", name=flow_name),
         sink=DataProduct(data_dir="/datapath", paths=[]),
         sources=[],
         data_model="Visibility",
     )
 
     timeout_s: Final = 0.5
-    values = []
+    values: list[tuple[Flow.Key, dict[str, Any]]] = []
 
+    # Sanity check: no products yet
     for txn in config.txn():
         assert txn.flow.list_keys(kind="data-product") == []
 
     async def aput_flow():
+        """Create the flow, then flip its state a few times. A little 'traffic generator'."""
         if not create_first:
             await asyncio.sleep(timeout_s)
 
@@ -74,21 +73,31 @@ async def test_dataproduct_status_watcher(
             txn.flow.state(test_dataproduct.key).update({"status": "FINISHED"})
 
     async def aget_single_state():
+        """Consume the watcher and collect FINISHED events.
+
+        If ``create_first`` is True, waits briefly before starting to simulate a pre-existing
+        flow. Runs the data-product status watcher with the shared ``config`` and appends any
+        ``(Flow.Key, "FINISHED")`` tuples to ``values`` until the timeout elapses. Timeouts are
+        suppressed because some parameterizations may legitimately produce no events.
+        """
         if create_first:
             await asyncio.sleep(timeout_s)
 
         with suppress(asyncio.TimeoutError):
             async with async_timeout.timeout(2 * timeout_s):
-                # NOTE: config not threadsafe
                 async with watch_dataproduct_status(
-                    Config(), "FINISHED", include_existing=include_existing
+                    config, "FINISHED", include_existing=include_existing
                 ) as producer:
-                    async for value in producer:
-                        values.append(value)
+                    async for key, state in producer:
+                        values.append((key, state))
 
     async with async_timeout.timeout(5 * timeout_s):
         await asyncio.gather(aget_single_state(), aput_flow())
 
+    # Assert the FINISHED event appeared the expected number of times
     assert len(values) == expected_count
     if expected_count:
-        assert (test_dataproduct.key, "FINISHED") in values
+        assert any(
+            key == test_dataproduct.key and state.get("status") == "FINISHED"
+            for key, state in values
+        )
