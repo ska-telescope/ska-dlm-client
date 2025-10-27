@@ -2019,7 +2019,7 @@ ska-telmodel = "^1.20"
 
 [package.source]
 type = "git"
-url = "git@gitlab.com:ska-telescope/sdp/ska-sdp-config.git"
+url = "https://gitlab.com/ska-telescope/sdp/ska-sdp-config.git"
 reference = "969330e0e6dde220023ef3f1e545ae83379dba17"
 resolved_reference = "969330e0e6dde220023ef3f1e545ae83379dba17"
 
@@ -2600,4 +2600,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "a359d20ba5673bdb47887680bff90d3f7ca8dd26e754c519f255b54f89cdabf5"
+content-hash = "3c564e2913c801207dd53f25fb844c7a5ca27c3b4e0f41c31c66d51d417e9c83"

@@ -40,7 +40,7 @@ pyyaml = "^6.0.2"
 ska-sdp-dataproduct-metadata = ">=0.7.0"
 watchdog = "^6.0.0"
 crc32c = "^2.7.1"
-ska-sdp-config = { git = "git@gitlab.com:ska-telescope/sdp/ska-sdp-config.git", rev = "969330e0e6dde220023ef3f1e545ae83379dba17" }
+ska-sdp-config = { git = "https://gitlab.com/ska-telescope/sdp/ska-sdp-config.git", rev = "969330e0e6dde220023ef3f1e545ae83379dba17" }
 athreading = "^0.2.0"
 async-timeout = "^5.0.1"
 
