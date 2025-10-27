@@ -5,7 +5,7 @@ from unittest import mock
 
 import pytest
 
-from ska_dlm_client.directory_watcher.config import Config
+from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.directory_watcher.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntries
 from ska_dlm_client.directory_watcher.registration_processor import (
@@ -292,7 +292,7 @@ def test_generate_paths_and_metadata_for_directory(request):
 @pytest.fixture
 def mock_config():
     """Create a mock Config object for testing."""
-    config = mock.MagicMock(spec=Config)
+    config = mock.MagicMock(spec=WatcherConfig)
     config.directory_to_watch = "/test/watch/dir"
     config.storage_name = "test-storage"
     config.ingest_register_path_to_add = ""
@@ -361,14 +361,14 @@ def test_registration_processor_init(mock_config):  # pylint: disable=redefined-
 
 def test_registration_processor_set_config(mock_config):  # pylint: disable=redefined-outer-name
     """Test the RegistrationProcessor set_config method."""
-    processor = RegistrationProcessor(mock.MagicMock(spec=Config))
+    processor = RegistrationProcessor(mock.MagicMock(spec=WatcherConfig))
     processor.set_config(mock_config)
     assert processor.get_config() == mock_config
 
 
 def test_registration_processor_follow_sym_link():
     """Test the RegistrationProcessor _follow_sym_link method."""
-    processor = RegistrationProcessor(mock.MagicMock(spec=Config))
+    processor = RegistrationProcessor(mock.MagicMock(spec=WatcherConfig))
 
     # Test with a non-symlink path
     path = mock.MagicMock()

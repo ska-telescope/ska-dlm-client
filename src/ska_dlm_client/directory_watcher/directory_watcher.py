@@ -11,7 +11,7 @@ from watchdog.observers.polling import DEFAULT_EMITTER_TIMEOUT, BaseObserver, Po
 from watchfiles import Change, awatch
 
 from .. import CmdLineParameters
-from .config import Config
+from .config import WatcherConfig
 from .registration_processor import RegistrationProcessor
 from .watcher_event_handler import WatcherEventHandler
 
@@ -46,7 +46,7 @@ class DirectoryWatcher(ABC):
 
     def __init__(
         self,
-        config: Config,
+        config: WatcherConfig,
         registration_processor: RegistrationProcessor,
         cmd_line_parameters: CmdLineParameters = None,
     ):

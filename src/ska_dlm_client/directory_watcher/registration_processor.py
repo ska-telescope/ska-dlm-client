@@ -11,7 +11,7 @@ from pathlib import Path
 from typing_extensions import Self
 
 import ska_dlm_client.directory_watcher.config
-from ska_dlm_client.directory_watcher.config import Config
+from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.directory_watcher.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntry
 from ska_dlm_client.openapi import ApiException, api_client
@@ -67,9 +67,9 @@ class RegistrationProcessor:
     the migration of data items between storage locations.
     """
 
-    _config: Config
+    _config: WatcherConfig
 
-    def __init__(self, config: Config):
+    def __init__(self, config: WatcherConfig):
         """Initialize the RegistrationProcessor with the given configuration.
 
         Args:
@@ -78,7 +78,7 @@ class RegistrationProcessor:
         """
         self._config = config
 
-    def get_config(self) -> Config:
+    def get_config(self) -> WatcherConfig:
         """Get the configuration being used by the RegistrationProcessor.
 
         Returns:
@@ -86,7 +86,7 @@ class RegistrationProcessor:
         """
         return self._config
 
-    def set_config(self, config: Config):
+    def set_config(self, config: WatcherConfig):
         """Set or reset the configuration used by the RegistrationProcessor.
 
         Args:

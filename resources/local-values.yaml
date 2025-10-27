@@ -7,7 +7,7 @@ directory_watcher:
   image: "ska-dlm-client"
   version: "0.1.0-dirty"
   directory_to_watch: "/data/dlm"
-  storage_root_directory: "/data"
+  storage_root_directory: "/data/dlm"
   imagePullPolicy: Never
 
 ska_dlm:

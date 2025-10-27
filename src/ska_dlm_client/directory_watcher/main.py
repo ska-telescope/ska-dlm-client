@@ -7,13 +7,14 @@ import logging
 import signal
 
 import ska_dlm_client.directory_watcher.config
-from ska_dlm_client.directory_watcher.config import Config
+from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.directory_watcher.directory_watcher import (
     DirectoryWatcher,
     INotifyDirectoryWatcher,
     PollingDirectoryWatcher,
 )
 from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
+from ska_dlm_client.register_storage_location.main import RCLONE_CONFIG_SOURCE, setup_volume
 from ska_dlm_client.utils import CmdLineParameters
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -101,7 +102,7 @@ def create_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def process_args(args: argparse.Namespace, cmd_line_parameters: CmdLineParameters) -> Config:
+def process_args(args: argparse.Namespace, cmd_line_parameters: CmdLineParameters) -> WatcherConfig:
     """Collect all command line parameters and create a Config object.
 
     Args:
@@ -111,7 +112,7 @@ def process_args(args: argparse.Namespace, cmd_line_parameters: CmdLineParameter
     Returns:
         A Config object initialized with all the command line parameters.
     """
-    config = Config(
+    config = WatcherConfig(
         directory_to_watch=args.directory_to_watch,
         ingest_server_url=args.ingest_server_url,
         storage_name=args.storage_name,
@@ -151,6 +152,14 @@ def create_directory_watcher() -> DirectoryWatcher:
     args = parser.parse_args()
     cmd_line_parameters.parse_arguments(args)
     config = process_args(args=args, cmd_line_parameters=cmd_line_parameters)
+
+    # For the directory_watcher we need to register the volume where the watch
+    # directory is located, if not registered already.
+    _ = setup_volume(
+        watcher_config=config,
+        api_configuration=config.ingest_configuration,
+        rclone_config = RCLONE_CONFIG_SOURCE
+    )
     registration_processor = RegistrationProcessor(config)
     if args.register_contents_of_watch_directory:
         registration_processor.register_data_products_from_watch_directory()

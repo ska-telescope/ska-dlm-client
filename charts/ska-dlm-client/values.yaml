@@ -48,10 +48,10 @@ directory_watcher:
   component: directory-watcher
   subsystem: data-lifecycle-management
   replicas: 1
-  directory_to_watch: /data/dlm/watch_dir
-  storage_root_directory: /data
-  use_polling_watcher: false
   storage_name: data
+  storage_root_directory: /data
+  directory_to_watch: /data/dlm/watch_dir
+  use_polling_watcher: false
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false
 

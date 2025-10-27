@@ -9,7 +9,7 @@ global:
     pvc:
       # PVC will be mounted as /data
       name: shared  # PVC name of the volume containing the directory to be watched.
-      read_only: true  # Unless required elsewhere set to true for best data protection.
+      read_only: false  # If set to true the DLM will not be able to move data off the volume.
 
 setupStorageLocation: False  # Only set this to True if needing to setup test storage location.
 

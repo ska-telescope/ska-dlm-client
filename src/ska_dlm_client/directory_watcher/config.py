@@ -14,7 +14,7 @@ METADATA_FILENAME = "ska-data-product.yaml"
 METADATA_EXECUTION_BLOCK_KEY = "execution_block"
 
 
-class Config:  # pylint: disable=too-few-public-methods, disable=too-many-instance-attributes
+class WatcherConfig:  # pylint: disable=too-few-public-methods, disable=too-many-instance-attributes
     """Running configuration of the SKA DLM client directory watcher.
 
     This class holds all configuration parameters needed for the directory watcher
