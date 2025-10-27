@@ -1,9 +1,8 @@
 """Shared helper functions for the ConfigDB dependency lifecycle."""
 
-from __future__ import annotations
-
+import json
 import logging
-from typing import Optional
+from typing import Any, Mapping, Optional
 
 from ska_sdp_config import ConfigCollision
 from ska_sdp_config.entity.flow import Dependency, Flow
@@ -11,6 +10,23 @@ from ska_sdp_config.entity.flow import Dependency, Flow
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
+
+
+def check_flow_annotations(flow: Flow | Mapping[str, Any]) -> None:
+    """Check if `annotations` entity is present."""
+    annotations = None
+
+    if isinstance(flow, Flow):
+        annotations = flow.annotations
+    elif isinstance(flow, Mapping):
+        annotations = flow.get("annotations")
+
+    if annotations is None:
+        logger.info("No 'annotations' on flow.")
+        return
+
+    # TEMP: Log what it found
+    logger.info("%s", json.dumps(annotations, sort_keys=True))
 
 
 def _initialise_dependency(

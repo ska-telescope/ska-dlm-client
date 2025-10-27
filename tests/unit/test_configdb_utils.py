@@ -2,17 +2,50 @@
 
 import logging
 
+import yaml
 from ska_sdp_config import ConfigCollision
 from ska_sdp_config.entity.flow import Flow
 
 from ska_dlm_client.sdp_ingest.configdb_utils import (
     _initialise_dependency,
+    check_flow_annotations,
     log_flow_dependencies,
     update_dependency_state,
 )
 
 PB_ID = "pb-madeup-00000000-a"
 NAME = "prod-a"
+
+
+def test_check_flow_annotations(caplog):  # WIP
+    """check_flow_annotations logs the annotations block from YAML input."""
+    # Peter's example:
+    flow_yaml = """
+key:
+  pb_id: pb-xyz
+  kind: data-product
+  name: image-cube
+sink:
+  kind: data-product
+  data_dir: /shared/fsx1/eb-xyz/ska-sdp/pb-xyz/vis/
+  paths: []
+data_model: Visibility
+annotations:
+  ska-data-lifecycle:
+    expiry: "10d"
+sources:
+  - uri: "/flow/pb-xyz:plasma:visibilities"
+    function: "ska-sdp-realtime-receive-processors:mswriter"
+"""
+
+    flow = yaml.safe_load(flow_yaml)
+
+    caplog.set_level(logging.INFO)
+    check_flow_annotations(flow)
+
+    expected = '{"ska-data-lifecycle": {"expiry": "10d"}}'
+    msgs = [rec.message for rec in caplog.records if rec.levelno == logging.INFO]
+    assert any(m == expected for m in msgs), msgs
 
 
 def test_initialise_dependency():
