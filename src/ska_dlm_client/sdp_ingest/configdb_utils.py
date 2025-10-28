@@ -1,6 +1,5 @@
 """Shared helper functions for the ConfigDB dependency lifecycle."""
 
-import json
 import logging
 from typing import Any, Mapping, Optional
 
@@ -12,21 +11,36 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def check_flow_annotations(flow: Flow | Mapping[str, Any]) -> None:
-    """Check if `annotations` entity is present."""
-    annotations = None
-
+def has_flow_annotation(
+    flow: Flow | Mapping[str, Any],
+    annotation_namespace: str = "ska-data-lifecycle",
+) -> bool:
+    """Return True iff annotations[annotation_namespace] exists on Flow entity."""
+    annotations: Any = None
     if isinstance(flow, Flow):
         annotations = flow.annotations
     elif isinstance(flow, Mapping):
         annotations = flow.get("annotations")
 
     if annotations is None:
-        logger.info("No 'annotations' on flow.")
-        return
+        logger.debug("No 'annotations' on flow.")
+        return False
 
-    # TEMP: Log what it found
-    logger.info("%s", json.dumps(annotations, sort_keys=True))
+    if not isinstance(annotations, Mapping):
+        logger.debug(
+            "'annotations' is not a mapping: type=%s value=%r",
+            type(annotations).__name__,
+            annotations,
+        )
+        return False
+
+    val = annotations.get(annotation_namespace)
+    if val is None:
+        logger.debug("No '%s' in annotations.", val)
+        return False
+
+    logger.info("Found annotations: '%s': %r", annotation_namespace, val)
+    return True
 
 
 def _initialise_dependency(

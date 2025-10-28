@@ -44,12 +44,13 @@ async def test_dataproduct_status_watcher(  # noqa: C901
         if txn.processing_block.get(pb_id) is None:
             txn.processing_block.create(ProcessingBlock(key=pb_id, eb_id=None, script=SCRIPT))
 
-    # Our data-product flow
+    # Construct the flow
     test_dataproduct: Final = Flow(
         key=Flow.Key(pb_id=pb_id, kind="data-product", name=flow_name),
         sink=DataProduct(data_dir="/datapath", paths=[]),
         sources=[],
         data_model="Visibility",
+        annotations={"ska-data-lifecycle": {"expiry": "10d"}},
     )
 
     timeout_s: Final = 0.5

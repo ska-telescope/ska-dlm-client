@@ -7,6 +7,17 @@ from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Dependency
 
 
+def pytest_configure(config: pytest.Config) -> None:
+    """Turn on live logs and bump to DEBUG when user passes -vv."""
+    verbose = int(getattr(config.option, "verbose", 0) or 0)
+
+    if verbose >= 2:  # addopts already contributes -v
+        if not getattr(config.option, "log_cli", False):
+            config.option.log_cli = True
+        if not getattr(config.option, "log_cli_level", None):
+            config.option.log_cli_level = "DEBUG"
+
+
 def clear_flow_dependencies(cfg: Config) -> None:
     """Delete all flow Dependency entities and their state."""
     for txn in cfg.txn():

@@ -2,13 +2,14 @@
 
 import logging
 
+import pytest
 import yaml
 from ska_sdp_config import ConfigCollision
 from ska_sdp_config.entity.flow import Flow
 
 from ska_dlm_client.sdp_ingest.configdb_utils import (
     _initialise_dependency,
-    check_flow_annotations,
+    has_flow_annotation,
     log_flow_dependencies,
     update_dependency_state,
 )
@@ -17,8 +18,8 @@ PB_ID = "pb-madeup-00000000-a"
 NAME = "prod-a"
 
 
-def test_check_flow_annotations(caplog):  # WIP
-    """check_flow_annotations logs the annotations block from YAML input."""
+def test_has_flow_annotation():
+    """Verify that has_flow_annotation correctly finds the specified annotation namespace."""
     # Peter's example:
     flow_yaml = """
 key:
@@ -39,13 +40,22 @@ sources:
 """
 
     flow = yaml.safe_load(flow_yaml)
+    assert has_flow_annotation(flow, "ska-data-lifecycle") is True
 
-    caplog.set_level(logging.INFO)
-    check_flow_annotations(flow)
 
-    expected = '{"ska-data-lifecycle": {"expiry": "10d"}}'
-    msgs = [rec.message for rec in caplog.records if rec.levelno == logging.INFO]
-    assert any(m == expected for m in msgs), msgs
+@pytest.mark.parametrize(
+    "flow",
+    [
+        {"annotations": {"other": 1}},  # missing the target namespace
+        {"annotations": {}},  # annotations present but empty
+        {"annotations": "not-a-mapping"},  # wrong type
+        {"something_else": 123},  # no annotations key at all
+    ],
+    ids=["missing-namespace", "empty-annotations", "wrong-type", "no-annotations-key"],
+)
+def test_has_flow_annotation_false_cases(flow):
+    """Verify that has_flow_annotation correctly returns False."""
+    assert has_flow_annotation(flow, "ska-data-lifecycle") is False
 
 
 def test_initialise_dependency():

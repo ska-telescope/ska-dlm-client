@@ -14,6 +14,8 @@ from overrides import override
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Flow
 
+from ska_dlm_client.sdp_ingest.configdb_utils import has_flow_annotation
+
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
@@ -84,7 +86,7 @@ class DataProductStatusWatcher(
         - Scans ConfigDB for 'data-product' Flow keys and reads their state.
         - Yields (Flow.Key, status) when status == self._status.
         - Honours include_existing by skipping pre-existing keys via ignored_keys.
-        - For each match, logs PB dependencies and creates a DLM dependency (empty state).
+        - For each match, creates a DLM dependency and checks for flow `annotations`.
 
         typing.Generator[YIELD, SEND, RETURN]
         - We yield DataProductKeyState (tuple[Flow.Key, dict[...]])
@@ -108,8 +110,10 @@ class DataProductStatusWatcher(
                         if key not in ignored_keys:
                             if state := txn.flow.state(key).get():
                                 if state.get("status") == self._status:
-                                    states.append((key, state))
-                                    ignored_keys.append(key)
+                                    flow = txn.flow.get(key)
+                                    if has_flow_annotation(flow, "ska-data-lifecycle"):
+                                        states.append((key, state))
+                                        ignored_keys.append(key)
                 except Exception:
                     logger.exception("Unexpected watcher exception")
                     raise
