@@ -1,6 +1,6 @@
 # ska_dlm_client.openapi.MigrationApi
 
-All URIs are relative to *http://localhost:8080*
+All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -10,11 +10,20 @@ Method | HTTP request | Description
 
 
 # **copy_data_item**
-> object copy_data_item(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, authorization=authorization)
+> Dict[str, object] copy_data_item(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, authorization=authorization)
 
 Copy Data Item
 
-Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialize the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) set the access path to the payload (6) set state to READY (7) save metadata in the data_item table
+Copy a data_item from source to destination.
+
+Steps
+(1) get the current storage_id(s) of the item
+(2) convert one (first) storage_id to a configured rclone backend
+(3) initialise the new item with the same OID on the new storage
+(4) use the rclone copy command to copy it to the new location
+(5) set the access path to the payload
+(6) set state to READY
+(7) save metadata in the data_item table
 
 ### Example
 
@@ -24,10 +33,10 @@ import ska_dlm_client.openapi
 from ska_dlm_client.openapi.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost:8080
+# Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
 configuration = ska_dlm_client.openapi.Configuration(
-    host = "http://localhost:8080"
+    host = "http://localhost"
 )
 
 
@@ -69,7 +78,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+**Dict[str, object]**
 
 ### Authorization
 
@@ -104,10 +113,10 @@ import ska_dlm_client.openapi
 from ska_dlm_client.openapi.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost:8080
+# Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
 configuration = ska_dlm_client.openapi.Configuration(
-    host = "http://localhost:8080"
+    host = "http://localhost"
 )
 
 
@@ -158,11 +167,11 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_migrations**
-> List[Optional[object]] query_migrations(authorization=authorization)
+> List[Optional[Dict[str, object]]] query_migrations(start_date=start_date, end_date=end_date, storage_id=storage_id, authorization=authorization)
 
 Query Migrations
 
-Query for all migrations by a given user.
+Query for all migrations by a given user, with optional filters.
 
 ### Example
 
@@ -172,10 +181,10 @@ import ska_dlm_client.openapi
 from ska_dlm_client.openapi.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost:8080
+# Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
 configuration = ska_dlm_client.openapi.Configuration(
-    host = "http://localhost:8080"
+    host = "http://localhost"
 )
 
 
@@ -183,11 +192,14 @@ configuration = ska_dlm_client.openapi.Configuration(
 with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = ska_dlm_client.openapi.MigrationApi(api_client)
+    start_date = 'start_date_example' # str | Filter migrations that started after this date (YYYY-MM-DD or YYYYMMDD) (optional)
+    end_date = 'end_date_example' # str | Filter migrations that ended before this date (YYYY-MM-DD or YYYYMMDD) (optional)
+    storage_id = 'storage_id_example' # str | Filter migrations by a specific storage location (optional)
     authorization = 'authorization_example' # str | Validated Bearer token with UserInfo (optional)
 
     try:
         # Query Migrations
-        api_response = api_instance.query_migrations(authorization=authorization)
+        api_response = api_instance.query_migrations(start_date=start_date, end_date=end_date, storage_id=storage_id, authorization=authorization)
         print("The response of MigrationApi->query_migrations:\n")
         pprint(api_response)
     except Exception as e:
@@ -201,11 +213,14 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **start_date** | **str**| Filter migrations that started after this date (YYYY-MM-DD or YYYYMMDD) | [optional] 
+ **end_date** | **str**| Filter migrations that ended before this date (YYYY-MM-DD or YYYYMMDD) | [optional] 
+ **storage_id** | **str**| Filter migrations by a specific storage location | [optional] 
  **authorization** | **str**| Validated Bearer token with UserInfo | [optional] 
 
 ### Return type
 
-**List[Optional[object]]**
+**List[Optional[Dict[str, object]]]**
 
 ### Authorization
 

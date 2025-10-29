@@ -76,10 +76,10 @@ class MigrationApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> Dict[str, object]:
         """Copy Data Item
 
-        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialize the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) set the access path to the payload (6) set state to READY (7) save metadata in the data_item table
+        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) set the access path to the payload (6) set state to READY (7) save metadata in the data_item table
 
         Parameters
         ----------
@@ -142,7 +142,7 @@ class MigrationApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -194,10 +194,10 @@ class MigrationApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Copy Data Item
 
-        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialize the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) set the access path to the payload (6) set state to READY (7) save metadata in the data_item table
+        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) set the access path to the payload (6) set state to READY (7) save metadata in the data_item table
 
         Parameters
         ----------
@@ -260,7 +260,7 @@ class MigrationApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -315,7 +315,7 @@ class MigrationApi:
     ) -> RESTResponseType:
         """Copy Data Item
 
-        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialize the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) set the access path to the payload (6) set state to READY (7) save metadata in the data_item table
+        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) set the access path to the payload (6) set state to READY (7) save metadata in the data_item table
 
         Parameters
         ----------
@@ -378,7 +378,7 @@ class MigrationApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "object",
+            "200": "Dict[str, object]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -716,6 +716,22 @@ class MigrationApi:
     @validate_call
     def query_migrations(
         self,
+        start_date: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="Filter migrations that started after this date (YYYY-MM-DD or YYYYMMDD)"
+            ),
+        ] = None,
+        end_date: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="Filter migrations that ended before this date (YYYY-MM-DD or YYYYMMDD)"
+            ),
+        ] = None,
+        storage_id: Annotated[
+            Optional[StrictStr],
+            Field(description="Filter migrations by a specific storage location"),
+        ] = None,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
@@ -728,13 +744,21 @@ class MigrationApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Optional[object]]:
+    ) -> List[Optional[Dict[str, object]]]:
         """Query Migrations
 
-        Query for all migrations by a given user.
+        Query for all migrations by a given user, with optional filters.
 
         Parameters
         ----------
+        start_date : str
+            Filter migrations that started after this date (YYYY-MM-DD
+            or YYYYMMDD)
+        end_date : str
+            Filter migrations that ended before this date (YYYY-MM-DD or
+            YYYYMMDD)
+        storage_id : str
+            Filter migrations by a specific storage location
         authorization : str
             Validated Bearer token with UserInfo
         _request_timeout : int, tuple(int, int), optional
@@ -764,6 +788,9 @@ class MigrationApi:
         # noqa: E501
 
         _param = self._query_migrations_serialize(
+            start_date=start_date,
+            end_date=end_date,
+            storage_id=storage_id,
             authorization=authorization,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -772,7 +799,7 @@ class MigrationApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -785,6 +812,22 @@ class MigrationApi:
     @validate_call
     def query_migrations_with_http_info(
         self,
+        start_date: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="Filter migrations that started after this date (YYYY-MM-DD or YYYYMMDD)"
+            ),
+        ] = None,
+        end_date: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="Filter migrations that ended before this date (YYYY-MM-DD or YYYYMMDD)"
+            ),
+        ] = None,
+        storage_id: Annotated[
+            Optional[StrictStr],
+            Field(description="Filter migrations by a specific storage location"),
+        ] = None,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
@@ -797,13 +840,21 @@ class MigrationApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Optional[object]]]:
+    ) -> ApiResponse[List[Optional[Dict[str, object]]]]:
         """Query Migrations
 
-        Query for all migrations by a given user.
+        Query for all migrations by a given user, with optional filters.
 
         Parameters
         ----------
+        start_date : str
+            Filter migrations that started after this date (YYYY-MM-DD
+            or YYYYMMDD)
+        end_date : str
+            Filter migrations that ended before this date (YYYY-MM-DD or
+            YYYYMMDD)
+        storage_id : str
+            Filter migrations by a specific storage location
         authorization : str
             Validated Bearer token with UserInfo
         _request_timeout : int, tuple(int, int), optional
@@ -833,6 +884,9 @@ class MigrationApi:
         # noqa: E501
 
         _param = self._query_migrations_serialize(
+            start_date=start_date,
+            end_date=end_date,
+            storage_id=storage_id,
             authorization=authorization,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -841,7 +895,7 @@ class MigrationApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -854,6 +908,22 @@ class MigrationApi:
     @validate_call
     def query_migrations_without_preload_content(
         self,
+        start_date: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="Filter migrations that started after this date (YYYY-MM-DD or YYYYMMDD)"
+            ),
+        ] = None,
+        end_date: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="Filter migrations that ended before this date (YYYY-MM-DD or YYYYMMDD)"
+            ),
+        ] = None,
+        storage_id: Annotated[
+            Optional[StrictStr],
+            Field(description="Filter migrations by a specific storage location"),
+        ] = None,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
@@ -869,10 +939,18 @@ class MigrationApi:
     ) -> RESTResponseType:
         """Query Migrations
 
-        Query for all migrations by a given user.
+        Query for all migrations by a given user, with optional filters.
 
         Parameters
         ----------
+        start_date : str
+            Filter migrations that started after this date (YYYY-MM-DD
+            or YYYYMMDD)
+        end_date : str
+            Filter migrations that ended before this date (YYYY-MM-DD or
+            YYYYMMDD)
+        storage_id : str
+            Filter migrations by a specific storage location
         authorization : str
             Validated Bearer token with UserInfo
         _request_timeout : int, tuple(int, int), optional
@@ -902,6 +980,9 @@ class MigrationApi:
         # noqa: E501
 
         _param = self._query_migrations_serialize(
+            start_date=start_date,
+            end_date=end_date,
+            storage_id=storage_id,
             authorization=authorization,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -910,7 +991,7 @@ class MigrationApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Optional[object]]",
+            "200": "List[Optional[Dict[str, object]]]",
             "422": "HTTPValidationError",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
@@ -918,6 +999,9 @@ class MigrationApi:
 
     def _query_migrations_serialize(
         self,
+        start_date,
+        end_date,
+        storage_id,
         authorization,
         _request_auth,
         _content_type,
@@ -938,6 +1022,18 @@ class MigrationApi:
 
         # process the path parameters
         # process the query parameters
+        if start_date is not None:
+
+            _query_params.append(("start_date", start_date))
+
+        if end_date is not None:
+
+            _query_params.append(("end_date", end_date))
+
+        if storage_id is not None:
+
+            _query_params.append(("storage_id", storage_id))
+
         # process the header parameters
         if authorization is not None:
             _header_params["authorization"] = authorization

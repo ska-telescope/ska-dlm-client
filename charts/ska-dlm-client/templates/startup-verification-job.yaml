@@ -33,7 +33,7 @@ spec:
         - {{ .Values.ska_dlm_client.request_server_url }}
         volumeMounts:
         - name: data-product-storage
-          mountPath: /data
+          mountPath: /dlm
       initContainers:
         - name: wait-for-directory-watcher
           image: {{ .Values.kubectl.image }}:{{ .Values.kubectl.version }}

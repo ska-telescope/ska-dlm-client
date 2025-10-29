@@ -38,7 +38,7 @@ class TestDirectoryWatcher:
 
     STORAGE_NAME = "data"
     INGREST_SERVER_URL = "http://localhost:8001"
-    ROOT_DIRECTORY = "/data"
+    ROOT_DIRECTORY = "/dlm"
 
     add_path_successful = False
 

@@ -200,7 +200,7 @@ def test_item_list_minus_metadata_file(
         assert item.item_type == ItemType.FILE
         assert item.metadata is None
         assert item.parent == container_item
-        assert item.path_rel_to_watch_dir in [f"{rel_path}/data", f"{rel_path}/weights"]
+        assert item.path_rel_to_watch_dir in [f"{rel_path}/dlm", f"{rel_path}/weights"]
 
 
 def test_measurement_set_directory_in(request, monkeypatch):

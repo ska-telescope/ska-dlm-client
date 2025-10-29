@@ -13,7 +13,7 @@ services:
     # the general case via a service name or similar.
     entrypoint: /entrypoint.sh
     volumes:
-      - shared-tmpfs:/data
+      - ~/scratch:/dlm
     networks:
       - dlm_network
   setup_storage_location:
@@ -25,6 +25,6 @@ services:
       dockerfile: Dockerfile
     # NOTE: the IP address is fixed here but need to work out how to connect in
     # the general case via a service name or similar.
-    entrypoint: python3 -m ska_dlm_client.register_storage_location.main --storage-name data --storage-root-directory /data --storage-server-url "http://dlm_storage:8003"
+    entrypoint: python3 -m ska_dlm_client.register_storage_location.main --storage-name data --storage-root-directory /dlm --storage-server-url "http://dlm_storage:8003"
     networks:
       - dlm_network

@@ -72,7 +72,6 @@ class PollingDirectoryWatcher(DirectoryWatcher):
 
     async def watch(self):
         """Watch for changes in the defined directory and process each change found."""
-        logger.info("with config parameters %s", self._config)
         logger.info("starting to watchdog %s", self._config.directory_to_watch)
         logger.info(
             "NOTE: MyPollingObserver has recursive=False, in case this matters in the future."

@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+import os
 import sys
 
 from ska_dlm_client.openapi import api_client
@@ -38,6 +39,7 @@ def get_or_init_location(api_configuration: Configuration, location:str=LOCATION
 
         # get the location_id
         logger.info("Checking location: %s", location)
+        api_storage.api_client.configuration.host = "http://dlm_storage:8003"
         response = api_storage.query_location(location_name=location)
         logger.info("query_location response: %s", response)
         if not isinstance(response, list):
@@ -70,6 +72,8 @@ def get_or_init_storage(
 ) -> str:
     """Get storage_id or perform storage initialisation based on the storage_name provided."""
     assert the_location_id is not None
+    os.makedirs(storage_root_directory, exist_ok=True)
+    logger.info("Watcher directory %s created (or already existed)", storage_root_directory)
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
         # Get the storage_id
@@ -95,9 +99,9 @@ def get_or_init_storage(
             logger.info("Storage created in DLM")
 
             if rclone_config is not None:
-                # Setup the storage config. 
+                # Setup the storage config.
                 response = api_storage.create_storage_config(
-                    body=rclone_config,
+                    request_body=rclone_config,
                     storage_id=the_storage_id,
                     storage_name=storage_name,
                     config_type="rclone",
@@ -118,9 +122,9 @@ def setup_volume(watcher_config:WatcherConfig, api_configuration: Configuration,
                                            location=LOCATION_NAME
                                            )
     storage_id = get_or_init_storage(
-        storage_name=watcher_config.name,
+        storage_name=watcher_config.storage_name,
         api_configuration=api_configuration,
-        storage_root_directory="/data/watch_dir",
+        storage_root_directory="/dlm/watch_dir",
         the_location_id=location_id,
         rclone_config=rclone_config
     )
@@ -141,16 +145,6 @@ def setup_testing(api_configuration: Configuration):
         rclone_config = RCLONE_CONFIG_TARGET
     )
     logger.info("location id %s and storage id %s", location_id, storage_id)
-
-    storage_id = get_or_init_storage(
-        storage_name = RCLONE_CONFIG_SOURCE["name"],
-        api_configuration = api_configuration,
-        storage_root_directory = RCLONE_CONFIG_SOURCE["parameters"]["remote"],
-        the_location_id = location_id,
-        rclone_config = RCLONE_CONFIG_SOURCE
-    )
-    logger.info("location id %s and storage id %s", location_id, storage_id)
-
 
 def create_parser() -> argparse.ArgumentParser:
     """Define a parser for all the command line parameters."""

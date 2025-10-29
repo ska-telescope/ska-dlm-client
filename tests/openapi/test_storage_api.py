@@ -22,6 +22,7 @@ class TestStorageApi(unittest.TestCase):
 
     def setUp(self) -> None:
         self.api = StorageApi()
+        self.api.api_client.configuration.host = "http://localhost:8003"
 
     def tearDown(self) -> None:
         pass
@@ -65,6 +66,16 @@ class TestStorageApi(unittest.TestCase):
         """Test case for query_location
 
         Query Location
+        NOTE: This currently only works if the DB has been populated already.
+        """
+        response = self.api.query_location(location_name='local-dev')
+        assert len(response[0]['location_id']) == 36
+        
+
+    def test_query_location_facility(self) -> None:
+        """Test case for query_location_facility
+
+        Query Location Facility
         """
         pass
 

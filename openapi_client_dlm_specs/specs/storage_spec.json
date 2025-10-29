@@ -7,9 +7,35 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "1.0.0"
+        "version": "1.2.0"
     },
     "paths": {
+        "/storage/query_location_facility": {
+            "get": {
+                "summary": "Query Location Facility",
+                "tags": [
+                    "storage"
+                ],
+                "description": "Query the location_facility table for valid facilities.",
+                "operationId": "query_location_facility",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "type": "array",
+                                    "title": "Response Query Location Facility"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/storage/query_location": {
             "get": {
                 "summary": "Query Location",
@@ -52,7 +78,8 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "type": "object"
+                                        "type": "object",
+                                        "additionalProperties": true
                                     },
                                     "title": "Response Query Location"
                                 }
@@ -78,7 +105,7 @@
                 "tags": [
                     "storage"
                 ],
-                "description": "Initialize a new storage.",
+                "description": "Initialise a new storage. Either location_id or location_name is required.",
                 "operationId": "init_storage",
                 "parameters": [
                     {
@@ -97,22 +124,8 @@
                         "in": "query",
                         "required": true,
                         "schema": {
-                            "type": "string",
-                            "description": "high level type of the storage, e.g. \"disk\", \"s3\"",
-                            "title": "Storage Type"
-                        },
-                        "description": "high level type of the storage, e.g. \"disk\", \"s3\""
-                    },
-                    {
-                        "name": "storage_interface",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "description": "storage interface for rclone access, e.g. \"posix\", \"s3\"",
-                            "title": "Storage Interface"
-                        },
-                        "description": "storage interface for rclone access, e.g. \"posix\", \"s3\""
+                            "$ref": "#/components/schemas/StorageType"
+                        }
                     },
                     {
                         "name": "root_directory",
@@ -124,6 +137,14 @@
                             "title": "Root Directory"
                         },
                         "description": "data directory as an absolute path on the remote storage endpoint"
+                    },
+                    {
+                        "name": "storage_interface",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/StorageInterface"
+                        }
                     },
                     {
                         "name": "location_id",
@@ -174,16 +195,13 @@
                         "description": "reserved storage capacity in bytes"
                     },
                     {
-                        "name": "storage_phase_level",
+                        "name": "storage_phase",
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "type": "string",
-                            "description": "one of \"GAS\", \"LIQUID\", \"SOLID\"",
-                            "default": "GAS",
-                            "title": "Storage Phase Level"
-                        },
-                        "description": "one of \"GAS\", \"LIQUID\", \"SOLID\""
+                            "$ref": "#/components/schemas/PhaseType",
+                            "default": "GAS"
+                        }
                     }
                 ],
                 "requestBody": {
@@ -192,7 +210,8 @@
                             "schema": {
                                 "anyOf": [
                                     {
-                                        "type": "object"
+                                        "type": "object",
+                                        "additionalProperties": true
                                     },
                                     {
                                         "type": "null"
@@ -267,12 +286,9 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "type": "string",
-                            "description": "default is rclone, but could be something else in the future.",
-                            "default": "rclone",
-                            "title": "Config Type"
-                        },
-                        "description": "default is rclone, but could be something else in the future."
+                            "$ref": "#/components/schemas/ConfigType",
+                            "default": "rclone"
+                        }
                     }
                 ],
                 "requestBody": {
@@ -281,6 +297,7 @@
                         "application/json": {
                             "schema": {
                                 "type": "object",
+                                "additionalProperties": true,
                                 "description": "the configuration entry. For rclone this is a JSON formatted string",
                                 "title": "Config"
                             }
@@ -350,12 +367,9 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "type": "string",
-                            "description": "query only the specified type, by default \"rclone\"",
-                            "default": "rclone",
-                            "title": "Config Type"
-                        },
-                        "description": "query only the specified type, by default \"rclone\""
+                            "$ref": "#/components/schemas/ConfigType",
+                            "default": "rclone"
+                        }
                     }
                 ],
                 "responses": {
@@ -366,7 +380,8 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "type": "string"
+                                        "type": "object",
+                                        "additionalProperties": true
                                     },
                                     "title": "Response Get Storage Config"
                                 }
@@ -398,6 +413,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "additionalProperties": true,
                                 "type": "object",
                                 "title": "Config",
                                 "description": "a json string containing the configuration"
@@ -437,7 +453,7 @@
                 "tags": [
                     "storage"
                 ],
-                "description": "Initialize a new storage location.",
+                "description": "Initialise a new location for a storage by specifying the location_name and location_type.",
                 "operationId": "init_location",
                 "parameters": [
                     {
@@ -456,23 +472,24 @@
                         "in": "query",
                         "required": true,
                         "schema": {
-                            "type": "string",
-                            "description": "the location type, e.g. \"server\"",
-                            "title": "Location Type"
-                        },
-                        "description": "the location type, e.g. \"server\""
+                            "$ref": "#/components/schemas/LocationType"
+                        }
                     },
                     {
                         "name": "location_country",
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "type": "string",
-                            "description": "the location country name",
-                            "default": "",
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/LocationCountry"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
                             "title": "Location Country"
-                        },
-                        "description": "the location country name"
+                        }
                     },
                     {
                         "name": "location_city",
@@ -492,11 +509,11 @@
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "description": "the location facility name",
+                            "description": "the location facility name, from table location_facility",
                             "default": "",
                             "title": "Location Facility"
                         },
-                        "description": "the location facility name"
+                        "description": "the location facility name, from table location_facility"
                     }
                 ],
                 "responses": {
@@ -566,7 +583,8 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "type": "object"
+                                        "type": "object",
+                                        "additionalProperties": true
                                     },
                                     "title": "Response Query Storage"
                                 }
@@ -589,6 +607,17 @@
     },
     "components": {
         "schemas": {
+            "ConfigType": {
+                "type": "string",
+                "enum": [
+                    "rclone",
+                    "ssh",
+                    "aws",
+                    "gcs"
+                ],
+                "title": "ConfigType",
+                "description": "Config type."
+            },
             "HTTPValidationError": {
                 "properties": {
                     "detail": {
@@ -601,6 +630,60 @@
                 },
                 "type": "object",
                 "title": "HTTPValidationError"
+            },
+            "LocationCountry": {
+                "type": "string",
+                "enum": [
+                    "AU",
+                    "ZA",
+                    "UK"
+                ],
+                "title": "LocationCountry",
+                "description": "Location country."
+            },
+            "LocationType": {
+                "type": "string",
+                "enum": [
+                    "local-dev",
+                    "low-integration",
+                    "mid-integration",
+                    "low-operations",
+                    "mid-operations"
+                ],
+                "title": "LocationType",
+                "description": "Location type."
+            },
+            "PhaseType": {
+                "type": "string",
+                "enum": [
+                    "GAS",
+                    "LIQUID",
+                    "SOLID",
+                    "PLASMA"
+                ],
+                "title": "PhaseType",
+                "description": "Phase type / resilience level."
+            },
+            "StorageInterface": {
+                "type": "string",
+                "enum": [
+                    "posix",
+                    "s3",
+                    "sftp",
+                    "https"
+                ],
+                "title": "StorageInterface",
+                "description": "Storage interface."
+            },
+            "StorageType": {
+                "type": "string",
+                "enum": [
+                    "filesystem",
+                    "objectstore",
+                    "tape"
+                ],
+                "title": "StorageType",
+                "description": "Storage type."
             },
             "ValidationError": {
                 "properties": {

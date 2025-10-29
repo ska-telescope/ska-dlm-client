@@ -155,6 +155,7 @@ def create_directory_watcher() -> DirectoryWatcher:
 
     # For the directory_watcher we need to register the volume where the watch
     # directory is located, if not registered already.
+    logger.info("API Config: %s", config)
     _ = setup_volume(
         watcher_config=config,
         api_configuration=config.ingest_configuration,

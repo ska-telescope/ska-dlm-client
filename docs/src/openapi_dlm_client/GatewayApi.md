@@ -1,6 +1,6 @@
 # ska_dlm_client.openapi.GatewayApi
 
-All URIs are relative to *http://localhost:8080*
+All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -16,7 +16,7 @@ Method | HTTP request | Description
 
 Auth Callback
 
-Auth callback from Provider
+Auth callback from Provider.
 
 ### Example
 
@@ -26,10 +26,10 @@ import ska_dlm_client.openapi
 from ska_dlm_client.openapi.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost:8080
+# Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
 configuration = ska_dlm_client.openapi.Configuration(
-    host = "http://localhost:8080"
+    host = "http://localhost"
 )
 
 
@@ -79,7 +79,7 @@ No authorization required
 
 Has Scope
 
-Get UMA scopes
+Get UMA scopes.
 
 ### Example
 
@@ -89,10 +89,10 @@ import ska_dlm_client.openapi
 from ska_dlm_client.openapi.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost:8080
+# Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
 configuration = ska_dlm_client.openapi.Configuration(
-    host = "http://localhost:8080"
+    host = "http://localhost"
 )
 
 
@@ -149,7 +149,7 @@ No authorization required
 
 Heartbeat
 
-Endpoint to check if Gateway is contactable
+Endpoint to check if Gateway is contactable.
 
 ### Example
 
@@ -159,10 +159,10 @@ import ska_dlm_client.openapi
 from ska_dlm_client.openapi.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost:8080
+# Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
 configuration = ska_dlm_client.openapi.Configuration(
-    host = "http://localhost:8080"
+    host = "http://localhost"
 )
 
 
@@ -212,7 +212,7 @@ No authorization required
 
 Token By Auth Flow
 
-Redirect to IDP for user authorisation
+Redirect to IDP for user authorisation.
 
 ### Example
 
@@ -222,10 +222,10 @@ import ska_dlm_client.openapi
 from ska_dlm_client.openapi.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost:8080
+# Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
 configuration = ska_dlm_client.openapi.Configuration(
-    host = "http://localhost:8080"
+    host = "http://localhost"
 )
 
 
@@ -271,11 +271,11 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **token_by_username_password_token_by_username_password_get**
-> object token_by_username_password_token_by_username_password_get(username, password)
+> Dict[str, object] token_by_username_password_token_by_username_password_get(username, password)
 
 Token By Username Password
 
-Get OAUTH token based on username and password
+Get OAUTH token based on username and password.
 
 ### Example
 
@@ -285,10 +285,10 @@ import ska_dlm_client.openapi
 from ska_dlm_client.openapi.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost:8080
+# Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
 configuration = ska_dlm_client.openapi.Configuration(
-    host = "http://localhost:8080"
+    host = "http://localhost"
 )
 
 
@@ -320,7 +320,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+**Dict[str, object]**
 
 ### Authorization
 
