@@ -49,7 +49,7 @@ directory_watcher:
   subsystem: data-lifecycle-management
   replicas: 1
   storage_name: data
-  storage_root_directory: /dlm
+  storage_root_directory: /dlm/watch_dir
   directory_to_watch: /dlm/watch_dir
   use_polling_watcher: false
   skip_rclone_access_check_on_register: false

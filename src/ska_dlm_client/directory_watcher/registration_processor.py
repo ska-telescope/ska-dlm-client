@@ -238,7 +238,7 @@ class RegistrationProcessor:
                             storage_name=self._config.storage_name,
                             do_storage_access_check=self._config.rclone_access_check_on_register,
                             parents=None if item.parent is None else item.parent.uuid,
-                            body=None if item.metadata is None else item.metadata.as_dict(),
+                            request_body=None if item.metadata is None else item.metadata.as_dict(),
                         )
                         logger.info("register_data_item response: %s", response)
                     else:

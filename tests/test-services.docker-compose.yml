@@ -36,7 +36,7 @@ services:
        dockerfile: Dockerfile
     # NOTE: the IP address is fixed here but need to work out how to connect in
     # the general case via a service name or similar.
-    entrypoint: python3 -m ska_dlm_client.directory_watcher.main --directory-to-watch /dlm/watch_dir --storage-name data1 --storage-root-directory /dlm --use-polling-watcher --ingest-server-url "http://dlm_ingest:8001" --readiness-probe-file /tmp/ready
+    entrypoint: python3 -m ska_dlm_client.directory_watcher.main --directory-to-watch /dlm/watch_dir --storage-name data1 --storage-root-directory /dlm/watch_dir --use-polling-watcher --ingest-server-url "http://dlm_ingest:8001" --readiness-probe-file /tmp/ready
     volumes:
       - shared-tmpfs:/dlm
     networks:
