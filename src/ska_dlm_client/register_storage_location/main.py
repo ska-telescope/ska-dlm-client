@@ -19,7 +19,7 @@ LOCATION_TYPE = "local-dev"
 LOCATION_COUNTRY = "AU"
 LOCATION_CITY = "Kensington"
 LOCATION_FACILITY = "local"
-RCLONE_CONFIG_TARGET = {"name": "data", "type": "alias", "parameters": {"remote": "/"}}
+RCLONE_CONFIG_TARGET = {"name": "data", "type": "alias", "parameters": {"remote": "/data"}}
 RCLONE_CONFIG_SOURCE = {"name": "dlm-watcher", "type": "sftp", "parameters":
     {
         "host": "dlm_directory_watcher",
@@ -32,14 +32,14 @@ STORAGE_INTERFACE = "posix"
 STORAGE_TYPE = "filesystem"
 
 
-def get_or_init_location(api_configuration: Configuration, location:str=LOCATION_NAME) -> str:
+def get_or_init_location(api_configuration: Configuration, location:str=LOCATION_NAME, storage_url="http://dlm_storage:8003") -> str:
     """Perform location initialisation to be used when testing."""
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
 
         # get the location_id
         logger.info("Checking location: %s", location)
-        api_storage.api_client.configuration.host = "http://dlm_storage:8003"
+        api_storage.api_client.configuration.host = storage_url
         response = api_storage.query_location(location_name=location)
         logger.info("query_location response: %s", response)
         if not isinstance(response, list):
@@ -124,7 +124,7 @@ def setup_volume(watcher_config:WatcherConfig, api_configuration: Configuration,
     storage_id = get_or_init_storage(
         storage_name=watcher_config.storage_name,
         api_configuration=api_configuration,
-        storage_root_directory="/dlm/watch_dir",
+        storage_root_directory=watcher_config.storage_root_directory,
         the_location_id=location_id,
         rclone_config=rclone_config
     )

@@ -155,20 +155,21 @@ class RegistrationProcessor:
         """
         with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
-            api_ingest.api_client.configuration.host = "http://dlm_ingest:8001"  # This needs to come from config!
+            api_ingest.api_client.configuration.host = self._config.ingest_server_url
             try:
                 # Generate the uri relative to the root directory.
                 item_path_rel_to_watch_dir = item.path_rel_to_watch_dir
-                uri = (
-                    item_path_rel_to_watch_dir
-                    if self._config.ingest_register_path_to_add == ""
-                    else f"{self._config.ingest_register_path_to_add}/{item_path_rel_to_watch_dir}"
-                )
+                # uri = (
+                #     item_path_rel_to_watch_dir
+                #     if self._config.ingest_register_path_to_add == ""
+                #     else f"{self._config.ingest_register_path_to_add}/{item_path_rel_to_watch_dir}"
+                # )
+                logger.info("Using URI: %s for data_item registration", item_path_rel_to_watch_dir)
                 response = None
                 if self._config.perform_actual_ingest_and_migration:
                     response = api_ingest.register_data_item(
                         item_name=item_path_rel_to_watch_dir,
-                        uri=uri,
+                        uri=item_path_rel_to_watch_dir,
                         item_type=item.item_type,
                         storage_name=self._config.storage_name,
                         do_storage_access_check=self._config.rclone_access_check_on_register,
