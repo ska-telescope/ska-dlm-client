@@ -200,7 +200,7 @@ def test_item_list_minus_metadata_file(
         assert item.item_type == ItemType.FILE
         assert item.metadata is None
         assert item.parent == container_item
-        assert item.path_rel_to_watch_dir in [f"{rel_path}/dlm", f"{rel_path}/weights"]
+        assert item.path_rel_to_watch_dir in [f"{rel_path}/data", f"{rel_path}/weights"]
 
 
 def test_measurement_set_directory_in(request, monkeypatch):
@@ -300,6 +300,7 @@ def mock_config():
     config.rclone_access_check_on_register = False
     config.migration_destination_storage_name = "test-destination-storage"
     config.directory_watcher_entries = mock.MagicMock(spec=DirectoryWatcherEntries)
+    config.ingest_server_url = "http://test-ingest:8000"
 
     # Use real Configuration instances instead of MagicMocks
     config.ingest_configuration = Configuration(host="http://test-ingest:8000")
@@ -438,7 +439,7 @@ def test_registration_processor_register_single_item(
         item_type=ItemType.FILE,
         storage_name=mock_config.storage_name,
         do_storage_access_check=mock_config.rclone_access_check_on_register,
-        body=item.metadata.as_dict(),
+        request_body=item.metadata.as_dict(),
     )
 
     # Test with registration disabled
@@ -493,7 +494,7 @@ def test_registration_processor_register_container_items(
         storage_name=mock_config.storage_name,
         do_storage_access_check=mock_config.rclone_access_check_on_register,
         parents=parent_item.uuid,
-        body=None,
+        request_body=None,
     )
     mock_ingest_api.return_value.register_data_item.assert_any_call(
         item_name="child-item2",
@@ -502,7 +503,7 @@ def test_registration_processor_register_container_items(
         storage_name=mock_config.storage_name,
         do_storage_access_check=mock_config.rclone_access_check_on_register,
         parents=parent_item.uuid,
-        body=None,
+        request_body=None,
     )
 
     # Test with registration disabled
