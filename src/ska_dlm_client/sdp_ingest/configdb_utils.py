@@ -12,35 +12,20 @@ logger = logging.getLogger(__name__)
 
 
 def has_flow_annotation(
-    flow: Flow | Mapping[str, Any],
+    flow: Flow,
     annotation_namespace: str = "ska-data-lifecycle",
 ) -> bool:
     """Return True iff annotations[annotation_namespace] exists on Flow entity."""
     annotations: Any = None
-    if isinstance(flow, Flow):
-        annotations = flow.annotations
-    elif isinstance(flow, Mapping):
-        annotations = flow.get("annotations")
+    annotations = flow.annotations
 
-    if annotations is None:
-        logger.debug("No 'annotations' on flow.")
-        return False
-
-    if not isinstance(annotations, Mapping):
-        logger.debug(
-            "'annotations' is not a mapping: type=%s value=%r",
-            type(annotations).__name__,
-            annotations,
-        )
-        return False
-
-    val = annotations.get(annotation_namespace)
-    if val is None:
+    has_annotation = annotations.get(annotation_namespace) is not None
+    if has_annotation:  # optional logging
+        logger.debug("Found annotations: '%s': %r", annotation_namespace, val)
+    else:
         logger.debug("No '%s' in annotations.", val)
-        return False
 
-    logger.info("Found annotations: '%s': %r", annotation_namespace, val)
-    return True
+    return has_annotation
 
 
 def _initialise_dependency(
