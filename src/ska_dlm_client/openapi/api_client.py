@@ -495,6 +495,11 @@ class ApiClient:
                 sub_kls = m.group(2)
                 return {k: self.__deserialize(v, sub_kls) for k, v in data.items()}
 
+            if klass.startswith("Optional["):
+                m = re.match(r"Optional\[([^,]*), (.*)]", klass)
+                assert m is not None, "Malformed Dict type definition"
+                return data
+
             # convert str to class
             if klass in self.NATIVE_TYPES_MAPPING:
                 klass = self.NATIVE_TYPES_MAPPING[klass]

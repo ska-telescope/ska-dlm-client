@@ -224,17 +224,12 @@ class RegistrationProcessor:
             for item in item_list:
                 try:
                     # Generate the uri relative to the root directory.
-                    uri = (
-                        item.path_rel_to_watch_dir
-                        if self._config.ingest_register_path_to_add == ""
-                        else f"{self._config.ingest_register_path_to_add}/"
-                        f"{item.path_rel_to_watch_dir}"
-                    )
+                    logger.info("Using URI: %s for data_item registration", item.path_rel_to_watch_dir)
                     response = None
                     if self._config.perform_actual_ingest_and_migration:
                         response = api_ingest.register_data_item(
                             item_name=item.path_rel_to_watch_dir,
-                            uri=uri,
+                            uri=item.path_rel_to_watch_dir,
                             item_type=item.item_type,
                             storage_name=self._config.storage_name,
                             do_storage_access_check=self._config.rclone_access_check_on_register,

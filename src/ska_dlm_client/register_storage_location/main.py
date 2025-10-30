@@ -3,6 +3,8 @@
 import argparse
 import logging
 import os
+import pwd
+import shutil
 import sys
 
 from ska_dlm_client.openapi import api_client
@@ -23,7 +25,7 @@ RCLONE_CONFIG_TARGET = {"name": "data", "type": "alias", "parameters": {"remote"
 RCLONE_CONFIG_SOURCE = {"name": "dlm-client", "type": "sftp", "parameters":
     {
         "host": "dlm_directory_watcher",
-        "key_file": "/root/.ssh/id_rsa.pem",
+        "key_file": "/root/.ssh/id_rsa",
         "shell_type": "unix",
         "type": "sftp",
         "user": "ska-dlm"
@@ -108,6 +110,15 @@ def get_or_init_storage(
                 )
                 storage_config_id = response
                 logger.info("Storage config created with id: %s", storage_config_id)
+
+                # Retrieve and install the rclone ssh public key
+                key = api_storage.get_ssh_public_key()
+                with open(os.path.expanduser("~/.ssh/authorized_keys"), "a", encoding="utf-8") as key_file:
+                    key_file.write(f"\n{key}\n")
+                shutil.copyfile(os.path.expanduser("~/.ssh/authorized_keys"), "/home/ska-dlm/.ssh/authorized_keys")
+                os.chown("/home/ska-dlm/.ssh/authorized_keys", pwd.getpwnam('ska-dlm').pw_uid,pwd.getpwnam('ska-dlm').pw_gid)
+                os.chmod("/home/ska-dlm/.ssh/authorized_keys", 0o600)
+                logger.info("rclone SSH public key installed.")
     return the_storage_id
 
 def setup_volume(watcher_config:WatcherConfig, api_configuration: Configuration,
