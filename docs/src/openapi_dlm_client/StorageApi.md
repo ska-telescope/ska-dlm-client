@@ -6,6 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**create_rclone_config**](StorageApi.md#create_rclone_config) | **POST** /storage/rclone_config | Create Rclone Config
 [**create_storage_config**](StorageApi.md#create_storage_config) | **POST** /storage/create_storage_config | Create Storage Config
+[**get_ssh_public_key**](StorageApi.md#get_ssh_public_key) | **GET** /storage/get_ssh_public_key | Get Ssh Public Key
 [**get_storage_config**](StorageApi.md#get_storage_config) | **GET** /storage/get_storage_config | Get Storage Config
 [**init_location**](StorageApi.md#init_location) | **POST** /storage/init_location | Init Location
 [**init_storage**](StorageApi.md#init_storage) | **POST** /storage/init_storage | Init Storage
@@ -153,6 +154,69 @@ No authorization required
 |-------------|-------------|------------------|
 **200** | Successful Response |  -  |
 **422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_ssh_public_key**
+> str get_ssh_public_key()
+
+Get Ssh Public Key
+
+Get the sftp ssh public key.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.StorageApi(api_client)
+
+    try:
+        # Get Ssh Public Key
+        api_response = api_instance.get_ssh_public_key()
+        print("The response of StorageApi->get_ssh_public_key:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling StorageApi->get_ssh_public_key: %s\n" % e)
+```
+
+
+
+### Parameters
+
+This endpoint does not need any parameter.
+
+### Return type
+
+**str**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

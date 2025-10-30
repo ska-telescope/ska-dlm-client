@@ -34,7 +34,7 @@ ska_dlm_client:
   image: artefact.skao.int/ska-dlm-client
   version: "1.0.0"
   imagePullPolicy: Always
-  storage_name: data
+  storage_name: dlm
   storage_root_directory: /dlm
   securityContext: {}
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
@@ -48,7 +48,7 @@ directory_watcher:
   component: directory-watcher
   subsystem: data-lifecycle-management
   replicas: 1
-  storage_name: data
+  storage_name: dlm
   storage_root_directory: /dlm/watch_dir
   directory_to_watch: /dlm/watch_dir
   use_polling_watcher: false
@@ -64,7 +64,7 @@ kafka_watcher:
   kafka_server_local_port: 9092
   kafka_broker_url: "ska-dlm-kafka:9092" # production to override with the full service DNS, e.g., ska-sdp-kafka.dp-shared:9092
   kafka_topic: "ska-sdp-dataproduct-ingest"
-  storage_name: data
+  storage_name: dlm
   check_rclone_access: false
 
 kafka:

@@ -114,6 +114,7 @@ Class | Method | HTTP request | Description
 *RequestApi* | [**update_item_tags**](openapi_dlm_client/RequestApi.md#update_item_tags) | **PATCH** /request/update_item_tags | Update Item Tags
 *StorageApi* | [**create_rclone_config**](openapi_dlm_client/StorageApi.md#create_rclone_config) | **POST** /storage/rclone_config | Create Rclone Config
 *StorageApi* | [**create_storage_config**](openapi_dlm_client/StorageApi.md#create_storage_config) | **POST** /storage/create_storage_config | Create Storage Config
+*StorageApi* | [**get_ssh_public_key**](openapi_dlm_client/StorageApi.md#get_ssh_public_key) | **GET** /storage/get_ssh_public_key | Get Ssh Public Key
 *StorageApi* | [**get_storage_config**](openapi_dlm_client/StorageApi.md#get_storage_config) | **GET** /storage/get_storage_config | Get Storage Config
 *StorageApi* | [**init_location**](openapi_dlm_client/StorageApi.md#init_location) | **POST** /storage/init_location | Init Location
 *StorageApi* | [**init_storage**](openapi_dlm_client/StorageApi.md#init_storage) | **POST** /storage/init_storage | Init Storage

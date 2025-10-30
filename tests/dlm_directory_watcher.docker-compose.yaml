@@ -14,6 +14,7 @@ services:
     entrypoint: /entrypoint.sh
     volumes:
       - ~/scratch:/dlm
+      - shared-tmpfs:/data
     networks:
       - dlm_network
   setup_storage_location:

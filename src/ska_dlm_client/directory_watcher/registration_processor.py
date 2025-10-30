@@ -107,12 +107,13 @@ class RegistrationProcessor:
             path.resolve()
         return path
 
-    def _copy_data_item_to_new_storage(self, uid: str) -> str | None:
+    def _copy_data_item_to_new_storage(self, uid: str, item_name:str="") -> str | None:
         """Send migration request to DLM.
 
         Args:
             uid: The unique identifier of the data item to copy.
-
+            item_name: The name of the item (only used for a log message)
+            
         Returns:
             The UUID of the migrated data item, or None if migration was skipped or failed.
         """
@@ -123,9 +124,10 @@ class RegistrationProcessor:
             logger.warning("Skipping migration due to missing destination storage name")
             return None
         if not self._config.perform_actual_ingest_and_migration:
-            logger.warning("Skipping migration due to config")
+            logger.warning("Migration is disabled in configuration!")
             return None
         with api_client.ApiClient(self._config.migration_configuration) as migration_api_client:
+            logger.info("Initiating migration of data item %s", item_name)
             api_migration = migration_api.MigrationApi(migration_api_client)
             try:
                 response = api_migration.copy_data_item(
@@ -158,24 +160,23 @@ class RegistrationProcessor:
             api_ingest.api_client.configuration.host = self._config.ingest_server_url
             try:
                 # Generate the uri relative to the root directory.
-                item_path_rel_to_watch_dir = item.path_rel_to_watch_dir
                 # uri = (
-                #     item_path_rel_to_watch_dir
+                #     item.path_rel_to_watch_dir
                 #     if self._config.ingest_register_path_to_add == ""
-                #     else f"{self._config.ingest_register_path_to_add}/{item_path_rel_to_watch_dir}"
+                #     else f"{self._config.ingest_register_path_to_add}/{item.path_rel_to_watch_dir}"
                 # )
-                logger.info("Using URI: %s for data_item registration", item_path_rel_to_watch_dir)
+                logger.info("Using URI: %s for data_item registration", item.path_rel_to_watch_dir)
                 response = None
                 if self._config.perform_actual_ingest_and_migration:
                     response = api_ingest.register_data_item(
-                        item_name=item_path_rel_to_watch_dir,
-                        uri=item_path_rel_to_watch_dir,
+                        item_name=item.path_rel_to_watch_dir,
+                        uri=item.path_rel_to_watch_dir,
                         item_type=item.item_type,
                         storage_name=self._config.storage_name,
                         do_storage_access_check=self._config.rclone_access_check_on_register,
                         request_body=None if item.metadata is None else item.metadata.as_dict(),
                     )
-                    logger.info("register_data_item response: %s", response)
+                    logger.debug("register_data_item response: %s", response)
                 else:
                     logger.warning("Skipping register_data_item due to config")
             except OpenApiException as err:
@@ -188,11 +189,12 @@ class RegistrationProcessor:
 
         dlm_registration_uuid = str(response) if response is not None else None
         # Attempt to migrate the data item to the new storage
-        migration_result = self._copy_data_item_to_new_storage(uid=dlm_registration_uuid)
+        migration_result = self._copy_data_item_to_new_storage(uid=dlm_registration_uuid,
+                                                               item_name=item.path_rel_to_watch_dir)
         time_registered = time.time()
 
         directory_watcher_entry = DirectoryWatcherEntry(
-            file_or_directory=item_path_rel_to_watch_dir,
+            file_or_directory=item.path_rel_to_watch_dir,
             dlm_storage_name=self._config.storage_name,
             dlm_registration_id=dlm_registration_uuid,
             time_registered=time_registered,
@@ -203,7 +205,7 @@ class RegistrationProcessor:
             "Added to DLM %s %s metadata, path %s, migration result: %s",
             item.item_type,
             "without" if item.metadata is None else "with",
-            item_path_rel_to_watch_dir,
+            item.path_rel_to_watch_dir,
             migration_result,
         )
         return dlm_registration_uuid
@@ -222,17 +224,16 @@ class RegistrationProcessor:
             for item in item_list:
                 try:
                     # Generate the uri relative to the root directory.
-                    item_path_rel_to_watch_dir = item.path_rel_to_watch_dir
                     uri = (
-                        item_path_rel_to_watch_dir
+                        item.path_rel_to_watch_dir
                         if self._config.ingest_register_path_to_add == ""
                         else f"{self._config.ingest_register_path_to_add}/"
-                        f"{item_path_rel_to_watch_dir}"
+                        f"{item.path_rel_to_watch_dir}"
                     )
                     response = None
                     if self._config.perform_actual_ingest_and_migration:
                         response = api_ingest.register_data_item(
-                            item_name=item_path_rel_to_watch_dir,
+                            item_name=item.path_rel_to_watch_dir,
                             uri=uri,
                             item_type=item.item_type,
                             storage_name=self._config.storage_name,
@@ -240,7 +241,7 @@ class RegistrationProcessor:
                             parents=None if item.parent is None else item.parent.uuid,
                             request_body=None if item.metadata is None else item.metadata.as_dict(),
                         )
-                        logger.info("register_data_item response: %s", response)
+                        logger.debug("register_data_item response: %s", response)
                     else:
                         logger.warning("Skipping register_data_item due to config")
                 except OpenApiException as err:
@@ -253,11 +254,12 @@ class RegistrationProcessor:
 
                 dlm_registration_uuid = str(response) if response is not None else None
                 # Attempt to migrate the data item to the new storage
-                migration_result = self._copy_data_item_to_new_storage(uid=dlm_registration_uuid)
+                migration_result = self._copy_data_item_to_new_storage(uid=dlm_registration_uuid,
+                                                                       item_name=item.path_rel_to_watch_dir)
                 time_registered = time.time()
 
                 directory_watcher_entry = DirectoryWatcherEntry(
-                    file_or_directory=item_path_rel_to_watch_dir,
+                    file_or_directory=item.path_rel_to_watch_dir,
                     dlm_storage_name=self._config.storage_name,
                     dlm_registration_id=dlm_registration_uuid,
                     time_registered=time_registered,
@@ -268,7 +270,7 @@ class RegistrationProcessor:
                     "Added to DLM %s %s metadata, path %s, migration result: %s",
                     item.item_type,
                     "without" if item.metadata is None else "with",
-                    item_path_rel_to_watch_dir,
+                    item.path_rel_to_watch_dir,
                     migration_result,
                 )
                 time.sleep(0.01)

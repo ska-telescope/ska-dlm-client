@@ -20,7 +20,7 @@ LOCATION_COUNTRY = "AU"
 LOCATION_CITY = "Kensington"
 LOCATION_FACILITY = "local"
 RCLONE_CONFIG_TARGET = {"name": "data", "type": "alias", "parameters": {"remote": "/data"}}
-RCLONE_CONFIG_SOURCE = {"name": "dlm-watcher", "type": "sftp", "parameters":
+RCLONE_CONFIG_SOURCE = {"name": "dlm-client", "type": "sftp", "parameters":
     {
         "host": "dlm_directory_watcher",
         "key_file": "/root/.ssh/id_rsa.pem",
