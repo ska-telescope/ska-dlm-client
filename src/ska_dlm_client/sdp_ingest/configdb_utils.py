@@ -1,7 +1,7 @@
 """Shared helper functions for the ConfigDB dependency lifecycle."""
 
 import logging
-from typing import Any, Mapping, Optional
+from typing import Optional
 
 from ska_sdp_config import ConfigCollision
 from ska_sdp_config.entity.flow import Dependency, Flow
@@ -15,16 +15,19 @@ def has_flow_annotation(
     flow: Flow,
     annotation_namespace: str = "ska-data-lifecycle",
 ) -> bool:
-    """Return True iff annotations[annotation_namespace] exists on Flow entity."""
-    annotations: Any = None
-    annotations = flow.annotations
+    """Return True iff annotations[annotation_namespace] exists on Flow entity.
 
-    has_annotation = annotations.get(annotation_namespace) is not None
-    if has_annotation:  # optional logging
-        logger.debug("Found annotations: '%s': %r", annotation_namespace, val)
+    Notes:
+        Value of the namespace may be None.
+        Relies on Pydantic model validation for Flow shape.
+    """
+    annotations = flow.annotations or {}
+
+    has_annotation = annotation_namespace in annotations
+    if has_annotation:
+        logger.debug("Found annotation key: %s", annotation_namespace)
     else:
-        logger.debug("No '%s' in annotations.", val)
-
+        logger.debug("No '%s' in annotations.", annotation_namespace)
     return has_annotation
 
 

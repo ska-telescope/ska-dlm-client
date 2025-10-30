@@ -1,11 +1,13 @@
 """Unit test module for configdb_utils."""
 
 import logging
+from pathlib import Path
+from typing import cast
 
 import pytest
-import yaml
+from pydantic import AnyUrl
 from ska_sdp_config import ConfigCollision
-from ska_sdp_config.entity.flow import Flow
+from ska_sdp_config.entity.flow import DataProduct, Flow, FlowSource
 
 from ska_dlm_client.sdp_ingest.configdb_utils import (
     _initialise_dependency,
@@ -18,43 +20,49 @@ PB_ID = "pb-madeup-00000000-a"
 NAME = "prod-a"
 
 
-def test_has_flow_annotation():
-    """Verify that has_flow_annotation correctly finds the specified annotation namespace."""
-    # Peter's example:
-    flow_yaml = """
-key:
-  pb_id: pb-xyz
-  kind: data-product
-  name: image-cube
-sink:
-  kind: data-product
-  data_dir: /shared/fsx1/eb-xyz/ska-sdp/pb-xyz/vis/
-  paths: []
-data_model: Visibility
-annotations:
-  ska-data-lifecycle:
-    expiry: "10d"
-sources:
-  - uri: "/flow/pb-xyz:plasma:visibilities"
-    function: "ska-sdp-realtime-receive-processors:mswriter"
-"""
+def _mk_flow(annotations) -> Flow:
+    return Flow(
+        key=Flow.Key(pb_id=PB_ID, kind="data-product", name=NAME),
+        sink=DataProduct(
+            data_dir=Path("/data"),
+            paths=[Path("scan_id.ms")],
+        ),
+        sources=[
+            FlowSource(
+                uri=cast(AnyUrl, "https://gitlab.com/ska-telescope/sdp/"),
+            )
+        ],
+        data_model="Visibility",
+        expiry_time=-1,
+        annotations=annotations,
+    )
 
-    flow = yaml.safe_load(flow_yaml)
+
+@pytest.mark.parametrize(
+    "annotations",
+    [
+        {"ska-data-lifecycle": None},  # annotations present, value None
+        {"ska-data-lifecycle": {"other": "stuff"}},  # annotations present, contains any content
+    ],
+    ids=["no-annotations", "wrong-key"],
+)
+def test_has_flow_annotation_true(annotations):
+    """True when `flow.annotations` exists and contains desired namespace. Value can be None."""
+    flow = _mk_flow(annotations)
     assert has_flow_annotation(flow, "ska-data-lifecycle") is True
 
 
 @pytest.mark.parametrize(
-    "flow",
+    "annotations",
     [
-        {"annotations": {"other": 1}},  # missing the target namespace
-        {"annotations": {}},  # annotations present but empty
-        {"annotations": "not-a-mapping"},  # wrong type
-        {"something_else": 123},  # no annotations key at all
+        None,  # annotations absent
+        {"some-other-system": "some_key"},  # annotations present, desired key missing
     ],
-    ids=["missing-namespace", "empty-annotations", "wrong-type", "no-annotations-key"],
+    ids=["no-annotations", "wrong-key"],
 )
-def test_has_flow_annotation_false_cases(flow):
-    """Verify that has_flow_annotation correctly returns False."""
+def test_has_flow_annotation_false(annotations):
+    """False when `annotations` is absent or missing the desired key."""
+    flow = _mk_flow(annotations)
     assert has_flow_annotation(flow, "ska-data-lifecycle") is False
 
 
