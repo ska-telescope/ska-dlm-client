@@ -33,8 +33,10 @@ RCLONE_CONFIG_SOURCE = {"name": "dlm-client", "type": "sftp", "parameters":
 STORAGE_INTERFACE = "posix"
 STORAGE_TYPE = "filesystem"
 
-
-def get_or_init_location(api_configuration: Configuration, location:str=LOCATION_NAME, storage_url="http://dlm_storage:8003") -> str:
+def get_or_init_location(
+    api_configuration: Configuration,
+    location:str=LOCATION_NAME,
+    storage_url="http://dlm_storage:8003") -> str:
     """Perform location initialisation to be used when testing."""
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
@@ -62,8 +64,6 @@ def get_or_init_location(api_configuration: Configuration, location:str=LOCATION
             logger.info("location created in DLM")
         logger.info("location_id: %s", the_location_id)
     return the_location_id
-
-
 
 def get_or_init_storage(
     storage_name: str,
@@ -143,9 +143,13 @@ def setup_volume(watcher_config:WatcherConfig, api_configuration: Configuration,
     return storage_id
 
 def setup_testing(api_configuration: Configuration):
-    """Complete configuration of the environment storage endpoints."""
-    # TODO: It would be expected that the following config would already be
-    # completed in prod but leaving in place for now.
+    """Configuration of a target storage endpoint for rclone."""
+    # NOTE: This is only required for integration testing with the DLM
+    # server.
+    # The setup of the source volume is now performed during the startup
+    # of the client. In future the setup of a default (archive) storage
+    # endpoint will be performed during stratup of the DLM server and
+    # then this can be removed as well.
     logger.info("Testing setup.")
     location_id = get_or_init_location(api_configuration, location=LOCATION_NAME)
     storage_id = get_or_init_storage(
