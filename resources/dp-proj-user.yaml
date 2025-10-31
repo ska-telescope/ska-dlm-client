@@ -9,8 +9,8 @@ setupStorageLocation: False
 
 ska_dlm_client:
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
-  version: "1.0.0"
-  storage_root_directory: "/dlm/dlmw"
+  version: "1.1.0"
+  storage_root_directory: "/data/dlmw"
   ingest_server_url: "http://ska-dlm-dev-ingest:80"
   storage_server_url: "http://ska-dlm-dev-storage:80"
   request_server_url: "http://ska-dlm-dev-request:80"

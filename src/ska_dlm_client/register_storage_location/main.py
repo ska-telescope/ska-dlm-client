@@ -7,6 +7,12 @@ import pwd
 import shutil
 import sys
 
+from ska_dlm_client.common_types import (
+    LocationCountry,
+    LocationType,
+    StorageInterface,
+    StorageType,
+)
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
@@ -16,9 +22,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Constants that can be used for testing.
-LOCATION_NAME = "local-dev"
-LOCATION_TYPE = "local-dev"
-LOCATION_COUNTRY = "AU"
+LOCATION_NAME = "ThisDLMClientLocationName"
+LOCATION_TYPE = LocationType.LOW_INTEGRATION
+LOCATION_COUNTRY = LocationCountry.AU
 LOCATION_CITY = "Kensington"
 LOCATION_FACILITY = "local"
 RCLONE_CONFIG_TARGET = {"name": "data", "type": "alias", "parameters": {"remote": "/data"}}

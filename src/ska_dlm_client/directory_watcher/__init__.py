@@ -6,7 +6,7 @@ register data products with the Data Lifecycle Management (DLM) system.
 
 __author__ = """Mark Boulton"""
 __email__ = "mark.boulton@uwa.edu.au"
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.directory_watcher.directory_watcher import (

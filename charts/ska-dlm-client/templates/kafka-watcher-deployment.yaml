@@ -39,5 +39,9 @@ spec:
         {{- if .Values.kafka_watcher.check_rclone_access }}
         - "--check-rclone-access"
         {{- end }}
+        {{- if ne .Values.kafka_watcher.kafka_base_dir "" }}
+        - "--kafka-base-dir"
+        - "{{ .Values.kafka_watcher.kafka_base_dir }}"
+        {{- end }}
       dnsPolicy: ClusterFirstWithHostNet
 {{- end }}

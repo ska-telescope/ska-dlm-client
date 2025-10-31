@@ -537,10 +537,10 @@ import ska_dlm_client.openapi
 from ska_dlm_client.openapi.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8080
 # See configuration.py for a list of all supported configuration parameters.
 configuration = ska_dlm_client.openapi.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8080"
 )
 
 

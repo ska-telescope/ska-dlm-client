@@ -4,10 +4,10 @@ import argparse
 import asyncio
 import json
 import logging
-import os
 
 import aiokafka
 
+from ska_dlm_client.directory_watcher.registration_processor import ItemType
 from ska_dlm_client.openapi import api_client, configuration
 from ska_dlm_client.openapi.dlm_api import ingest_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
@@ -45,6 +45,13 @@ def main():
         help="Ingest server URL including the service port. E.g., http://ska-dlm-dev-ingest:80",
     )
     parser.add_argument(
+        "--kafka-base-dir",
+        type=str,
+        required=False,
+        default="",
+        help="The base directory to be removed from the path of the file in the kafka message.",
+    )
+    parser.add_argument(
         "--check-rclone-access",
         action="store_true",  # Set to True if the flag is present, else this will be False.
         help="Optionally, check if DLM has rclone access to the data item.",
@@ -57,6 +64,7 @@ def main():
             kafka_topic=args.kafka_topic,
             ingest_server_url=args.ingest_server_url,
             storage_name=args.storage_name,
+            kafka_base_dir=args.kafka_base_dir,
             check_rclone_access=args.check_rclone_access,
         )
     )
@@ -82,6 +90,7 @@ async def post_dlm_data_item(
     ingest_server_url: str,
     storage_name: str,
     ingest_event_data: dict,
+    kafka_base_dir: str,
     check_rclone_access: bool = True,
 ):
     """Call DLM via the OpenAPI spec."""
@@ -89,20 +98,26 @@ async def post_dlm_data_item(
     with api_client.ApiClient(ingest_configuration) as ingest_api_client:
         api_ingest = ingest_api.IngestApi(ingest_api_client)
         try:
+            # Remove the kafka_base_dir from the start of the given file path.
+            if kafka_base_dir == "":
+                item_name = ingest_event_data["file"]
+            else:
+                item_name = ingest_event_data["file"].replace(f"{kafka_base_dir}", "")
             logger.info(
                 "Calling DLM with item_name=%s, uri=%s, storage_name=%s, body=%s, \
                 check_rclone_access=%s",
-                os.path.basename(ingest_event_data["file"].rstrip("/")),
+                item_name,
                 ingest_event_data["file"],  # TODO: Kafka message content must be validated DMAN-74
                 storage_name,
                 ingest_event_data["metadata"],
                 check_rclone_access,
             )
             response = api_ingest.register_data_item(
-                item_name=os.path.basename(ingest_event_data["file"].rstrip("/")),
+                item_name=item_name,
                 uri=ingest_event_data["file"],
+                item_type=ItemType.CONTAINER,
                 storage_name=storage_name,
-                body=ingest_event_data["metadata"],
+                request_body=ingest_event_data["metadata"],
                 do_storage_access_check=check_rclone_access,
             )
             logger.info("item posted successfully with response %s", response)
@@ -112,11 +127,12 @@ async def post_dlm_data_item(
             logger.error("Ignoring and continuing.....")
 
 
-async def watch(
+async def watch(  # pylint: disable=too-many-arguments, too-many-positional-arguments
     kafka_broker_url: list[str],
     kafka_topic: list[str],
     ingest_server_url: str,
     storage_name: str,
+    kafka_base_dir: str,
     check_rclone_access: bool,
 ):
     """
@@ -144,16 +160,18 @@ async def watch(
                 # Call the DLM (to be handled separately)
                 logger.debug(
                     "calling DLM with ingest_server_url=%s, storage_name=%s, "
-                    "ingest_event_data=%s, check_rclone_access=%s",
+                    "ingest_event_data=%s, kafka_base_dir=%s, check_rclone_access=%s",
                     ingest_server_url,
                     storage_name,
                     ingest_event_data,
+                    kafka_base_dir,
                     check_rclone_access,
                 )
                 await post_dlm_data_item(
                     ingest_server_url=ingest_server_url,
                     storage_name=storage_name,
                     ingest_event_data=ingest_event_data,
+                    kafka_base_dir=kafka_base_dir,
                     check_rclone_access=check_rclone_access,
                 )
 

@@ -2,17 +2,39 @@
 
 ## Development
 
-### Notes
+### Added
 
-* Still aimed at integration with 1.1.x of DLM server services.
+* ska-sdp-config DB watcher that yields matching data-product Flow status events.
+* Integration test harness to start DLM services (via Docker Compose).
+* Start of integration tests for directory-watcher and kafka-watcher.
+
+### Changed
+
+* Kafka Docker image switched from bitnami/kafka to apache/kafka
+* kubectl image switched from bitnami/kubectl to artefact.skao.int/ska-ser-utils
+
+## 1.1.0
 
 ### Added
 
 * Added optional Kafka service to the Helm chart for local development support.
-* Documentation updates, particularly around class/method docstrings.
-* An offline test mode is added to allow dev testing without full DLM server deployment.
-* Added migration ability to directory-watcher that will call copy_data after an ingest.
-* Added old documentation related to DLM Client demo in PI26.
+* Added setting of kafka-watcher's command line parameter kafka-base-dir in the helm chart.
+
+### Updated
+
+* Updated OpenAPI spec to match DLM Server Services 1.2.0 release. Minor fixes associated with this.
+
+## 1.0.2
+
+### Fixed
+
+* kafka-watcher now passes item_type of container on register_data_item call.
+
+## 1.0.1
+
+### Fixed
+
+* kafka-watcher now uses path of file to help ensure unique data_item.
 
 ## 1.0.0
 

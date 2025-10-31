@@ -4,13 +4,13 @@ import logging
 import os
 import time
 from dataclasses import dataclass
-from enum import Enum
 from os.path import isdir, isfile, islink
 from pathlib import Path
 
 from typing_extensions import Self
 
 import ska_dlm_client.directory_watcher.config
+from ska_dlm_client.common_types import ItemType
 from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.directory_watcher.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntry
@@ -234,7 +234,9 @@ class RegistrationProcessor:
                             storage_name=self._config.storage_name,
                             do_storage_access_check=self._config.rclone_access_check_on_register,
                             parents=None if item.parent is None else item.parent.uuid,
-                            request_body=None if item.metadata is None else item.metadata.as_dict(),
+                            request_body=(
+                                None if item.metadata is None else item.metadata.as_dict()
+                            ),
                         )
                         logger.debug("register_data_item response: %s", response)
                     else:
