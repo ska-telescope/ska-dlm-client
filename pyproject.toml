@@ -32,7 +32,7 @@ priority = "supplemental"
 [tool.poetry.dependencies]
 python = "^3.10"
 aiokafka = "0.10.0"
-pydantic = "^2.9.2"
+pydantic = "^2.11.9"
 python-dateutil = "^2.9.0.post0"
 python-benedict = ">=0.33.2"
 watchfiles = "^0.24.0"
@@ -88,9 +88,6 @@ max-line-length = 180
 
 # exclude for auto generated code
 exclude = ["src/ska_dlm_client/openapi", "tests/openapi"]
-
-[tool.pylint.MASTER]
-ignore = "openapi"
 
 [tool.pylint.messages_control]
 disable = [

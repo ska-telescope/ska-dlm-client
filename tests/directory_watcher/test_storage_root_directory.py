@@ -4,7 +4,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from ska_dlm_client.directory_watcher.config import STATUS_FILE_FILENAME, Config
+from ska_dlm_client.directory_watcher.config import STATUS_FILE_FILENAME, WatcherConfig
 from ska_dlm_client.directory_watcher.main import create_parser, process_args
 from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
 
@@ -99,7 +99,7 @@ class TestStorageRootDirectory:
         class MockRegistrationProcessor(RegistrationProcessor):
             """A class to use for testing storage_root_directory."""
 
-            def __init__(self, config: Config):
+            def __init__(self, config: WatcherConfig):
                 """Initialize with the given config."""
                 super().__init__(config)
                 self.register_data_item_args = None
@@ -123,7 +123,7 @@ class TestStorageRootDirectory:
                 return "test-uuid"
 
         # Create config with non-empty storage_root_directory
-        config = Config(
+        config = WatcherConfig(
             directory_to_watch=self.the_watch_dir,
             ingest_server_url=self.INGEST_SERVER_URL,
             storage_name=self.STORAGE_NAME,
