@@ -30,7 +30,7 @@ class TestDirectoryWatcher:
 
     @classmethod
     def setup_class(cls) -> None:
-        """Setup for the testing process."""
+        """Set up for the testing process."""
         cls.the_watch_dir = tempfile.mkdtemp()
         cls.parser = create_parser()
         cls.parsed = cls.parser.parse_args(

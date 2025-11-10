@@ -145,8 +145,9 @@ def setup_volume(
     location_id: str = None,
 ):
     """
-    Register and configure a storage volume. This takes care of already existing
-    volumes.
+    Register and configure a storage volume.
+
+    This takes care of already existing volumes.
     """
     if location_id is None:
         location_id = get_or_init_location(api_configuration, location=LOCATION_NAME)
@@ -162,7 +163,7 @@ def setup_volume(
 
 
 def setup_testing(api_configuration: Configuration):
-    """Configuration of a target storage endpoint for rclone."""
+    """Configure a target storage endpoint for rclone."""
     # NOTE: This is only required for integration testing with the DLM
     # server.
     # The setup of the source volume is now performed during the startup
