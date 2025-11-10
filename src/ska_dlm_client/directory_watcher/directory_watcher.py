@@ -11,8 +11,8 @@ from watchdog.observers.polling import DEFAULT_EMITTER_TIMEOUT, BaseObserver, Po
 from watchfiles import Change, awatch
 
 from .. import CmdLineParameters
+from ..registration_processor import RegistrationProcessor
 from .config import WatcherConfig
-from .registration_processor import RegistrationProcessor
 from .watcher_event_handler import WatcherEventHandler
 
 logger = logging.getLogger(__name__)

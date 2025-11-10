@@ -13,8 +13,8 @@ from ska_dlm_client.directory_watcher.directory_watcher import (
     INotifyDirectoryWatcher,
     PollingDirectoryWatcher,
 )
-from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
 from ska_dlm_client.register_storage_location.main import RCLONE_CONFIG_SOURCE, setup_volume
+from ska_dlm_client.registration_processor import RegistrationProcessor
 from ska_dlm_client.utils import CmdLineParameters
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -102,7 +102,9 @@ def create_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def process_args(args: argparse.Namespace, cmd_line_parameters: CmdLineParameters) -> WatcherConfig:
+def process_args(
+    args: argparse.Namespace, cmd_line_parameters: CmdLineParameters
+) -> WatcherConfig:
     """Collect all command line parameters and create a Config object.
 
     Args:
@@ -159,7 +161,7 @@ def create_directory_watcher() -> DirectoryWatcher:
     _ = setup_volume(
         watcher_config=config,
         api_configuration=config.ingest_configuration,
-        rclone_config = RCLONE_CONFIG_SOURCE
+        rclone_config=RCLONE_CONFIG_SOURCE,
     )
     registration_processor = RegistrationProcessor(config)
     if args.register_contents_of_watch_directory:

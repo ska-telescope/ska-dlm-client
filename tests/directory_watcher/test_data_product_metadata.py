@@ -6,8 +6,8 @@ from shutil import copytree
 
 import pytest
 
+from ska_dlm_client.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher import config
-from ska_dlm_client.directory_watcher.data_product_metadata import DataProductMetadata
 
 METADATA_FILE_EB_ID = "eb-m001-20191031-12345"
 TEST_DATA_PRODUCT_FILE = "a_data_product.ext"

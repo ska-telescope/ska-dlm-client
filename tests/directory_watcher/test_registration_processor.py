@@ -5,10 +5,12 @@ from unittest import mock
 
 import pytest
 
+from ska_dlm_client.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.config import WatcherConfig
-from ska_dlm_client.directory_watcher.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntries
-from ska_dlm_client.directory_watcher.registration_processor import (
+from ska_dlm_client.openapi.configuration import Configuration
+from ska_dlm_client.openapi.exceptions import OpenApiException
+from ska_dlm_client.registration_processor import (
     Item,
     ItemType,
     RegistrationProcessor,
@@ -23,8 +25,6 @@ from ska_dlm_client.directory_watcher.registration_processor import (
     _item_list_minus_metadata_file,
     _measurement_set_directory_in,
 )
-from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.exceptions import OpenApiException
 
 
 def returned_items_match(test_path: str, dir_entries: list[Item]):
@@ -312,9 +312,7 @@ def mock_config():
 @pytest.fixture
 def mock_api_client():
     """Create a mock ApiClient for testing."""
-    with mock.patch(
-        "ska_dlm_client.directory_watcher.registration_processor.api_client.ApiClient"
-    ) as mock_client:
+    with mock.patch("ska_dlm_client.registration_processor.api_client.ApiClient") as mock_client:
         # Return a context manager that can be used with 'with' statements
         mock_instance = mock.MagicMock()
         mock_client.return_value.__enter__.return_value = mock_instance
@@ -324,9 +322,7 @@ def mock_api_client():
 @pytest.fixture
 def mock_ingest_api():
     """Create a mock IngestApi for testing."""
-    with mock.patch(
-        "ska_dlm_client.directory_watcher.registration_processor.ingest_api.IngestApi"
-    ) as mock_api:
+    with mock.patch("ska_dlm_client.registration_processor.ingest_api.IngestApi") as mock_api:
         mock_api.return_value.register_data_item.return_value = "test-uuid"
         yield mock_api
 
@@ -335,7 +331,7 @@ def mock_ingest_api():
 def mock_migration_api():
     """Create a mock MigrationApi for testing."""
     with mock.patch(
-        "ska_dlm_client.directory_watcher.registration_processor.migration_api.MigrationApi"
+        "ska_dlm_client.registration_processor.migration_api.MigrationApi"
     ) as mock_api:
         mock_api.return_value.copy_data_item.return_value = "test-migration-uuid"
         yield mock_api
@@ -344,9 +340,7 @@ def mock_migration_api():
 @pytest.fixture
 def mock_data_product_metadata():
     """Create a mock DataProductMetadata for testing."""
-    with mock.patch(
-        "ska_dlm_client.directory_watcher.registration_processor.DataProductMetadata"
-    ) as mock_dpm:
+    with mock.patch("ska_dlm_client.registration_processor.DataProductMetadata") as mock_dpm:
         mock_metadata = mock.MagicMock(spec=DataProductMetadata)
         mock_metadata.as_dict.return_value = {"test": "metadata"}
         mock_metadata.dp_metadata_loaded_from_a_file = True
@@ -520,7 +514,7 @@ def test_registration_processor_register_container_items(
     mock_ingest_api.return_value.register_data_item.assert_called_once()
 
 
-@mock.patch("ska_dlm_client.directory_watcher.registration_processor._generate_paths_and_metadata")
+@mock.patch("ska_dlm_client.registration_processor._generate_paths_and_metadata")
 def test_registration_processor_add_path(
     mock_generate, mock_config, mock_data_product_metadata
 ):  # pylint: disable=protected-access, redefined-outer-name

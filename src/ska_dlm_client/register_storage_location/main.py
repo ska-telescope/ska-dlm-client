@@ -7,16 +7,11 @@ import pwd
 import shutil
 import sys
 
-from ska_dlm_client.common_types import (
-    LocationCountry,
-    LocationType,
-    StorageInterface,
-    StorageType,
-)
+from ska_dlm_client.common_types import LocationCountry, LocationType
+from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
-from ska_dlm_client.directory_watcher.config import WatcherConfig
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -28,21 +23,26 @@ LOCATION_COUNTRY = LocationCountry.AU
 LOCATION_CITY = "Kensington"
 LOCATION_FACILITY = "local"
 RCLONE_CONFIG_TARGET = {"name": "data", "type": "alias", "parameters": {"remote": "/data"}}
-RCLONE_CONFIG_SOURCE = {"name": "dlm-client", "type": "sftp", "parameters":
-    {
+RCLONE_CONFIG_SOURCE = {
+    "name": "dlm-client",
+    "type": "sftp",
+    "parameters": {
         "host": "dlm_directory_watcher",
         "key_file": "/root/.ssh/id_rsa",
         "shell_type": "unix",
         "type": "sftp",
-        "user": "ska-dlm"
-    }}
+        "user": "ska-dlm",
+    },
+}
 STORAGE_INTERFACE = "posix"
 STORAGE_TYPE = "filesystem"
 
+
 def get_or_init_location(
     api_configuration: Configuration,
-    location:str=LOCATION_NAME,
-    storage_url="http://dlm_storage:8003") -> str:
+    location: str = LOCATION_NAME,
+    storage_url="http://dlm_storage:8003",
+) -> str:
     """Perform location initialisation to be used when testing."""
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
@@ -71,12 +71,13 @@ def get_or_init_location(
         logger.info("location_id: %s", the_location_id)
     return the_location_id
 
+
 def get_or_init_storage(
     storage_name: str,
     api_configuration: Configuration,
     storage_root_directory: str,
     the_location_id: str,
-    rclone_config:str
+    rclone_config: str,
 ) -> str:
     """Get storage_id or perform storage initialisation based on the storage_name provided."""
     assert the_location_id is not None
@@ -119,34 +120,46 @@ def get_or_init_storage(
 
                 # Retrieve and install the rclone ssh public key
                 key = api_storage.get_ssh_public_key()
-                with open(os.path.expanduser("~/.ssh/authorized_keys"), "a", encoding="utf-8") as key_file:
+                with open(
+                    os.path.expanduser("~/.ssh/authorized_keys"), "a", encoding="utf-8"
+                ) as key_file:
                     key_file.write(f"\n{key}\n")
-                shutil.copyfile(os.path.expanduser("~/.ssh/authorized_keys"), "/home/ska-dlm/.ssh/authorized_keys")
-                os.chown("/home/ska-dlm/.ssh/authorized_keys", pwd.getpwnam('ska-dlm').pw_uid,pwd.getpwnam('ska-dlm').pw_gid)
+                shutil.copyfile(
+                    os.path.expanduser("~/.ssh/authorized_keys"),
+                    "/home/ska-dlm/.ssh/authorized_keys",
+                )
+                os.chown(
+                    "/home/ska-dlm/.ssh/authorized_keys",
+                    pwd.getpwnam("ska-dlm").pw_uid,
+                    pwd.getpwnam("ska-dlm").pw_gid,
+                )
                 os.chmod("/home/ska-dlm/.ssh/authorized_keys", 0o600)
                 logger.info("rclone SSH public key installed.")
     return the_storage_id
 
-def setup_volume(watcher_config:WatcherConfig, api_configuration: Configuration,
-                 rclone_config: str=None,
-                 location_id: str=None):
+
+def setup_volume(
+    watcher_config: WatcherConfig,
+    api_configuration: Configuration,
+    rclone_config: str = None,
+    location_id: str = None,
+):
     """
-    Register and configure a storage volume. This takes care of already existing 
+    Register and configure a storage volume. This takes care of already existing
     volumes.
     """
     if location_id is None:
-        location_id = get_or_init_location(api_configuration,
-                                           location=LOCATION_NAME
-                                           )
+        location_id = get_or_init_location(api_configuration, location=LOCATION_NAME)
     storage_id = get_or_init_storage(
         storage_name=watcher_config.storage_name,
         api_configuration=api_configuration,
         storage_root_directory=watcher_config.storage_root_directory,
         the_location_id=location_id,
-        rclone_config=rclone_config
+        rclone_config=rclone_config,
     )
     logger.info("location id %s and storage id %s", location_id, storage_id)
     return storage_id
+
 
 def setup_testing(api_configuration: Configuration):
     """Configuration of a target storage endpoint for rclone."""
@@ -159,13 +172,14 @@ def setup_testing(api_configuration: Configuration):
     logger.info("Testing setup.")
     location_id = get_or_init_location(api_configuration, location=LOCATION_NAME)
     storage_id = get_or_init_storage(
-        storage_name = RCLONE_CONFIG_TARGET["name"],
-        api_configuration = api_configuration,
-        storage_root_directory = RCLONE_CONFIG_TARGET["parameters"]["remote"],
-        the_location_id = location_id,
-        rclone_config = RCLONE_CONFIG_TARGET
+        storage_name=RCLONE_CONFIG_TARGET["name"],
+        api_configuration=api_configuration,
+        storage_root_directory=RCLONE_CONFIG_TARGET["parameters"]["remote"],
+        the_location_id=location_id,
+        rclone_config=RCLONE_CONFIG_TARGET,
     )
     logger.info("location id %s and storage id %s", location_id, storage_id)
+
 
 def create_parser() -> argparse.ArgumentParser:
     """Define a parser for all the command line parameters."""

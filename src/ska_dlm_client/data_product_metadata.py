@@ -6,7 +6,7 @@ import os
 import yaml
 
 from ska_dlm_client.directory_watcher import config
-from ska_dlm_client.directory_watcher.minimal_metadata_generator import minimal_metadata_generator
+from ska_dlm_client.minimal_metadata_generator import minimal_metadata_generator
 
 logger = logging.getLogger(__name__)
 

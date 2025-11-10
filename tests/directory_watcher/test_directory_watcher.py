@@ -13,24 +13,10 @@ from ska_dlm_client.directory_watcher.directory_watcher import (
 )
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntries
 from ska_dlm_client.directory_watcher.main import create_parser, process_args
-from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
 from ska_dlm_client.openapi.configuration import Configuration
+from ska_dlm_client.registration_processor import RegistrationProcessor
 
-
-class MockCmdLineParameters:
-    """Mock class for CmdLineParameters to use in tests."""
-
-    def __init__(self):
-        """Initialize with default values."""
-        self.migration_server_url = None
-        self.migration_destination_storage_name = None
-        self.perform_actual_ingest_and_migration = True
-
-    def parse_arguments(self, args):
-        """Mock method that does nothing."""
-
-    def set_application_ready(self):
-        """Mock method that does nothing."""
+from . import test_utils
 
 
 class TestDirectoryWatcher:
@@ -44,7 +30,7 @@ class TestDirectoryWatcher:
 
     @classmethod
     def setup_class(cls) -> None:
-        """Set for the testing process."""
+        """Setup for the testing process."""
         cls.the_watch_dir = tempfile.mkdtemp()
         cls.parser = create_parser()
         cls.parsed = cls.parser.parse_args(
@@ -59,7 +45,7 @@ class TestDirectoryWatcher:
                 cls.ROOT_DIRECTORY,
             ]
         )
-        cls.cmd_line_parameters = MockCmdLineParameters()
+        cls.cmd_line_parameters = test_utils.MockCmdLineParameters()
         cls.cmd_line_parameters.parse_arguments(cls.parsed)
         cls.config = process_args(args=cls.parsed, cmd_line_parameters=cls.cmd_line_parameters)
 
