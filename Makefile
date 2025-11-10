@@ -33,7 +33,7 @@ docker-compose-down: ## Shut down test services in docker previously started wit
 
 oci-build-dlm_directory_watcher:
 	make oci-build OCI_IMAGE=ska-dlm-client-directory_watcher \
-	OCI_IMAGE_FILE_PATH=tests/Dockerfile-dlm_directory_watcher
+	OCI_IMAGE_FILE_PATH=Dockerfile
 
 openapi-code-from-local-dlm: ## Use the connection to DLM services to retrieve and generate OpenAPI code
 	@echo "Using the connection to DLM services to retrieve and generate OpenAPI code"

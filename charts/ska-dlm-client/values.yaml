@@ -34,8 +34,8 @@ ska_dlm_client:
   image: artefact.skao.int/ska-dlm-client
   version: "1.1.0"
   imagePullPolicy: Always
-  storage_name: data
-  storage_root_directory: /data
+  storage_name: dlm
+  storage_root_directory: /dlm
   securityContext: {}
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace:port
@@ -44,14 +44,14 @@ ska_dlm_client:
   request_server_url: "http://ska-dlm-dev-request:80" # override for production
 
 directory_watcher:
-  enabled: false
+  enabled: true
   component: directory-watcher
   subsystem: data-lifecycle-management
   replicas: 1
-  directory_to_watch: /data/dlm/watch_dir
-  storage_root_directory: /data
+  storage_name: dlm
+  storage_root_directory: /dlm/watch_dir
+  directory_to_watch: /dlm/watch_dir
   use_polling_watcher: false
-  storage_name: data
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false
 
@@ -64,7 +64,7 @@ kafka_watcher:
   kafka_server_local_port: 9092
   kafka_broker_url: "ska-dlm-kafka:9092" # production to override with the full service DNS, e.g., ska-sdp-kafka.dp-shared:9092
   kafka_topic: "ska-sdp-dataproduct-ingest"
-  storage_name: data
+  storage_name: dlm
   check_rclone_access: false
   kafka_base_dir: "" # Base directory string removed from path to generate item_name
 
@@ -89,7 +89,7 @@ ssh_storage_access:
     service_name: "ssh-sa-daq"
     pvc:
       name: daq-pvc
-      mount_path: /data
+      mount_path: /dlm
       read_only: true
     secret:
       pub_name: "daq-pub"
@@ -99,7 +99,7 @@ ssh_storage_access:
     service_name: "ssh-sa-pst"
     pvc:
       name: pst-pvc
-      mount_path: /data
+      mount_path: /dlm
       read_only: true
     secret:
       pub_name: "pst-pub"
@@ -109,7 +109,7 @@ ssh_storage_access:
     service_name: "ssh-sa-sdp"
     pvc:
       name: sdp-pvc
-      mount_path: /data
+      mount_path: /dlm
       read_only: true
     secret:
       pub_name: "sdp-pub"

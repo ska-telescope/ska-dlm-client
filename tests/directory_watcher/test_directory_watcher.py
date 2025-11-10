@@ -17,12 +17,28 @@ from ska_dlm_client.directory_watcher.registration_processor import Registration
 from ska_dlm_client.openapi.configuration import Configuration
 
 
+class MockCmdLineParameters:
+    """Mock class for CmdLineParameters to use in tests."""
+
+    def __init__(self):
+        """Initialize with default values."""
+        self.migration_server_url = None
+        self.migration_destination_storage_name = None
+        self.perform_actual_ingest_and_migration = True
+
+    def parse_arguments(self, args):
+        """Mock method that does nothing."""
+
+    def set_application_ready(self):
+        """Mock method that does nothing."""
+
+
 class TestDirectoryWatcher:
     """DirectoryWatcher unit test stubs."""
 
     STORAGE_NAME = "data"
     INGREST_SERVER_URL = "http://localhost:8001"
-    ROOT_DIRECTORY = "/data"
+    ROOT_DIRECTORY = "/dlm"
 
     add_path_successful = False
 
@@ -43,7 +59,9 @@ class TestDirectoryWatcher:
                 cls.ROOT_DIRECTORY,
             ]
         )
-        cls.config = process_args(args=cls.parsed)
+        cls.cmd_line_parameters = MockCmdLineParameters()
+        cls.cmd_line_parameters.parse_arguments(cls.parsed)
+        cls.config = process_args(args=cls.parsed, cmd_line_parameters=cls.cmd_line_parameters)
 
     @classmethod
     def teardown_class(cls) -> None:
@@ -74,6 +92,11 @@ class TestDirectoryWatcher:
         assert isinstance(self.config.directory_watcher_entries, DirectoryWatcherEntries)
         assert isinstance(self.config.ingest_configuration, Configuration)
 
+        # Test migration-related attributes
+        assert self.config.migration_server_url is None
+        assert self.config.migration_destination_storage_name is None
+        assert self.config.perform_actual_ingest_and_migration is True
+
     @pytest.mark.asyncio
     @pytest.mark.parametrize("test_polling", [True, False])
     async def test_process_directory_entry_change_test(self, test_polling) -> None:
@@ -81,9 +104,17 @@ class TestDirectoryWatcher:
         registration_processor = MockRegistrationProcessor(self.config)
         a_temp_file = tempfile.mktemp(dir=self.the_watch_dir)
         if test_polling:
-            directory_watcher = PollingDirectoryWatcher(self.config, registration_processor)
+            directory_watcher = PollingDirectoryWatcher(
+                config=self.config,
+                registration_processor=registration_processor,
+                cmd_line_parameters=self.cmd_line_parameters,
+            )
         else:
-            directory_watcher = INotifyDirectoryWatcher(self.config, registration_processor)
+            directory_watcher = INotifyDirectoryWatcher(
+                config=self.config,
+                registration_processor=registration_processor,
+                cmd_line_parameters=self.cmd_line_parameters,
+            )
         asyncio.get_event_loop().create_task(directory_watcher.watch())
         # Now let the directory_watcher start and listen on given directory
         await asyncio.sleep(2)
@@ -108,6 +139,12 @@ class MockRegistrationProcessor(RegistrationProcessor):
 
     absolute_path: str
     path_rel_to_watch_dir: str
+
+    def __init__(self, config):
+        """Initialize with default values."""
+        super().__init__(config)
+        self.absolute_path = ""
+        self.path_rel_to_watch_dir = ""
 
     def add_path(self, absolute_path: str, path_rel_to_watch_dir: str):
         """Perform testing on the given paths."""
