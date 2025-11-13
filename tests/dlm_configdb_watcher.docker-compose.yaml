@@ -1,0 +1,35 @@
+include:
+  - path: services.docker-compose.yaml  # same include we already use
+
+services:
+  dlm_configdb_watcher:
+    platform: linux/amd64
+    image: dlm_configdb_watcher
+    container_name: dlm_configdb_watcher
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    entrypoint: /configdb_entrypoint.sh
+    volumes:
+      # Host folder that the watcher will read as /data/SDPBuffer
+      - ${HOME}/scratch/data:/data
+      - shared-tmpfs:/data-shared
+    networks: # My watcher is on dlm_network and tests-etcd-1 is on tests_default
+      - dlm_network
+      - tests_default
+
+  setup_sdpbuffer_storage:
+    platform: linux/amd64
+    image: dlm_configdb_watcher
+    container_name: dlm_setup_sdpbuffer_storage
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    entrypoint: >
+      python3 -m ska_dlm_client.register_storage_location.main
+      --storage-name dummy
+      --storage-root-directory /ignore
+      --storage-server-url "http://dlm_storage:8003"
+      --demo-sdp-ingest
+    networks:
+      - dlm_network

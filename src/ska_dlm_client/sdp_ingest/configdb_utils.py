@@ -56,7 +56,7 @@ async def create_sdp_migration_dependency(config, dataproduct_key: Flow.Key):
     if dep is not None:
         for txn in config.txn():
             # Persist the dependency
-            txn.dependency.create(dep)
+            txn.dependency.create(dep)  # TODO: in the event of ConfigCollision, return to watching
             # Persist the dependency state (with no status for now)
             txn.dependency.state(dep).create({})
             logger.info("Created DLM dependency for %s/%s", dep.key.pb_id, dep.key.name)

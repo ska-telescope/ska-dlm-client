@@ -6,6 +6,7 @@ import time
 from dataclasses import dataclass
 from os.path import isdir, isfile, islink
 from pathlib import Path
+from typing import Any, Protocol, overload, runtime_checkable
 
 from typing_extensions import Self
 
@@ -20,6 +21,37 @@ from ska_dlm_client.openapi.exceptions import OpenApiException
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+# flake8: noqa
+# pylint: disable=missing-function-docstring,too-few-public-methods
+
+
+@runtime_checkable
+class _DirectoryWatcherEntriesLike(Protocol):
+    def add(self, entry: DirectoryWatcherEntry) -> None: ...
+
+    def save_to_file(self) -> None: ...
+
+
+@runtime_checkable
+class RegistrationConfig(Protocol):
+    """Config surface used by RegistrationProcessor (duck-typed).
+
+    Any config object (WatcherConfig, SDPIngestConfig, etc.) must provide
+    these attributes.
+    """
+
+    migration_destination_storage_name: str | None
+    perform_actual_ingest_and_migration: bool
+    migration_configuration: Any
+
+    ingest_configuration: Any
+    ingest_server_url: str
+    storage_name: str
+    rclone_access_check_on_register: bool
+
+    directory_watcher_entries: _DirectoryWatcherEntriesLike
+    directory_to_watch: str
 
 
 @dataclass
@@ -57,16 +89,16 @@ class RegistrationProcessor:
     the migration of data items between storage locations.
     """
 
-    _config: WatcherConfig
+    # Back-compat default: public hints say WatcherConfig.
+    _config: WatcherConfig  # but we accept any RegistrationConfig at runtime
 
-    def __init__(self, config: WatcherConfig):
-        """Initialize the RegistrationProcessor with the given configuration.
-
-        Args:
-            config: The configuration object containing DLM connection settings
-                   and other parameters needed for registration and migration.
-        """
-        self._config = config
+    @overload
+    def __init__(self, config: WatcherConfig): ...
+    @overload
+    def __init__(self, config: RegistrationConfig): ...
+    def __init__(self, config):
+        """Initialize with a config (WatcherConfig by default)."""
+        self._config = config  # type: ignore[assignment]
 
     def get_config(self) -> WatcherConfig:
         """Get the configuration being used by the RegistrationProcessor.
@@ -76,13 +108,13 @@ class RegistrationProcessor:
         """
         return self._config
 
-    def set_config(self, config: WatcherConfig):
-        """Set or reset the configuration used by the RegistrationProcessor.
-
-        Args:
-            config: The new configuration object to use.
-        """
-        self._config = config
+    @overload
+    def set_config(self, config: WatcherConfig) -> None: ...
+    @overload
+    def set_config(self, config: RegistrationConfig) -> None: ...
+    def set_config(self, config) -> None:
+        """Replace the configuration (still back-compat typed)."""
+        self._config = config  # type: ignore[assignment]
 
     def _follow_sym_link(self, path: Path) -> Path:
         """Return the real path after following the symlink.
@@ -166,7 +198,7 @@ class RegistrationProcessor:
                         uri=item.path_rel_to_watch_dir,
                         item_type=item.item_type,
                         storage_name=self._config.storage_name,
-                        do_storage_access_check=self._config.rclone_access_check_on_register,
+                        do_storage_access_check=(self._config.rclone_access_check_on_register),
                         request_body=None if item.metadata is None else item.metadata.as_dict(),
                     )
                     logger.debug("register_data_item response: %s", response)
@@ -228,7 +260,7 @@ class RegistrationProcessor:
                             uri=item.path_rel_to_watch_dir,
                             item_type=item.item_type,
                             storage_name=self._config.storage_name,
-                            do_storage_access_check=self._config.rclone_access_check_on_register,
+                            do_storage_access_check=(self._config.rclone_access_check_on_register),
                             parents=None if item.parent is None else item.parent.uuid,
                             request_body=(
                                 None if item.metadata is None else item.metadata.as_dict()
@@ -372,7 +404,7 @@ def _generate_item_list_for_data_product(
             item = Item(
                 path_rel_to_watch_dir=os.path.join(path_rel_to_watch_dir, entry),
                 item_type=ItemType.FILE,
-                metadata=None,  # Set to know as Container has this file's metadata
+                metadata=None,  # Set to None as Container has this file's metadata
                 parent=container_item,
             )
             item_list.append(item)
@@ -555,6 +587,7 @@ def _directory_contains_only_files(absolute_path: str) -> bool:
     return True
 
 
+# TODO: universally define METADATA_FILENAME from ska_sdp_dataproduct_metadata.metadata
 def _directory_contains_metadata_file(absolute_path: str) -> bool:
     """Check if a directory contains a metadata file.
 
@@ -634,7 +667,7 @@ def _item_list_minus_metadata_file(
         item = Item(
             path_rel_to_watch_dir=os.path.join(path_rel_to_watch_dir, entry),
             item_type=ItemType.FILE,
-            metadata=None,  # Set to know as Container has this file's metadata
+            metadata=None,  # Set to None as Container has this file's metadata
             parent=container_item,
         )
         item_list.append(item)
