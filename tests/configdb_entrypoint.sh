@@ -16,11 +16,6 @@ mkdir -p /data/SDPBuffer
 chown -R ska-dlm:ska-dlm /data/SDPBuffer || true
 chmod -R 777 /data/SDPBuffer || true
 
-# Make sure the destination storage folder exists
-mkdir -p /data/dest_storage
-chown -R ska-dlm:ska-dlm /data/dest_storage
-chmod -R 777 /data/dest_storage
-
 # Ensure SFTP sees paths that DLM/rclone might use
 mkdir -p /home/ska-dlm
 mkdir -p /home/ska-dlm/data

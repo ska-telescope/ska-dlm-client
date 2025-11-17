@@ -43,9 +43,7 @@ def _initialise_dependency(
 
 
 async def create_sdp_migration_dependency(config, dataproduct_key: Flow.Key):
-    """Create migration dependency."""
-    # TODO: Call dlm to initialize/register data item
-    # create DLM dependency (no state yet)
+    """Create migration dependency, with no state."""
     dep = _initialise_dependency(
         dataproduct_key,
         dep_kind="dlm-copy",

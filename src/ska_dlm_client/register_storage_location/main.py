@@ -46,7 +46,7 @@ DEMO_DEST_STORAGE_NAME = "dest_storage"
 
 # As seen *inside* the ConfigDB watcher container
 DEMO_SOURCE_ROOT_DIRECTORY = "/data/SDPBuffer"
-DEMO_DEST_ROOT_DIRECTORY = "/data/dest_storage"
+DEMO_DEST_ROOT_DIRECTORY = "/dest_storage"  # <- root within the shared volume
 
 RCLONE_CONFIG_SDPBUFFER = {
     "name": DEMO_SOURCE_STORAGE_NAME,
@@ -67,8 +67,8 @@ RCLONE_CONFIG_DEST_STORAGE = {
     "name": DEMO_DEST_STORAGE_NAME,
     "type": "alias",
     "parameters": {
-        # As seen from *rclone's* container; /data is already used in tests.
-        "remote": DEMO_DEST_ROOT_DIRECTORY,
+        # As seen from *rclone's* container; /data is where the shared volume is mounted.
+        "remote": "/data",  # base directory in rclone container
     },
 }
 
@@ -116,15 +116,31 @@ def get_or_init_storage(
 ) -> str:
     """Get storage_id or perform storage initialisation based on the storage_name provided."""
     assert the_location_id is not None
-    try:
-        os.makedirs(storage_root_directory, exist_ok=True)
-    except OSError as err:
-        logger.warning(
-            "Could not create %s (likely read-only filesystem): %s",
+
+    # For the ConfigDB watcher demo we only want to create the *local* directory
+    # for the source storage (SDPBuffer). The destination storage lives on the
+    # rclone/shared volume, so creating its root locally (e.g. "/dest_storage")
+    # just litters the container filesystem.
+    if storage_name == DEMO_SOURCE_STORAGE_NAME:
+        try:
+            os.makedirs(storage_root_directory, exist_ok=True)
+            logger.info(
+                "Watcher directory %s created (or already existed)",
+                storage_root_directory,
+            )
+        except OSError as err:
+            logger.warning(
+                "Could not create %s (likely read-only filesystem): %s",
+                storage_root_directory,
+                err,
+            )
+    else:
+        logger.info(
+            "Skipping local directory creation for storage %s (root=%s)",
+            storage_name,
             storage_root_directory,
-            err,
         )
-    logger.info("Watcher directory %s created (or already existed)", storage_root_directory)
+
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
         # Get the storage_id
@@ -163,7 +179,9 @@ def get_or_init_storage(
                 # Retrieve and install the rclone ssh public key
                 key = api_storage.get_ssh_public_key()
                 with open(
-                    os.path.expanduser("~/.ssh/authorized_keys"), "a", encoding="utf-8"
+                    os.path.expanduser("~/.ssh/authorized_keys"),
+                    "a",
+                    encoding="utf-8",
                 ) as key_file:
                     key_file.write(f"\n{key}\n")
                 shutil.copyfile(
@@ -177,6 +195,7 @@ def get_or_init_storage(
                 )
                 os.chmod("/home/ska-dlm/.ssh/authorized_keys", 0o600)
                 logger.info("rclone SSH public key installed.")
+
     return the_storage_id
 
 

@@ -12,7 +12,8 @@ services:
     entrypoint: /configdb_entrypoint.sh
     volumes:
       # Host folder that the watcher will read as /data/SDPBuffer
-      - ${HOME}/scratch/data:/data
-      - shared-tmpfs:/data-shared
+      - ${HOME}/scratch/data:/data # /data → bind mount to ${HOME}/scratch/data on my Mac
+      - shared-tmpfs:/data-shared # /data-shared → a named Docker volume called shared-tmpfs (not my Mac)
+      # shared-tmpfs survives container restarts and docker compose down unless you use -v
     networks:
       - dlm_network
