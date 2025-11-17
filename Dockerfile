@@ -34,7 +34,7 @@ USER ska-dlm
 
 # Copy all Python packages & console scripts to the runtime container
 COPY --from=buildenv /app/.venv /app/.venv/
-COPY tests/entrypoint.sh /entrypoint.sh
+# COPY tests/entrypoint.sh /entrypoint.sh
 COPY tests/configdb_entrypoint.sh /configdb_entrypoint.sh
 ENV PATH="/app/.venv/bin:${PATH}"
 

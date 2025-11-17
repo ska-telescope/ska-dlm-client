@@ -16,10 +16,7 @@ from ska_dlm_client.openapi.dlm_api import storage_api
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Shared / directory-watcher test constants (existing behaviour)
-# ---------------------------------------------------------------------------
-
+# Constants that can be used for testing.
 LOCATION_NAME = "ThisDLMClientLocationName"
 LOCATION_TYPE = LocationType.LOW_INTEGRATION
 LOCATION_COUNTRY = LocationCountry.AU
@@ -31,13 +28,12 @@ RCLONE_CONFIG_SOURCE = {
     "type": "sftp",
     "parameters": {
         "host": "dlm_directory_watcher",
-        "key_file": "/root/.ssh/id_rsa",
+        "key_file": "/root/.ssh/id_rsa",  # <-- client PRIVATE key
         "shell_type": "unix",
         "type": "sftp",
         "user": "ska-dlm",
     },
 }
-
 STORAGE_INTERFACE = "posix"
 STORAGE_TYPE = "filesystem"
 
@@ -187,8 +183,8 @@ def get_or_init_storage(
 def setup_volume(
     watcher_config: WatcherConfig,
     api_configuration: Configuration,
-    rclone_config: dict | None = None,
-    location_id: str | None = None,
+    rclone_config: str = None,
+    location_id: str = None,
 ):
     """
     Register and configure a storage volume.
@@ -208,46 +204,67 @@ def setup_volume(
     return storage_id
 
 
-def setup_testing(api_configuration: Configuration):
-    """Configure a target storage endpoint for rclone (directory watcher tests)."""
-    # NOTE: This is only required for integration testing with the DLM server.
-    # The setup of the source volume is now performed during the startup
-    # of the client. In future the setup of a default (archive) storage
-    # endpoint will be performed during startup of the DLM server and
-    # then this can be removed as well.
-    logger.info("Testing setup (directory watcher).")
-    location_id = get_or_init_location(api_configuration, location=LOCATION_NAME)
-    storage_id = get_or_init_storage(
-        storage_name=RCLONE_CONFIG_TARGET["name"],
-        api_configuration=api_configuration,
-        storage_root_directory=RCLONE_CONFIG_TARGET["parameters"]["remote"],
-        the_location_id=location_id,
-        rclone_config=RCLONE_CONFIG_TARGET,
+def setup_configdb_demo(api_configuration: Configuration, storage_server_url: str):
+    """Set up the ConfigDB watcher demo: SDPBuffer + dest_storage."""
+    logger.info(
+        "setup_configdb_demo: start. ConfigDB watcher demo setup: "
+        "SDPBuffer -> dest_storage. storage_server_url=%s",
+        storage_server_url,
     )
-    logger.info("location id %s and storage id %s", location_id, storage_id)
-
-
-def setup_sdp_ingest_demo(api_configuration: Configuration) -> None:
-    """Configure SDPBuffer + dest_storage for the ConfigDB watcher demo."""
-    logger.info("Setting up ConfigDB watcher demo storages (SDPBuffer -> dest_storage).")
-    location_id = get_or_init_location(api_configuration, location=LOCATION_NAME)
+    location_id = get_or_init_location(
+        api_configuration,
+        location=LOCATION_NAME,
+        storage_url=storage_server_url,
+    )
+    logger.info("setup_configdb_demo: using location_id=%s", location_id)
 
     # Source storage: SDPBuffer (SFTP into dlm_configdb_watcher:/data/SDPBuffer)
-    get_or_init_storage(
+    logger.info(
+        "setup_configdb_demo: setting up source storage %s at %s with rclone_config type=%s",
+        DEMO_SOURCE_STORAGE_NAME,
+        DEMO_SOURCE_ROOT_DIRECTORY,
+        RCLONE_CONFIG_SDPBUFFER.get("type"),
+    )
+    sdpbuffer_storage_id = get_or_init_storage(
         storage_name=DEMO_SOURCE_STORAGE_NAME,
         api_configuration=api_configuration,
         storage_root_directory=DEMO_SOURCE_ROOT_DIRECTORY,
         the_location_id=location_id,
         rclone_config=RCLONE_CONFIG_SDPBUFFER,
     )
+    logger.info(
+        "setup_configdb_demo: source storage %s has storage_id=%s",
+        DEMO_SOURCE_STORAGE_NAME,
+        sdpbuffer_storage_id,
+    )
 
     # Destination storage: dest_storage (alias /data/dest_storage in rclone)
-    get_or_init_storage(
+    logger.info(
+        "setup_configdb_demo: setting up destination storage %s at %s "
+        "with rclone_config type=%s",
+        DEMO_DEST_STORAGE_NAME,
+        DEMO_DEST_ROOT_DIRECTORY,
+        RCLONE_CONFIG_DEST_STORAGE.get("type"),
+    )
+    dest_storage_id = get_or_init_storage(
         storage_name=DEMO_DEST_STORAGE_NAME,
         api_configuration=api_configuration,
         storage_root_directory=DEMO_DEST_ROOT_DIRECTORY,
         the_location_id=location_id,
         rclone_config=RCLONE_CONFIG_DEST_STORAGE,
+    )
+    logger.info(
+        "setup_configdb_demo: destination storage %s has storage_id=%s",
+        DEMO_DEST_STORAGE_NAME,
+        dest_storage_id,
+    )
+
+    logger.info(
+        "ConfigDB demo setup complete: location id %s, source storage id %s, "
+        "dest storage id %s",
+        location_id,
+        sdpbuffer_storage_id,
+        dest_storage_id,
     )
 
 
@@ -255,14 +272,9 @@ def create_parser() -> argparse.ArgumentParser:
     """Define a parser for all the command line parameters."""
     parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
 
-    # Existing arguments (kept for backwards compatibility)
-    parser.add_argument(
-        "-n",
-        "--storage-name",
-        type=str,
-        required=True,
-        help="The name by which the DLM system know the storage as.",
-    )
+    # NOTE: For the ConfigDB watcher demo we hard-code the storage names and
+    # root directories (SDPBuffer and dest_storage). Only the storage service
+    # URL is configurable from the CLI.
     parser.add_argument(
         "-s",
         "--storage-server-url",
@@ -270,36 +282,18 @@ def create_parser() -> argparse.ArgumentParser:
         required=True,
         help="Storage service URL.",
     )
-    parser.add_argument(
-        "-r",
-        "--storage-root-directory",
-        type=str,
-        required=True,
-        help="Storage root directory.",
-    )
-
-    # New optional flag: use ConfigDB watcher demo setup instead of directory watcher setup
-    parser.add_argument(
-        "--demo-sdp-ingest",
-        action="store_true",
-        help=(
-            "If set, initialise storages for the ConfigDB watcher demo "
-            "(SDPBuffer + dest_storage) instead of the directory-watcher test setup."
-        ),
-    )
     return parser
 
 
 def main():
-    """If called as a CLI, register test volumes or the SDP ingest demo volumes."""
+    """If this is called as a CLI we just register the integration/developer setup volumes."""
     parser = create_parser()
     args = parser.parse_args()
     api_configuration = Configuration(host=args.storage_server_url)
-
-    if getattr(args, "demo_sdp_ingest", False):
-        setup_sdp_ingest_demo(api_configuration)
-    else:
-        setup_testing(api_configuration)
+    setup_configdb_demo(
+        api_configuration,
+        storage_server_url=args.storage_server_url,
+    )
 
 
 if __name__ == "__main__":

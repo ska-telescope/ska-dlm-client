@@ -13,16 +13,28 @@ set -euo pipefail
 
 # Make sure /data/SDPBuffer exists (user must bind-mount it)
 mkdir -p /data/SDPBuffer
-# Change ownership so rclone (running as user ska-dlm) can read it
 chown -R ska-dlm:ska-dlm /data/SDPBuffer || true
-# Allow read/write/execute for user+group
-chmod -R ug+rwX /data/SDPBuffer || true
+chmod -R 777 /data/SDPBuffer || true
 
 # Make sure the destination storage folder exists
 mkdir -p /data/dest_storage
-# Give rclone write access
 chown -R ska-dlm:ska-dlm /data/dest_storage
-chmod -R ug+rwX /data/dest_storage
+chmod -R 777 /data/dest_storage
+
+# Ensure SFTP sees paths that DLM/rclone might use
+mkdir -p /home/ska-dlm
+mkdir -p /home/ska-dlm/data
+
+# Clean up any old symlinks / dirs
+rm -rf /home/ska-dlm/SDPBuffer 2>/dev/null || true
+rm -rf /home/ska-dlm/data/SDPBuffer 2>/dev/null || true
+
+# Two symlinks pointing at the real source dir
+ln -s /data/SDPBuffer /home/ska-dlm/SDPBuffer
+ln -s /data/SDPBuffer /home/ska-dlm/data/SDPBuffer
+
+chown -h ska-dlm:ska-dlm /home/ska-dlm/SDPBuffer
+chown -h ska-dlm:ska-dlm /home/ska-dlm/data/SDPBuffer
 
 
 ############################################
@@ -32,6 +44,7 @@ chmod -R ug+rwX /data/dest_storage
 ############################################
 
 /etc/init.d/ssh start
+/usr/sbin/sshd
 # rclone config has:
 #   type = sftp
 #   user = ska-dlm
@@ -57,6 +70,9 @@ source /app/.venv/bin/activate
 #       - listen for FINISHED data-products
 #       - ingest + migrate
 ############################################
+
+python3 -m ska_dlm_client.register_storage_location.main \
+  --storage-server-url "http://dlm_storage:8003"
 
 python3 -m ska_dlm_client.sdp_ingest.main \
   --src-path /data/SDPBuffer \

@@ -43,8 +43,8 @@ services:
       interval: 1s
       timeout: 10s
       retries: 10
-#     networks:
-#       - dlm_network
+    networks:
+      - dlm_network
   dlm_directory_watcher:
     platform: linux/amd64
     image: dlm_directory_watcher

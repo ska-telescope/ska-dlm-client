@@ -103,12 +103,12 @@ async def sdp_to_dlm_ingest_and_migrate(
             # Registration (blocking) -> run in thread
             dlm_migrated_uuid = await asyncio.to_thread(processor._register_single_item, item)
             # _register_single_item attempts to inititate a copy to
-            # _config.migration_destination_storage_name
+            # _config.migration_destination_storage_name (_register_single_item has error logs)
             logger.info("dlm_migrated_uuid")
             logger.info(dlm_migrated_uuid)
 
             if not dlm_migrated_uuid:
-                # _register_single_item has its own success/error logs; mark dependency FAILED.
+                # TODO: it's not recognising a failed migration. Need to query for the item.
                 _set_dependency_state(config, new_dep, "FAILED")
             else:
                 _set_dependency_state(config, new_dep, "FINISHED")
