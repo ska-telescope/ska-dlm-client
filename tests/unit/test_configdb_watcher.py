@@ -29,7 +29,7 @@ NAME = "prod-a"
 async def test_dataproduct_status_watcher(  # noqa: C901
     config, create_first: bool, include_existing: bool, expected_count: int
 ):
-    """Verify the watcher emits FINISHED events and creates a DLM dependency once.
+    """Verify the watcher emits COMPLETED events and creates a DLM dependency once.
 
     For uniqueness across param cases we vary both the PB id and the flow name.
     When expected_count==1 we also assert that the dependency state exists.
@@ -67,17 +67,17 @@ async def test_dataproduct_status_watcher(  # noqa: C901
         for txn in config.txn():
             txn.flow.create(test_dataproduct)
             txn.flow.state(test_dataproduct.key).create({"status": "WAITING"})
-            txn.flow.state(test_dataproduct.key).update({"status": "FINISHED"})
+            txn.flow.state(test_dataproduct.key).update({"status": "COMPLETED"})
             txn.flow.state(test_dataproduct.key).update({})
             txn.flow.state(test_dataproduct.key).update({"status": "WAITING"})
-            txn.flow.state(test_dataproduct.key).update({"status": "FINISHED"})
+            txn.flow.state(test_dataproduct.key).update({"status": "COMPLETED"})
 
     async def aget_single_state():
-        """Consume the watcher and collect FINISHED events.
+        """Consume the watcher and collect COMPLETED events.
 
         If ``create_first`` is True, waits briefly before starting to simulate a pre-existing
         flow. Runs the data-product status watcher with the shared ``config`` and appends any
-        ``(Flow.Key, "FINISHED")`` tuples to ``values`` until the timeout elapses. Timeouts are
+        ``(Flow.Key, "COMPLETED")`` tuples to ``values`` until the timeout elapses. Timeouts are
         suppressed because some parameterizations may legitimately produce no events.
         """
         if create_first:
@@ -86,7 +86,7 @@ async def test_dataproduct_status_watcher(  # noqa: C901
         with suppress(asyncio.TimeoutError):
             async with async_timeout.timeout(2 * timeout_s):
                 async with watch_dataproduct_status(
-                    config, "FINISHED", include_existing=include_existing
+                    config, "COMPLETED", include_existing=include_existing
                 ) as producer:
                     async for key, state in producer:
                         values.append((key, state))
@@ -94,10 +94,10 @@ async def test_dataproduct_status_watcher(  # noqa: C901
     async with async_timeout.timeout(5 * timeout_s):
         await asyncio.gather(aget_single_state(), aput_flow())
 
-    # Assert the FINISHED event appeared the expected number of times
+    # Assert the COMPLETED event appeared the expected number of times
     assert len(values) == expected_count
     if expected_count:
         assert any(
-            key == test_dataproduct.key and state.get("status") == "FINISHED"
+            key == test_dataproduct.key and state.get("status") == "COMPLETED"
             for key, state in values
         )
