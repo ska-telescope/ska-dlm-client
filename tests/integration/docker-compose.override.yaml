@@ -9,6 +9,16 @@ services:
   dlm_postgrest: # Optional: expose PostgREST if you want to poke it from your browser/curl
     ports:
       - "3000:3000"
+
+  dlm_rclone:
+    image: rclone/rclone
+    ports: ["5572:5572"] # Optional: expose RC for local debugging
+    volumes: # Mount the certs we generated on the host
+      # Uses DLM_SERVER_DIR (set by tests) so certs live in the server repo:
+      # ska-data-lifecycle/tests/integration/certs
+      - ${DLM_SERVER_DIR}/tests/integration/certs:/etc/ssl/localcerts:ro
+      - shared-tmpfs:/dlm
+
   dlm_storage:
     ports:
       - 8003:8003
