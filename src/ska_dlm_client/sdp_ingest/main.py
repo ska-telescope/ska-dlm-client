@@ -14,8 +14,8 @@ logger = logging.getLogger("ska_dlm_client.sdp_ingest")
 
 async def sdp_to_dlm_ingest_and_migrate(*, include_existing: bool) -> None:
     """Ingests and migrates SDP dataproduct using DLM."""
-    # watch sdp config database for finished data products
-    # and for each finished dataproduct:
+    # watch sdp config database for 'COMPLETED' Flow states
+    # and for each 'COMPLETED' data-product:
     # * register a dlm dependency with state WORKING
     # * invoke dlm-ingest and dlm-migration
     # * move dependency state to FINISHED
@@ -25,7 +25,7 @@ async def sdp_to_dlm_ingest_and_migrate(*, include_existing: bool) -> None:
     logger.info("Starting SDP Config watcher (include_existing=%s)...", include_existing)
 
     async with watch_dataproduct_status(
-        config, status="FINISHED", include_existing=include_existing
+        config, status="COMPLETED", include_existing=include_existing
     ) as producer:
         logger.info("Watcher READY and listening for events.")
         async for dataproduct_key, _ in producer:
