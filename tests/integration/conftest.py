@@ -148,7 +148,7 @@ def _compose(*args: str):
         cmd += ["-f", str(f)]
     cmd += list(args)
 
-    p = subprocess.run(cmd, capture_output=True, text=True, env=env, check=True)
+    p = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)
     if p.returncode != 0:
         print("[compose STDOUT]\n", p.stdout)
         print("[compose STDERR]\n", p.stderr)

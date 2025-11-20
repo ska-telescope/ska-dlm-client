@@ -6,7 +6,10 @@ import logging
 
 from ska_sdp_config import Config
 
-from ska_dlm_client.sdp_ingest.configdb_utils import create_sdp_migration_dependency
+from ska_dlm_client.sdp_ingest.configdb_utils import (
+    create_sdp_migration_dependency,
+    get_data_product_dir,
+)
 from ska_dlm_client.sdp_ingest.configdb_watcher import watch_dataproduct_status
 
 logger = logging.getLogger("ska_dlm_client.sdp_ingest")
@@ -17,8 +20,8 @@ async def sdp_to_dlm_ingest_and_migrate(*, include_existing: bool) -> None:
     # watch sdp config database for 'COMPLETED' Flow states
     # and for each 'COMPLETED' data-product:
     # * register a dlm dependency with state WORKING
-    # * invoke dlm-ingest and dlm-migration
-    # * move dependency state to FINISHED
+    # * invoke dlm-ingest and dlm-migration (TODO)
+    # * move dependency state to FINISHED/FAILED (TODO)
     #
     # If any DLM call fails, reliably transition state to FAILED
     config = Config()  # Share one handle between writer & watcher
@@ -28,13 +31,24 @@ async def sdp_to_dlm_ingest_and_migrate(*, include_existing: bool) -> None:
         config, status="COMPLETED", include_existing=include_existing
     ) as producer:
         logger.info("Watcher READY and listening for events.")
+
         async for dataproduct_key, _ in producer:
+            # Resolve the source directory from the Flow sink
+            src_dir = get_data_product_dir(config, dataproduct_key)
+            logger.info(
+                "New COMPLETED data-product: key=%s, src_path=%s",
+                dataproduct_key,
+                src_dir,
+            )
             # register a dlm dependency with state WORKING
             new_dep = await create_sdp_migration_dependency(config, dataproduct_key)
+
+        if new_dep:
+            print("New dependency: ", new_dep)
+            logger.info("New dependency: %s", new_dep)
+
             # TODO: invoke dlm-ingest and dlm-migration
             # TODO: move dependency state to FINISHED/FAILED
-    if new_dep:
-        print("New dependency: ", new_dep)
 
 
 def main():

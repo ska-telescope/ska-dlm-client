@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import Optional
 
-from ska_sdp_config import ConfigCollision
-from ska_sdp_config.entity.flow import Dependency, Flow
+from ska_sdp_config import Config, ConfigCollision
+from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
 logging.basicConfig(level=logging.INFO)
 
@@ -43,9 +44,7 @@ def _initialise_dependency(
 
 
 async def create_sdp_migration_dependency(config, dataproduct_key: Flow.Key):
-    """Create migration dependency."""
-    # TODO: Call dlm to initialize/register data item
-    # create DLM dependency (no state yet)
+    """Create migration dependency (no state yet)."""
     dep = _initialise_dependency(
         dataproduct_key,
         dep_kind="dlm-copy",
@@ -61,6 +60,47 @@ async def create_sdp_migration_dependency(config, dataproduct_key: Flow.Key):
             txn.dependency.state(dep).create({})
             logger.info("Created DLM dependency for %s/%s", dep.key.pb_id, dep.key.name)
     return dep
+
+
+def get_data_product_dir(config: Config, key: Flow.Key) -> Path:
+    """
+    Resolve the container path to the data-product directory for a Flow key.
+
+    This uses `Flow.sink.data_dir`, which is a `PVCPath | AnyPurePath`.
+    For `PVCPath`, `str(data_dir)` is `pvc_mount_path / pvc_subpath`.
+    For example::
+
+        PVCPath(
+            pvc_mount_path="/data",
+            pvc_subpath="product/<eb>/ska-sdp/<pb>",
+        )
+
+    The returned value is `Path("/data/product/<eb>/ska-sdp/<pb>")`.
+    """
+    flow: Flow | None = None
+    for txn in config.txn():
+        flow = txn.flow.get(key)
+        break
+
+    if flow is None:
+        msg = f"Flow not found for key {key}"
+        logger.error(msg)
+        raise RuntimeError(msg)
+
+    if not isinstance(flow.sink, DataProduct):
+        msg = (
+            "Flow sink kind '%s' is not 'data-product' for key %s",
+            flow.sink.kind,
+            key,
+        )
+        logger.error(msg)
+        raise TypeError(msg)
+
+    data_dir = flow.sink.data_dir
+    # data_dir is PVCPath | AnyPurePath; str() gives the container path
+    path = Path(str(data_dir))
+    logger.debug("Resolved data-product dir for %s: %s", key, path)
+    return path
 
 
 def log_flow_dependencies(txn, product_key: Flow.Key) -> None:
