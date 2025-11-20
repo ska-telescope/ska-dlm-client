@@ -40,6 +40,8 @@ async def sdp_to_dlm_ingest_and_migrate(*, include_existing: bool) -> None:
                 dataproduct_key,
                 src_dir,
             )
+            # If we want the watcher to keep yielding events while we process previous ones,
+            # we need to make the processing run in separate tasks.
             # register a dlm dependency with state WORKING
             new_dep = await create_sdp_migration_dependency(config, dataproduct_key)
 
@@ -47,7 +49,7 @@ async def sdp_to_dlm_ingest_and_migrate(*, include_existing: bool) -> None:
             print("New dependency: ", new_dep)
             logger.info("New dependency: %s", new_dep)
 
-            # TODO: invoke dlm-ingest and dlm-migration
+            # TODO: invoke dlm-ingest and dlm-migration (call _register_single_item?)
             # TODO: move dependency state to FINISHED/FAILED
 
 
