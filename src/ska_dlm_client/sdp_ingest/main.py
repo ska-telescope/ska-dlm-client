@@ -108,8 +108,10 @@ async def sdp_to_dlm_ingest_and_migrate(
             logger.info(dlm_migrated_uuid)
 
             if not dlm_migrated_uuid:
-                # TODO: it's not recognising a failed migration. Need to query for the item.
+                # TODO: it's not recognising a failed migration.
                 _set_dependency_state(config, new_dep, "FAILED")
+                logger.info("Dependency %s set to FAILED", getattr(new_dep, "key", "<unknown>"))
+                # TODO: print real error message in log
             else:
                 _set_dependency_state(config, new_dep, "FINISHED")
                 logger.info(

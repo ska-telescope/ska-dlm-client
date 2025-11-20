@@ -226,8 +226,10 @@ def setup_volume(
 def setup_configdb_demo(api_configuration: Configuration, storage_server_url: str):
     """Set up the ConfigDB watcher demo: SDPBuffer + dest_storage."""
     logger.info(
-        "setup_configdb_demo: start. ConfigDB watcher demo setup: "
-        "SDPBuffer -> dest_storage. storage_server_url=%s",
+        "setup_configdb_demo: Starting ConfigDB watcher demo setup: "
+        "%s -> %s. storage_server_url=%s",
+        DEMO_SOURCE_STORAGE_NAME,
+        DEMO_DEST_STORAGE_NAME,
         storage_server_url,
     )
     location_id = get_or_init_location(
@@ -235,7 +237,11 @@ def setup_configdb_demo(api_configuration: Configuration, storage_server_url: st
         location=LOCATION_NAME,
         storage_url=storage_server_url,
     )
-    logger.info("setup_configdb_demo: using location_id=%s", location_id)
+    logger.info(
+        "setup_configdb_demo: setting up location %s with location_id=%s",
+        LOCATION_NAME,
+        location_id,
+    )
 
     # Source storage: SDPBuffer (SFTP into dlm_configdb_watcher:/data/SDPBuffer)
     logger.info(

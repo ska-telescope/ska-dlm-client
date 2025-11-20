@@ -63,17 +63,17 @@ def create_or_update_flow() -> None:
             txn.flow.create(test_dataproduct)
             print(f"Flow created: {test_dataproduct.key}")
         except ConfigCollision:
-            print(f"Flow already exists: {test_dataproduct.key}")
+            print(f"ERROR: Flow already exists: {test_dataproduct.key}")
 
     # Set/update Flow state to FINISHED
     for txn in cfg.txn():
         ops = txn.flow.state(test_dataproduct.key)
         try:
             ops.create({"status": "FINISHED"})
-            print("State CREATED: FINISHED")
+            print("State created with status FINISHED")
         except Exception:
             ops.update({"status": "FINISHED"})
-            print("State UPDATED: FINISHED")
+            print("State updated with status FINISHED")
 
     print("Done.")
 
