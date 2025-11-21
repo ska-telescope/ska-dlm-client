@@ -26,7 +26,6 @@ class _DummyWatcher:
         raise StopAsyncIteration
 
 
-@pytest.mark.integration
 def _fake_watch_dataproduct_status(config, status, include_existing):
     """Replace watch_dataproduct_status with a dummy watcher."""
     _ = (config, status, include_existing)  # Mark arguments as intentionally unused
@@ -71,6 +70,7 @@ def test_sdp_ingest_main_logs_ready(monkeypatch, caplog):
 
 
 @pytest.mark.asyncio
+@pytest.mark.integration
 async def test_real_watcher_starts(caplog):
     """Run the real watcher, wait for READY log, then cancel it cleanly."""
     caplog.set_level(logging.INFO, logger="ska_dlm_client.sdp_ingest")
