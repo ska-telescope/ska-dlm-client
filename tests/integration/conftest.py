@@ -24,7 +24,7 @@ from ska_dlm_client.openapi.configuration import Configuration
 logging.basicConfig(level=os.getenv("PYTEST_LOGLEVEL", "INFO"))
 log = logging.getLogger(__name__)
 
-PROJECT_NAME = os.environ.get("COMPOSE_PROJECT_NAME", "integration-tests")
+PROJECT_NAME = os.environ.get("COMPOSE_PROJECT_NAME", "tests")
 
 # --- OpenAPI client deserialization patch (handles Optional[Dict[str, object]]) ---
 # Original private method
@@ -224,6 +224,7 @@ def dlm_stack():
         "dlm_ingest",
         "dlm_request",
         "dlm_directory_watcher",
+        "etcd",
     )
     try:
         _wait_for_http(POSTGREST_URL, timeout_s=30)
