@@ -73,6 +73,7 @@ def _register_data_product(item: Item, ingest_config: SDPIngestConfig) -> str | 
     Returns:
         The UUID of the registered data item, or None if registration failed.
     """
+    dlm_registration_uuid: str | None = None
     with api_client.ApiClient(ingest_config.ingest_configuration) as ingest_api_client:
         api_ingest = ingest_api.IngestApi(ingest_api_client)
         try:
@@ -86,16 +87,21 @@ def _register_data_product(item: Item, ingest_config: SDPIngestConfig) -> str | 
                 request_body=None if item.metadata is None else item.metadata.as_dict(),
             )
             logger.debug("register_data_item response: %s", response)
+            if response is not None:  # Can we assume any non-None response = a valid uuid?
+                dlm_registration_uuid = str(response)
+                logger.info(
+                    "DLM registration successful. Source uuid: %s",
+                    dlm_registration_uuid,
+                )
+
         except OpenApiException as err:
             logger.error("OpenApiException caught during register_container_parent_item")
             if isinstance(err, ApiException):
                 logger.error("ApiException: %s", err.body)
             logger.error("%s", err)
             logger.error("Ignoring and continuing.....")
-            return None
 
-        dlm_registration_uuid = str(response) if response is not None else None
-        return dlm_registration_uuid
+    return dlm_registration_uuid
 
 
 async def _process_completed_flow(
@@ -139,12 +145,12 @@ async def _process_completed_flow(
     )
 
     # Register (blocking) -> run in thread
-    dlm_migrated_uuid = await asyncio.to_thread(
+    dlm_source_uuid = await asyncio.to_thread(
         _register_data_product,
         item,
         ingest_config,
     )
-    logger.debug("dlm_migrated_uuid: %s", dlm_migrated_uuid)
+    logger.debug("dlm_migrated_uuid: %s", dlm_source_uuid)
 
     # TODO: Ensure location & storage exists (call get_or_init_location and get_or_init_storage)?
     # TODO: move dependency state to WORKING

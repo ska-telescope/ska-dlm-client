@@ -102,6 +102,7 @@ integration_tests:
     DOCKER_TLS_CERTDIR: ""
     DLM_SERVER_REPO: https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/ska-telescope/ska-data-lifecycle.git
     DLM_SERVER_REF: "1.2.0"
+    INGEST_SERVER_URL: http://docker:8001
     STORAGE_URL:  http://docker:8003
     POSTGREST_URL: http://docker:3000
     RCLONE_BASE:   https://docker:5572

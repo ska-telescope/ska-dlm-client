@@ -2,110 +2,114 @@
 
 import asyncio
 import logging
-import sys
+import os
 
 import pytest
+from ska_sdp_config import Config
+from ska_sdp_config.entity import ProcessingBlock, Script
+from ska_sdp_config.entity.flow import DataProduct, Flow
 
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.sdp_ingest import main as sdp_ingest_main
 
-
-class _DummyWatcher:
-    """Minimal async context manager + async iterator for the watcher."""
-
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, exc_type, exc, tb):
-        return False
-
-    def __aiter__(self):
-        return self
-
-    async def __anext__(self):
-        # No events -> exit the async for loop immediately
-        raise StopAsyncIteration
+PB_ID = "pb-test-00000000-a"
+FLOW_NAME = "test-flow"
+SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
+INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://localhost:8001")
 
 
-def _fake_watch_dataproduct_status(config, status="COMPLETED", include_existing=False, **_kwargs):
-    """Replace watch_dataproduct_status with a dummy watcher."""
-    _ = (config, status, include_existing)  # Mark arguments as intentionally unused
-    return _DummyWatcher()
+def _get_cfg() -> Config:
+    """Return a Config using the same env-based backend settings as the watcher."""
+    return Config()
 
 
-@pytest.mark.integration
-def test_sdp_ingest_main_logs_ready(monkeypatch, caplog):
-    """
-    Start the SDP watcher entrypoint and assert it logs 'Watcher READY'.
+def _ensure_processing_block() -> None:
+    """Create the ProcessingBlock if it doesn't already exist (idempotent)."""
+    cfg = _get_cfg()
+    for txn in cfg.txn():
+        if txn.processing_block.get(PB_ID) is None:
+            txn.processing_block.create(
+                ProcessingBlock(
+                    key=PB_ID,
+                    eb_id=None,
+                    script=SCRIPT,
+                )
+            )
+            print(f"Created ProcessingBlock {PB_ID}")
+        else:
+            print(f"ProcessingBlock {PB_ID} already exists")
 
-    This is a smoke test for the CLI entrypoint:
-    * Calls the real main() (so argparse and asyncio.run() are exercised).
-    * Enters the real sdp_to_dlm_ingest_and_migrate coroutine up to the
-    async-with watcher block.
-    * Monkeypatches watch_dataproduct_status to a dummy watcher so the test
-    does not block.
-    * Verifies that the expected 'Watcher READY' log message is emitted.
-    """
-    # Patch the watcher factory so we don't block forever waiting on etcd events
-    monkeypatch.setattr(
-        sdp_ingest_main,
-        "watch_dataproduct_status",
-        _fake_watch_dataproduct_status,
+
+def _create_or_update_completed_flow(data_dir: str) -> None:
+    """Create a Flow and set its state to COMPLETED."""
+    cfg = _get_cfg()
+    test_dataproduct = Flow(
+        key=Flow.Key(pb_id=PB_ID, kind="data-product", name=FLOW_NAME),
+        sink=DataProduct(data_dir=data_dir, paths=[]),
+        sources=[],
+        data_model="Visibility",
     )
 
-    # Capture logs from the sdp_ingest logger
-    caplog.set_level(logging.INFO, logger="ska_dlm_client.sdp_ingest")
+    # Create the Flow
+    for txn in cfg.txn():
+        txn.flow.create(test_dataproduct)
 
-    # Pretend we were called as a CLI without --include-existing
-    monkeypatch.setattr(
-        sys,
-        "argv",
-        [
-            "ska-dlm-client-sdp-ingest",
-            "--source-storage",
-            "SDPBuffer",
-        ],
+    # Set Flow state to COMPLETED
+    for txn in cfg.txn():
+        ops = txn.flow.state(test_dataproduct.key)
+        ops.create({"status": "COMPLETED"})
+
+
+def trigger_completed_flow() -> None:
+    """Ensure PB + Flow exist and mark Flow as COMPLETED."""
+    _ensure_processing_block()
+    # IMPORTANT: this must match what the watcher expects:
+    #   - same `storage_root_directory`
+    #   - points at a directory that actually contains the .ms + metadata
+    _create_or_update_completed_flow(
+        data_dir="tests/directory_watcher/test_registration_processor/testing1"
     )
-
-    # Run sdp_to_dlm_ingest_and_migrate once and exit quickly
-    sdp_ingest_main.main()
-
-    # Check that the watcher announced readiness
-    assert "Watcher READY and looking for events." in caplog.text
 
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_real_watcher_starts(caplog):
-    """Run the real watcher, wait for READY log, then cancel it cleanly."""
+async def test_watcher_starts_and_registers(caplog):
+    """Run the real watcher, wait for success logs, then cancel it cleanly."""
     caplog.set_level(logging.INFO, logger="ska_dlm_client.sdp_ingest")
-
-    # This should match how your Docker compose exposes the ingest service
-    # If tests talk to the host-mapped port, localhost is usually correct.
-    ingest_server_url = "http://localhost:8001"
 
     ingest_config = sdp_ingest_main.SDPIngestConfig(
         include_existing=False,
-        ingest_server_url=ingest_server_url,
-        ingest_configuration=Configuration(host=ingest_server_url),
-        source_storage="SDPBuffer",  # or whatever your test uses
-        storage_root_directory="",  # or the root used in your test setup
+        ingest_server_url=INGEST_SERVER_URL,
+        ingest_configuration=Configuration(host=INGEST_SERVER_URL),
+        source_storage="MyDisk",  # Should be registered by test_directory_watcher.py
+        storage_root_directory="/data",
     )
 
-    # Start the real watcher in the background
     task = asyncio.create_task(sdp_ingest_main.sdp_to_dlm_ingest_and_migrate(ingest_config))
 
     try:
-        # Wait until the watcher logs that it's ready, or timeout
-        message = "Watcher READY and looking for events."
-        for _ in range(50):  # up to ~5s total
-            if message in caplog.text:
+        # 1) Wait for watcher to be READY
+        ready_msg = "Watcher READY and looking for events."
+        for _ in range(50):
+            if ready_msg in caplog.text:
                 break
             await asyncio.sleep(0.1)
         else:
             pytest.fail("Watcher did not log readiness within timeout")
+
+        # 2) Trigger a COMPLETED Flow
+        trigger_completed_flow()
+
+        # 3) Wait for the registration success log
+        success_msg = "DLM registration successful"
+        for _ in range(100):  # give it longer for end-to-end path
+            if success_msg in caplog.text:
+                break
+            await asyncio.sleep(0.1)
+        else:
+            pytest.fail("Watcher did not log successful registration within timeout")
+
     finally:
-        # Cancel the watcher task and wait for it to finish
         task.cancel()
         with pytest.raises(asyncio.CancelledError):
             await task
