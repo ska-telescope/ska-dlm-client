@@ -3,11 +3,21 @@
 import argparse
 import asyncio
 import logging
+from dataclasses import dataclass
 
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Flow
 
-from ska_dlm_client.directory_watcher.registration_processor import _measurement_set_directory_in
+from ska_dlm_client.directory_watcher.registration_processor import (
+    Item,
+    _directory_contains_metadata_file,
+    _item_for_single_file_with_metadata,
+    _measurement_set_directory_in,
+)
+from ska_dlm_client.openapi import ApiException, api_client
+from ska_dlm_client.openapi.configuration import Configuration
+from ska_dlm_client.openapi.dlm_api import ingest_api
+from ska_dlm_client.openapi.exceptions import OpenApiException
 from ska_dlm_client.sdp_ingest.configdb_utils import (
     create_sdp_migration_dependency,
     get_data_product_dir,
@@ -17,7 +27,82 @@ from ska_dlm_client.sdp_ingest.configdb_watcher import watch_dataproduct_status
 logger = logging.getLogger("ska_dlm_client.sdp_ingest")
 
 
-async def _process_completed_flow(config: Config, dataproduct_key: Flow.Key) -> None:
+@dataclass
+class SDPIngestConfig:
+    """Runtime configuration for the SDP→DLM ConfigDB Watcher."""
+
+    include_existing: bool
+    ingest_server_url: str
+    ingest_configuration: Configuration
+    source_storage: str
+    storage_root_directory: str
+
+
+def process_args(args: argparse.Namespace) -> SDPIngestConfig:
+    """Collect all command line parameters and create an SDPIngestConfig object.
+
+    Args:
+        args: The parsed command line arguments from argparse.
+
+    Returns:
+        An SDPIngestConfig object initialized with the command line parameters.
+    """
+    ingest_configuration = Configuration(host=args.ingest_server_url)
+
+    return SDPIngestConfig(
+        include_existing=args.include_existing,
+        ingest_server_url=args.ingest_server_url,
+        ingest_configuration=ingest_configuration,
+        source_storage=args.source_storage,
+        storage_root_directory=args.storage_root_directory,
+    )
+
+
+def _register_data_product(item: Item, ingest_config: SDPIngestConfig) -> str | None:
+    """Register a single data item with the DLM.
+
+    Sends a registration request to the DLM API for the given item.
+    Note: this is a temporary function (adapted from
+    ska_dlm_client.directory_watcher.registration_processor._register_single_item).
+    In the future, the two Watchers will share a universal 'register & migrate'.
+
+    Args:
+        item: The data item to register with the DLM.
+        ingest_config: Runtime ingest configuration (API host, storage name, etc.).
+
+    Returns:
+        The UUID of the registered data item, or None if registration failed.
+    """
+    with api_client.ApiClient(ingest_config.ingest_configuration) as ingest_api_client:
+        api_ingest = ingest_api.IngestApi(ingest_api_client)
+        try:
+            logger.info("Using URI: %s for data_item registration", item.path_rel_to_watch_dir)
+            response = api_ingest.register_data_item(
+                item_name=item.path_rel_to_watch_dir,
+                uri=item.path_rel_to_watch_dir,
+                item_type=item.item_type,
+                storage_name=ingest_config.source_storage,
+                do_storage_access_check=False,  # TODO: do not hard-code
+                request_body=None if item.metadata is None else item.metadata.as_dict(),
+            )
+            logger.debug("register_data_item response: %s", response)
+        except OpenApiException as err:
+            logger.error("OpenApiException caught during register_container_parent_item")
+            if isinstance(err, ApiException):
+                logger.error("ApiException: %s", err.body)
+            logger.error("%s", err)
+            logger.error("Ignoring and continuing.....")
+            return None
+
+        dlm_registration_uuid = str(response) if response is not None else None
+        return dlm_registration_uuid
+
+
+async def _process_completed_flow(
+    configdb: Config,
+    dataproduct_key: Flow.Key,
+    ingest_config: SDPIngestConfig,
+) -> None:
     """Process a single COMPLETED data-product Flow.
 
     - Resolve the data-product directory from Flow.sink.data_dir.
@@ -25,7 +110,7 @@ async def _process_completed_flow(config: Config, dataproduct_key: Flow.Key) -> 
     - Create a DLM migration dependency (no state yet).
     """
     # Resolve the source directory from the Flow sink
-    src_dir = get_data_product_dir(config, dataproduct_key)
+    src_dir = get_data_product_dir(configdb, dataproduct_key)
     logger.info(
         "New COMPLETED data-product identified: key=%s, src_path=%s",
         dataproduct_key,
@@ -34,43 +119,68 @@ async def _process_completed_flow(config: Config, dataproduct_key: Flow.Key) -> 
 
     # Identify the .ms file (may raise if path does not exist / no .ms)
     ms_file_name = _measurement_set_directory_in(src_dir)
-    logger.info("ms_file: %s", ms_file_name)
+    logger.info("Found MS file: %s", ms_file_name)
 
     # Register a DLM dependency (no state)
-    new_dep = await create_sdp_migration_dependency(config, dataproduct_key)
+    new_dep = await create_sdp_migration_dependency(configdb, dataproduct_key)
     if new_dep:
         logger.info("New dependency: %s", new_dep)
 
-    # TODO: invoke dlm-ingest and dlm-migration
-    # TODO: move dependency state to WORKING/FINISHED/FAILED
+    # Look for the metadata file
+    if not _directory_contains_metadata_file(src_dir):
+        logger.error("No metadata file found!")  # Set metadata = None
+    else:
+        logger.debug("Found the metadata file!")
+
+    # Build Item object
+    item = _item_for_single_file_with_metadata(
+        absolute_path=src_dir,
+        path_rel_to_watch_dir=ms_file_name,  # TODO: verify relative vs absolute
+    )
+
+    # Register (blocking) -> run in thread
+    dlm_migrated_uuid = await asyncio.to_thread(
+        _register_data_product,
+        item,
+        ingest_config,
+    )
+    logger.debug("dlm_migrated_uuid: %s", dlm_migrated_uuid)
+
+    # TODO: Ensure location & storage exists (call get_or_init_location and get_or_init_storage)?
+    # TODO: move dependency state to WORKING
+    # TODO: invoke dlm-migration
+    # TODO: move dependency state to FINISHED/FAILED
 
 
-async def sdp_to_dlm_ingest_and_migrate(*, include_existing: bool) -> None:
-    """Ingests and migrates SDP dataproduct using DLM."""
-    # watch sdp config database for 'COMPLETED' Flow states
-    # and for each 'COMPLETED' data-product:
-    # * create a dlm dependency (no state)
-    # * invoke dlm-ingest and dlm-migration (TODO)
-    # * update dependency state to WORKING
-    # * depending on outcome, move dependency state to FINISHED/FAILED (TODO)
-    config = Config()  # Share one handle between writer & watcher
-    logger.info("Starting SDP Config watcher (include_existing=%s)...", include_existing)
+async def sdp_to_dlm_ingest_and_migrate(ingest_config: SDPIngestConfig) -> None:
+    """Ingest and migrate SDP data-products using DLM."""
+    configdb = Config()  # Share one handle between writer & watcher
+    logger.info(
+        "Starting SDP Config watcher (include_existing=%s, source_storage=%s)...",
+        ingest_config.include_existing,
+        ingest_config.source_storage,
+    )
 
     async with watch_dataproduct_status(
-        config, status="COMPLETED", include_existing=include_existing
+        configdb,
+        status="COMPLETED",
+        include_existing=ingest_config.include_existing,
     ) as producer:  # make the desired status configurable?
         logger.info("Watcher READY and looking for events.")
 
         async for dataproduct_key, _ in producer:
             try:
-                await _process_completed_flow(config, dataproduct_key)
+                await _process_completed_flow(
+                    configdb,
+                    dataproduct_key,
+                    ingest_config,
+                )
             except Exception:  # pylint: disable=broad-exception-caught  # pragma: no cover
-                # Log traceback but keep watching
                 logger.exception("Failed to process Flow %s", dataproduct_key)
                 logger.info("Continuing to look for new Flows")
 
 
-def main():
+def main() -> None:
     """Control the main execution of the program."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -78,8 +188,35 @@ def main():
         action="store_true",
         help="If set, first yield existing dataproduct keys with matching status.",
     )
+    parser.add_argument(
+        "-i",
+        "--ingest-server-url",
+        type=str,
+        default="http://dlm_ingest:8001",
+        help=(
+            "Ingest server URL including the service port. " "Default 'http://dlm_ingest:8001'."
+        ),
+    )
+    parser.add_argument(
+        "--source-storage",
+        type=str,
+        required=True,
+        help="Source storage name (e.g., 'SDPBuffer').",
+    )
+    parser.add_argument(
+        "-r",
+        "--storage-root-directory",
+        type=str,
+        default="",
+        help=(
+            "The root directory of the source storage, used to match "
+            "relative path names. Default ''."
+        ),
+    )
     args = parser.parse_args()
-    asyncio.run(sdp_to_dlm_ingest_and_migrate(include_existing=args.include_existing))
+    ingest_config = process_args(args)
+
+    asyncio.run(sdp_to_dlm_ingest_and_migrate(ingest_config))
 
 
 if __name__ == "__main__":
