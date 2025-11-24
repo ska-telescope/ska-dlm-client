@@ -6,6 +6,7 @@ import sys
 
 import pytest
 
+from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.sdp_ingest import main as sdp_ingest_main
 
 
@@ -26,7 +27,7 @@ class _DummyWatcher:
         raise StopAsyncIteration
 
 
-def _fake_watch_dataproduct_status(config, status, include_existing):
+def _fake_watch_dataproduct_status(config, status="COMPLETED", include_existing=False, **_kwargs):
     """Replace watch_dataproduct_status with a dummy watcher."""
     _ = (config, status, include_existing)  # Mark arguments as intentionally unused
     return _DummyWatcher()
@@ -59,7 +60,11 @@ def test_sdp_ingest_main_logs_ready(monkeypatch, caplog):
     monkeypatch.setattr(
         sys,
         "argv",
-        ["ska-dlm-client-sdp-ingest"],
+        [
+            "ska-dlm-client-sdp-ingest",
+            "--source-storage",
+            "SDPBuffer",
+        ],
     )
 
     # Run sdp_to_dlm_ingest_and_migrate once and exit quickly
@@ -75,10 +80,20 @@ async def test_real_watcher_starts(caplog):
     """Run the real watcher, wait for READY log, then cancel it cleanly."""
     caplog.set_level(logging.INFO, logger="ska_dlm_client.sdp_ingest")
 
-    # Start the real watcher in the background
-    task = asyncio.create_task(
-        sdp_ingest_main.sdp_to_dlm_ingest_and_migrate(include_existing=False)
+    # This should match how your Docker compose exposes the ingest service
+    # If tests talk to the host-mapped port, localhost is usually correct.
+    ingest_server_url = "http://localhost:8001"
+
+    ingest_config = sdp_ingest_main.SDPIngestConfig(
+        include_existing=False,
+        ingest_server_url=ingest_server_url,
+        ingest_configuration=Configuration(host=ingest_server_url),
+        source_storage="SDPBuffer",  # or whatever your test uses
+        storage_root_directory="",  # or the root used in your test setup
     )
+
+    # Start the real watcher in the background
+    task = asyncio.create_task(sdp_ingest_main.sdp_to_dlm_ingest_and_migrate(ingest_config))
 
     try:
         # Wait until the watcher logs that it's ready, or timeout
