@@ -13,10 +13,10 @@ from ska_dlm_client.common_types import (
     StorageInterface,
     StorageType,
 )
+from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
-from ska_dlm_client.directory_watcher.config import WatcherConfig
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

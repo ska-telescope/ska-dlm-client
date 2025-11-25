@@ -1,10 +1,10 @@
 """Register the given file or directory with the DLM."""
 
-from enum import Enum
 import logging
 import os
 import time
 from dataclasses import dataclass
+from enum import Enum
 from os.path import isdir, isfile, islink
 from pathlib import Path
 
