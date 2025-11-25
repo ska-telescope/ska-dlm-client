@@ -5,10 +5,12 @@ import os
 
 import yaml
 
-from ska_dlm_client.directory_watcher import config
 from ska_dlm_client.minimal_metadata_generator import minimal_metadata_generator
 
 logger = logging.getLogger(__name__)
+
+METADATA_FILENAME = "ska-data-product.yaml"
+METADATA_EXECUTION_BLOCK_KEY = "execution_block"
 
 
 class DataProductMetadata:
@@ -56,7 +58,7 @@ class DataProductMetadata:
             dir_path = os.path.dirname(self.dp_path)
         elif os.path.isdir(self.dp_path):
             dir_path = self.dp_path
-        metadata_path = os.path.join(dir_path, config.METADATA_FILENAME)
+        metadata_path = os.path.join(dir_path, METADATA_FILENAME)
         if os.path.exists(metadata_path):
             self.load_metadata(metadata_path)
             self.dp_metadata_loaded_from_a_file = True
@@ -85,10 +87,10 @@ class DataProductMetadata:
         # An error is not raised in order to allow for the best chance of the metadata being
         # stored with its data product. An exception is not raised as the file may still be a
         # valid format with a valid key.
-        if not metadata_path.endswith(config.METADATA_FILENAME):
+        if not metadata_path.endswith(METADATA_FILENAME):
             logger.warning(
                 "Expected metadata file name to be %s but got %s",
-                config.METADATA_FILENAME,
+                METADATA_FILENAME,
                 metadata_path,
             )
         with open(metadata_path, "r", encoding="utf-8") as file:
@@ -107,7 +109,7 @@ class DataProductMetadata:
         str | None
             Returns the execution block as in the metadata file or None if not found.
         """
-        return self.root.get(config.METADATA_EXECUTION_BLOCK_KEY, None)
+        return self.root.get(METADATA_EXECUTION_BLOCK_KEY, None)
 
     def as_dict(self) -> dict:
         """Return a dictitonary representation of the metadata."""
