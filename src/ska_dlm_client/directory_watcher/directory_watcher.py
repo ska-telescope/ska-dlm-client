@@ -10,9 +10,10 @@ from watchdog.observers.api import EventQueue, ObservedWatch
 from watchdog.observers.polling import DEFAULT_EMITTER_TIMEOUT, BaseObserver, PollingEmitter
 from watchfiles import Change, awatch
 
+from ska_dlm_client.registration_processor import RegistrationProcessor
+
 from .. import CmdLineParameters
 from .config import WatcherConfig
-from .registration_processor import RegistrationProcessor
 from .watcher_event_handler import WatcherEventHandler
 
 logger = logging.getLogger(__name__)

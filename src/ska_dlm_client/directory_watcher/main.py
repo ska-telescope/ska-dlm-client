@@ -13,8 +13,8 @@ from ska_dlm_client.directory_watcher.directory_watcher import (
     INotifyDirectoryWatcher,
     PollingDirectoryWatcher,
 )
-from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
 from ska_dlm_client.register_storage_location.main import RCLONE_CONFIG_SOURCE, setup_volume
+from ska_dlm_client.registration_processor import RegistrationProcessor
 from ska_dlm_client.utils import CmdLineParameters
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

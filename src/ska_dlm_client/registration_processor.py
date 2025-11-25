@@ -11,8 +11,8 @@ from typing_extensions import Self
 
 import ska_dlm_client.directory_watcher.config
 from ska_dlm_client.common_types import ItemType
+from ska_dlm_client.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.config import WatcherConfig
-from ska_dlm_client.directory_watcher.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntry
 from ska_dlm_client.openapi import ApiException, api_client
 from ska_dlm_client.openapi.dlm_api import ingest_api, migration_api

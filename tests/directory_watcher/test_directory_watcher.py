@@ -13,8 +13,8 @@ from ska_dlm_client.directory_watcher.directory_watcher import (
 )
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntries
 from ska_dlm_client.directory_watcher.main import create_parser, process_args
-from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
 from ska_dlm_client.openapi.configuration import Configuration
+from ska_dlm_client.registration_processor import RegistrationProcessor
 
 
 class MockCmdLineParameters:

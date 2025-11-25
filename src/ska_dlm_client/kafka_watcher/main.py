@@ -7,10 +7,10 @@ import logging
 
 import aiokafka
 
-from ska_dlm_client.directory_watcher.registration_processor import ItemType
 from ska_dlm_client.openapi import api_client, configuration
 from ska_dlm_client.openapi.dlm_api import ingest_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
+from ska_dlm_client.registration_processor import ItemType
 
 logging.basicConfig(level=logging.INFO)
 

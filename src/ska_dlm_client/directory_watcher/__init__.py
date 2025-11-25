@@ -15,8 +15,8 @@ from ska_dlm_client.directory_watcher.directory_watcher import (
     LStatPollingEmitter,
     PollingDirectoryWatcher,
 )
-from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
 from ska_dlm_client.directory_watcher.watcher_event_handler import WatcherEventHandler
+from ska_dlm_client.registration_processor import RegistrationProcessor
 
 __all__ = [
     "DirectoryWatcher",
