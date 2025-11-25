@@ -135,13 +135,7 @@ async def watch(  # pylint: disable=too-many-arguments, too-many-positional-argu
     kafka_base_dir: str,
     check_rclone_access: bool,
 ):
-    """
-    Asynchronously consumes data product, create events from data queues, and notifies DLM.
-
-    Args:
-        servers (list[str]): Data queue servers.
-        topics (list[str]): Data queue topics.
-    """
+    """Asynchronously consumes data product, create events from data queues, and notifies DLM."""
     logger.debug("Connecting to Kafka server(s): %s", ", ".join(kafka_broker_url))
     logger.info("Watching %s topic(s) for dataproducts to process", ", ".join(kafka_broker_url))
 

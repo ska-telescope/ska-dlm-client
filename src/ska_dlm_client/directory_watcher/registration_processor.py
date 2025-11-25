@@ -4,7 +4,6 @@ import logging
 import os
 import time
 from dataclasses import dataclass
-from enum import Enum
 from os.path import isdir, isfile, islink
 from pathlib import Path
 
@@ -23,14 +22,14 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-class ItemType(str, Enum):
-    """Data Item on the filesystem."""
+# class ItemType(str, Enum):
+#     """Data Item on the filesystem."""
 
-    UNKOWN = "unknown"
-    """A single file."""
-    FILE = "file"
-    """A directory superset with parents."""
-    CONTAINER = "container"
+#     UNKOWN = "unknown"
+#     """A single file."""
+#     FILE = "file"
+#     """A directory superset with parents."""
+#     CONTAINER = "container"
 
 
 @dataclass
@@ -108,13 +107,13 @@ class RegistrationProcessor:
             path.resolve()
         return path
 
-    def _copy_data_item_to_new_storage(self, uid: str, item_name:str="") -> str | None:
+    def _copy_data_item_to_new_storage(self, uid: str, item_name: str = "") -> str | None:
         """Send migration request to DLM.
 
         Args:
             uid: The unique identifier of the data item to copy.
             item_name: The name of the item (only used for a log message)
-            
+
         Returns:
             The UUID of the migrated data item, or None if migration was skipped or failed.
         """
@@ -160,12 +159,6 @@ class RegistrationProcessor:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
             api_ingest.api_client.configuration.host = self._config.ingest_server_url
             try:
-                # Generate the uri relative to the root directory.
-                # uri = (
-                #     item.path_rel_to_watch_dir
-                #     if self._config.ingest_register_path_to_add == ""
-                #     else f"{self._config.ingest_register_path_to_add}/{item.path_rel_to_watch_dir}"
-                # )
                 logger.info("Using URI: %s for data_item registration", item.path_rel_to_watch_dir)
                 response = None
                 if self._config.perform_actual_ingest_and_migration:
@@ -190,8 +183,9 @@ class RegistrationProcessor:
 
         dlm_registration_uuid = str(response) if response is not None else None
         # Attempt to migrate the data item to the new storage
-        migration_result = self._copy_data_item_to_new_storage(uid=dlm_registration_uuid,
-                                                               item_name=item.path_rel_to_watch_dir)
+        migration_result = self._copy_data_item_to_new_storage(
+            uid=dlm_registration_uuid, item_name=item.path_rel_to_watch_dir
+        )
         time_registered = time.time()
 
         directory_watcher_entry = DirectoryWatcherEntry(
@@ -225,7 +219,9 @@ class RegistrationProcessor:
             for item in item_list:
                 try:
                     # Generate the uri relative to the root directory.
-                    logger.info("Using URI: %s for data_item registration", item.path_rel_to_watch_dir)
+                    logger.info(
+                        "Using URI: %s for data_item registration", item.path_rel_to_watch_dir
+                    )
                     response = None
                     if self._config.perform_actual_ingest_and_migration:
                         response = api_ingest.register_data_item(
@@ -252,8 +248,9 @@ class RegistrationProcessor:
 
                 dlm_registration_uuid = str(response) if response is not None else None
                 # Attempt to migrate the data item to the new storage
-                migration_result = self._copy_data_item_to_new_storage(uid=dlm_registration_uuid,
-                                                                       item_name=item.path_rel_to_watch_dir)
+                migration_result = self._copy_data_item_to_new_storage(
+                    uid=dlm_registration_uuid, item_name=item.path_rel_to_watch_dir
+                )
                 time_registered = time.time()
 
                 directory_watcher_entry = DirectoryWatcherEntry(

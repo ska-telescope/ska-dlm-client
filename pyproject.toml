@@ -82,6 +82,10 @@ ignore = [
     'F401',  # Module imported but unused
     'W503',  # Line break occurred before a binary operator
     'D105',  # Missing docstring in magic method
+    'DAR101',  # Missing docstring in public class
+    'DAR201',  # Missing docstring in public module
+    'DAR301',  # Missing docstring in public package
+    'DAR401',  # Missing docstring in public function
 ]
 max-complexity = 10
 max-line-length = 180

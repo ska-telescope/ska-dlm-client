@@ -102,8 +102,9 @@ def create_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def process_args(args: argparse.Namespace,
-    cmd_line_parameters: CmdLineParameters) -> WatcherConfig:
+def process_args(
+    args: argparse.Namespace, cmd_line_parameters: CmdLineParameters
+) -> WatcherConfig:
     """Collect all command line parameters and create a Config object.
 
     Args:
@@ -160,7 +161,7 @@ def create_directory_watcher() -> DirectoryWatcher:
     _ = setup_volume(
         watcher_config=config,
         api_configuration=config.ingest_configuration,
-        rclone_config = RCLONE_CONFIG_SOURCE
+        rclone_config=RCLONE_CONFIG_SOURCE,
     )
     registration_processor = RegistrationProcessor(config)
     if args.register_contents_of_watch_directory:
