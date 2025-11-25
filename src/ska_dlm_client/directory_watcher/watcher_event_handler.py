@@ -19,8 +19,9 @@ from watchdog.events import (
     FileSystemEventHandler,
 )
 
-from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.registration_processor import RegistrationProcessor
+
+from .config import WatcherConfig
 
 logger = logging.getLogger(__name__)
 

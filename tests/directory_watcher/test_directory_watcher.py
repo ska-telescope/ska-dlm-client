@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from ska_dlm_client.directory_watcher.config import STATUS_FILE_FILENAME
+from ska_dlm_client.config import STATUS_FILE_FILENAME
 from ska_dlm_client.directory_watcher.directory_watcher import (
     INotifyDirectoryWatcher,
     PollingDirectoryWatcher,

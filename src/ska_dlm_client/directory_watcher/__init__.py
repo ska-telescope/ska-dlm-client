@@ -8,7 +8,6 @@ __author__ = """Mark Boulton"""
 __email__ = "mark.boulton@uwa.edu.au"
 __version__ = "1.1.0"
 
-from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.directory_watcher.directory_watcher import (
     DirectoryWatcher,
     INotifyDirectoryWatcher,
@@ -17,6 +16,8 @@ from ska_dlm_client.directory_watcher.directory_watcher import (
 )
 from ska_dlm_client.directory_watcher.watcher_event_handler import WatcherEventHandler
 from ska_dlm_client.registration_processor import RegistrationProcessor
+
+from .config import WatcherConfig
 
 __all__ = [
     "DirectoryWatcher",

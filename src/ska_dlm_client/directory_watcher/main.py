@@ -6,8 +6,7 @@ import functools
 import logging
 import signal
 
-import ska_dlm_client.directory_watcher.config
-from ska_dlm_client.directory_watcher.config import WatcherConfig
+import ska_dlm_client.config
 from ska_dlm_client.directory_watcher.directory_watcher import (
     DirectoryWatcher,
     INotifyDirectoryWatcher,
@@ -16,6 +15,8 @@ from ska_dlm_client.directory_watcher.directory_watcher import (
 from ska_dlm_client.register_storage_location.main import RCLONE_CONFIG_SOURCE, setup_volume
 from ska_dlm_client.registration_processor import RegistrationProcessor
 from ska_dlm_client.utils import CmdLineParameters
+
+from .config import WatcherConfig
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -84,7 +85,7 @@ def create_parser() -> argparse.ArgumentParser:
         "--status-file-filename",
         type=str,
         required=False,
-        default=ska_dlm_client.directory_watcher.config.STATUS_FILE_FILENAME,
+        default=ska_dlm_client.config.STATUS_FILE_FILENAME,
         help="",
     )
     parser.add_argument(

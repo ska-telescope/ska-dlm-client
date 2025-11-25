@@ -6,13 +6,6 @@ from ska_dlm_client.directory_watcher.directory_watcher_entries import Directory
 from ska_dlm_client.openapi import configuration
 from ska_dlm_client.openapi.configuration import Configuration
 
-STATUS_FILE_FILENAME = ".directory_watcher_status.run"
-DIRECTORY_IS_MEASUREMENT_SET_SUFFIX = ".ms"
-# Based on
-# https://confluence.skatelescope.org/display/SWSI/ADR-55+Definition+of+metadata+for+data+management+at+AA0.5
-METADATA_FILENAME = "ska-data-product.yaml"
-METADATA_EXECUTION_BLOCK_KEY = "execution_block"
-
 
 class WatcherConfig:  # pylint: disable=too-few-public-methods
     # pylint: disable=too-many-instance-attributes

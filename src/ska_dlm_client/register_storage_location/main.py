@@ -8,7 +8,7 @@ import shutil
 import sys
 
 from ska_dlm_client.common_types import LocationCountry, LocationType
-from ska_dlm_client.directory_watcher.config import WatcherConfig
+from ska_dlm_client.config import Config
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
@@ -139,7 +139,7 @@ def get_or_init_storage(
 
 
 def setup_volume(
-    watcher_config: WatcherConfig,
+    watcher_config: Config,
     api_configuration: Configuration,
     rclone_config: str = None,
     location_id: str = None,

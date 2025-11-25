@@ -213,9 +213,7 @@ def test_measurement_set_directory_in(request, monkeypatch):
     watch_dir = os.path.join(test_dir, "watch_dir")
 
     # Mock the config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
-    monkeypatch.setattr(
-        "ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX", ".ms"
-    )
+    monkeypatch.setattr("ska_dlm_client.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX", ".ms")
 
     # Create a temporary directory with a measurement set directory
     temp_dir_path = os.path.join(test_dir, "temp_dir_with_ms")

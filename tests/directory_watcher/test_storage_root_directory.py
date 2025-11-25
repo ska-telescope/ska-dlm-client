@@ -4,7 +4,8 @@ import os
 import tempfile
 from pathlib import Path
 
-from ska_dlm_client.directory_watcher.config import STATUS_FILE_FILENAME, WatcherConfig
+from ska_dlm_client.config import STATUS_FILE_FILENAME
+from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.directory_watcher.main import create_parser, process_args
 from ska_dlm_client.registration_processor import RegistrationProcessor
 from ska_dlm_client.utils import CmdLineParameters

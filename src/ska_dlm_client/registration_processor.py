@@ -9,10 +9,10 @@ from pathlib import Path
 
 from typing_extensions import Self
 
-import ska_dlm_client.directory_watcher.config
+import ska_dlm_client.config
 from ska_dlm_client.common_types import ItemType
+from ska_dlm_client.config import Config
 from ska_dlm_client.data_product_metadata import DataProductMetadata
-from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntry
 from ska_dlm_client.openapi import ApiException, api_client
 from ska_dlm_client.openapi.dlm_api import ingest_api, migration_api
@@ -67,9 +67,9 @@ class RegistrationProcessor:
     the migration of data items between storage locations.
     """
 
-    _config: WatcherConfig
+    _config: Config
 
-    def __init__(self, config: WatcherConfig):
+    def __init__(self, config: Config):
         """Initialize the RegistrationProcessor with the given configuration.
 
         Args:
@@ -78,7 +78,7 @@ class RegistrationProcessor:
         """
         self._config = config
 
-    def get_config(self) -> WatcherConfig:
+    def get_config(self) -> Config:
         """Get the configuration being used by the RegistrationProcessor.
 
         Returns:
@@ -86,7 +86,7 @@ class RegistrationProcessor:
         """
         return self._config
 
-    def set_config(self, config: WatcherConfig):
+    def set_config(self, config: Config):
         """Set or reset the configuration used by the RegistrationProcessor.
 
         Args:
@@ -369,7 +369,7 @@ def _generate_item_list_for_data_product(
             )
             item_list.extend(additional_items)
             logger.info("%s: %s", absolute_path, additional_items)
-        elif not entry == ska_dlm_client.directory_watcher.config.METADATA_FILENAME:
+        elif not entry == ska_dlm_client.config.METADATA_FILENAME:
             item = Item(
                 path_rel_to_watch_dir=os.path.join(path_rel_to_watch_dir, entry),
                 item_type=ItemType.FILE,
@@ -442,7 +442,7 @@ def _generate_paths_and_metadata_for_directory(
 
         # When not just a measurement set then add files from directory
         if not path_rel_to_watch_dir.lower().endswith(
-            ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
+            ska_dlm_client.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
         ):
             additional_items = _item_list_minus_metadata_file(
                 container_item=container_item,
@@ -569,7 +569,7 @@ def _directory_contains_metadata_file(absolute_path: str) -> bool:
         True if the directory contains a metadata file, False otherwise.
     """
     for entry in os.listdir(absolute_path):
-        if entry == ska_dlm_client.directory_watcher.config.METADATA_FILENAME:
+        if entry == ska_dlm_client.config.METADATA_FILENAME:
             return True
     return False
 
@@ -587,9 +587,7 @@ def _measurement_set_directory_in(absolute_path: str) -> str | None:
         The name of the measurement set directory if found, None otherwise.
     """
     for entry in os.listdir(absolute_path):
-        if entry.lower().endswith(
-            ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
-        ):
+        if entry.lower().endswith(ska_dlm_client.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX):
             return entry
     return None
 
@@ -608,8 +606,8 @@ def _directory_list_minus_metadata_file(absolute_path: str) -> list[str]:
         A list of filenames in the directory, excluding the metadata file.
     """
     dir_list = os.listdir(absolute_path)
-    if ska_dlm_client.directory_watcher.config.METADATA_FILENAME in dir_list:
-        dir_list.remove(ska_dlm_client.directory_watcher.config.METADATA_FILENAME)
+    if ska_dlm_client.config.METADATA_FILENAME in dir_list:
+        dir_list.remove(ska_dlm_client.config.METADATA_FILENAME)
     return dir_list
 
 
