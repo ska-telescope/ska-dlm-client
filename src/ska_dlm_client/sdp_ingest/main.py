@@ -21,6 +21,7 @@ from ska_dlm_client.openapi.exceptions import OpenApiException
 from ska_dlm_client.sdp_ingest.configdb_utils import (
     create_sdp_migration_dependency,
     get_data_product_dir,
+    update_dependency_state,
 )
 from ska_dlm_client.sdp_ingest.configdb_watcher import watch_dataproduct_status
 
@@ -144,17 +145,33 @@ async def _process_completed_flow(
         path_rel_to_watch_dir=ms_file_name,  # TODO: verify relative vs absolute
     )
 
+    # TODO: Ensure location & storage exists (call get_or_init_location and get_or_init_storage)?
     # Register (blocking) -> run in thread
     dlm_source_uuid = await asyncio.to_thread(
         _register_data_product,
         item,
         ingest_config,
     )
-    logger.debug("dlm_migrated_uuid: %s", dlm_source_uuid)
+    logger.debug("dlm_source_uuid: %s", dlm_source_uuid)
 
-    # TODO: Ensure location & storage exists (call get_or_init_location and get_or_init_storage)?
-    # TODO: move dependency state to WORKING
-    # TODO: invoke dlm-migration
+    if dlm_source_uuid is None:
+        logger.warning(
+            "DLM registration failed for %s; leaving dependency %s in initial state.",
+            dataproduct_key,
+            new_dep,
+        )
+        return
+
+    # Move dependency state to WORKING
+    for txn in configdb.txn():
+        update_dependency_state(txn, new_dep, status="WORKING")
+        logger.info("Dependency %s status set to WORKING.", new_dep)
+
+    logger.warning(
+        "End of ConfigDB Watcher functionality. Migration step will follow in a future release."
+    )
+
+    # TODO: invoke dlm-migration (blocked by DMAN-124)
     # TODO: move dependency state to FINISHED/FAILED
 
 
