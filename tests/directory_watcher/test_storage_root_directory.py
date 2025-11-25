@@ -7,6 +7,7 @@ from pathlib import Path
 from ska_dlm_client.directory_watcher.config import STATUS_FILE_FILENAME, WatcherConfig
 from ska_dlm_client.directory_watcher.main import create_parser, process_args
 from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
+from ska_dlm_client.utils import CmdLineParameters
 
 
 class TestStorageRootDirectory:
@@ -40,7 +41,16 @@ class TestStorageRootDirectory:
                 "",
             ]
         )
-        config = process_args(args=parsed)
+        cmd_line_parameters = CmdLineParameters(
+            parser=self.parser,
+            add_migration_server_url=True,
+            add_migration_destination_storage_name=True,
+            add_readiness_probe_file=True,
+            add_do_not_perform_actual_ingest_and_migration=True,
+            add_dir_updates_wait_time=True,
+        )
+
+        config = process_args(args=parsed, cmd_line_parameters=cmd_line_parameters)
 
         # When storage_root_directory is empty, ingest_register_path_to_add is a relative path
         # calculated from the current working directory to the watch directory
@@ -74,9 +84,20 @@ class TestStorageRootDirectory:
                 self.STORAGE_NAME,
                 "--storage-root-directory",
                 root_dir,
+                "--readiness-probe-file",
+                "/tmp/probe",
             ]
         )
-        config = process_args(args=parsed)
+        cmd_line_parameters = CmdLineParameters(
+            parser=self.parser,
+            # add_migration_server_url=True,
+            # add_migration_destination_storage_name=True,
+            # add_readiness_probe_file=True,
+            # add_do_not_perform_actual_ingest_and_migration=True,
+            # add_dir_updates_wait_time=True,
+        )
+
+        config = process_args(args=parsed, cmd_line_parameters=cmd_line_parameters)
 
         # When storage_root_directory is not empty, ingest_register_path_to_add should be the
         # relative path

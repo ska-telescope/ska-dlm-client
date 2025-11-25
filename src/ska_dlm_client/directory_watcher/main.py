@@ -102,7 +102,8 @@ def create_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def process_args(args: argparse.Namespace, cmd_line_parameters: CmdLineParameters) -> WatcherConfig:
+def process_args(args: argparse.Namespace,
+    cmd_line_parameters: CmdLineParameters) -> WatcherConfig:
     """Collect all command line parameters and create a Config object.
 
     Args:
