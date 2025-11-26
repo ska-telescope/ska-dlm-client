@@ -80,16 +80,14 @@ def get_data_product_dir(config: Config, key: Flow.Key) -> Path:
     flow: Flow | None
     for txn in config.txn():
         flow = txn.flow.get(key)
-        if flow is None:
-            raise KeyError(f"Flow key not found: {key}")
 
-        if not isinstance(flow.sink, DataProduct):
-            raise TypeError(f"Expected data product key: {key}")
+    if flow is None:
+        raise KeyError(f"Flow key not found: {key}")
 
-        return Path(str(flow.sink.data_dir))
+    if not isinstance(flow.sink, DataProduct):
+        raise TypeError(f"Expected data product key: {key}")
 
-    # If config.txn() yielded nothing:
-    raise KeyError(f"Flow key not found: {key}")
+    return Path(str(flow.sink.data_dir))
 
 
 def log_flow_dependencies(txn, product_key: Flow.Key) -> None:
