@@ -89,8 +89,6 @@ def get_data_product_dir(config: Config, key: Flow.Key) -> Path:
         raise TypeError(f"Expected data product key: {key}")
 
     return Path(str(flow.sink.data_dir))
-    logger.debug("Resolved data-product dir for %s: %s", key, path)
-    return path
 
 
 def log_flow_dependencies(txn, product_key: Flow.Key) -> None:
