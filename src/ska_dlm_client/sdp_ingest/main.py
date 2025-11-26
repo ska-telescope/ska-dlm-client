@@ -88,7 +88,7 @@ def _register_data_product(item: Item, ingest_config: SDPIngestConfig) -> str | 
                 request_body=None if item.metadata is None else item.metadata.as_dict(),
             )
             logger.debug("register_data_item response: %s", response)
-            if response is not None:  # Can we assume any non-None response = a valid uuid?
+            if response is not None:  # TODO: don't assume any non-None response = a valid uuid
                 dlm_registration_uuid = str(response)
                 logger.info(
                     "DLM registration successful. Source uuid: %s",
