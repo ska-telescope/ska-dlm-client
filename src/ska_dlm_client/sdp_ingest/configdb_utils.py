@@ -78,28 +78,18 @@ def get_data_product_dir(config: Config, key: Flow.Key) -> Path:
 
     The returned value is `Path("/data/product/<eb>/ska-sdp/<pb>")`.
     """
-    flow: Flow | None = None
+    flow: Flow | None
     for txn in config.txn():
         flow = txn.flow.get(key)
-        break
-
-    if flow is None:
-        msg = f"Flow not found for key {key}"
-        logger.error(msg)
-        raise RuntimeError(msg)
+        if flow is None:
+            msg = f"Flow key not found: {key}"
+            raise KeyError(msg)
+    assert isinstance(flow, Flow)
 
     if not isinstance(flow.sink, DataProduct):
-        msg = (
-            "Flow sink kind '%s' is not 'data-product' for key %s",
-            flow.sink.kind,
-            key,
-        )
-        logger.error(msg)
-        raise TypeError(msg)
+        raise TypeError(f"Expected data product key: {key}")
 
-    data_dir = flow.sink.data_dir
-    # data_dir is PVCPath | AnyPurePath; str() gives the container path
-    path = Path(str(data_dir))
+    return Path(str(flow.sink.data_dir))
     logger.debug("Resolved data-product dir for %s: %s", key, path)
     return path
 
