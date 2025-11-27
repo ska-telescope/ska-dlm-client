@@ -65,18 +65,10 @@ async def create_sdp_migration_dependency(config, dataproduct_key: Flow.Key):
 
 def get_data_product_dir(config: Config, key: Flow.Key) -> Path:
     """
-    Resolve the container path to the data-product directory for a Flow key.
+    Get the directory path to a data product in the SDP configuration database.
 
-    This uses `Flow.sink.data_dir`, which is a `PVCPath | AnyPurePath`.
-    For `PVCPath`, `str(data_dir)` is `pvc_mount_path / pvc_subpath`.
-    For example::
-
-        PVCPath(
-            pvc_mount_path="/data",
-            pvc_subpath="product/<eb>/ska-sdp/<pb>",
-        )
-
-    The returned value is `Path("/data/product/<eb>/ska-sdp/<pb>")`.
+    Returns:
+        absolute path on the local filesystem.
     """
     flow: Flow | None
     for txn in config.txn():
