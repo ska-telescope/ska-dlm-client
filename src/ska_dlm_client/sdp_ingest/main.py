@@ -5,6 +5,7 @@ import asyncio
 import logging
 from dataclasses import dataclass
 
+import athreading
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Flow
 
@@ -88,12 +89,11 @@ def _register_data_product(item: Item, ingest_config: SDPIngestConfig) -> str | 
                 request_body=None if item.metadata is None else item.metadata.as_dict(),
             )
             logger.debug("register_data_item response: %s", response)
-            if response is not None:  # TODO: don't assume any non-None response = a valid uuid
-                dlm_registration_uuid = str(response)
-                logger.info(
-                    "DLM registration successful. Source uuid: %s",
-                    dlm_registration_uuid,
-                )
+            dlm_registration_uuid = str(response)
+            logger.info(
+                "DLM registration successful. Source uuid: %s",
+                dlm_registration_uuid,
+            )
 
         except OpenApiException as err:
             logger.error("OpenApiException caught during register_container_parent_item")
@@ -114,8 +114,20 @@ async def _process_completed_flow(
 
     - Resolve the data-product directory from Flow.sink.data_dir.
     - Identify the .ms file in that directory.
-    - Create a DLM migration dependency (no state yet).
+    - Create a DLM migration dependency
+    - Register data-rpduct in DLM
+    - Set dependency state to WORKING or FAILED.
     """
+    new_dep: str | None = None
+    dep_status: str | None = None
+
+    @athreading.call
+    def _aupdate_dependency_state(status: str) -> None:
+        """Async wrapper for updating Dependency state."""
+        for txn in configdb.txn():
+            update_dependency_state(txn, new_dep, status=status)
+            logger.info("Dependency %s status set to %s.", new_dep, status)
+
     # Resolve the source directory from the Flow sink
     src_dir = get_data_product_dir(configdb, dataproduct_key)
     logger.info(
@@ -124,29 +136,33 @@ async def _process_completed_flow(
         src_dir,
     )
 
-    # Identify the .ms file (may raise if path does not exist / no .ms)
+    # Identify the .ms file
     ms_file_name = _measurement_set_directory_in(src_dir)
     logger.info("Found MS file: %s", ms_file_name)
 
-    # Register a DLM dependency (no state)
+    # Create a DLM dependency (no state yet)
     new_dep = await create_sdp_migration_dependency(configdb, dataproduct_key)
-    if new_dep:
-        logger.info("New dependency: %s", new_dep)
+    if not new_dep:
+        logger.error(
+            "Failed to create dependency for data-product %s ",
+            dataproduct_key,
+        )
+    else:
+        logger.info("New dependency created: %s", new_dep)
 
     # Look for the metadata file
     if not _directory_contains_metadata_file(src_dir):
-        logger.error("No metadata file found!")  # Set metadata = None
+        logger.error("No metadata file found!")
     else:
         logger.debug("Found the metadata file!")
 
     # Build Item object
     item = _item_for_single_file_with_metadata(
         absolute_path=src_dir,
-        path_rel_to_watch_dir=ms_file_name,  # TODO: verify relative vs absolute
+        path_rel_to_watch_dir=ms_file_name,
     )
 
-    # TODO: Ensure location & storage exists (call get_or_init_location and get_or_init_storage)?
-    # Register (blocking) -> run in thread
+    # Register (blocking -> run in thread)
     dlm_source_uuid = await asyncio.to_thread(
         _register_data_product,
         item,
@@ -156,20 +172,24 @@ async def _process_completed_flow(
 
     if dlm_source_uuid is None:
         logger.warning(
-            "DLM registration failed for %s; leaving dependency %s in initial state.",
+            "DLM registration failed for %s; marking dependency %s as FAILED.",
             dataproduct_key,
             new_dep,
         )
-        return
+        dep_status = "FAILED"
+    else:
+        dep_status = "WORKING"
 
-    # Move dependency state to WORKING
-    for txn in configdb.txn():
-        update_dependency_state(txn, new_dep, status="WORKING")
-        logger.info("Dependency %s status set to WORKING.", new_dep)
+    # Update the dependency state
+    if new_dep and dep_status:
+        await _aupdate_dependency_state(dep_status)
 
-    logger.warning(
-        "End of ConfigDB Watcher functionality. Migration step will follow in a future release."
-    )
+    if dep_status == "WORKING":
+        logger.info(
+            "End of ConfigDB Watcher functionality. Migration step will follow in a "
+            "future release. Dependency %s is in WORKING state.",
+            new_dep,
+        )
 
     # TODO: invoke dlm-migration (blocked by DMAN-124)
     # TODO: move dependency state to FINISHED/FAILED
