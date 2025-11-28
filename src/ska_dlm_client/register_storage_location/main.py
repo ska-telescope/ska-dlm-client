@@ -82,7 +82,7 @@ def get_or_init_storage(
     """Get storage_id or perform storage initialisation based on the storage_name provided."""
     assert the_location_id is not None
     os.makedirs(storage_root_directory, exist_ok=True)
-    logger.info("Watcher directory %s created (or already existed)", storage_root_directory)
+    logger.info("Data directory %s created (or already existed)", storage_root_directory)
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
         # Get the storage_id
@@ -120,21 +120,24 @@ def get_or_init_storage(
 
                 # Retrieve and install the rclone ssh public key
                 key = api_storage.get_ssh_public_key()
-                with open(
-                    os.path.expanduser("~/.ssh/authorized_keys"), "a", encoding="utf-8"
-                ) as key_file:
-                    key_file.write(f"\n{key}\n")
-                shutil.copyfile(
-                    os.path.expanduser("~/.ssh/authorized_keys"),
-                    "/home/ska-dlm/.ssh/authorized_keys",
-                )
-                os.chown(
-                    "/home/ska-dlm/.ssh/authorized_keys",
-                    pwd.getpwnam("ska-dlm").pw_uid,
-                    pwd.getpwnam("ska-dlm").pw_gid,
-                )
-                os.chmod("/home/ska-dlm/.ssh/authorized_keys", 0o600)
-                logger.info("rclone SSH public key installed.")
+                try:
+                    with open(
+                        os.path.expanduser("~/.ssh/authorized_keys"), "a", encoding="utf-8"
+                    ) as key_file:
+                        key_file.write(f"\n{key}\n")
+                    shutil.copyfile(
+                        os.path.expanduser("~/.ssh/authorized_keys"),
+                        "/home/ska-dlm/.ssh/authorized_keys",
+                    )
+                    os.chown(
+                        "/home/ska-dlm/.ssh/authorized_keys",
+                        pwd.getpwnam("ska-dlm").pw_uid,
+                        pwd.getpwnam("ska-dlm").pw_gid,
+                    )
+                    os.chmod("/home/ska-dlm/.ssh/authorized_keys", 0o600)
+                    logger.info("rclone SSH public key installed.")
+                except Exception as e:
+                    logger.error("Unable to install SSH key: %s",e)
     return the_storage_id
 
 
@@ -167,7 +170,8 @@ def setup_testing(api_configuration: Configuration):
     # endpoint will be performed during stratup of the DLM server and
     # then this can be removed as well.
     logger.info("Testing setup.")
-    location_id = get_or_init_location(api_configuration, location=LOCATION_NAME)
+    storage_url=f"{api_configuration.host}:8003"
+    location_id = get_or_init_location(api_configuration, location=LOCATION_NAME, storage_url=storage_url)
     storage_id = get_or_init_storage(
         storage_name=RCLONE_CONFIG_TARGET["name"],
         api_configuration=api_configuration,

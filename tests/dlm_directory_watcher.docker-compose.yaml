@@ -13,8 +13,7 @@ services:
     # the general case via a service name or similar.
     entrypoint: /entrypoint.sh
     volumes:
-      - ~/scratch:/dlm
-      - shared-tmpfs:/data
+      - shared-tmpfs:/dlm
     networks:
       - dlm_network
   setup_storage_location:

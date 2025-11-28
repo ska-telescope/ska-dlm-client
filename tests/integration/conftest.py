@@ -65,11 +65,13 @@ DEFAULT_SERVER_DIR = (DEFAULT_BASE / "ska-data-lifecycle").resolve()
 DLM_SERVER_DIR = Path(os.getenv("DLM_SERVER_DIR", str(DEFAULT_SERVER_DIR))).resolve()
 
 SERVER_TESTS = DLM_SERVER_DIR / "tests"
+CLIENT = CLIENT_ROOT / "tests/test-services.docker-compose.yml"
 OVERRIDE = Path(__file__).with_name("docker-compose.override.yaml")
 
 COMPOSE_FILES = [
     SERVER_TESTS / "services.docker-compose.yaml",
     SERVER_TESTS / "dlm.docker-compose.yaml",
+    CLIENT,
     OVERRIDE,
 ]
 
@@ -218,6 +220,10 @@ def dlm_stack():
         "dlm_postgrest",
         "dlm_rclone",
         "dlm_storage",
+        "dlm_migration",
+        "dlm_ingest",
+        "dlm_request",
+        "dlm_directory_watcher"
     )
     try:
         _wait_for_http(POSTGREST_URL, timeout_s=30)
@@ -225,7 +231,8 @@ def dlm_stack():
         _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
         yield
     finally:  # teardown
-        _compose("down", "-v")
+        pass
+        # _compose("down", "-v")
 
 
 @pytest.fixture(scope="session")

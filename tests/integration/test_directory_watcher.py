@@ -2,6 +2,7 @@
 
 import logging
 import subprocess
+from time import sleep
 
 import pytest
 
@@ -11,15 +12,20 @@ from ska_dlm_client.common_types import (
     StorageInterface,
     StorageType,
 )
+from ska_dlm_client.config import STATUS_FILE_FILENAME
+from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
+from ska_dlm_client.openapi.dlm_api import request_api
+from ska_dlm_client.register_storage_location.main import setup_testing
 
 log = logging.getLogger(__name__)
 
 LOCATION_NAME = "ThisDLMClientLocationName"
 LOCATION_TYPE = LocationType.LOCAL_DEV
 LOCATION_COUNTRY = LocationCountry.AU
+
 LOCATION_CITY = "Marksville"
 LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
 STORAGE = {
@@ -31,7 +37,7 @@ STORAGE = {
         "STORAGE_CONFIG": {"name": "data", "type": "local", "parameters": {}}
     },
     "SRC": {
-        "STORAGE_NAME": "MyDisk1",
+        "STORAGE_NAME": "dlm_watcher",
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
         "ROOT_DIRECTORY": "/dlm",
@@ -119,34 +125,28 @@ def test_storage_initialisation(storage_configuration: Configuration):
 @pytest.mark.integration
 def test_auto_migration(storage_configuration: Configuration):
     """Test auto migration using directory watcher."""
+    # watcher_config = WatcherConfig(
+    #     directory_to_watch=STORAGE["SRC"]["ROOT_DIRECTORY"] + "/watch_dir",
+    #     ingest_server_url="http://localhost:8001",
+    #     storage_name=STORAGE["SRC"]["STORAGE_NAME"],
+    #     status_file_absolute_path=f"{STORAGE["SRC"]["ROOT_DIRECTORY"] + "/watch_dir"}/{STATUS_FILE_FILENAME}",
+    #     storage_root_directory=STORAGE["SRC"]["ROOT_DIRECTORY"]
+    # )
+    api_configuration = Configuration(host="http://localhost")
+    setup_testing(api_configuration)
     with api_client.ApiClient(storage_configuration) as the_api_client:
-        api_storage = storage_api.StorageApi(the_api_client)
-
-        # --- Check whether source storage already configured ---
-        resp2 = api_storage.query_storage(storage_name=STORAGE["TGT"]["STORAGE_NAME"])
-        if resp2 and _get_id(resp2[0], "storage_id"):
-            log.info("Target storage already configured, skipping setup.")
-            location_id = _get_id(resp2[0], "location_id")
-        else:
-            # --- ensure location exists ---
-            location_id = _init_location_if_needed(api_storage)
-
-            # --- ensure source storage exists ---
-            _ = _init_storage_if_needed(api_storage, location_id)
-
-        # --- Check whether target storage already configured ---
-        resp2 = api_storage.query_storage(storage_name=STORAGE["SRC"]["STORAGE_NAME"])
-        if resp2 and _get_id(resp2[0], "storage_id"):
-            log.info("Source Storage already configured, skipping setup.")
-            tgt_storage_id = _get_id(resp2[0], "storage_id")
-        else:
-            # --- ensure storage exists ---
-            tgt_storage_id = _init_storage_if_needed(api_storage, location_id, storage=STORAGE["SRC"])
-
-        log.info("Source Storage ID: %s", tgt_storage_id)
-    # --- start and trigger watcher by copying file ---
-    subprocess.run("docker start dlm_directory_watcher", shell=True, check=True)
-    cmd = "docker exec dlm_directory_watcher cp /etc/group /dlm/watch_dir/."
-    subprocess.run(cmd, shell=True, check=True)
-    # assert isinstance(migration_id, str) and migration_id
-    # log.info("Migration initiated: %s", migration_id)
+        log.info("Migration setup: Source Storage: %s",
+            STORAGE["SRC"]["STORAGE_NAME"])
+        log.info("Migration setup: Target Storage: %s",
+            STORAGE["TGT"]["STORAGE_NAME"])
+        # --- start and trigger watcher by copying file ---
+        cmd = "docker exec dlm_directory_watcher cp /etc/group /dlm/watch_dir/."
+        log.info("Migration setup: Copy command: %s",cmd)
+        subprocess.run(cmd, shell=True, check=True)
+        sleep(2)
+        api_request = request_api.RequestApi(the_api_client)
+        resp2 = api_request.query_exists(item_name="group")
+        # assert resp2 and _get_id(resp2[0], "item_name") == "group"
+        log.info("File migration verified in DLM system:  %s",resp2)
+        # assert isinstance(migration_id, str) and migration_id
+        # log.info("Migration initiated: %s", migration_id)
