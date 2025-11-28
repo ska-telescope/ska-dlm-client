@@ -27,7 +27,7 @@ class DirectoryWatcherEntry:
 class DirectoryWatcherEntries:
     """The list of entries to be managed."""
 
-    directory_watcher_entries: [DirectoryWatcherEntry]
+    directory_watcher_entries: list[DirectoryWatcherEntry]
     entries_file: str
     write_directory_entries_file: bool
 

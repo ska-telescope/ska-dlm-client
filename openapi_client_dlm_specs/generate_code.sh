@@ -15,8 +15,8 @@ rm -rf specs openapi_client_dlm_project
 echo "\nrunning the python script to generate the OpenAPI specs"
 python3 generate_openapi_specs.py specs
 
-echo "\nrunning openapi-generatoe to create an OpenAPI project from the spec files"
-openapi-generator generate --generator-name python --api-package ska_dlm_client.openapi.dlm_api -o openapi_client_dlm_project --package-name ska_dlm_client.openapi --input-spec-root-directory specs/
+echo "\nrunning openapi-generate to create an OpenAPI project from the spec files"
+openapi-generator-cli generate --generator-name python --api-package ska_dlm_client.openapi.dlm_api -o openapi_client_dlm_project --package-name ska_dlm_client.openapi --input-spec-root-directory specs/
 
 echo "\nfixing package location of dlm_api"
 mv openapi_client_dlm_project/ska_dlm_client/openapi/ska_dlm_client/openapi/dlm_api openapi_client_dlm_project/ska_dlm_client/openapi/

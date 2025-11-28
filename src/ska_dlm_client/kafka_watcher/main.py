@@ -7,7 +7,7 @@ import logging
 
 import aiokafka
 
-from ska_dlm_client.directory_watcher.registration_processor import ItemType
+from ska_dlm_client.common_types import ItemType
 from ska_dlm_client.openapi import api_client, configuration
 from ska_dlm_client.openapi.dlm_api import ingest_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
@@ -135,13 +135,7 @@ async def watch(  # pylint: disable=too-many-arguments, too-many-positional-argu
     kafka_base_dir: str,
     check_rclone_access: bool,
 ):
-    """
-    Asynchronously consumes data product, create events from data queues, and notifies DLM.
-
-    Args:
-        servers (list[str]): Data queue servers.
-        topics (list[str]): Data queue topics.
-    """
+    """Asynchronously consumes data product, create events from data queues, and notifies DLM."""
     logger.debug("Connecting to Kafka server(s): %s", ", ".join(kafka_broker_url))
     logger.info("Watching %s topic(s) for dataproducts to process", ", ".join(kafka_broker_url))
 

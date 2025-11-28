@@ -17,15 +17,17 @@ services:
     volumes: # Mount the certs we generated on the host
       - ${DLM_SERVER_DIR}/tests/integration/certs:/etc/ssl/localcerts:ro
     # Point rclone at the mounted certs
+    entrypoint: rclone
     command:
       - rcd
       - --rc-serve
-      - --rc-addr
-      - :5572
+      - --rc-addr=0.0.0.0:5572
       - --rc-cert=/etc/ssl/localcerts/selfsigned.cert
       - --rc-key=/etc/ssl/localcerts/selfsigned.key
       - --rc-no-auth
       - --rc-job-expire-duration=43200s
+      - --rc-web-gui
+      - --rc-web-gui-no-open-browser
   dlm_storage:
     ports:
       - 8003:8003

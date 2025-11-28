@@ -23,7 +23,7 @@ from datetime import datetime
 from ska_dlm_client.openapi import ApiException, api_client, configuration
 from ska_dlm_client.openapi.dlm_api import request_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
-from ska_dlm_client.startup_verification.utils import CmdLineParameters
+from ska_dlm_client.utils import CmdLineParameters
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

@@ -32,7 +32,7 @@ priority = "supplemental"
 [tool.poetry.dependencies]
 python = "^3.10"
 aiokafka = "0.10.0"
-pydantic = "^2.9.2"
+pydantic = "^2.11.9"
 python-dateutil = "^2.9.0.post0"
 python-benedict = ">=0.33.2"
 watchfiles = "^0.24.0"
@@ -82,6 +82,10 @@ ignore = [
     'F401',  # Module imported but unused
     'W503',  # Line break occurred before a binary operator
     'D105',  # Missing docstring in magic method
+    'DAR101',  # Missing docstring in public class
+    'DAR201',  # Missing docstring in public module
+    'DAR301',  # Missing docstring in public package
+    'DAR401',  # Missing docstring in public function
 ]
 max-complexity = 10
 max-line-length = 180
@@ -89,15 +93,15 @@ max-line-length = 180
 # exclude for auto generated code
 exclude = ["src/ska_dlm_client/openapi", "tests/openapi"]
 
-[tool.pylint.MASTER]
-ignore = "openapi"
-
 [tool.pylint.messages_control]
 disable = [
     "duplicate-code",
     "fixme",
 ]
 enable = ["useless-suppression"]
+
+[tool.pylint.MASTER]
+ignore-paths = ["tests/openapi", "src/ska_dlm_client/openapi"]
 
 [tool.isort]
 line_length = 99

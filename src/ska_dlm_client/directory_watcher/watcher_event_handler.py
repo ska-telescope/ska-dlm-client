@@ -19,8 +19,9 @@ from watchdog.events import (
     FileSystemEventHandler,
 )
 
-from ska_dlm_client.directory_watcher.config import Config
-from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
+from ska_dlm_client.registration_processor import RegistrationProcessor
+
+from .config import WatcherConfig
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,9 @@ class WatcherEventHandler(FileSystemEventHandler):
     Originally based on `LoggingEventHandler`.
     """
 
-    def __init__(self, config: Config, registration_processor: RegistrationProcessor) -> None:
+    def __init__(
+        self, config: WatcherConfig, registration_processor: RegistrationProcessor
+    ) -> None:
         """Initialise with the required config and registration_processor."""
         self._config = config
         self._registration_processor = registration_processor
