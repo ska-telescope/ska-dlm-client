@@ -22,16 +22,6 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-# class ItemType(str, Enum):
-#     """Data Item on the filesystem."""
-
-#     UNKOWN = "unknown"
-#     """A single file."""
-#     FILE = "file"
-#     """A directory superset with parents."""
-#     CONTAINER = "container"
-
-
 @dataclass
 class Item:
     """Data Item related information to aid registration."""

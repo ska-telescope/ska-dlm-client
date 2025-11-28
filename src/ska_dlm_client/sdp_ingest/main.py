@@ -9,16 +9,16 @@ import athreading
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Flow
 
-from ska_dlm_client.directory_watcher.registration_processor import (
+from ska_dlm_client.openapi import ApiException, api_client
+from ska_dlm_client.openapi.configuration import Configuration
+from ska_dlm_client.openapi.dlm_api import ingest_api
+from ska_dlm_client.openapi.exceptions import OpenApiException
+from ska_dlm_client.registration_processor import (
     Item,
     _directory_contains_metadata_file,
     _item_for_single_file_with_metadata,
     _measurement_set_directory_in,
 )
-from ska_dlm_client.openapi import ApiException, api_client
-from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.dlm_api import ingest_api
-from ska_dlm_client.openapi.exceptions import OpenApiException
 from ska_dlm_client.sdp_ingest.configdb_utils import (
     create_sdp_migration_dependency,
     get_data_product_dir,

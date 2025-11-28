@@ -20,7 +20,6 @@ services:
       # ska-data-lifecycle/tests/integration/certs
       - ${DLM_SERVER_DIR}/tests/integration/certs:/etc/ssl/localcerts:ro
     # Point rclone at the mounted certs
-    entrypoint: rclone
     command:
       - rcd
       - --rc-serve
