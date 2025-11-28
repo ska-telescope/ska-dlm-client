@@ -100,10 +100,33 @@ For a detailed guide please check the [sample deployment documentation](https://
 
 # Testing
 
-To run automated tests
+To run automated tests, you can use the following command:
 
 ```sh
 make python-test
+```
+
+This will execute the tests using pytest with coverage reporting. Under the hood, the command runs:
+
+```sh
+PYTHONPATH=/Users/00077990/ska/pi27/ska-dlm-client/src/:/app/src/:  pytest  \
+ --cov=src/ --cov-report=term-missing --cov-report html:build/reports/code-coverage --cov-report xml:build/reports/code-coverage.xml --junitxml=build/reports/unit-tests.xml tests/
+```
+
+This command:
+- Sets the PYTHONPATH to include both local and container source directories
+- Runs pytest on the tests/ directory
+- Collects code coverage for the src/ directory
+- Generates coverage reports in multiple formats:
+  - Terminal output with missing lines highlighted
+  - HTML report in build/reports/code-coverage
+  - XML report in build/reports/code-coverage.xml
+- Outputs test results in JUnit XML format to build/reports/unit-tests.xml
+
+You can also run specific tests by specifying the test file or directory:
+
+```sh
+make PYTHON_TEST_FILE=tests/directory_watcher/test_directory_utils.py python-test
 ```
 
 

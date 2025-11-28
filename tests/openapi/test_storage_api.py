@@ -40,6 +40,13 @@ class TestStorageApi(unittest.TestCase):
         """
         pass
 
+    def test_get_ssh_public_key(self) -> None:
+        """Test case for get_ssh_public_key
+
+        Get Ssh Public Key
+        """
+        pass
+
     def test_get_storage_config(self) -> None:
         """Test case for get_storage_config
 

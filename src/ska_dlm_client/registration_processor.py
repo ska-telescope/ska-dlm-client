@@ -9,17 +9,27 @@ from pathlib import Path
 
 from typing_extensions import Self
 
-import ska_dlm_client.directory_watcher.config
+import ska_dlm_client.config
 from ska_dlm_client.common_types import ItemType
-from ska_dlm_client.directory_watcher.config import Config
-from ska_dlm_client.directory_watcher.data_product_metadata import DataProductMetadata
+from ska_dlm_client.config import Config
+from ska_dlm_client.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntry
 from ska_dlm_client.openapi import ApiException, api_client
-from ska_dlm_client.openapi.dlm_api import ingest_api
+from ska_dlm_client.openapi.dlm_api import ingest_api, migration_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+
+# class ItemType(str, Enum):
+#     """Data Item on the filesystem."""
+
+#     UNKOWN = "unknown"
+#     """A single file."""
+#     FILE = "file"
+#     """A directory superset with parents."""
+#     CONTAINER = "container"
 
 
 @dataclass
@@ -50,51 +60,119 @@ class Item:
 
 
 class RegistrationProcessor:
-    """The class used for processing of the registration."""
+    """Processes the registration of data items with the DLM.
+
+    This class handles the registration of data items with the DLM system,
+    including sending registration requests to the DLM API and handling
+    the migration of data items between storage locations.
+    """
 
     _config: Config
-    dry_run_for_debug: bool = False
 
     def __init__(self, config: Config):
-        """Initialise the RegistrationProcessor with the given config."""
+        """Initialize the RegistrationProcessor with the given configuration.
+
+        Args:
+            config: The configuration object containing DLM connection settings
+                   and other parameters needed for registration and migration.
+        """
         self._config = config
 
-    def get_config(self):
-        """Get the Config being used by the RegistrationProcessor."""
+    def get_config(self) -> Config:
+        """Get the configuration being used by the RegistrationProcessor.
+
+        Returns:
+            The current configuration object.
+        """
         return self._config
 
     def set_config(self, config: Config):
-        """Set/reset the config."""
+        """Set or reset the configuration used by the RegistrationProcessor.
+
+        Args:
+            config: The new configuration object to use.
+        """
         self._config = config
 
     def _follow_sym_link(self, path: Path) -> Path:
-        """Return the real path after following the symlink."""
+        """Return the real path after following the symlink.
+
+        Args:
+            path: The path that might be a symlink.
+
+        Returns:
+            The resolved path if it was a symlink, otherwise the original path.
+        """
         if path.is_symlink():
             path.resolve()
         return path
 
+    def _copy_data_item_to_new_storage(self, uid: str, item_name: str = "") -> str | None:
+        """Send migration request to DLM.
+
+        Args:
+            uid: The unique identifier of the data item to copy.
+            item_name: The name of the item (only used for a log message)
+
+        Returns:
+            The UUID of the migrated data item, or None if migration was skipped or failed.
+        """
+        if not uid:
+            logger.warning("Skipping migration due to missing uid")
+            return None
+        if not self._config.migration_destination_storage_name:
+            logger.warning("Skipping migration due to missing destination storage name")
+            return None
+        if not self._config.perform_actual_ingest_and_migration:
+            logger.warning("Migration is disabled in configuration!")
+            return None
+        with api_client.ApiClient(self._config.migration_configuration) as migration_api_client:
+            logger.info("Initiating migration of data item %s", item_name)
+            api_migration = migration_api.MigrationApi(migration_api_client)
+            try:
+                response = api_migration.copy_data_item(
+                    uid=uid, destination_name=self._config.migration_destination_storage_name
+                )
+                logger.info("Migration response: %s", response)
+                return str(response)
+            except OpenApiException as err:
+                logger.error("OpenApiException caught during copy_data_item")
+                if isinstance(err, ApiException):
+                    logger.error("ApiException: %s", err.body)
+                logger.error("%s", err)
+                logger.error("Ignoring and continuing.....")
+                return None
+
     def _register_single_item(self, item: Item) -> str | None:
-        """Register the given item returning its uuid in the DLM."""
+        """Register a single data item with the DLM.
+
+        Sends a registration request to the DLM API for the given item,
+        and optionally migrates the registered item to a new storage location.
+
+        Args:
+            item: The data item to register with the DLM.
+
+        Returns:
+            The UUID of the registered data item, or None if registration failed.
+        """
         with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
+            api_ingest.api_client.configuration.host = self._config.ingest_server_url
             try:
-                # Generate the uri relative to the root directory.
-                item_path_rel_to_watch_dir = item.path_rel_to_watch_dir
-                uri = (
-                    item_path_rel_to_watch_dir
-                    if self._config.ingest_register_path_to_add == ""
-                    else f"{self._config.ingest_register_path_to_add}/{item_path_rel_to_watch_dir}"
-                )
+                logger.info("Using URI: %s for data_item registration", item.path_rel_to_watch_dir)
                 response = None
-                if not self.dry_run_for_debug:
+                if self._config.perform_actual_ingest_and_migration:
                     response = api_ingest.register_data_item(
-                        item_name=item_path_rel_to_watch_dir,
-                        uri=uri,
+                        item_name=item.path_rel_to_watch_dir,
+                        uri=item.path_rel_to_watch_dir,
                         item_type=item.item_type,
                         storage_name=self._config.storage_name,
                         do_storage_access_check=self._config.rclone_access_check_on_register,
                         request_body=None if item.metadata is None else item.metadata.as_dict(),
                     )
+                    logger.debug("register_data_item response: %s", response)
+                else:
+                    logger.warning("Skipping register_data_item due to config")
             except OpenApiException as err:
                 logger.error("OpenApiException caught during register_container_parent_item")
                 if isinstance(err, ApiException):
@@ -103,11 +181,15 @@ class RegistrationProcessor:
                 logger.error("Ignoring and continuing.....")
                 return None
 
-        dlm_registration_uuid = str(response)
+        dlm_registration_uuid = str(response) if response is not None else None
+        # Attempt to migrate the data item to the new storage
+        migration_result = self._copy_data_item_to_new_storage(
+            uid=dlm_registration_uuid, item_name=item.path_rel_to_watch_dir
+        )
         time_registered = time.time()
 
         directory_watcher_entry = DirectoryWatcherEntry(
-            file_or_directory=item_path_rel_to_watch_dir,
+            file_or_directory=item.path_rel_to_watch_dir,
             dlm_storage_name=self._config.storage_name,
             dlm_registration_id=dlm_registration_uuid,
             time_registered=time_registered,
@@ -115,32 +197,36 @@ class RegistrationProcessor:
         self._config.directory_watcher_entries.add(directory_watcher_entry)
         self._config.directory_watcher_entries.save_to_file()
         logger.info(
-            "Added to DLM %s %s metadata and path %s",
+            "Added to DLM %s %s metadata, path %s, migration result: %s",
             item.item_type,
             "without" if item.metadata is None else "with",
-            item_path_rel_to_watch_dir,
+            item.path_rel_to_watch_dir,
+            migration_result,
         )
         return dlm_registration_uuid
 
     def _register_container_items(self, item_list: list[Item]):
-        """Register the given item returning its uuid in the DLM."""
+        """Register a list of data items with the DLM.
+
+        Sends registration requests to the DLM API for each item in the list,
+        and optionally migrates each registered item to a new storage location.
+
+        Args:
+            item_list: A list of data items to register with the DLM.
+        """
         with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
             for item in item_list:
                 try:
                     # Generate the uri relative to the root directory.
-                    item_path_rel_to_watch_dir = item.path_rel_to_watch_dir
-                    uri = (
-                        item_path_rel_to_watch_dir
-                        if self._config.ingest_register_path_to_add == ""
-                        else f"{self._config.ingest_register_path_to_add}/"
-                        f"{item_path_rel_to_watch_dir}"
+                    logger.info(
+                        "Using URI: %s for data_item registration", item.path_rel_to_watch_dir
                     )
                     response = None
-                    if not self.dry_run_for_debug:
+                    if self._config.perform_actual_ingest_and_migration:
                         response = api_ingest.register_data_item(
-                            item_name=item_path_rel_to_watch_dir,
-                            uri=uri,
+                            item_name=item.path_rel_to_watch_dir,
+                            uri=item.path_rel_to_watch_dir,
                             item_type=item.item_type,
                             storage_name=self._config.storage_name,
                             do_storage_access_check=self._config.rclone_access_check_on_register,
@@ -149,6 +235,9 @@ class RegistrationProcessor:
                                 None if item.metadata is None else item.metadata.as_dict()
                             ),
                         )
+                        logger.debug("register_data_item response: %s", response)
+                    else:
+                        logger.warning("Skipping register_data_item due to config")
                 except OpenApiException as err:
                     logger.error("OpenApiException caught during _register_container_items")
                     if isinstance(err, ApiException):
@@ -157,11 +246,15 @@ class RegistrationProcessor:
                     logger.error("Ignoring and continuing.....")
                     return
 
-                dlm_registration_uuid = str(response)
+                dlm_registration_uuid = str(response) if response is not None else None
+                # Attempt to migrate the data item to the new storage
+                migration_result = self._copy_data_item_to_new_storage(
+                    uid=dlm_registration_uuid, item_name=item.path_rel_to_watch_dir
+                )
                 time_registered = time.time()
 
                 directory_watcher_entry = DirectoryWatcherEntry(
-                    file_or_directory=item_path_rel_to_watch_dir,
+                    file_or_directory=item.path_rel_to_watch_dir,
                     dlm_storage_name=self._config.storage_name,
                     dlm_registration_id=dlm_registration_uuid,
                     time_registered=time_registered,
@@ -169,21 +262,26 @@ class RegistrationProcessor:
                 self._config.directory_watcher_entries.add(directory_watcher_entry)
                 self._config.directory_watcher_entries.save_to_file()
                 logger.info(
-                    "Added to DLM %s %s metadata and path %s",
+                    "Added to DLM %s %s metadata, path %s, migration result: %s",
                     item.item_type,
                     "without" if item.metadata is None else "with",
-                    item_path_rel_to_watch_dir,
+                    item.path_rel_to_watch_dir,
+                    migration_result,
                 )
                 time.sleep(0.01)
 
     def add_path(self, absolute_path: str, path_rel_to_watch_dir: str):
-        """Add the given path_rel_to_watch_dir to the DLM.
+        """Add the given path to the DLM.
 
         If absolute_path is a file, a single file will be registered with the DLM.
         If absolute_path is a directory, and it is an MS, then ingest a single data
         item for the whole directory.
         If absolute_path is a directory, and it is NOT an MS, then recursively ingest
-        all files and subdirectories
+        all files and subdirectories.
+
+        Args:
+            absolute_path: The absolute path to the file or directory to register.
+            path_rel_to_watch_dir: The path relative to the watch directory.
         """
         logger.info("in add_path with %s and %s", absolute_path, path_rel_to_watch_dir)
         item_list = _generate_paths_and_metadata(
@@ -206,11 +304,16 @@ class RegistrationProcessor:
             time.sleep(2)
             item_list.remove(parent_item)
             self._register_container_items(item_list=item_list)
+            logger.info("Finished adding data items %s", parent_item)
+        logger.info("Finished add_path %s", path_rel_to_watch_dir)
 
-    def register_data_products_from_watch_directory(self, dry_run_for_debug: bool = False):
-        """Provide a mechanism to register the contents of the directory to watch."""
+    def register_data_products_from_watch_directory(self):
+        """Register all data products found in the watch directory with the DLM.
+
+        Iterates through all items in the configured watch directory and registers
+        each one with the DLM using the add_path method.
+        """
         logger.info("\n##############################\n")
-        self.dry_run_for_debug = dry_run_for_debug
         for item in os.listdir(self._config.directory_to_watch):
             self.add_path(
                 absolute_path=os.path.join(self._config.directory_to_watch, item),
@@ -222,7 +325,18 @@ class RegistrationProcessor:
 def _generate_item_list_for_data_product(
     absolute_path: str, path_rel_to_watch_dir: str
 ) -> list[Item]:
-    """Return the list of relative paths to data items given a directory."""
+    """Generate a list of Item objects for a data product directory.
+
+    Analyzes the directory structure and metadata to create Item objects
+    representing the data product and its components.
+
+    Args:
+        absolute_path: The absolute path to the data product directory.
+        path_rel_to_watch_dir: The path relative to the watch directory.
+
+    Returns:
+        A list of Item objects representing the data product and its components.
+    """
     item_list: list[Item] = []
     # Case with metadata being at same level as container directory
 
@@ -255,7 +369,7 @@ def _generate_item_list_for_data_product(
             )
             item_list.extend(additional_items)
             logger.info("%s: %s", absolute_path, additional_items)
-        elif not entry == ska_dlm_client.directory_watcher.config.METADATA_FILENAME:
+        elif not entry == ska_dlm_client.config.METADATA_FILENAME:
             item = Item(
                 path_rel_to_watch_dir=os.path.join(path_rel_to_watch_dir, entry),
                 item_type=ItemType.FILE,
@@ -267,16 +381,27 @@ def _generate_item_list_for_data_product(
     return item_list
 
 
-def _generate_paths_and_metadata_for_direcotry(
+def _generate_paths_and_metadata_for_directory(
     absolute_path: str, path_rel_to_watch_dir: str
 ) -> list[Item]:
-    """Return the list of relative paths to data items given a directory."""
+    """Generate a list of Item objects for a directory.
+
+    Analyzes the directory structure to determine if it contains data products
+    and creates appropriate Item objects.
+
+    Args:
+        absolute_path: The absolute path to the directory.
+        path_rel_to_watch_dir: The path relative to the watch directory.
+
+    Returns:
+        A list of Item objects representing the directory contents.
+    """
     item_list: list[Item] = []
     # Determine first if the given path is the head of a data item or of a directory containing
     # other data items. Exclude any configurations not currently supported
     if not _directory_contains_only_files(absolute_path):
         if _directory_contains_only_directories(absolute_path):
-            logger.info("Direcory %s contains only directories, processing.", absolute_path)
+            logger.info("Directory %s contains only directories, processing.", absolute_path)
         elif _directory_contains_metadata_file(absolute_path):
             item_list = _generate_item_list_for_data_product(
                 absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
@@ -317,7 +442,7 @@ def _generate_paths_and_metadata_for_direcotry(
 
         # When not just a measurement set then add files from directory
         if not path_rel_to_watch_dir.lower().endswith(
-            ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
+            ska_dlm_client.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
         ):
             additional_items = _item_list_minus_metadata_file(
                 container_item=container_item,
@@ -331,7 +456,7 @@ def _generate_paths_and_metadata_for_direcotry(
         for entry in os.listdir(absolute_path):
             local_abs_path = os.path.join(absolute_path, entry)
             local_rel_path = os.path.join(path_rel_to_watch_dir, entry)
-            new_items = _generate_paths_and_metadata_for_direcotry(
+            new_items = _generate_paths_and_metadata_for_directory(
                 absolute_path=local_abs_path, path_rel_to_watch_dir=local_rel_path
             )
             item_list.extend(new_items)
@@ -339,7 +464,18 @@ def _generate_paths_and_metadata_for_direcotry(
 
 
 def _generate_paths_and_metadata(absolute_path: str, path_rel_to_watch_dir: str) -> list[Item]:
-    """Return the list of relative paths to data items and their associated metadata."""
+    """Generate a list of Item objects with their associated metadata.
+
+    Determines whether the path is a file or directory and creates appropriate
+    Item objects with metadata.
+
+    Args:
+        absolute_path: The absolute path to the file or directory.
+        path_rel_to_watch_dir: The path relative to the watch directory.
+
+    Returns:
+        A list of Item objects with their associated metadata.
+    """
     logger.info("working with path %s", absolute_path)
     item_list: list[Item] = []
     if isfile(absolute_path):
@@ -358,7 +494,7 @@ def _generate_paths_and_metadata(absolute_path: str, path_rel_to_watch_dir: str)
         else:
             logger.info("entry is directory")
 
-        item_list = _generate_paths_and_metadata_for_direcotry(
+        item_list = _generate_paths_and_metadata_for_directory(
             absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
         )
     elif islink(absolute_path):
@@ -369,7 +505,17 @@ def _generate_paths_and_metadata(absolute_path: str, path_rel_to_watch_dir: str)
 
 
 def _item_for_single_file_with_metadata(absolute_path: str, path_rel_to_watch_dir: str) -> Item:
-    """Create an Item for a file by itself adding any metadata to it."""
+    """Create an Item object for a single file with its metadata.
+
+    Extracts metadata for the file and creates an Item object of type FILE.
+
+    Args:
+        absolute_path: The absolute path to the file.
+        path_rel_to_watch_dir: The path relative to the watch directory.
+
+    Returns:
+        An Item object representing the file with its metadata.
+    """
     metadata = DataProductMetadata(absolute_path)
     item = Item(
         path_rel_to_watch_dir=path_rel_to_watch_dir,
@@ -381,7 +527,14 @@ def _item_for_single_file_with_metadata(absolute_path: str, path_rel_to_watch_di
 
 
 def _directory_contains_only_directories(absolute_path: str) -> bool:
-    """Return True if the given directory contains only directories."""
+    """Check if a directory contains only subdirectories and no files.
+
+    Args:
+        absolute_path: The absolute path to the directory to check.
+
+    Returns:
+        True if the directory contains only subdirectories, False otherwise.
+    """
     for entry in os.listdir(absolute_path):
         if not os.path.isdir(os.path.join(absolute_path, entry)):
             return False
@@ -389,7 +542,14 @@ def _directory_contains_only_directories(absolute_path: str) -> bool:
 
 
 def _directory_contains_only_files(absolute_path: str) -> bool:
-    """Return True if the given directory contains only files."""
+    """Check if a directory contains only files and no subdirectories.
+
+    Args:
+        absolute_path: The absolute path to the directory to check.
+
+    Returns:
+        True if the directory contains only files, False otherwise.
+    """
     for entry in os.listdir(absolute_path):
         if not os.path.isfile(os.path.join(absolute_path, entry)):
             return False
@@ -397,35 +557,77 @@ def _directory_contains_only_files(absolute_path: str) -> bool:
 
 
 def _directory_contains_metadata_file(absolute_path: str) -> bool:
-    """Return True if the given directory contains only files."""
+    """Check if a directory contains a metadata file.
+
+    Looks for the presence of a file with the name defined in
+    ska_dlm_client.directory_watcher.config.METADATA_FILENAME.
+
+    Args:
+        absolute_path: The absolute path to the directory to check.
+
+    Returns:
+        True if the directory contains a metadata file, False otherwise.
+    """
     for entry in os.listdir(absolute_path):
-        if entry == ska_dlm_client.directory_watcher.config.METADATA_FILENAME:
+        if entry == ska_dlm_client.config.METADATA_FILENAME:
             return True
     return False
 
 
 def _measurement_set_directory_in(absolute_path: str) -> str | None:
-    """Return the name of the measurement set directory or None if nothing found."""
+    """Find a measurement set directory within the given directory.
+
+    Looks for a directory with a name ending with the suffix defined in
+    ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX.
+
+    Args:
+        absolute_path: The absolute path to the directory to search in.
+
+    Returns:
+        The name of the measurement set directory if found, None otherwise.
+    """
     for entry in os.listdir(absolute_path):
-        if entry.lower().endswith(
-            ska_dlm_client.directory_watcher.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
-        ):
+        if entry.lower().endswith(ska_dlm_client.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX):
             return entry
     return None
 
 
 def _directory_list_minus_metadata_file(absolute_path: str) -> list[str]:
-    """Return the list of relative minus the metadata file name."""
+    """Get a list of directory contents excluding the metadata file.
+
+    Returns a list of all files and directories in the given directory,
+    excluding the metadata file defined in
+    ska_dlm_client.directory_watcher.config.METADATA_FILENAME.
+
+    Args:
+        absolute_path: The absolute path to the directory to list.
+
+    Returns:
+        A list of filenames in the directory, excluding the metadata file.
+    """
     dir_list = os.listdir(absolute_path)
-    if ska_dlm_client.directory_watcher.config.METADATA_FILENAME in dir_list:
-        dir_list.remove(ska_dlm_client.directory_watcher.config.METADATA_FILENAME)
+    if ska_dlm_client.config.METADATA_FILENAME in dir_list:
+        dir_list.remove(ska_dlm_client.config.METADATA_FILENAME)
     return dir_list
 
 
 def _item_list_minus_metadata_file(
     container_item: Item, absolute_path: str, path_rel_to_watch_dir: str
 ) -> list[Item]:
-    """Return a listing of the given absolute_path directory without the metadata file."""
+    """Create Item objects for all files in a directory, excluding the metadata file.
+
+    Creates Item objects of type FILE for each file in the directory, excluding
+    the metadata file. Each Item is linked to the provided container_item as its parent.
+
+    Args:
+        container_item: The parent Item object representing the container directory.
+        absolute_path: The absolute path to the directory to process.
+        path_rel_to_watch_dir: The path relative to the watch directory.
+
+    Returns:
+        A list of Item objects representing the files in the directory, excluding the
+        metadata file.
+    """
     item_list: list[Item] = []
     for entry in _directory_list_minus_metadata_file(absolute_path):
         item = Item(

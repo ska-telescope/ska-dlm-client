@@ -19,6 +19,7 @@ import mimetypes
 import os
 import re
 import tempfile
+import uuid
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, Union
 from urllib.parse import quote
@@ -392,6 +393,8 @@ class ApiClient:
             return obj.get_secret_value()
         elif isinstance(obj, self.PRIMITIVE_TYPES):
             return obj
+        elif isinstance(obj, uuid.UUID):
+            return str(obj)
         elif isinstance(obj, list):
             return [self.sanitize_for_serialization(sub_obj) for sub_obj in obj]
         elif isinstance(obj, tuple):
@@ -446,7 +449,7 @@ class ApiClient:
             except ValueError:
                 data = response_text
         elif re.match(
-            r"^application/(json|[\w!#$&.+-^_]+\+json)\s*(;|$)", content_type, re.IGNORECASE
+            r"^application/(json|[\w!#$&.+\-^_]+\+json)\s*(;|$)", content_type, re.IGNORECASE
         ):
             if response_text == "":
                 data = ""
@@ -492,6 +495,11 @@ class ApiClient:
                 sub_kls = m.group(2)
                 return {k: self.__deserialize(v, sub_kls) for k, v in data.items()}
 
+            if klass.startswith("Optional["):
+                m = re.match(r"Optional\[([^,]*), (.*)]", klass)
+                assert m is not None, "Malformed Dict type definition"
+                return data
+
             # convert str to class
             if klass in self.NATIVE_TYPES_MAPPING:
                 klass = self.NATIVE_TYPES_MAPPING[klass]
@@ -500,13 +508,13 @@ class ApiClient:
 
         if klass in self.PRIMITIVE_TYPES:
             return self.__deserialize_primitive(data, klass)
-        elif klass == object:
+        elif klass is object:
             return self.__deserialize_object(data)
-        elif klass == datetime.date:
+        elif klass is datetime.date:
             return self.__deserialize_date(data)
-        elif klass == datetime.datetime:
+        elif klass is datetime.datetime:
             return self.__deserialize_datetime(data)
-        elif klass == decimal.Decimal:
+        elif klass is decimal.Decimal:
             return decimal.Decimal(data)
         elif issubclass(klass, Enum):
             return self.__deserialize_enum(data, klass)

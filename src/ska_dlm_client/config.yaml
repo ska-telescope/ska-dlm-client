@@ -4,15 +4,15 @@
 auth_token: "Replace this with the authorization token"
 
 location:
-  name: "MyLocationName"
-  type: "MyLocationType"
-  country: "MyLocationCountry"
-  city: "MyLocationCity"
-  facility: "MyLocationFacility"
+  name: "local-dev"
+  type: "local-dev"
+  country: "AU"
+  city: "Kensington"
+  facility: "local"
 
 storage:
-  name: "MyStorageName"
-  type: "disk"
+  name: "data1"
+  type: "filesystem"
   interface: "posix"
   capacity: 100000000,
   phase_level: "GAS"

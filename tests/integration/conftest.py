@@ -157,7 +157,7 @@ def _compose(*args: str):
     return p
 
 
-def _wait_for_rclone(base="https://127.0.0.1:5572", timeout_s: int = 60):
+def _wait_for_rclone(base=RCLONE_BASE, timeout_s: int = 60):
     """Wait until rclone's Remote Control API responds (TLS + routing ready)."""
     end = time.time() + timeout_s
     while time.time() < end:
@@ -209,6 +209,7 @@ def dlm_stack():
     _ensure_rclone_certs()
 
     # Start only what we need; --no-deps avoids auth/gateway
+    log.info("Attempting to start required server services...")
     _compose(
         "up",
         "-d",

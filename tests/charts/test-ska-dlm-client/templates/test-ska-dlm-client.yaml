@@ -14,17 +14,17 @@ spec:
     imagePullPolicy: {{ .Values.directory_watcher.imagePullPolicy }}
     volumeMounts:
       - name: test-configmap
-        mountPath: "/data"
+        mountPath: "/dlm"
         readOnly: true
     command:
     - python3
-    - /data/setup_dlm.py
+    - /dlm/setup_dlm.py
     - "--storage-name"
     - "data"
     - "--storage-server-url"
     - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}:80"
     - "--storage-root-directory"
-    - "/data"
+    - "/dlm"
   volumes:
     - name: test-configmap
       configMap:

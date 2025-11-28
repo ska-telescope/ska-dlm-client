@@ -17,16 +17,24 @@ RUN . .venv/bin/activate \
 
 FROM python:${PYTHON_VERSION}-slim AS dlm_runtime
 
-RUN apt-get update && apt-get install -y rclone
+RUN apt-get update && apt-get install -y rclone openssh-server && \
+    ssh-keygen -A && \
+    openssl req -x509 -nodes -days 365 \
+        -subj "/C=AU/ST=WA/O=SKAO, Inc./CN=skao.int" \
+        -addext "subjectAltName=DNS:skao.int" \
+        -newkey rsa:2048 \
+        -keyout /etc/ssl/private/selfsigned.key \
+        -out /etc/ssl/certs/selfsigned.cert
 
 # Best practice not to run as root
 RUN useradd ska-dlm
-RUN mkdir /home/ska-dlm
+RUN mkdir -p /home/ska-dlm/.ssh
 RUN chown -R ska-dlm /home/ska-dlm
 USER ska-dlm
 
 # Copy all Python packages & console scripts to the runtime container
 COPY --from=buildenv /app/.venv /app/.venv/
+COPY tests/entrypoint.sh /entrypoint.sh
 ENV PATH="/app/.venv/bin:${PATH}"
-
+USER root
 CMD ["directory_watcher"]

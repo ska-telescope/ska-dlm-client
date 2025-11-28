@@ -1,3 +1,4 @@
+# flake8: ignore=DAR101
 """Shared helper functions for the ConfigDB dependency lifecycle."""
 
 from __future__ import annotations
@@ -112,8 +113,8 @@ def log_flow_dependencies(txn, product_key: Flow.Key) -> None:
         description = getattr(dep_meta, "description", None)
 
         entries.append(
-            f"(pb_id={dkey.pb_id}, kind={getattr(dkey,'kind',None)}, "
-            f"name={dkey.name}, origin={getattr(dkey,'origin',None)}, "
+            f"(pb_id={dkey.pb_id}, kind={getattr(dkey, 'kind', None)}, "
+            f"name={dkey.name}, origin={getattr(dkey, 'origin', None)}, "
             f"status={status}, expiry_time={expiry_time}, description={description})"
         )
 

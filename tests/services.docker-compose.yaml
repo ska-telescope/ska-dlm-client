@@ -1,8 +1,9 @@
 networks:
   dlm_network:
     name: dlm_network
+    external: true
 
 volumes:
   shared-tmpfs:
     name: shared-tmpfs
-    external: true
+    # external: true

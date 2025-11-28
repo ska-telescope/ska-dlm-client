@@ -12,7 +12,6 @@ Do not edit the class manually.
 """
 # noqa: E501
 
-
 # import models into model package
 from ska_dlm_client.openapi.models.http_validation_error import HTTPValidationError
 from ska_dlm_client.openapi.models.validation_error import ValidationError

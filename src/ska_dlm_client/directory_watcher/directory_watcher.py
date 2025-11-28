@@ -10,10 +10,11 @@ from watchdog.observers.api import EventQueue, ObservedWatch
 from watchdog.observers.polling import DEFAULT_EMITTER_TIMEOUT, BaseObserver, PollingEmitter
 from watchfiles import Change, awatch
 
-from ska_dlm_client.directory_watcher.config import Config
-from ska_dlm_client.directory_watcher.registration_processor import RegistrationProcessor
-from ska_dlm_client.directory_watcher.watcher_event_handler import WatcherEventHandler
-from ska_dlm_client.startup_verification.utils import CmdLineParameters
+from ska_dlm_client.registration_processor import RegistrationProcessor
+
+from .. import CmdLineParameters
+from .config import WatcherConfig
+from .watcher_event_handler import WatcherEventHandler
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ class DirectoryWatcher(ABC):
 
     def __init__(
         self,
-        config: Config,
+        config: WatcherConfig,
         registration_processor: RegistrationProcessor,
         cmd_line_parameters: CmdLineParameters = None,
     ):
@@ -72,7 +73,6 @@ class PollingDirectoryWatcher(DirectoryWatcher):
 
     async def watch(self):
         """Watch for changes in the defined directory and process each change found."""
-        logger.info("with config parameters %s", self._config)
         logger.info("starting to watchdog %s", self._config.directory_to_watch)
         logger.info(
             "NOTE: MyPollingObserver has recursive=False, in case this matters in the future."
