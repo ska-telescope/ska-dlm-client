@@ -63,7 +63,7 @@ class WatcherConfig:  # pylint: disable=too-few-public-methods
             perform_actual_ingest_and_migration: Whether to perform ingest and migration.
         """
         self.directory_to_watch = directory_to_watch
-        self.ingest_server_url = f"{ingest_server_url}"
+        self.ingest_server_url = ingest_server_url
         self.storage_name = storage_name
         self.status_file_absolute_path = status_file_absolute_path
         self.storage_root_directory = storage_root_directory
