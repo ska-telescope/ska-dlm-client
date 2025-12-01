@@ -87,16 +87,29 @@ integration_tests:
         KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
         KAFKA_MESSAGE_MAX_BYTES: 134217728
 
+    - name: quay.io/coreos/etcd:v3.5.9
+      alias: etcd
+      command:
+        - /usr/local/bin/etcd
+        - "--advertise-client-urls=http://0.0.0.0:2379"
+        - "--listen-client-urls=http://0.0.0.0:2379"
+        - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
+        - "--listen-peer-urls=http://0.0.0.0:2380"
+        - "--initial-cluster=default=http://0.0.0.0:2380"
+
   variables: # Job-wide env
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
     DLM_SERVER_REPO: https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/ska-telescope/ska-data-lifecycle.git
     DLM_SERVER_REF: "1.2.0"
+    INGEST_SERVER_URL: http://docker:8001
     STORAGE_URL:  http://docker:8003
     POSTGREST_URL: http://docker:3000
     RCLONE_BASE:   https://docker:5572
     COMPOSE_PROJECT_NAME: integration-tests
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    SDP_CONFIG_HOST: etcd
+    SDP_CONFIG_PORT: "2379"
     # To debug services, uncomment the line below. For more info see
     # https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2119#note_1142144587
     # CI_DEBUG_SERVICES: trace

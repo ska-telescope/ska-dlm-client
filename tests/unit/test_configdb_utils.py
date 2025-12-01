@@ -1,33 +1,52 @@
 """Unit test module for configdb_utils."""
 
 import logging
+import pathlib
 
+import pytest
 from ska_sdp_config import ConfigCollision
-from ska_sdp_config.entity.flow import Flow
+from ska_sdp_config.entity.common import PVCPath
+from ska_sdp_config.entity.flow import DataProduct, Flow
 
 from ska_dlm_client.sdp_ingest.configdb_utils import (
     _initialise_dependency,
+    create_sdp_migration_dependency,
+    get_data_product_dir,
     log_flow_dependencies,
     update_dependency_state,
 )
 
 PB_ID = "pb-madeup-00000000-a"
+EB_ID = "eb-00000000"
 NAME = "prod-a"
+FLOW_NAME = "vis-receive-mswriter-processor"
 
 
-def test_initialise_dependency():
-    """Test _initialise_dependency - happy path."""
+@pytest.mark.asyncio
+async def test_create_sdp_migration_dependency(config):
+    """Test create_sdp_migration_dependency persists dep and empty state."""
     key = Flow.Key(pb_id=PB_ID, name=NAME)
-    dep = _initialise_dependency(
-        key, dep_kind="dlm-copy", origin="dlmtest", expiry_time=-1, description="unit"
-    )
+
+    dep = await create_sdp_migration_dependency(config, key)
+
+    # Returned dependency has expected key + metadata
     assert dep is not None
     assert dep.key.pb_id == PB_ID
-    assert dep.key.kind == "dlm-copy"
     assert dep.key.name == NAME
-    assert dep.key.origin == "dlmtest"
+    assert dep.key.kind == "dlm-copy"
+    assert dep.key.origin == "ska-data-lifecycle-management"
     assert dep.expiry_time == -1
-    assert dep.description == "unit"
+    assert dep.description == "DLM: lock data-product for copy"
+
+    # Verify entity is persisted in ConfigDB
+    for txn in config.txn():
+        stored_dep = txn.dependency.get(dep.key)
+        assert stored_dep is not None
+
+        # State should exist and be an empty dict
+        state = txn.dependency.state(dep).get()
+        assert state == {}
+        break
 
 
 def test_update_dependency_state(config):
@@ -86,3 +105,34 @@ def test_log_flow_dependencies(config, caplog):
     # Positive log line containing status
     assert f"Flow dependencies for {PB_ID}/{NAME}:" in caplog.text
     assert "status=WORKING" in caplog.text
+
+
+def test_get_data_product_dir(config):
+    """Test get_data_product_dir resolves PVCPath to container path."""
+    key = Flow.Key(pb_id=PB_ID, name=FLOW_NAME)
+
+    pvc = PVCPath(
+        k8s_namespaces=[],
+        k8s_pvc_name="pvc_name",
+        pvc_mount_path="/data",
+        pvc_subpath=pathlib.Path(f"product/{EB_ID}/ska-sdp/{PB_ID}"),
+    )
+
+    flow = Flow(
+        key=key,
+        data_model="Visibility",
+        sink=DataProduct(
+            data_dir=pvc,
+            paths=[],
+        ),
+        sources=[],
+    )
+
+    # Persist the Flow in the config DB
+    for txn in config.txn():
+        txn.flow.create(flow)
+
+    # Exercise the helper
+    result = get_data_product_dir(config, key)
+
+    assert str(result) == f"/data/product/{EB_ID}/ska-sdp/{PB_ID}"

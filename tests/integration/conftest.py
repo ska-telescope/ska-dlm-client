@@ -24,7 +24,7 @@ from ska_dlm_client.openapi.configuration import Configuration
 logging.basicConfig(level=os.getenv("PYTEST_LOGLEVEL", "INFO"))
 log = logging.getLogger(__name__)
 
-PROJECT_NAME = os.environ.get("COMPOSE_PROJECT_NAME", "integration-tests")
+PROJECT_NAME = os.environ.get("COMPOSE_PROJECT_NAME", "tests")
 
 # --- OpenAPI client deserialization patch (handles Optional[Dict[str, object]]) ---
 # Original private method
@@ -74,6 +74,7 @@ COMPOSE_FILES = [
 ]
 
 # URLs can be overridden in CI to hit the DinD host
+INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://127.0.0.1:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://127.0.0.1:8003")
 POSTGREST_URL = os.getenv("POSTGREST_URL", "http://127.0.0.1:3000")
 RCLONE_BASE = os.getenv("RCLONE_BASE", "https://127.0.0.1:5572")
@@ -148,7 +149,7 @@ def _compose(*args: str):
         cmd += ["-f", str(f)]
     cmd += list(args)
 
-    p = subprocess.run(cmd, capture_output=True, text=True, env=env, check=True)
+    p = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)
     if p.returncode != 0:
         print("[compose STDOUT]\n", p.stdout)
         print("[compose STDERR]\n", p.stderr)
@@ -215,13 +216,16 @@ def dlm_stack():
         "--force-recreate",
         "--no-deps",
         "dlm_db",
+        "dlm_ingest",
         "dlm_postgrest",
         "dlm_rclone",
         "dlm_storage",
+        "etcd",
     )
     try:
         _wait_for_http(POSTGREST_URL, timeout_s=30)
         _wait_for_http(f"{STORAGE_URL}/openapi.json", timeout_s=30)
+        _wait_for_http(f"{INGEST_SERVER_URL}/openapi.json", timeout_s=30)
         _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
         yield
     finally:  # teardown

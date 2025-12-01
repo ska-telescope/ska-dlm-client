@@ -13,11 +13,13 @@ services:
   dlm_rclone:
     image: rclone/rclone
     build: null # Remove the build step inherited from the base files
+    entrypoint: ["rclone"]
     ports: ["5572:5572"] # Optional: expose RC for local debugging
     volumes: # Mount the certs we generated on the host
+      # Uses DLM_SERVER_DIR (set by tests) so certs live in the server repo:
+      # ska-data-lifecycle/tests/integration/certs
       - ${DLM_SERVER_DIR}/tests/integration/certs:/etc/ssl/localcerts:ro
     # Point rclone at the mounted certs
-    entrypoint: rclone
     command:
       - rcd
       - --rc-serve
@@ -36,4 +38,17 @@ services:
     depends_on:
       dlm_rclone:
         condition: service_started
+
+  etcd:
+    image: artefact.skao.int/ska-sdp-etcd:3.5.9
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    command:
+      - /usr/bin/etcd
+      - "--advertise-client-urls=http://0.0.0.0:2379"
+      - "--listen-client-urls=http://0.0.0.0:2379"
+      - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
+      - "--listen-peer-urls=http://0.0.0.0:2380"
+      - "--initial-cluster=default=http://0.0.0.0:2380"
 

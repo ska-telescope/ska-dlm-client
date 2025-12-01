@@ -4,10 +4,11 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import Optional
 
-from ska_sdp_config import ConfigCollision
-from ska_sdp_config.entity.flow import Dependency, Flow
+from ska_sdp_config import Config, ConfigCollision
+from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
 logging.basicConfig(level=logging.INFO)
 
@@ -44,9 +45,7 @@ def _initialise_dependency(
 
 
 async def create_sdp_migration_dependency(config, dataproduct_key: Flow.Key):
-    """Create migration dependency."""
-    # TODO: Call dlm to initialize/register data item
-    # create DLM dependency (no state yet)
+    """Create migration dependency (no state yet)."""
     dep = _initialise_dependency(
         dataproduct_key,
         dep_kind="dlm-copy",
@@ -62,6 +61,26 @@ async def create_sdp_migration_dependency(config, dataproduct_key: Flow.Key):
             txn.dependency.state(dep).create({})
             logger.info("Created DLM dependency for %s/%s", dep.key.pb_id, dep.key.name)
     return dep
+
+
+def get_data_product_dir(config: Config, key: Flow.Key) -> Path:
+    """
+    Get the directory path to a data product in the SDP configuration database.
+
+    Returns:
+        absolute path on the local filesystem.
+    """
+    flow: Flow | None
+    for txn in config.txn():
+        flow = txn.flow.get(key)
+
+    if flow is None:
+        raise KeyError(f"Flow key not found: {key}")
+
+    if not isinstance(flow.sink, DataProduct):
+        raise TypeError(f"Expected data product key: {key}")
+
+    return Path(str(flow.sink.data_dir))
 
 
 def log_flow_dependencies(txn, product_key: Flow.Key) -> None:

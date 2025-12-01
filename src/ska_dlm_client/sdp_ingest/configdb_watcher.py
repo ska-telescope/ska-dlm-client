@@ -26,7 +26,7 @@ def watch_dataproduct_status(config: Config, status: str, *, include_existing: b
 
     Args:
         config: configuration database client.
-        status: desired status event.
+        status: desired status event, e.g., COMPLETED
         include_existing: first yield existing dataproduct keys with matching status.
     """
     return DataProductStatusWatcher(config, status, include_existing)
