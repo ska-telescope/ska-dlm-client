@@ -94,6 +94,7 @@ async def test_watcher_starts_and_registers(caplog):
         ingest_configuration=Configuration(host=INGEST_SERVER_URL),
         source_storage="MyDisk",  # <- Should be registered by test_directory_watcher.py
         storage_root_directory="/data",
+        migration_destination_storage_name="MyDisk",
     )
 
     task = asyncio.create_task(sdp_ingest_main.sdp_to_dlm_ingest_and_migrate(ingest_config))
@@ -142,6 +143,7 @@ async def test_watcher_logs_failed_registration(caplog):
         ingest_configuration=Configuration(host=INGEST_SERVER_URL),
         source_storage="NonExistentStorage",  # <- not registered on DLM side
         storage_root_directory="/data",
+        migration_destination_storage_name="MyDisk",
     )
 
     task = asyncio.create_task(sdp_ingest_main.sdp_to_dlm_ingest_and_migrate(ingest_config))

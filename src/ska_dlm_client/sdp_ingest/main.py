@@ -9,12 +9,9 @@ import athreading
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Flow
 
-from ska_dlm_client.openapi import ApiException, api_client
 from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.dlm_api import ingest_api
-from ska_dlm_client.openapi.exceptions import OpenApiException
 from ska_dlm_client.registration_processor import (
-    Item,
+    RegistrationProcessor,
     _directory_contains_metadata_file,
     _item_for_single_file_with_metadata,
     _measurement_set_directory_in,
@@ -38,6 +35,7 @@ class SDPIngestConfig:
     ingest_configuration: Configuration
     source_storage: str
     storage_root_directory: str
+    migration_destination_storage_name: str | None = None
 
 
 def process_args(args: argparse.Namespace) -> SDPIngestConfig:
@@ -57,52 +55,8 @@ def process_args(args: argparse.Namespace) -> SDPIngestConfig:
         ingest_configuration=ingest_configuration,
         source_storage=args.source_storage,
         storage_root_directory=args.storage_root_directory,
+        migration_destination_storage_name=args.migration_destination_storage_name,
     )
-
-
-def _register_data_product(item: Item, ingest_config: SDPIngestConfig) -> str | None:
-    """Register a single data item with the DLM.
-
-    Sends a registration request to the DLM API for the given item.
-    Note: this is a temporary function (adapted from
-    ska_dlm_client.directory_watcher.registration_processor._register_single_item).
-    In the future, the two Watchers will share a universal 'register & migrate'.
-
-    Args:
-        item: The data item to register with the DLM.
-        ingest_config: Runtime ingest configuration (API host, storage name, etc.).
-
-    Returns:
-        The UUID of the registered data item, or None if registration failed.
-    """
-    dlm_registration_uuid: str | None = None
-    with api_client.ApiClient(ingest_config.ingest_configuration) as ingest_api_client:
-        api_ingest = ingest_api.IngestApi(ingest_api_client)
-        try:
-            logger.info("Using URI: %s for data_item registration", item.path_rel_to_watch_dir)
-            response = api_ingest.register_data_item(
-                item_name=item.path_rel_to_watch_dir,
-                uri=item.path_rel_to_watch_dir,
-                item_type=item.item_type,
-                storage_name=ingest_config.source_storage,
-                do_storage_access_check=False,  # TODO: do not hard-code
-                request_body=None if item.metadata is None else item.metadata.as_dict(),
-            )
-            logger.debug("register_data_item response: %s", response)
-            dlm_registration_uuid = str(response)
-            logger.info(
-                "DLM registration successful. Source uuid: %s",
-                dlm_registration_uuid,
-            )
-
-        except OpenApiException as err:
-            logger.error("OpenApiException caught during register_container_parent_item")
-            if isinstance(err, ApiException):
-                logger.error("ApiException: %s", err.body)
-            logger.error("%s", err)
-            logger.error("Ignoring and continuing.....")
-
-    return dlm_registration_uuid
 
 
 async def _process_completed_flow(
@@ -163,10 +117,9 @@ async def _process_completed_flow(
     )
 
     # Register (blocking -> run in thread)
+    processor = RegistrationProcessor(ingest_config)
     dlm_source_uuid = await asyncio.to_thread(
-        _register_data_product,
-        item,
-        ingest_config,
+        processor._register_single_item, item  # pylint: disable=protected-access
     )
     logger.debug("dlm_source_uuid: %s", dlm_source_uuid)
 
