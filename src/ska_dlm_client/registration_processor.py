@@ -6,12 +6,12 @@ import time
 from dataclasses import dataclass
 from os.path import isdir, isfile, islink
 from pathlib import Path
+from typing import Any
 
 from typing_extensions import Self
 
 import ska_dlm_client.config
 from ska_dlm_client.common_types import ItemType
-from ska_dlm_client.config import Config
 from ska_dlm_client.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntry
 from ska_dlm_client.openapi import ApiException, api_client
@@ -57,18 +57,18 @@ class RegistrationProcessor:
     the migration of data items between storage locations.
     """
 
-    _config: Config
+    _config: Any
 
-    def __init__(self, config: Config):
+    def __init__(self, config: Any) -> None:
         """Initialize the RegistrationProcessor with the given configuration.
 
         Args:
             config: The configuration object containing DLM connection settings
-                   and other parameters needed for registration and migration.
+                and other parameters needed for registration and migration.
         """
         self._config = config
 
-    def get_config(self) -> Config:
+    def get_config(self) -> Any:
         """Get the configuration being used by the RegistrationProcessor.
 
         Returns:
@@ -76,7 +76,7 @@ class RegistrationProcessor:
         """
         return self._config
 
-    def set_config(self, config: Config):
+    def set_config(self, config: Any) -> None:
         """Set or reset the configuration used by the RegistrationProcessor.
 
         Args:
@@ -110,30 +110,59 @@ class RegistrationProcessor:
         if not uid:
             logger.warning("Skipping migration due to missing uid")
             return None
-        if not self._config.migration_destination_storage_name:
+
+        cfg = self._config
+
+        destination_storage_name = getattr(
+            cfg,
+            "migration_destination_storage_name",
+            None,
+        )
+        if not destination_storage_name:
             logger.warning("Skipping migration due to missing destination storage name")
             return None
-        if not self._config.perform_actual_ingest_and_migration:
+
+        if not getattr(cfg, "perform_actual_ingest_and_migration", True):
             logger.warning("Migration is disabled in configuration!")
             return None
-        with api_client.ApiClient(self._config.migration_configuration) as migration_api_client:
+
+        # Require an explicit migration_configuration with a host
+        migration_configuration = getattr(cfg, "migration_configuration", None)
+        if migration_configuration is None:
+            logger.error(
+                "Skipping migration because migration_configuration is not set on "
+                "the RegistrationProcessor config",
+            )
+            return None
+
+        if getattr(migration_configuration, "host", None) is None:
+            logger.error(
+                "Skipping migration because migration_configuration.host is not set",
+            )
+            return None
+
+        result: str | None = None
+        with api_client.ApiClient(migration_configuration) as migration_api_client:
             logger.info("Initiating migration of data item %s", item_name)
             api_migration = migration_api.MigrationApi(migration_api_client)
+            api_migration.api_client.configuration.host = migration_configuration.host
             try:
                 response = api_migration.copy_data_item(
-                    uid=uid, destination_name=self._config.migration_destination_storage_name
+                    uid=uid,
+                    destination_name=destination_storage_name,
                 )
                 logger.info("Migration response: %s", response)
-                return str(response)
+                result = str(response)
             except OpenApiException as err:
                 logger.error("OpenApiException caught during copy_data_item")
                 if isinstance(err, ApiException):
                     logger.error("ApiException: %s", err.body)
                 logger.error("%s", err)
                 logger.error("Ignoring and continuing.....")
-                return None
 
-    def _register_single_item(self, item: Item) -> str | None:
+        return result
+
+    def _register_single_item(self, item: Item) -> str | None:  # pylint: disable=too-many-locals
         """Register a single data item with the DLM.
 
         Sends a registration request to the DLM API for the given item,
@@ -145,26 +174,58 @@ class RegistrationProcessor:
         Returns:
             The UUID of the registered data item, or None if registration failed.
         """
-        with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
+        cfg = self._config
+
+        # --- Common config needed by BOTH Directory Watcher and ConfigDB Watcher
+        ingest_configuration = getattr(cfg, "ingest_configuration", None)
+        ingest_server_url = getattr(cfg, "ingest_server_url", None)
+
+        # storage_name for Directory Watcher; source_storage for ConfigDB Watcher
+        storage_name = getattr(cfg, "storage_name", None)
+        if storage_name is None:
+            storage_name = getattr(cfg, "source_storage", None)
+
+        if ingest_configuration is None or ingest_server_url is None or storage_name is None:
+            logger.error(
+                "RegistrationProcessor config missing required ingest settings "
+                "(ingest_configuration=%r, ingest_server_url=%r, storage_name=%r)",
+                ingest_configuration,
+                ingest_server_url,
+                storage_name,
+            )
+            return None
+
+        # These are Directory-Watcher-specific; provide safe defaults if absent
+        perform_actual_ingest_and_migration = getattr(
+            cfg, "perform_actual_ingest_and_migration", True
+        )
+        rclone_access_check_on_register = getattr(cfg, "rclone_access_check_on_register", False)
+
+        with api_client.ApiClient(ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
-            api_ingest.api_client.configuration.host = self._config.ingest_server_url
+            api_ingest.api_client.configuration.host = ingest_server_url
             try:
-                logger.info("Using URI: %s for data_item registration", item.path_rel_to_watch_dir)
+                logger.info(
+                    "Using URI: %s for data_item registration",
+                    item.path_rel_to_watch_dir,
+                )
                 response = None
-                if self._config.perform_actual_ingest_and_migration:
+                if perform_actual_ingest_and_migration:
                     response = api_ingest.register_data_item(
                         item_name=item.path_rel_to_watch_dir,
                         uri=item.path_rel_to_watch_dir,
                         item_type=item.item_type,
-                        storage_name=self._config.storage_name,
-                        do_storage_access_check=self._config.rclone_access_check_on_register,
-                        request_body=None if item.metadata is None else item.metadata.as_dict(),
+                        storage_name=storage_name,
+                        do_storage_access_check=rclone_access_check_on_register,
+                        request_body=(None if item.metadata is None else item.metadata.as_dict()),
                     )
                     logger.debug("register_data_item response: %s", response)
                 else:
                     logger.warning("Skipping register_data_item due to config")
             except OpenApiException as err:
-                logger.error("OpenApiException caught during register_container_parent_item")
+                logger.error(
+                    "OpenApiException caught during register_container_parent_item",
+                )
                 if isinstance(err, ApiException):
                     logger.error("ApiException: %s", err.body)
                 logger.error("%s", err)
@@ -172,27 +233,42 @@ class RegistrationProcessor:
                 return None
 
         dlm_registration_uuid = str(response) if response is not None else None
+
         # Attempt to migrate the data item to the new storage
         migration_result = self._copy_data_item_to_new_storage(
-            uid=dlm_registration_uuid, item_name=item.path_rel_to_watch_dir
+            uid=dlm_registration_uuid,
+            item_name=item.path_rel_to_watch_dir,
         )
+
         time_registered = time.time()
 
-        directory_watcher_entry = DirectoryWatcherEntry(
-            file_or_directory=item.path_rel_to_watch_dir,
-            dlm_storage_name=self._config.storage_name,
-            dlm_registration_id=dlm_registration_uuid,
-            time_registered=time_registered,
-        )
-        self._config.directory_watcher_entries.add(directory_watcher_entry)
-        self._config.directory_watcher_entries.save_to_file()
-        logger.info(
-            "Added to DLM %s %s metadata, path %s, migration result: %s",
-            item.item_type,
-            "without" if item.metadata is None else "with",
-            item.path_rel_to_watch_dir,
-            migration_result,
-        )
+        # DirectoryWatcher-specific bookkeeping is only done if the config has it
+        directory_watcher_entries = getattr(cfg, "directory_watcher_entries", None)
+        if directory_watcher_entries is not None:
+            directory_watcher_entry = DirectoryWatcherEntry(
+                file_or_directory=item.path_rel_to_watch_dir,
+                dlm_storage_name=storage_name,
+                dlm_registration_id=dlm_registration_uuid,
+                time_registered=time_registered,
+            )
+            directory_watcher_entries.add(directory_watcher_entry)
+            directory_watcher_entries.save_to_file()
+            logger.info(
+                "Added to DLM %s %s metadata, path %s, migration result: %s",
+                item.item_type,
+                "without" if item.metadata is None else "with",
+                item.path_rel_to_watch_dir,
+                migration_result,
+            )
+        else:
+            # ConfigDB watcher path – no directory_watcher_entries
+            logger.info(
+                "Registered and migrated item %s (%s); migration_result=%s",
+                item.path_rel_to_watch_dir,
+                item.item_type,
+                migration_result,
+            )
+
         return dlm_registration_uuid
 
     def _register_container_items(self, item_list: list[Item]):
