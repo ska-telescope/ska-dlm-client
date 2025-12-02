@@ -9,31 +9,12 @@ services:
   dlm_postgrest: # Optional: expose PostgREST if you want to poke it from your browser/curl
     ports:
       - "3000:3000"
-
-  dlm_rclone:
-    image: rclone/rclone
-    build: null # Remove the build step inherited from the base files
-    ports: ["5572:5572"] # Optional: expose RC for local debugging
-    volumes: # Mount the certs we generated on the host
-      - ${DLM_SERVER_DIR}/tests/integration/certs:/etc/ssl/localcerts:ro
-      - shared-tmpfs:/dlm
-    # Point rclone at the mounted certs
-    entrypoint: rclone
-    command:
-      - rcd
-      - --rc-serve
-      - --rc-addr=0.0.0.0:5572
-      - --rc-cert=/etc/ssl/localcerts/selfsigned.cert
-      - --rc-key=/etc/ssl/localcerts/selfsigned.key
-      - --rc-no-auth
-      - --rc-job-expire-duration=43200s
-      - --rc-web-gui
-      - --rc-web-gui-no-open-browser
   dlm_storage:
     ports:
       - 8003:8003
     environment:
       RCLONE_RC_URL: "https://dlm_rclone:5572"
+      SSH_PUBLIC_KEY_PATH: "/dlm/.ssh/id_rsa.pub"
     depends_on:
       dlm_rclone:
         condition: service_started
@@ -64,13 +45,16 @@ services:
       - dlm_rclone
       - dlm_gateway
 
-  setup_storage_location:
-    depends_on:
-      - dlm_storage
-    volumes:
-      - shared-tmpfs:/dlm
   dlm_directory_watcher:
+    platform: linux/amd64
+    image: dlm_directory_watcher
+    container_name: dlm_directory_watcher
+    build:
+       context: ..
+       dockerfile: Dockerfile
     depends_on:
       - dlm_storage
     volumes:
       - shared-tmpfs:/dlm
+    networks:
+      - dlm_network

@@ -1,4 +1,4 @@
-ARG PYTHON_VERSION=3.12
+ARG PYTHON_VERSION=3.10
 
 FROM python:${PYTHON_VERSION} AS buildenv
 ARG POETRY_VERSION=1.8.2
@@ -37,4 +37,4 @@ COPY --from=buildenv /app/.venv /app/.venv/
 COPY tests/entrypoint.sh /entrypoint.sh
 ENV PATH="/app/.venv/bin:${PATH}"
 USER root
-CMD ["directory_watcher"]
+ENTRYPOINT [ "/entrypoint.sh" ]

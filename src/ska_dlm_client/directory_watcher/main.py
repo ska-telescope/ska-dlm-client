@@ -157,13 +157,14 @@ def create_directory_watcher() -> DirectoryWatcher:
     config = process_args(args=args, cmd_line_parameters=cmd_line_parameters)
 
     # For the directory_watcher we need to register the volume where the watch
-    # directory is located, if not registered already.
-    logger.info("API Config: %s", config)
-    _ = setup_volume(
-        watcher_config=config,
-        api_configuration=config.ingest_configuration,
-        rclone_config=RCLONE_CONFIG_SOURCE,
-    )
+    # directory is located, if not registered already, but only in non-dev-test-mode.
+    logger.info("Watcher Config: %s", config)
+    if not cmd_line_parameters.dev_test_mode:
+        _ = setup_volume(
+            watcher_config=config,
+            api_configuration=config.ingest_configuration,
+            rclone_config=RCLONE_CONFIG_SOURCE,
+        )
     registration_processor = RegistrationProcessor(config)
     if args.register_contents_of_watch_directory:
         registration_processor.register_data_products_from_watch_directory()

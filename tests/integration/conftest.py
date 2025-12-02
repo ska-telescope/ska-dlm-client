@@ -76,6 +76,7 @@ COMPOSE_FILES = [
 ]
 
 # URLs can be overridden in CI to hit the DinD host
+REQUEST_URL = os.getenv("REQUEST_URL", "http://127.0.0.1:8002")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://127.0.0.1:8003")
 POSTGREST_URL = os.getenv("POSTGREST_URL", "http://127.0.0.1:3000")
 RCLONE_BASE = os.getenv("RCLONE_BASE", "https://127.0.0.1:5572")
@@ -214,7 +215,6 @@ def dlm_stack():
     _compose(
         "up",
         "-d",
-        "--force-recreate",
         "--no-deps",
         "dlm_db",
         "dlm_postgrest",
@@ -240,3 +240,9 @@ def storage_configuration(request) -> Configuration:
     """Storage API client config."""
     request.getfixturevalue("dlm_stack")  # triggers setup
     return Configuration(host=STORAGE_URL)
+
+@pytest.fixture(scope="session")
+def request_configuration(request) -> Configuration:
+    """Storage API client config."""
+    request.getfixturevalue("dlm_stack")  # triggers setup
+    return Configuration(host=REQUEST_URL)

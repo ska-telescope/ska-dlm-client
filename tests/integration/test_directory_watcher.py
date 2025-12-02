@@ -123,15 +123,9 @@ def test_storage_initialisation(storage_configuration: Configuration):
         assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
 
 @pytest.mark.integration
-def test_auto_migration(storage_configuration: Configuration):
+def test_auto_migration(storage_configuration: Configuration,
+    request_configuration: Configuration):
     """Test auto migration using directory watcher."""
-    # watcher_config = WatcherConfig(
-    #     directory_to_watch=STORAGE["SRC"]["ROOT_DIRECTORY"] + "/watch_dir",
-    #     ingest_server_url="http://localhost:8001",
-    #     storage_name=STORAGE["SRC"]["STORAGE_NAME"],
-    #     status_file_absolute_path=f"{STORAGE["SRC"]["ROOT_DIRECTORY"] + "/watch_dir"}/{STATUS_FILE_FILENAME}",
-    #     storage_root_directory=STORAGE["SRC"]["ROOT_DIRECTORY"]
-    # )
     api_configuration = Configuration(host="http://localhost")
     setup_testing(api_configuration)
     with api_client.ApiClient(storage_configuration) as the_api_client:
@@ -139,12 +133,18 @@ def test_auto_migration(storage_configuration: Configuration):
             STORAGE["SRC"]["STORAGE_NAME"])
         log.info("Migration setup: Target Storage: %s",
             STORAGE["TGT"]["STORAGE_NAME"])
-        # --- start and trigger watcher by copying file ---
-        cmd = "docker exec dlm_directory_watcher cp /etc/group /dlm/watch_dir/."
-        log.info("Migration setup: Copy command: %s",cmd)
-        subprocess.run(cmd, shell=True, check=True)
+        # --- trigger watcher by copying file ---
         sleep(2)
+        cmd = "docker exec dlm_directory_watcher cp /etc/group /dlm/watch_dir/."
+        log.info("Migration initializtion copy command: %s",cmd)
+        p = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+        if p.returncode != 0:
+            print("[copy file STDOUT]\n", p.stdout)
+            print("[copy file STDERR]\n", p.stderr)
+            raise RuntimeError("copy command failed %s", p.stderr)
+    with api_client.ApiClient(request_configuration) as the_api_client:
         api_request = request_api.RequestApi(the_api_client)
+        sleep(2)
         resp2 = api_request.query_exists(item_name="group")
         # assert resp2 and _get_id(resp2[0], "item_name") == "group"
         log.info("File migration verified in DLM system:  %s",resp2)
