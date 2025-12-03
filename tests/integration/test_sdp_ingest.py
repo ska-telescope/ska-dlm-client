@@ -85,6 +85,7 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.skip(reason="No destination storage end-point to use. TODO: PI29")
 async def test_watcher_registers_and_migrates(caplog):
     """Run the real watcher, wait for success logs, then cancel it cleanly."""
     caplog.set_level(logging.INFO, logger="ska_dlm_client.sdp_ingest")
@@ -95,7 +96,7 @@ async def test_watcher_registers_and_migrates(caplog):
         ingest_configuration=Configuration(host=INGEST_SERVER_URL),
         source_storage="MyDisk",  # <- registered by previous tests
         storage_root_directory="/data",
-        migration_destination_storage_name="data",  # <- registered by previous tests
+        migration_destination_storage_name="data",  # use a second storage end-point
         migration_configuration=Configuration(host=MIGRATION_SERVER_URL),
     )
 
