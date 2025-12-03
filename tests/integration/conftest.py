@@ -223,7 +223,7 @@ def dlm_stack():
         "dlm_migration",
         "dlm_ingest",
         "dlm_request",
-        "dlm_directory_watcher"
+        "dlm_directory_watcher",
     )
     try:
         _wait_for_http(POSTGREST_URL, timeout_s=30)
@@ -231,8 +231,7 @@ def dlm_stack():
         _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
         yield
     finally:  # teardown
-        pass
-        # _compose("down", "-v")
+        _compose("down", "-v")
 
 
 @pytest.fixture(scope="session")
@@ -240,6 +239,7 @@ def storage_configuration(request) -> Configuration:
     """Storage API client config."""
     request.getfixturevalue("dlm_stack")  # triggers setup
     return Configuration(host=STORAGE_URL)
+
 
 @pytest.fixture(scope="session")
 def request_configuration(request) -> Configuration:

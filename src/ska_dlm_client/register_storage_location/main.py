@@ -1,3 +1,4 @@
+# pylint: disable=broad-exception-caught
 """Initialize a location and a storage."""
 
 import argparse
@@ -137,7 +138,7 @@ def get_or_init_storage(
                     os.chmod("/home/ska-dlm/.ssh/authorized_keys", 0o600)
                     logger.info("rclone SSH public key installed.")
                 except Exception as e:
-                    logger.error("Unable to install SSH key: %s",e)
+                    logger.error("Unable to install SSH key: %s", e)
     return the_storage_id
 
 
@@ -170,8 +171,10 @@ def setup_testing(api_configuration: Configuration):
     # endpoint will be performed during stratup of the DLM server and
     # then this can be removed as well.
     logger.info("Testing setup.")
-    storage_url=f"{api_configuration.host}:8003"
-    location_id = get_or_init_location(api_configuration, location=LOCATION_NAME, storage_url=storage_url)
+    storage_url = f"{api_configuration.host}:8003"
+    location_id = get_or_init_location(
+        api_configuration, location=LOCATION_NAME, storage_url=storage_url
+    )
     storage_id = get_or_init_storage(
         storage_name=RCLONE_CONFIG_TARGET["name"],
         api_configuration=api_configuration,

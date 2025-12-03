@@ -12,12 +12,9 @@ from ska_dlm_client.common_types import (
     StorageInterface,
     StorageType,
 )
-from ska_dlm_client.config import STATUS_FILE_FILENAME
-from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.dlm_api import storage_api
-from ska_dlm_client.openapi.dlm_api import request_api
+from ska_dlm_client.openapi.dlm_api import request_api, storage_api
 from ska_dlm_client.register_storage_location.main import setup_testing
 
 log = logging.getLogger(__name__)
@@ -34,27 +31,31 @@ STORAGE = {
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
         "ROOT_DIRECTORY": "/data",
-        "STORAGE_CONFIG": {"name": "data", "type": "local", "parameters": {}}
+        "STORAGE_CONFIG": {"name": "data", "type": "local", "parameters": {}},
     },
     "SRC": {
         "STORAGE_NAME": "dlm_watcher",
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
         "ROOT_DIRECTORY": "/dlm",
-        "STORAGE_CONFIG": {"name": "dlm", "type": "sftp", 
-                           "parameters": {
-                                "host": "dlm_directory_watcher",
-                                "key_file": "/root/.ssh/id_rsa",
-                                "shell_type": "unix",
-                                "type": "sftp",
-                                "user": "ska-dlm",
-                                }
-                        }
-                }
-    }
+        "STORAGE_CONFIG": {
+            "name": "dlm",
+            "type": "sftp",
+            "parameters": {
+                "host": "dlm_directory_watcher",
+                "key_file": "/root/.ssh/id_rsa",
+                "shell_type": "unix",
+                "type": "sftp",
+                "user": "ska-dlm",
+            },
+        },
+    },
+}
+
 
 def _get_id(item, key: str):
     return item[key] if isinstance(item, dict) else getattr(item, key)
+
 
 def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
     resp = api_storage.query_location(location_name=LOCATION_NAME)
@@ -74,9 +75,9 @@ def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
         log.info("Location created: %s", location_id)
     return location_id
 
+
 def _init_storage_if_needed(
-    api_storage: storage_api.StorageApi, location_id: str,
-    storage:dict = None
+    api_storage: storage_api.StorageApi, location_id: str, storage: dict = None
 ) -> str:
     resp = api_storage.query_storage(storage_name=storage["STORAGE_NAME"])
     assert isinstance(resp, list)
@@ -95,6 +96,7 @@ def _init_storage_if_needed(
         assert isinstance(storage_id, str) and storage_id
         log.info("Storage created: %s", storage_id)
     return storage_id
+
 
 @pytest.mark.integration
 def test_storage_initialisation(storage_configuration: Configuration):
@@ -122,31 +124,30 @@ def test_storage_initialisation(storage_configuration: Configuration):
         resp2 = api_storage.query_storage(storage_name=STORAGE["TGT"]["STORAGE_NAME"])
         assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
 
+
 @pytest.mark.integration
-def test_auto_migration(storage_configuration: Configuration,
-    request_configuration: Configuration):
+def test_auto_migration(
+    storage_configuration: Configuration, request_configuration: Configuration
+):
     """Test auto migration using directory watcher."""
     api_configuration = Configuration(host="http://localhost")
     setup_testing(api_configuration)
     with api_client.ApiClient(storage_configuration) as the_api_client:
-        log.info("Migration setup: Source Storage: %s",
-            STORAGE["SRC"]["STORAGE_NAME"])
-        log.info("Migration setup: Target Storage: %s",
-            STORAGE["TGT"]["STORAGE_NAME"])
+        log.info("Migration setup: Source Storage: %s", STORAGE["SRC"]["STORAGE_NAME"])
+        log.info("Migration setup: Target Storage: %s", STORAGE["TGT"]["STORAGE_NAME"])
         # --- trigger watcher by copying file ---
         sleep(2)
         cmd = "docker exec dlm_directory_watcher cp /etc/group /dlm/watch_dir/."
-        log.info("Migration initializtion copy command: %s",cmd)
+        log.info("Migration initializtion copy command: %s", cmd)
         p = subprocess.run(cmd, capture_output=True, shell=True, check=True)
         if p.returncode != 0:
             print("[copy file STDOUT]\n", p.stdout)
             print("[copy file STDERR]\n", p.stderr)
-            raise RuntimeError("copy command failed %s", p.stderr)
+    assert p.returncode == 0
     with api_client.ApiClient(request_configuration) as the_api_client:
         api_request = request_api.RequestApi(the_api_client)
         sleep(2)
-        resp2 = api_request.query_exists(item_name="group")
-        # assert resp2 and _get_id(resp2[0], "item_name") == "group"
-        log.info("File migration verified in DLM system:  %s",resp2)
-        # assert isinstance(migration_id, str) and migration_id
-        # log.info("Migration initiated: %s", migration_id)
+        resp2 = api_request.query_data_item(item_name="group")
+        assert len(resp2) == 2
+        assert resp2 and _get_id(resp2[0], "item_name") == "group"
+        assert resp2 and _get_id(resp2[1], "item_name") == "group"
