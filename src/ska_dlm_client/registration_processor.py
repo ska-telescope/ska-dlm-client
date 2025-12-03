@@ -67,6 +67,7 @@ class RegistrationProcessor:
                 and other parameters needed for registration and migration.
         """
         self._config = config
+        self.last_migration_result: str | None = None
 
     def get_config(self) -> Any:
         """Get the configuration being used by the RegistrationProcessor.
@@ -239,7 +240,7 @@ class RegistrationProcessor:
             uid=dlm_registration_uuid,
             item_name=item.path_rel_to_watch_dir,
         )
-
+        self.last_migration_result = migration_result
         time_registered = time.time()
 
         # DirectoryWatcher-specific bookkeeping is only done if the config has it
