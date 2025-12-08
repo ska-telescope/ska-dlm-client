@@ -15,6 +15,7 @@ from ska_dlm_client.sdp_ingest import main as sdp_ingest_main
 PB_ID = "pb-test-00000000-a"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://localhost:8001")
+MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", "http://localhost:8004")
 
 
 def _get_cfg() -> Config:
@@ -84,19 +85,22 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_watcher_starts_and_registers(caplog):
+@pytest.mark.skip(reason="No destination storage end-point to use. TODO: PI29")
+async def test_watcher_registers_and_migrates(caplog):
     """Run the real watcher, wait for success logs, then cancel it cleanly."""
     caplog.set_level(logging.INFO, logger="ska_dlm_client.sdp_ingest")
 
-    ingest_config = sdp_ingest_main.SDPIngestConfig(
+    sdp_ingest_config = sdp_ingest_main.SDPIngestConfig(
         include_existing=False,
         ingest_server_url=INGEST_SERVER_URL,
         ingest_configuration=Configuration(host=INGEST_SERVER_URL),
-        source_storage="MyDisk",  # <- Should be registered by test_directory_watcher.py
+        source_storage="MyDisk",  # <- registered by previous tests
         storage_root_directory="/data",
+        migration_destination_storage_name="data",  # use a second storage end-point
+        migration_configuration=Configuration(host=MIGRATION_SERVER_URL),
     )
 
-    task = asyncio.create_task(sdp_ingest_main.sdp_to_dlm_ingest_and_migrate(ingest_config))
+    task = asyncio.create_task(sdp_ingest_main.sdp_to_dlm_ingest_and_migrate(sdp_ingest_config))
 
     try:
         # 1) Wait for watcher to be READY
@@ -111,14 +115,14 @@ async def test_watcher_starts_and_registers(caplog):
         # 2) Trigger a COMPLETED Flow
         trigger_completed_flow(flow_name="test-flow")
 
-        # 3) Wait for the "status set to WORKING" log
-        working_msg = "status set to WORKING"
+        # 3) Wait for the "status set to FINISHED" log
+        finished_msg = "status set to FINISHED"
         for _ in range(100):
-            if working_msg in caplog.text:
+            if finished_msg in caplog.text:
                 break
             await asyncio.sleep(0.1)
         else:
-            pytest.fail("Dependency was not marked WORKING within timeout")
+            pytest.fail("Dependency was not marked FINISHED within timeout")
 
     finally:
         task.cancel()
@@ -126,7 +130,7 @@ async def test_watcher_starts_and_registers(caplog):
             await task
 
     statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow")
-    assert "WORKING" in statuses
+    assert "FINISHED" in statuses
 
 
 @pytest.mark.asyncio
@@ -136,15 +140,16 @@ async def test_watcher_logs_failed_registration(caplog):
     caplog.set_level(logging.INFO, logger="ska_dlm_client.sdp_ingest")
 
     # Deliberately use a bad storage name to trigger DLM registration failure
-    ingest_config = sdp_ingest_main.SDPIngestConfig(
+    sdp_ingest_config = sdp_ingest_main.SDPIngestConfig(
         include_existing=False,
         ingest_server_url=INGEST_SERVER_URL,
         ingest_configuration=Configuration(host=INGEST_SERVER_URL),
         source_storage="NonExistentStorage",  # <- not registered on DLM side
         storage_root_directory="/data",
+        migration_destination_storage_name="MyDisk",
     )
 
-    task = asyncio.create_task(sdp_ingest_main.sdp_to_dlm_ingest_and_migrate(ingest_config))
+    task = asyncio.create_task(sdp_ingest_main.sdp_to_dlm_ingest_and_migrate(sdp_ingest_config))
 
     try:
         # 1) Wait for watcher to be READY

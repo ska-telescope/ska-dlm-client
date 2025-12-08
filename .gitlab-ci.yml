@@ -104,6 +104,7 @@ integration_tests:
     DLM_SERVER_REF: "1.2.0"
     INGEST_SERVER_URL: http://docker:8001
     STORAGE_URL:  http://docker:8003
+    MIGRATION_SERVER_URL: http://docker:8004
     POSTGREST_URL: http://docker:3000
     RCLONE_BASE:   https://docker:5572
     COMPOSE_PROJECT_NAME: integration-tests

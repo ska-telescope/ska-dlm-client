@@ -75,6 +75,7 @@ COMPOSE_FILES = [
 
 # URLs can be overridden in CI to hit the DinD host
 INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://127.0.0.1:8001")
+MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", "http://127.0.0.1:8004")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://127.0.0.1:8003")
 POSTGREST_URL = os.getenv("POSTGREST_URL", "http://127.0.0.1:3000")
 RCLONE_BASE = os.getenv("RCLONE_BASE", "https://127.0.0.1:5572")
@@ -220,12 +221,14 @@ def dlm_stack():
         "dlm_postgrest",
         "dlm_rclone",
         "dlm_storage",
+        "dlm_migration",
         "etcd",
     )
     try:
         _wait_for_http(POSTGREST_URL, timeout_s=30)
         _wait_for_http(f"{STORAGE_URL}/openapi.json", timeout_s=30)
         _wait_for_http(f"{INGEST_SERVER_URL}/openapi.json", timeout_s=30)
+        _wait_for_http(f"{MIGRATION_SERVER_URL}/openapi.json", timeout_s=30)
         _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
         yield
     finally:  # teardown

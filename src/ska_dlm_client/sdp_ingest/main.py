@@ -9,12 +9,9 @@ import athreading
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Flow
 
-from ska_dlm_client.openapi import ApiException, api_client
 from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.dlm_api import ingest_api
-from ska_dlm_client.openapi.exceptions import OpenApiException
 from ska_dlm_client.registration_processor import (
-    Item,
+    RegistrationProcessor,
     _directory_contains_metadata_file,
     _item_for_single_file_with_metadata,
     _measurement_set_directory_in,
@@ -38,18 +35,20 @@ class SDPIngestConfig:
     ingest_configuration: Configuration
     source_storage: str
     storage_root_directory: str
+    migration_destination_storage_name: str | None = None
+    migration_configuration: Configuration | None = None
 
 
 def process_args(args: argparse.Namespace) -> SDPIngestConfig:
-    """Collect all command line parameters and create an SDPIngestConfig object.
-
-    Args:
-        args: The parsed command line arguments from argparse.
-
-    Returns:
-        An SDPIngestConfig object initialized with the command line parameters.
-    """
+    """Collect all command line parameters and create an SDPIngestConfig object."""
     ingest_configuration = Configuration(host=args.ingest_server_url)
+
+    # Only configure migration if the user supplied a migration server URL
+    migration_configuration = (
+        Configuration(host=args.migration_server_url)
+        if args.migration_server_url is not None
+        else None
+    )
 
     return SDPIngestConfig(
         include_existing=args.include_existing,
@@ -57,52 +56,9 @@ def process_args(args: argparse.Namespace) -> SDPIngestConfig:
         ingest_configuration=ingest_configuration,
         source_storage=args.source_storage,
         storage_root_directory=args.storage_root_directory,
+        migration_destination_storage_name=args.migration_destination_storage_name,
+        migration_configuration=migration_configuration,
     )
-
-
-def _register_data_product(item: Item, ingest_config: SDPIngestConfig) -> str | None:
-    """Register a single data item with the DLM.
-
-    Sends a registration request to the DLM API for the given item.
-    Note: this is a temporary function (adapted from
-    ska_dlm_client.directory_watcher.registration_processor._register_single_item).
-    In the future, the two Watchers will share a universal 'register & migrate'.
-
-    Args:
-        item: The data item to register with the DLM.
-        ingest_config: Runtime ingest configuration (API host, storage name, etc.).
-
-    Returns:
-        The UUID of the registered data item, or None if registration failed.
-    """
-    dlm_registration_uuid: str | None = None
-    with api_client.ApiClient(ingest_config.ingest_configuration) as ingest_api_client:
-        api_ingest = ingest_api.IngestApi(ingest_api_client)
-        try:
-            logger.info("Using URI: %s for data_item registration", item.path_rel_to_watch_dir)
-            response = api_ingest.register_data_item(
-                item_name=item.path_rel_to_watch_dir,
-                uri=item.path_rel_to_watch_dir,
-                item_type=item.item_type,
-                storage_name=ingest_config.source_storage,
-                do_storage_access_check=False,  # TODO: do not hard-code
-                request_body=None if item.metadata is None else item.metadata.as_dict(),
-            )
-            logger.debug("register_data_item response: %s", response)
-            dlm_registration_uuid = str(response)
-            logger.info(
-                "DLM registration successful. Source uuid: %s",
-                dlm_registration_uuid,
-            )
-
-        except OpenApiException as err:
-            logger.error("OpenApiException caught during register_container_parent_item")
-            if isinstance(err, ApiException):
-                logger.error("ApiException: %s", err.body)
-            logger.error("%s", err)
-            logger.error("Ignoring and continuing.....")
-
-    return dlm_registration_uuid
 
 
 async def _process_completed_flow(
@@ -115,8 +71,9 @@ async def _process_completed_flow(
     - Resolve the data-product directory from Flow.sink.data_dir.
     - Identify the .ms file in that directory.
     - Create a DLM migration dependency
-    - Register data-rpduct in DLM
-    - Set dependency state to WORKING or FAILED.
+    - Register data-product in DLM
+    - Migrate the data-product (if configured)
+    - Set dependency state to WORKING/FINISHED/FAILED depending on outcome.
     """
     new_dep: str | None = None
     dep_status: str | None = None
@@ -162,15 +119,21 @@ async def _process_completed_flow(
         path_rel_to_watch_dir=ms_file_name,
     )
 
-    # Register (blocking -> run in thread)
+    processor = RegistrationProcessor(ingest_config)
+    processor.last_migration_result = None  # Clear any stale migration result
+
+    # If we have a dependency, mark it WORKING before we start register+migrate
+    if new_dep:
+        await _aupdate_dependency_state("WORKING")
+
+    # Register+migrate (blocking -> run in thread)
     dlm_source_uuid = await asyncio.to_thread(
-        _register_data_product,
+        processor._register_single_item,  # pylint: disable=protected-access
         item,
-        ingest_config,
     )
     logger.debug("dlm_source_uuid: %s", dlm_source_uuid)
 
-    if dlm_source_uuid is None:
+    if dlm_source_uuid is None:  # Registration failed
         logger.warning(
             "DLM registration failed for %s; marking dependency %s as FAILED.",
             dataproduct_key,
@@ -178,21 +141,28 @@ async def _process_completed_flow(
         )
         dep_status = "FAILED"
     else:
-        dep_status = "WORKING"
+        migration_result = processor.last_migration_result  # Inspect migration outcome
+        logger.debug("migration_result: %s", migration_result)
 
-    # Update the dependency state
+        if migration_result is None:
+            logger.warning(
+                "Migration failed or was skipped for %s; marking dependency %s as FAILED.",
+                dataproduct_key,
+                new_dep,
+            )
+            dep_status = "FAILED"
+        else:
+            logger.info(
+                "Registration and migration succeeded for %s; "
+                "marking dependency %s as FINISHED.",
+                dataproduct_key,
+                new_dep,
+            )
+            dep_status = "FINISHED"
+
+    # Update the dependency state to FAILED/FINISHED
     if new_dep and dep_status:
         await _aupdate_dependency_state(dep_status)
-
-    if dep_status == "WORKING":
-        logger.info(
-            "End of ConfigDB Watcher functionality. Migration step will follow in a "
-            "future release. Dependency %s is in WORKING state.",
-            new_dep,
-        )
-
-    # TODO: invoke dlm-migration (blocked by DMAN-124)
-    # TODO: move dependency state to FINISHED/FAILED
 
 
 async def sdp_to_dlm_ingest_and_migrate(ingest_config: SDPIngestConfig) -> None:
@@ -254,6 +224,25 @@ def main() -> None:
         help=(
             "The root directory of the source storage, used to match "
             "relative path names. Default ''."
+        ),
+    )
+    parser.add_argument(
+        "--migration-destination-storage-name",
+        type=str,
+        default=None,
+        help=(
+            "Destination storage name used for migration. "
+            "If omitted, migration will be skipped."
+        ),
+    )
+    parser.add_argument(
+        "-m",
+        "--migration-server-url",
+        type=str,
+        default=None,
+        help=(
+            "Migration server URL including the service port. "
+            "If omitted, migration will be skipped."
         ),
     )
     args = parser.parse_args()
