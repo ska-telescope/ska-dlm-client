@@ -1,0 +1,47 @@
+{{- if .Values.configdb_watcher.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ska-dlm-client.fullname" . }}-configdb-watcher
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ska-dlm-client.configdb-watcher.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.configdb_watcher.replicas }}
+  selector:
+    matchLabels:
+      component: {{ .Values.configdb_watcher.component }}
+      subsystem: {{ .Values.configdb_watcher.subsystem }}
+  template:
+    metadata:
+      labels:
+        {{- include "ska-dlm-client.configdb-watcher.labels" . | nindent 8 }}
+    spec:
+      dnsPolicy: ClusterFirst
+      containers:
+        - name: configdb-watcher
+          image: {{ .Values.ska_dlm_client.image }}:{{ .Values.ska_dlm_client.version }}
+          imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
+          command:
+          - "sdp-config-watcher"
+          args:
+          {{- if .Values.configdb_watcher.include_existing }}
+          - "--include-existing"
+          {{- end }}
+          - "--ingest-server-url"
+          - {{ .Values.configdb_watcher.ingest_server_url }}
+          - "--source-storage"
+          - {{ .Values.configdb_watcher.source_storage }}
+          - "--storage-root-directory"
+          - {{ .Values.configdb_watcher.storage_root_directory }}
+          - "--migration-destination-storage-name"
+          - {{ .Values.configdb_watcher.migration_destination_storage_name }}
+          - "--migration-server-url"
+          - {{ .Values.configdb_watcher.migration_server_url }}
+          env:
+            - name: SDP_CONFIG_HOST
+              value: "etcd"
+            - name: SDP_CONFIG_PORT
+              value: "2379"
+
+{{- end }}
