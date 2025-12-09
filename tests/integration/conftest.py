@@ -231,7 +231,7 @@ def dlm_stack():
         _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
         yield
     finally:  # teardown
-        _compose("down", "-v")
+        _compose("down", "-v", "--remove-orphans")
 
 
 @pytest.fixture(scope="session")
