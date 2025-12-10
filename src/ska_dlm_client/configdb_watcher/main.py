@@ -23,7 +23,7 @@ from ska_dlm_client.configdb_watcher.configdb_utils import (
 )
 from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
 
-logger = logging.getLogger("ska_dlm_client.sdp_ingest")
+logger = logging.getLogger("ska_dlm_client.configdb_watcher")
 
 
 @dataclass

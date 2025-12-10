@@ -10,7 +10,7 @@ from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
 from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.configdb_watcher import main as sdp_ingest_main
+from ska_dlm_client.configdb_watcher import main as configdb_watcher_main
 
 PB_ID = "pb-test-00000000-a"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
@@ -88,9 +88,9 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
 # @pytest.mark.skip(reason="No destination storage end-point to use. TODO: PI29")
 async def test_watcher_registers_and_migrates(caplog):
     """Run the real watcher, wait for success logs, then cancel it cleanly."""
-    caplog.set_level(logging.INFO, logger="ska_dlm_client.sdp_ingest")
+    caplog.set_level(logging.INFO, logger="ska_dlm_client.configdb_watcher")
 
-    sdp_ingest_config = sdp_ingest_main.SDPIngestConfig(
+    configdb_watcher_config = configdb_watcher_main.SDPIngestConfig(
         include_existing=False,
         ingest_server_url=INGEST_SERVER_URL,
         ingest_configuration=Configuration(host=INGEST_SERVER_URL),
@@ -100,7 +100,7 @@ async def test_watcher_registers_and_migrates(caplog):
         migration_configuration=Configuration(host=MIGRATION_SERVER_URL),
     )
 
-    task = asyncio.create_task(sdp_ingest_main.sdp_to_dlm_ingest_and_migrate(sdp_ingest_config))
+    task = asyncio.create_task(configdb_watcher_main.sdp_to_dlm_ingest_and_migrate(configdb_watcher_config))
 
     try:
         # 1) Wait for watcher to be READY
@@ -137,10 +137,10 @@ async def test_watcher_registers_and_migrates(caplog):
 @pytest.mark.integration
 async def test_watcher_logs_failed_registration(caplog):
     """Run the watcher, trigger a Flow, and check failed registration is logged."""
-    caplog.set_level(logging.INFO, logger="ska_dlm_client.sdp_ingest")
+    caplog.set_level(logging.INFO, logger="ska_dlm_client.configdb_watcher")
 
     # Deliberately use a bad storage name to trigger DLM registration failure
-    sdp_ingest_config = sdp_ingest_main.SDPIngestConfig(
+    configdb_watcher_config = configdb_watcher_main.SDPIngestConfig(
         include_existing=False,
         ingest_server_url=INGEST_SERVER_URL,
         ingest_configuration=Configuration(host=INGEST_SERVER_URL),
@@ -149,7 +149,7 @@ async def test_watcher_logs_failed_registration(caplog):
         migration_destination_storage_name="MyDisk",
     )
 
-    task = asyncio.create_task(sdp_ingest_main.sdp_to_dlm_ingest_and_migrate(sdp_ingest_config))
+    task = asyncio.create_task(configdb_watcher_main.sdp_to_dlm_ingest_and_migrate(configdb_watcher_config))
 
     try:
         # 1) Wait for watcher to be READY
