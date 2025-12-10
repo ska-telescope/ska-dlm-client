@@ -36,7 +36,7 @@ class MockCmdLineParameters:
 class TestDirectoryWatcher:
     """DirectoryWatcher unit test stubs."""
 
-    STORAGE_NAME = "data"
+    STORAGE_NAME = "dlm-watcher"
     INGREST_SERVER_URL = "http://localhost:8001"
     ROOT_DIRECTORY = "/dlm"
 

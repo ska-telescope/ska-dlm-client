@@ -9,13 +9,59 @@ from ska_sdp_config import Config
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
+from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
+from ska_dlm_client.openapi.dlm_api import request_api, storage_api
+from ska_dlm_client.register_storage_location.main import setup_testing
+
 from ska_dlm_client.configdb_watcher import main as configdb_watcher_main
+
+from ska_dlm_client.common_types import (
+    LocationCountry,
+    LocationType,
+    StorageInterface,
+    StorageType,
+)
+
+log = logging.getLogger(__name__)
 
 PB_ID = "pb-test-00000000-a"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://localhost:8001")
 MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", "http://localhost:8004")
+
+LOCATION_NAME = "ThisDLMClientLocationName"
+LOCATION_TYPE = LocationType.LOCAL_DEV
+LOCATION_COUNTRY = LocationCountry.AU
+
+LOCATION_CITY = "Marksville"
+LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
+STORAGE = {
+    "TGT": {
+        "STORAGE_NAME": "MyDisk",
+        "STORAGE_TYPE": StorageType.FILESYSTEM,
+        "STORAGE_INTERFACE": StorageInterface.POSIX,
+        "ROOT_DIRECTORY": "/data",
+        "STORAGE_CONFIG": {"name": "dlm-archive", "type": "local", "parameters": {}},
+    },
+    "SRC": {
+        "STORAGE_NAME": "dlm-watcher",
+        "STORAGE_TYPE": StorageType.FILESYSTEM,
+        "STORAGE_INTERFACE": StorageInterface.POSIX,
+        "ROOT_DIRECTORY": "/dlm",
+        "STORAGE_CONFIG": {
+            "name": "dlm",
+            "type": "sftp",
+            "parameters": {
+                "host": "dlm_configdb_watcher",
+                "key_file": "/root/.ssh/id_rsa",
+                "shell_type": "unix",
+                "type": "sftp",
+                "user": "ska-dlm",
+            },
+        },
+    },
+}
 
 
 def _get_cfg() -> Config:
@@ -67,6 +113,9 @@ def trigger_completed_flow(flow_name) -> None:
         flow_name_arg=flow_name,
     )
 
+def _get_id(item, key: str):
+    return item[key] if isinstance(item, dict) else getattr(item, key)
+
 
 def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
     """Return all dependency statuses for a given data-product (by pb_id/name)."""
@@ -82,21 +131,96 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
                 statuses.append(status)
     return statuses
 
+def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
+    resp = api_storage.query_location(location_name=LOCATION_NAME)
+    assert isinstance(resp, list)
+    if resp:
+        location_id = _get_id(resp[0], "location_id")
+        log.info("Location already exists: %s", location_id)
+    else:
+        location_id = api_storage.init_location(
+            location_name=LOCATION_NAME,
+            location_type=LOCATION_TYPE,
+            location_country=LOCATION_COUNTRY,
+            location_city=LOCATION_CITY,
+            location_facility=LOCATION_FACILITY,
+        )
+        assert isinstance(location_id, str) and location_id
+        log.info("Location created: %s", location_id)
+    return location_id
+
+def _init_storage_if_needed(
+    api_storage: storage_api.StorageApi, location_id: str, storage: dict = None
+) -> str:
+    resp = api_storage.query_storage(storage_name=storage["STORAGE_NAME"])
+    assert isinstance(resp, list)
+    if resp:
+        storage_id = _get_id(resp[0], "storage_id")
+        log.info("Storage already exists: %s", storage_id)
+    else:
+        storage_id = api_storage.init_storage(
+            storage_name=storage["STORAGE_NAME"],
+            storage_type=storage["STORAGE_TYPE"],
+            storage_interface=storage["STORAGE_INTERFACE"],
+            root_directory=storage["ROOT_DIRECTORY"],
+            location_id=location_id,
+            location_name=LOCATION_NAME,
+        )
+        assert isinstance(storage_id, str) and storage_id
+        log.info("Storage created: %s %s", storage["STORAGE_NAME"], storage_id)
+    return storage_id
+
+
+
+@pytest.mark.integration
+def test_storage_initialisation(storage_configuration: Configuration):
+    """Test setting up a location, storage and storage config."""
+    with api_client.ApiClient(storage_configuration) as the_api_client:
+        api_storage = storage_api.StorageApi(the_api_client)
+
+        # --- ensure location exists ---
+        location_id = _init_location_if_needed(api_storage)
+
+        # --- ensure storage exists ---
+        storage_id = _init_storage_if_needed(api_storage, location_id, storage=STORAGE["TGT"])
+
+        # --- set storage config ---
+        cfg_id = api_storage.create_storage_config(
+            request_body=STORAGE["TGT"]["STORAGE_CONFIG"],
+            storage_id=storage_id,
+            storage_name=STORAGE["TGT"]["STORAGE_NAME"],
+            config_type="rclone",
+        )
+        assert isinstance(cfg_id, str) and cfg_id
+        log.info("Target storage config id: %s", cfg_id)
+
+        # --- verify by querying again ---
+        resp2 = api_storage.query_storage(storage_name=STORAGE["TGT"]["STORAGE_NAME"])
+        assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
+
+
 
 @pytest.mark.asyncio
 @pytest.mark.integration
 # @pytest.mark.skip(reason="No destination storage end-point to use. TODO: PI29")
-async def test_watcher_registers_and_migrates(caplog):
+async def test_watcher_registers_and_migrates(caplog, storage_configuration: Configuration):
     """Run the real watcher, wait for success logs, then cancel it cleanly."""
+    """Test auto migration using configdb watcher."""
+    api_configuration = Configuration(host="http://localhost")
+    setup_testing(api_configuration)
     caplog.set_level(logging.INFO, logger="ska_dlm_client.configdb_watcher")
+    with api_client.ApiClient(storage_configuration) as the_api_client:
+        log.info("Migration setup: Source Storage: %s", STORAGE["SRC"]["STORAGE_NAME"])
+        log.info("Migration setup: Target Storage: %s", STORAGE["TGT"]["STORAGE_NAME"])
+        # --- trigger watcher by copying file ---
 
     configdb_watcher_config = configdb_watcher_main.SDPIngestConfig(
         include_existing=False,
         ingest_server_url=INGEST_SERVER_URL,
         ingest_configuration=Configuration(host=INGEST_SERVER_URL),
-        source_storage="MyDisk",  # <- registered by previous tests
-        storage_root_directory="/data",
-        migration_destination_storage_name="data",  # use a second storage end-point
+        source_storage=STORAGE["SRC"]["STORAGE_NAME"],  # <- registered by previous tests
+        storage_root_directory=STORAGE["SRC"]["ROOT_DIRECTORY"],
+        migration_destination_storage_name=STORAGE["TGT"]["STORAGE_NAME"],  # use a second storage end-point
         migration_configuration=Configuration(host=MIGRATION_SERVER_URL),
     )
 

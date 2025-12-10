@@ -75,9 +75,9 @@ services:
       - shared-tmpfs:/dlm
     networks:
       - dlm_network
-  sdp_etcd:
+  etcd:
     image: artefact.skao.int/ska-sdp-etcd:3.5.9
-    container_name: sdp_etcd
+    container_name: etcd
     ports:
       - "2379:2379"
       - "2380:2380"

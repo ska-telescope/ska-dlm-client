@@ -1,3 +1,4 @@
+# pylint: disable=broad-exception-caught
 """
 Integration test harness for ska_dlm_client.
 
@@ -156,10 +157,11 @@ def _compose(*args: str):
         cmd += ["-f", str(f)]
     cmd += list(args)
 
+    log.info('docker compose command: %s',' '.join(cmd))
     p = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)
     if p.returncode != 0:
-        print("[compose STDOUT]\n", p.stdout)
-        print("[compose STDERR]\n", p.stderr)
+        log.info("[compose STDOUT]: %s\n", p.stdout)
+        log.error("[compose STDERR] %s\n", p.stderr)
         raise RuntimeError("docker compose failed")
     return p
 
@@ -229,7 +231,7 @@ def dlm_stack():
         "dlm_ingest",
         "dlm_request",
         "dlm_directory_watcher",
-        "sdp_etcd",
+        "etcd",
         "dlm_configdb_watcher",
     )
     try:
@@ -240,10 +242,13 @@ def dlm_stack():
         _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
         yield
     finally:  # teardown
-        cmd = "docker exec dlm_directory_watcher rm /dlm/watch_dir/group"
-        _ = subprocess.run(cmd, capture_output=True, shell=True, check=True)
-        _compose("down", "-v", "--remove-orphans")
-
+        # cmd = "docker exec dlm_directory_watcher rm /dlm/watch_dir/group"
+        # try:
+        #     _ = subprocess.run(cmd, capture_output=True, shell=True, check=False)
+        # except Exception:
+        #     pass
+        # _compose("down", "-v", "--remove-orphans")
+        pass
 
 @pytest.fixture(scope="session")
 def storage_configuration(request) -> Configuration:

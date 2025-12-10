@@ -23,9 +23,9 @@ LOCATION_TYPE = LocationType.LOW_INTEGRATION
 LOCATION_COUNTRY = LocationCountry.AU
 LOCATION_CITY = "Kensington"
 LOCATION_FACILITY = "local"
-RCLONE_CONFIG_TARGET = {"name": "data", "type": "alias", "parameters": {"remote": "/data"}}
+RCLONE_CONFIG_TARGET = {"name": "dlm-watcher", "type": "alias", "parameters": {"remote": "/data"}}
 RCLONE_CONFIG_SOURCE = {
-    "name": "dlm-client",
+    "name": "dlm-watcher",
     "type": "sftp",
     "parameters": {
         "host": "dlm_directory_watcher",

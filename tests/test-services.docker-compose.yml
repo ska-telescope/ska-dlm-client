@@ -26,9 +26,9 @@ services:
       timeout: 10s
       retries: 5
 
-  sdp_etcd:
+  etcd:
     image: artefact.skao.int/ska-sdp-etcd:3.5.9
-    container_name: sdp_etcd
+    container_name: etcd
     platform: linux/amd64
     networks:
       - dlm_network

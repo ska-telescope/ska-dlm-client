@@ -109,7 +109,7 @@ integration_tests:
     RCLONE_BASE:   https://docker:5572
     COMPOSE_PROJECT_NAME: integration-tests
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    SDP_CONFIG_HOST: sdp_etcd
+    SDP_CONFIG_HOST: etcd
     SDP_CONFIG_PORT: "2379"
     # To debug services, uncomment the line below. For more info see
     # https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2119#note_1142144587
