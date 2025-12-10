@@ -2104,14 +2104,14 @@ files = [
 
 [[package]]
 name = "ska-sdp-config"
-version = "1.4.0"
+version = "1.3.1"
 description = "SKA SDP Configuration Library"
 optional = false
 python-versions = ">=3.10,<4.0"
 groups = ["main"]
 files = [
-    {file = "ska_sdp_config-1.4.0-py3-none-any.whl", hash = "sha256:dc1863ee01020d0147b020454785d25093a8f91f659c6c97585bab4063b4f817"},
-    {file = "ska_sdp_config-1.4.0.tar.gz", hash = "sha256:8f01a081f7e00b01d0add7599edc70986c376a7ef41577d8253d31e1183c4dc7"},
+    {file = "ska_sdp_config-1.3.1-py3-none-any.whl", hash = "sha256:c2640d65c014dc47631a29ce9dd6f66ad2d6b852b6de01e800e2753c0d88e3ac"},
+    {file = "ska_sdp_config-1.3.1.tar.gz", hash = "sha256:cccaa582b79ad680848a95094867910e1fe628674572335a9575335c5280fa25"},
 ]
 
 [package.dependencies]
@@ -2121,7 +2121,6 @@ pydantic = ">=2.11,<3.0"
 PyYAML = ">=6.0,<7.0"
 requests = ">=2.32,<3.0"
 semantic-version = ">=2.10,<3.0"
-ska-ser-logging = ">=0.4.3,<0.5.0"
 ska-telmodel = ">=1.20,<2.0"
 
 [package.source]
@@ -2131,20 +2130,20 @@ reference = "skao"
 
 [[package]]
 name = "ska-sdp-dataproduct-metadata"
-version = "1.0.1"
+version = "1.0.0.post1"
 description = "SKA SDP Data Product Metadata"
 optional = false
 python-versions = ">=3.10,<4.0"
 groups = ["main"]
 files = [
-    {file = "ska_sdp_dataproduct_metadata-1.0.1-py3-none-any.whl", hash = "sha256:707313ff3384ee4d7336cc2e05cea58946fa20ed1fbda867c215ab4650ca4830"},
-    {file = "ska_sdp_dataproduct_metadata-1.0.1.tar.gz", hash = "sha256:07c9a39205ac24715fead0f40ece31899fed92510dd7b76426e79f21acc12b85"},
+    {file = "ska_sdp_dataproduct_metadata-1.0.0.post1-py3-none-any.whl", hash = "sha256:601c97dc3ab82e7d1738253b7ebbcc551ee65c6c95f098eb3df84998e56313d8"},
+    {file = "ska_sdp_dataproduct_metadata-1.0.0.post1.tar.gz", hash = "sha256:773e33af8a4d914cc25770e234145d2bdd8c72eaa00d3c0fcc7752de30dc9061"},
 ]
 
 [package.dependencies]
 jsonschema = ">=4.23,<5.0"
 python-benedict = ">=0.34.1,<0.35.0"
-ska-sdp-config = ">=1.4.0,<2.0.0"
+ska-sdp-config = ">=1.0.0,<2.0.0"
 ska-ser-logging = ">=0.4.3,<0.5.0"
 
 [package.source]
@@ -2782,4 +2781,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "b19d62caffad767712d0852299133145a99379d0c29c4630206ec15a49d5db51"
+content-hash = "bfc354412363fcbd75ee3c0df972d93a3736522ef7c834ced2e0ba4c58f5c8e2"

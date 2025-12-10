@@ -56,20 +56,28 @@ services:
       - dlm_gateway
 
   dlm_directory_watcher:
-    platform: linux/amd64
     image: dlm_directory_watcher
     container_name: dlm_directory_watcher
-    build:
-       context: ..
-       dockerfile: Dockerfile
     depends_on:
       - dlm_storage
     volumes:
       - shared-tmpfs:/dlm
     networks:
       - dlm_network
-  etcd:
+  dlm_configdb_watcher:
+    image: dlm_configdb_watcher
+    container_name: dlm_configdb_watcher
+    depends_on:
+      - dlm_storage
+      - dlm_ingest
+      - etcd
+    volumes:
+      - shared-tmpfs:/dlm
+    networks:
+      - dlm_network
+  sdp_etcd:
     image: artefact.skao.int/ska-sdp-etcd:3.5.9
+    container_name: sdp_etcd
     ports:
       - "2379:2379"
       - "2380:2380"

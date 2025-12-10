@@ -26,9 +26,12 @@ services:
       timeout: 10s
       retries: 5
 
-  etcd:
+  sdp_etcd:
     image: artefact.skao.int/ska-sdp-etcd:3.5.9
+    container_name: sdp_etcd
     platform: linux/amd64
+    networks:
+      - dlm_network
     ports:
       - "2379:2379"
     command:

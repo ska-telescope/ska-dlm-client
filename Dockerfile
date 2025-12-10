@@ -37,4 +37,3 @@ COPY --from=buildenv /app/.venv /app/.venv/
 COPY tests/entrypoint.sh /entrypoint.sh
 ENV PATH="/app/.venv/bin:${PATH}"
 USER root
-ENTRYPOINT [ "/entrypoint.sh" ]

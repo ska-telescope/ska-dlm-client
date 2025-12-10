@@ -9,7 +9,7 @@ import pytest
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.flow import DataProduct, Flow
 
-from ska_dlm_client.sdp_ingest.configdb_watcher import watch_dataproduct_status
+from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
 
 SCRIPT = Script.Key(kind="batch", name="unit_test", version="0.0.0")
 PB_ID = "pb-madeup-00000000-a"

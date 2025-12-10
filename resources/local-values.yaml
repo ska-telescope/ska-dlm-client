@@ -6,8 +6,8 @@ global:
 directory_watcher:
   image: "ska-dlm-client"
   version: "0.1.0-dirty"
-  directory_to_watch: "/dlm/dlm"
-  storage_root_directory: "/dlm/dlm"
+  directory_to_watch: "/dlm/watch_dir"
+  storage_root_directory: "/dlm"
   imagePullPolicy: Never
 
 ska_dlm:
