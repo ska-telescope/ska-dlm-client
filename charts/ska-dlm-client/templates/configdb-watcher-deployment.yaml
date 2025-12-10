@@ -43,5 +43,15 @@ spec:
               value: "etcd"
             - name: SDP_CONFIG_PORT
               value: "2379"
+          volumeMounts:
+            - name: data-product-storage
+              mountPath: /dlm
+              {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
+              readOnly: true
+              {{- end }}
+      volumes:
+        - name: data-product-storage
+          persistentVolumeClaim:
+            claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
 
 {{- end }}

@@ -20,7 +20,7 @@ global:
   development: true
   dataProduct:
     pvc:  # NOTE: This is globally shared all data products volume
-      name: test-pvc
+      name: shared # test-pvc
       read_only: true
 
 nameOverride: ""
