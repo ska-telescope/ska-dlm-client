@@ -100,7 +100,8 @@ async def _process_completed_flow(
         """Async wrapper for updating Dependency state."""
         for txn in configdb.txn():
             update_dependency_state(txn, new_dep, status=status)
-            logger.info("Dependency %s status set to %s.", new_dep, status)
+            state = txn.dependency.state(new_dep).get()
+            logger.info("Dependency %s status set to %s.", new_dep, state.get("status"))
 
     # Resolve the source directory from the Flow sink
     src_dir = get_data_product_dir(configdb, dataproduct_key)

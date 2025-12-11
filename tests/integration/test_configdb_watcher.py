@@ -53,7 +53,7 @@ STORAGE = {
         "STORAGE_NAME": "sdp-watcher",
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
-        "ROOT_DIRECTORY": "/dlm",
+        "ROOT_DIRECTORY": "/dlm/testing1",
         "STORAGE_CONFIG": {
             "name": "dlm",
             "type": "sftp",
@@ -114,7 +114,7 @@ def trigger_completed_flow(flow_name) -> None:
     #   - same `storage_root_directory`
     #   - points at a directory that actually contains the .ms + metadata
     _create_completed_flow(
-        data_dir="/dlm/testing1",
+        data_dir=STORAGE["SRC"]["ROOT_DIRECTORY"],
         flow_name_arg=flow_name,
     )
 
@@ -128,9 +128,11 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
     statuses: list[str] = []
     for txn in cfg.txn():
         dkeys = txn.dependency.list_keys(pb_id=pb_id, name=name)
+        log.info("Found dependencies for %s/%s: %s", pb_id, name, dkeys)
         for dkey in dkeys:
-            dep_obj = Dependency(key=dkey, expiry_time=-1, description=None)
+            dep_obj = Dependency(key=dkey, expiry_time=-1, description="DLM: lock data-product for copy")
             state = txn.dependency.state(dep_obj).get() or {}
+            log.info("Found state %s for dependency %s", state, dep_obj)
             status = state.get("status")
             if status is not None:
                 statuses.append(status)
@@ -228,39 +230,8 @@ async def test_watcher_registers_and_migrates(caplog, storage_configuration: Con
         log.error("Failed to copy MS to watcher container.")
         return
 
-    # configdb_watcher_config = configdb_watcher_main.SDPIngestConfig(
-    #     include_existing=False,
-    #     ingest_server_url=INGEST_SERVER_URL,
-    #     ingest_configuration=Configuration(host=INGEST_SERVER_URL),
-    #     storage_server_url=STORAGE_SERVER_URL,
-    #     storage_name=STORAGE["SRC"]["STORAGE_NAME"],  # <- registered by previous tests
-    #     storage_root_directory=STORAGE["SRC"]["ROOT_DIRECTORY"],
-    #     migration_destination_storage_name=STORAGE["TGT"]["STORAGE_NAME"],  # use a second storage end-point
-    #     migration_configuration=Configuration(host=MIGRATION_SERVER_URL),
-    # )
-
-    # task = asyncio.create_task(configdb_watcher_main.sdp_to_dlm_ingest_and_migrate(configdb_watcher_config))
-
-    try:
-
-        # 1) Trigger a COMPLETED Flow
-        trigger_completed_flow(flow_name="test-flow")
-
-        # 2) Wait for the "status set to FINISHED" log
-        finished_msg = "status set to FINISHED"
-        for _ in range(100):
-            if finished_msg in caplog.text:
-                break
-            await asyncio.sleep(0.1)
-        else:
-            pytest.fail("Dependency was not marked FINISHED within timeout")
-
-    finally:
-        # task.cancel()
-        # with pytest.raises(asyncio.CancelledError):
-        #     await task
-        pass
-
+    trigger_completed_flow("test-flow")
+    sleep(1)
     statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow")
     assert "FINISHED" in statuses
 
