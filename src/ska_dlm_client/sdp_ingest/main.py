@@ -142,7 +142,9 @@ async def _process_completed_flow(
         )
         dep_status = "FAILED"
     else:
-        migration_result = processor.last_migration_result  # Inspect migration outcome
+        # TODO: Instead, inspect 'success' key in job_status column in migration table;
+        # Log and throw
+        migration_result = processor.last_migration_result
         logger.debug("migration_result: %s", migration_result)
 
         if migration_result is None:
@@ -171,8 +173,17 @@ async def sdp_to_dlm_ingest_and_migrate(ingest_config: SDPIngestConfig) -> None:
     configdb = Config()  # Share one handle between writer & watcher
 
     log_configdb_backend_details(configdb)
-    config_str = ", ".join(f"{key}={value!r}" for key, value in vars(ingest_config).items())
-    logger.info("Starting ConfigDB watcher with config: %s", config_str)
+    logger.info(
+        "Starting ConfigDB watcher with: "
+        "include_existing=%s, ingest_server_url=%s, "
+        "source_storage=%s, storage_root_directory=%s, "
+        "migration_destination_storage_name=%s",
+        ingest_config.include_existing,
+        ingest_config.ingest_server_url,
+        ingest_config.source_storage,
+        ingest_config.storage_root_directory,
+        ingest_config.migration_destination_storage_name,
+    )
 
     async with watch_dataproduct_status(
         configdb,

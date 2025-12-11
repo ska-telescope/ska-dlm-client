@@ -32,16 +32,16 @@ ska_dlm:
 
 ska_dlm_client:
   image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client #artefact.skao.int/ska-dlm-client
-  version: "103589b5" # "28be4cc2" #"1.1.0"
+  version: "afe71bb5" # Change to new release asap!
   imagePullPolicy: Always
   storage_name: dlm
   storage_root_directory: /dlm
   securityContext: {}
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace:port
-  ingest_server_url: "http://ska-dlm-dev-ingest:80" # override for production
-  storage_server_url: "http://ska-dlm-dev-storage:80" # override for production
-  request_server_url: "http://ska-dlm-dev-request:80" # override for production
+  ingest_server_url: "http://ska-dlm-ingest" # override for production
+  storage_server_url: "http://ska-dlm-storage" # override for production
+  request_server_url: "http://ska-dlm-request" # override for production
 
 directory_watcher:
   enabled: false
