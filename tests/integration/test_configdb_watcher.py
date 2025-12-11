@@ -26,9 +26,10 @@ from ska_dlm_client.common_types import (
 )
 
 log = logging.getLogger(__name__)
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 PB_ID = "pb-test-00000000-a"
-DEMO_MS_PATH = "tests/directory_watcher/test_registration_processor/testing1"
+DEMO_MS_PATH = f"{dir_path}/../directory_watcher/test_registration_processor/testing1"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://localhost:8001")
 STORAGE_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://localhost:8003")
@@ -113,7 +114,7 @@ def trigger_completed_flow(flow_name) -> None:
     #   - same `storage_root_directory`
     #   - points at a directory that actually contains the .ms + metadata
     _create_completed_flow(
-        data_dir="/dlm/watch_dir",
+        data_dir="/dlm/testing1",
         flow_name_arg=flow_name,
     )
 
@@ -206,7 +207,6 @@ def test_storage_initialisation(storage_configuration: Configuration):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-# @pytest.mark.skip(reason="No destination storage end-point to use. TODO: PI29")
 # TODO: This does not work at all since it is running the client locally and not in
 # a container.
 async def test_watcher_registers_and_migrates(caplog, storage_configuration: Configuration):
@@ -215,49 +215,38 @@ async def test_watcher_registers_and_migrates(caplog, storage_configuration: Con
     api_configuration = Configuration(host="http://localhost")
     setup_testing(api_configuration)
     caplog.set_level(logging.INFO, logger="ska_dlm_client.configdb_watcher")
-    with api_client.ApiClient(storage_configuration) as the_api_client:
-        log.info("Migration setup: Source Storage: %s", STORAGE["SRC"]["STORAGE_NAME"])
-        log.info("Migration setup: Target Storage: %s", STORAGE["TGT"]["STORAGE_NAME"])
         # --- copying demo.ps ---
-        sleep(2)
-        cmd = f"docker container cp {DEMO_MS_PATH} dlm_configdb_watcher:/dlm/watch_dir/."
-        log.info("Migration initialization copy command: %s", cmd)
-        p = subprocess.run(cmd, capture_output=True, shell=True, check=True)
-        if p.returncode != 0:
-            log.info("[copy file STDOUT]: %s\n", p.stdout)
-            log.error("[copy file STDERR]: %s\n", p.stderr)
+    sleep(2)
+    cmd = f"docker container cp {DEMO_MS_PATH} dlm_configdb_watcher:/dlm/."
+    log.info("Move MS into container: %s", cmd)
+    p = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    if p.returncode != 0:
+        log.info("[copy file STDOUT]: %s\n", p.stdout)
+        log.error("[copy file STDERR]: %s\n", p.stderr)
     assert p.returncode == 0
     if p.returncode != 0:
-        log.error("Failed to copy demo.ms to watcher container.")
+        log.error("Failed to copy MS to watcher container.")
         return
 
-    configdb_watcher_config = configdb_watcher_main.SDPIngestConfig(
-        include_existing=False,
-        ingest_server_url=INGEST_SERVER_URL,
-        ingest_configuration=Configuration(host=INGEST_SERVER_URL),
-        storage_server_url=STORAGE_SERVER_URL,
-        storage_name=STORAGE["SRC"]["STORAGE_NAME"],  # <- registered by previous tests
-        storage_root_directory=STORAGE["SRC"]["ROOT_DIRECTORY"],
-        migration_destination_storage_name=STORAGE["TGT"]["STORAGE_NAME"],  # use a second storage end-point
-        migration_configuration=Configuration(host=MIGRATION_SERVER_URL),
-    )
+    # configdb_watcher_config = configdb_watcher_main.SDPIngestConfig(
+    #     include_existing=False,
+    #     ingest_server_url=INGEST_SERVER_URL,
+    #     ingest_configuration=Configuration(host=INGEST_SERVER_URL),
+    #     storage_server_url=STORAGE_SERVER_URL,
+    #     storage_name=STORAGE["SRC"]["STORAGE_NAME"],  # <- registered by previous tests
+    #     storage_root_directory=STORAGE["SRC"]["ROOT_DIRECTORY"],
+    #     migration_destination_storage_name=STORAGE["TGT"]["STORAGE_NAME"],  # use a second storage end-point
+    #     migration_configuration=Configuration(host=MIGRATION_SERVER_URL),
+    # )
 
-    task = asyncio.create_task(configdb_watcher_main.sdp_to_dlm_ingest_and_migrate(configdb_watcher_config))
+    # task = asyncio.create_task(configdb_watcher_main.sdp_to_dlm_ingest_and_migrate(configdb_watcher_config))
 
     try:
-        # 1) Wait for watcher to be READY
-        ready_msg = "Watcher READY and looking for events."
-        for _ in range(50):
-            if ready_msg in caplog.text:
-                break
-            await asyncio.sleep(0.1)
-        else:
-            pytest.fail("Watcher did not log readiness within timeout")
 
-        # 2) Trigger a COMPLETED Flow
+        # 1) Trigger a COMPLETED Flow
         trigger_completed_flow(flow_name="test-flow")
 
-        # 3) Wait for the "status set to FINISHED" log
+        # 2) Wait for the "status set to FINISHED" log
         finished_msg = "status set to FINISHED"
         for _ in range(100):
             if finished_msg in caplog.text:
@@ -267,9 +256,10 @@ async def test_watcher_registers_and_migrates(caplog, storage_configuration: Con
             pytest.fail("Dependency was not marked FINISHED within timeout")
 
     finally:
-        task.cancel()
-        with pytest.raises(asyncio.CancelledError):
-            await task
+        # task.cancel()
+        # with pytest.raises(asyncio.CancelledError):
+        #     await task
+        pass
 
     statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow")
     assert "FINISHED" in statuses

@@ -59,11 +59,12 @@ def process_args(args: argparse.Namespace) -> SDPIngestConfig:
     ingest_configuration = Configuration(host=args.ingest_server_url)
 
     # Only configure migration if the user supplied a migration server URL
-    migration_configuration = (
-        Configuration(host=args.migration_server_url)
-        if args.migration_server_url is not None
-        else None
-    )
+    if args.migration_server_url is not None:
+        migration_configuration = Configuration(host=args.migration_server_url)
+    else:
+        migration_configuration = None
+        logger.warning("No migration server specified. Unable to perform migrations.")
+    
 
     return SDPIngestConfig(
         include_existing=args.include_existing,

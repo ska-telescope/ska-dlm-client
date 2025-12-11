@@ -131,7 +131,7 @@ def get_or_init_storage(
                         os.path.expanduser("~/.ssh/authorized_keys"), "a", encoding="utf-8"
                     ) as key_file:
                         key_file.write(f"\n{key}\n")
-                    if os.environ["USER"] == "root":  # assume running inside a client container
+                    if "USER" not in os.environ or os.environ["USER"] == "root":  # assume running inside a client container
                         shutil.copyfile(
                             os.path.expanduser("~/.ssh/authorized_keys"),
                             "/home/ska-dlm/.ssh/authorized_keys",
