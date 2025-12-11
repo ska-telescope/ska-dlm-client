@@ -3,6 +3,8 @@
 import asyncio
 import logging
 import os
+import subprocess
+from time import sleep
 
 import pytest
 from ska_sdp_config import Config
@@ -26,8 +28,10 @@ from ska_dlm_client.common_types import (
 log = logging.getLogger(__name__)
 
 PB_ID = "pb-test-00000000-a"
+DEMO_MS_PATH = "tests/directory_watcher/test_registration_processor/testing1"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://localhost:8001")
+STORAGE_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://localhost:8003")
 MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", "http://localhost:8004")
 
 LOCATION_NAME = "ThisDLMClientLocationName"
@@ -38,14 +42,14 @@ LOCATION_CITY = "Marksville"
 LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
 STORAGE = {
     "TGT": {
-        "STORAGE_NAME": "MyDisk",
+        "STORAGE_NAME": "dlm-archive",
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
         "ROOT_DIRECTORY": "/data",
         "STORAGE_CONFIG": {"name": "dlm-archive", "type": "local", "parameters": {}},
     },
     "SRC": {
-        "STORAGE_NAME": "dlm-watcher",
+        "STORAGE_NAME": "sdp-watcher",
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
         "ROOT_DIRECTORY": "/dlm",
@@ -109,7 +113,7 @@ def trigger_completed_flow(flow_name) -> None:
     #   - same `storage_root_directory`
     #   - points at a directory that actually contains the .ms + metadata
     _create_completed_flow(
-        data_dir="tests/directory_watcher/test_registration_processor/testing1",
+        data_dir="/dlm/watch_dir",
         flow_name_arg=flow_name,
     )
 
@@ -203,6 +207,8 @@ def test_storage_initialisation(storage_configuration: Configuration):
 @pytest.mark.asyncio
 @pytest.mark.integration
 # @pytest.mark.skip(reason="No destination storage end-point to use. TODO: PI29")
+# TODO: This does not work at all since it is running the client locally and not in
+# a container.
 async def test_watcher_registers_and_migrates(caplog, storage_configuration: Configuration):
     """Run the real watcher, wait for success logs, then cancel it cleanly."""
     """Test auto migration using configdb watcher."""
@@ -212,13 +218,25 @@ async def test_watcher_registers_and_migrates(caplog, storage_configuration: Con
     with api_client.ApiClient(storage_configuration) as the_api_client:
         log.info("Migration setup: Source Storage: %s", STORAGE["SRC"]["STORAGE_NAME"])
         log.info("Migration setup: Target Storage: %s", STORAGE["TGT"]["STORAGE_NAME"])
-        # --- trigger watcher by copying file ---
+        # --- copying demo.ps ---
+        sleep(2)
+        cmd = f"docker container cp {DEMO_MS_PATH} dlm_configdb_watcher:/dlm/watch_dir/."
+        log.info("Migration initialization copy command: %s", cmd)
+        p = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+        if p.returncode != 0:
+            log.info("[copy file STDOUT]: %s\n", p.stdout)
+            log.error("[copy file STDERR]: %s\n", p.stderr)
+    assert p.returncode == 0
+    if p.returncode != 0:
+        log.error("Failed to copy demo.ms to watcher container.")
+        return
 
     configdb_watcher_config = configdb_watcher_main.SDPIngestConfig(
         include_existing=False,
         ingest_server_url=INGEST_SERVER_URL,
         ingest_configuration=Configuration(host=INGEST_SERVER_URL),
-        source_storage=STORAGE["SRC"]["STORAGE_NAME"],  # <- registered by previous tests
+        storage_server_url=STORAGE_SERVER_URL,
+        storage_name=STORAGE["SRC"]["STORAGE_NAME"],  # <- registered by previous tests
         storage_root_directory=STORAGE["SRC"]["ROOT_DIRECTORY"],
         migration_destination_storage_name=STORAGE["TGT"]["STORAGE_NAME"],  # use a second storage end-point
         migration_configuration=Configuration(host=MIGRATION_SERVER_URL),
@@ -268,9 +286,11 @@ async def test_watcher_logs_failed_registration(caplog):
         include_existing=False,
         ingest_server_url=INGEST_SERVER_URL,
         ingest_configuration=Configuration(host=INGEST_SERVER_URL),
-        source_storage="NonExistentStorage",  # <- not registered on DLM side
-        storage_root_directory="/data",
-        migration_destination_storage_name="MyDisk",
+        storage_server_url=STORAGE_SERVER_URL,
+        storage_name="NonExistentStorage",  # <- not registered on DLM side
+        storage_root_directory=STORAGE["SRC"]["ROOT_DIRECTORY"],
+        migration_destination_storage_name=STORAGE["TGT"]["STORAGE_NAME"],
+        migration_configuration=Configuration(host=MIGRATION_SERVER_URL),
     )
 
     task = asyncio.create_task(configdb_watcher_main.sdp_to_dlm_ingest_and_migrate(configdb_watcher_config))

@@ -11,7 +11,7 @@ from src.ska_dlm_client.kafka_watcher.main import main, post_dlm_data_item, watc
 KAFKA_HOST = "localhost:9092"
 TEST_TOPIC = "test-events"
 INGEST_HOST = "http://dlm/api"
-STORAGE_NAME = "dlm-watcher"
+STORAGE_NAME = "kafka-watcher"
 KAFKA_MSG = {
     "file": "/data/test/file_name",
     "time": "2025-02-05T14:23:45.678901",
