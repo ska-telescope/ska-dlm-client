@@ -22,27 +22,39 @@ spec:
         - name: configdb-watcher
           image: {{ .Values.ska_dlm_client.image }}:{{ .Values.ska_dlm_client.version }}
           imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
-          command:
-          - "sdp-config-watcher"
-          args:
-          {{- if .Values.configdb_watcher.include_existing }}
-          - "--include-existing"
-          {{- end }}
-          - "--ingest-server-url"
-          - {{ .Values.configdb_watcher.ingest_server_url }}
-          - "--source-storage"
-          - {{ .Values.configdb_watcher.source_storage }}
-          - "--storage-root-directory"
-          - {{ .Values.configdb_watcher.storage_root_directory }}
-          - "--migration-destination-storage-name"
-          - {{ .Values.configdb_watcher.migration_destination_storage_name }}
-          - "--migration-server-url"
-          - {{ .Values.configdb_watcher.migration_server_url }}
+
+          # Where ska_sdp_config.Config() should look for etcd / ConfigDB
           env:
             - name: SDP_CONFIG_HOST
-              value: "etcd"
+              value: {{ default (printf "%s-etcd" (include "ska-dlm-client.fullname" .)) .Values.configdb_watcher.sdp_config.host | quote }}
             - name: SDP_CONFIG_PORT
-              value: "2379"
+              value: {{ .Values.configdb_watcher.sdp_config.port | quote }}
+            {{- if .Values.configdb_watcher.sdp_config.path }}
+            - name: SDP_CONFIG_PATH
+              value: {{ .Values.configdb_watcher.sdp_config.path | quote }}
+            {{- end }}
+
+          command:
+            - "sdp-config-watcher"
+          args:
+          {{- if .Values.configdb_watcher.include_existing }}
+            - "--include-existing"
+          {{- end }}
+            - "--ingest-server-url"
+            - {{ .Values.configdb_watcher.ingest_server_url }}
+            - "--source-storage"
+            - {{ .Values.configdb_watcher.source_storage }}
+            - "--storage-root-directory"
+            - {{ .Values.configdb_watcher.storage_root_directory }}
+          {{- if .Values.configdb_watcher.migration_destination_storage_name }}
+            - "--migration-destination-storage-name"
+            - {{ .Values.configdb_watcher.migration_destination_storage_name }}
+          {{- end }}
+          {{- if .Values.configdb_watcher.migration_server_url }}
+            - "--migration-server-url"
+            - {{ .Values.configdb_watcher.migration_server_url }}
+          {{- end }}
+
           volumeMounts:
             - name: data-product-storage
               mountPath: /dlm

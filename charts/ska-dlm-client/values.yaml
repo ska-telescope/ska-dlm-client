@@ -20,7 +20,7 @@ global:
   development: true
   dataProduct:
     pvc:  # NOTE: This is globally shared all data products volume
-      name: shared # test-pvc
+      name: shared
       read_only: true
 
 nameOverride: ""
@@ -66,10 +66,14 @@ configdb_watcher:
   storage_root_directory: /
   migration_destination_storage_name: # If omitted, migration will be skipped
   migration_server_url: # If omitted, migration will be skipped
+  sdp_config:
+    host: ""      # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
+    port: 2379    # default etcd client port
+    path: ""      # optional
 
-# if we want a local etcd service
+# if you want to deploy a local etcd service
 etcd:
-  enabled: true
+  enabled: true # set to false if you want to use an external etcd
   image: "artefact.skao.int/ska-sdp-etcd"
   tag: "3.5.9"
 
