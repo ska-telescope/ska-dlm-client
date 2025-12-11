@@ -3,12 +3,10 @@
 import argparse
 import asyncio
 import logging
-import os
 from dataclasses import dataclass
 
 import athreading
 from ska_sdp_config import Config
-from ska_sdp_config.backend.etcd3 import Etcd3Backend
 from ska_sdp_config.entity.flow import Flow
 
 from ska_dlm_client.openapi.configuration import Configuration
@@ -21,6 +19,7 @@ from ska_dlm_client.registration_processor import (
 from ska_dlm_client.sdp_ingest.configdb_utils import (
     create_sdp_migration_dependency,
     get_data_product_dir,
+    log_configdb_backend_details,
     update_dependency_state,
 )
 from ska_dlm_client.sdp_ingest.configdb_watcher import watch_dataproduct_status
@@ -171,50 +170,9 @@ async def sdp_to_dlm_ingest_and_migrate(ingest_config: SDPIngestConfig) -> None:
     """Ingest and migrate SDP data-products using DLM."""
     configdb = Config()  # Share one handle between writer & watcher
 
-    # --- TEMP: log etcd / ConfigDB connection details ------------------------
-    backend = getattr(configdb, "_backend", None)
-
-    sdp_backend = os.getenv("SDP_CONFIG_BACKEND")
-    sdp_host = os.getenv("SDP_CONFIG_HOST")
-    sdp_port = os.getenv("SDP_CONFIG_PORT")
-    sdp_path = os.getenv("SDP_CONFIG_PATH")
-
-    if isinstance(backend, Etcd3Backend):
-        client = getattr(backend, "_client", None)
-        root = getattr(backend, "_root", None)
-
-        # MultiEndpointEtcd3Client usually has some notion of endpoints;
-        # this is defensive so it won't explode if the attribute name changes.
-        endpoints = getattr(client, "endpoints", None) if client is not None else None
-        if endpoints is None:
-            endpoints = getattr(client, "_endpoints", None) if client is not None else None
-
-        logger.info(
-            "ConfigDB backend: etcd3 "
-            "(env backend=%r, host=%r, port=%r, path=%r, root=%r, endpoints=%r)",
-            sdp_backend,
-            sdp_host,
-            sdp_port,
-            sdp_path,
-            root,
-            endpoints,
-        )
-    else:
-        logger.info(
-            "ConfigDB backend: %s (env backend=%r, host=%r, port=%r, path=%r)",
-            type(backend).__name__ if backend is not None else None,
-            sdp_backend,
-            sdp_host,
-            sdp_port,
-            sdp_path,
-        )
-    # -----------------------------------------------------------------------
-
-    logger.info(
-        "Starting ConfigDB watcher (include_existing=%s, source_storage=%s)...",
-        ingest_config.include_existing,
-        ingest_config.source_storage,
-    )
+    log_configdb_backend_details(configdb)
+    config_str = ", ".join(f"{key}={value!r}" for key, value in vars(ingest_config).items())
+    logger.info("Starting ConfigDB watcher with config: %s", config_str)
 
     async with watch_dataproduct_status(
         configdb,

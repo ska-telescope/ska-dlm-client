@@ -32,7 +32,7 @@ ska_dlm:
 
 ska_dlm_client:
   image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client #artefact.skao.int/ska-dlm-client
-  version: "28be4cc2" #"1.1.0"
+  version: "103589b5" # "28be4cc2" #"1.1.0"
   imagePullPolicy: Always
   storage_name: dlm
   storage_root_directory: /dlm
