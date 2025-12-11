@@ -133,7 +133,6 @@ def update_dependency_state(txn, dep: Dependency, status: str = "WORKING") -> No
 
 def log_configdb_backend_details(config: Config) -> None:
     """Log backend and environment details for the SDP ConfigDB connection."""
-
     backend = getattr(config, "_backend", None)
 
     sdp_backend = os.getenv("SDP_CONFIG_BACKEND")
