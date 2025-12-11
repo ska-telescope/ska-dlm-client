@@ -242,13 +242,12 @@ def dlm_stack():
         _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
         yield
     finally:  # teardown
-        # cmd = "docker exec dlm_directory_watcher rm /dlm/watch_dir/group"
-        # try:
-        #     _ = subprocess.run(cmd, capture_output=True, shell=True, check=False)
-        # except Exception:
-        #     pass
-        # _compose("down", "-v", "--remove-orphans")
-        pass
+        cmd = "docker exec dlm_directory_watcher rm /dlm/watch_dir/group"
+        try:
+            _ = subprocess.run(cmd, capture_output=True, shell=True, check=False)
+        except Exception:
+            pass
+        _compose("down", "-v", "--remove-orphans")
 
 @pytest.fixture(scope="session")
 def storage_configuration(request) -> Configuration:

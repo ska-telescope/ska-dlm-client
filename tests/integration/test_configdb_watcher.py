@@ -13,7 +13,7 @@ from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.dlm_api import request_api, storage_api
+from ska_dlm_client.openapi.dlm_api import storage_api
 from ska_dlm_client.register_storage_location.main import setup_testing
 
 from ska_dlm_client.configdb_watcher import main as configdb_watcher_main
@@ -211,14 +211,13 @@ def test_storage_initialisation(storage_configuration: Configuration):
 @pytest.mark.integration
 # TODO: This does not work at all since it is running the client locally and not in
 # a container.
-async def test_watcher_registers_and_migrates(caplog, storage_configuration: Configuration):
+async def test_watcher_registers_and_migrates():
     """Run the real watcher, wait for success logs, then cancel it cleanly."""
     """Test auto migration using configdb watcher."""
     api_configuration = Configuration(host="http://localhost")
     setup_testing(api_configuration)
-    caplog.set_level(logging.INFO, logger="ska_dlm_client.configdb_watcher")
-        # --- copying demo.ps ---
     sleep(2)
+    # --- copying demo.ps ---
     cmd = f"docker container cp {DEMO_MS_PATH} dlm_configdb_watcher:/dlm/."
     log.info("Move MS into container: %s", cmd)
     p = subprocess.run(cmd, capture_output=True, shell=True, check=True)
@@ -238,9 +237,10 @@ async def test_watcher_registers_and_migrates(caplog, storage_configuration: Con
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_watcher_logs_failed_registration(caplog):
+@pytest.mark.skip(reason="We need to trigger a failed registration on the container, but how?")
+# The current implementation runs a new configdb_watcher locally.
+async def test_watcher_logs_failed_registration():
     """Run the watcher, trigger a Flow, and check failed registration is logged."""
-    caplog.set_level(logging.INFO, logger="ska_dlm_client.configdb_watcher")
 
     # Deliberately use a bad storage name to trigger DLM registration failure
     configdb_watcher_config = configdb_watcher_main.SDPIngestConfig(
