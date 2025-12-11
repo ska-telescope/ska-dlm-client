@@ -144,7 +144,9 @@ class RegistrationProcessor:
 
         result: str | None = None
         with api_client.ApiClient(migration_configuration) as migration_api_client:
-            logger.info("Initiating migration of data_item '%s' to %s", item_name, destination_storage_name)
+            logger.info(
+                "Initiating migration of data_item '%s' to %s", item_name, destination_storage_name
+            )
             api_migration = migration_api.MigrationApi(migration_api_client)
             api_migration.api_client.configuration.host = migration_configuration.host
             try:

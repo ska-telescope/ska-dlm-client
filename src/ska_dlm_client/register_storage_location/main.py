@@ -87,7 +87,9 @@ def get_or_init_storage(
             os.makedirs(storage_root_directory, exist_ok=True)
         except PermissionError as e:
             # we just log the error here
-            logger.error("Unable to create storage root directory %s: %s", storage_root_directory, e)
+            logger.error(
+                "Unable to create storage root directory %s: %s", storage_root_directory, e
+            )
     logger.info("Data directory %s created (or already existed)", storage_root_directory)
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
@@ -131,7 +133,9 @@ def get_or_init_storage(
                         os.path.expanduser("~/.ssh/authorized_keys"), "a", encoding="utf-8"
                     ) as key_file:
                         key_file.write(f"\n{key}\n")
-                    if "USER" not in os.environ or os.environ["USER"] == "root":  # assume running inside a client container
+                    if (
+                        "USER" not in os.environ or os.environ["USER"] == "root"
+                    ):  # assume running inside a client container
                         shutil.copyfile(
                             os.path.expanduser("~/.ssh/authorized_keys"),
                             "/home/ska-dlm/.ssh/authorized_keys",
@@ -155,11 +159,13 @@ def setup_volume(
     api_configuration: Configuration,
     rclone_config: str = None,
     location_id: str = None,
-    storage_server_url: str = "http://dlm_storage:8003"
+    storage_server_url: str = "http://dlm_storage:8003",
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
     if location_id is None:
-        location_id = get_or_init_location(api_configuration, location=LOCATION_NAME, storage_url=storage_server_url)
+        location_id = get_or_init_location(
+            api_configuration, location=LOCATION_NAME, storage_url=storage_server_url
+        )
     storage_id = get_or_init_storage(
         storage_name=watcher_config.storage_name,
         api_configuration=api_configuration,

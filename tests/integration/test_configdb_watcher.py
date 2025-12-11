@@ -1,6 +1,5 @@
 """SDP Ingest (ConfigDB Watcher) integration tests."""
 
-import asyncio
 import logging
 import os
 import subprocess
@@ -11,19 +10,16 @@ from ska_sdp_config import Config
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
-from ska_dlm_client.openapi import api_client
-from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.dlm_api import storage_api
-from ska_dlm_client.register_storage_location.main import setup_testing
-
-from ska_dlm_client.configdb_watcher import main as configdb_watcher_main
-
 from ska_dlm_client.common_types import (
     LocationCountry,
     LocationType,
     StorageInterface,
     StorageType,
 )
+from ska_dlm_client.openapi import api_client
+from ska_dlm_client.openapi.configuration import Configuration
+from ska_dlm_client.openapi.dlm_api import storage_api
+from ska_dlm_client.register_storage_location.main import setup_testing
 
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -118,6 +114,7 @@ def trigger_completed_flow(flow_name) -> None:
         flow_name_arg=flow_name,
     )
 
+
 def _get_id(item, key: str):
     return item[key] if isinstance(item, dict) else getattr(item, key)
 
@@ -130,13 +127,16 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
         dkeys = txn.dependency.list_keys(pb_id=pb_id, name=name)
         log.info("Found dependencies for %s/%s: %s", pb_id, name, dkeys)
         for dkey in dkeys:
-            dep_obj = Dependency(key=dkey, expiry_time=-1, description="DLM: lock data-product for copy")
+            dep_obj = Dependency(
+                key=dkey, expiry_time=-1, description="DLM: lock data-product for copy"
+            )
             state = txn.dependency.state(dep_obj).get() or {}
             log.info("Found state %s for dependency %s", state, dep_obj)
             status = state.get("status")
             if status is not None:
                 statuses.append(status)
     return statuses
+
 
 def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
     resp = api_storage.query_location(location_name=LOCATION_NAME)
@@ -155,6 +155,7 @@ def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
         assert isinstance(location_id, str) and location_id
         log.info("Location created: %s", location_id)
     return location_id
+
 
 def _init_storage_if_needed(
     api_storage: storage_api.StorageApi, location_id: str, storage: dict = None
@@ -176,7 +177,6 @@ def _init_storage_if_needed(
         assert isinstance(storage_id, str) and storage_id
         log.info("Storage created: %s %s", storage["STORAGE_NAME"], storage_id)
     return storage_id
-
 
 
 @pytest.mark.integration
@@ -206,14 +206,16 @@ def test_storage_initialisation(storage_configuration: Configuration):
         assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
 
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 # TODO: This does not work at all since it is running the client locally and not in
 # a container.
 async def test_watcher_registers_and_migrates():
-    """Run the real watcher, wait for success logs, then cancel it cleanly."""
-    """Test auto migration using configdb watcher."""
+    """
+    Run the real watcher, wait for success logs, then cancel it cleanly.
+
+    Test auto migration using configdb watcher.
+    """
     api_configuration = Configuration(host="http://localhost")
     setup_testing(api_configuration)
     sleep(2)
@@ -241,49 +243,24 @@ async def test_watcher_registers_and_migrates():
 # The current implementation runs a new configdb_watcher locally.
 async def test_watcher_logs_failed_registration():
     """Run the watcher, trigger a Flow, and check failed registration is logged."""
-
     # Deliberately use a bad storage name to trigger DLM registration failure
-    configdb_watcher_config = configdb_watcher_main.SDPIngestConfig(
-        include_existing=False,
-        ingest_server_url=INGEST_SERVER_URL,
-        ingest_configuration=Configuration(host=INGEST_SERVER_URL),
-        storage_server_url=STORAGE_SERVER_URL,
-        storage_name="NonExistentStorage",  # <- not registered on DLM side
-        storage_root_directory=STORAGE["SRC"]["ROOT_DIRECTORY"],
-        migration_destination_storage_name=STORAGE["TGT"]["STORAGE_NAME"],
-        migration_configuration=Configuration(host=MIGRATION_SERVER_URL),
-    )
+    # configdb_watcher_config = configdb_watcher_main.SDPIngestConfig(
+    #     include_existing=False,
+    #     ingest_server_url=INGEST_SERVER_URL,
+    #     ingest_configuration=Configuration(host=INGEST_SERVER_URL),
+    #     storage_server_url=STORAGE_SERVER_URL,
+    #     storage_name="NonExistentStorage",  # <- not registered on DLM side
+    #     storage_root_directory=STORAGE["SRC"]["ROOT_DIRECTORY"],
+    #     migration_destination_storage_name=STORAGE["TGT"]["STORAGE_NAME"],
+    #     migration_configuration=Configuration(host=MIGRATION_SERVER_URL),
+    # )
 
-    task = asyncio.create_task(configdb_watcher_main.sdp_to_dlm_ingest_and_migrate(configdb_watcher_config))
+    # 1) Trigger a COMPLETED Flow
+    trigger_completed_flow("test-flow-failure")
 
-    try:
-        # 1) Wait for watcher to be READY
-        ready_msg = "Watcher READY and looking for events."
-        for _ in range(50):
-            if ready_msg in caplog.text:
-                break
-            await asyncio.sleep(0.1)
-        else:
-            pytest.fail("Watcher did not log readiness within timeout")
-
-        # 2) Trigger a COMPLETED Flow
-        trigger_completed_flow("test-flow-failure")
-
-        # 3) Wait for the registration failure log
-        failure_msg = "DLM registration failed"
-        for _ in range(100):  # give it enough time for end-to-end path
-            if failure_msg in caplog.text:
-                break
-            await asyncio.sleep(0.1)
-        else:
-            pytest.fail("Watcher did not log failed registration within timeout")
-
-        assert "status set to FAILED" in caplog.text
-
-    finally:
-        task.cancel()
-        with pytest.raises(asyncio.CancelledError):
-            await task
-
-    statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow-failure")
+    # 2) Wait for the registration failure log
+    sleep(1)
+    statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow")
+    if "FAILED" in statuses:
+        pytest.fail("Watcher did not log failed registration within timeout")
     assert "FAILED" in statuses

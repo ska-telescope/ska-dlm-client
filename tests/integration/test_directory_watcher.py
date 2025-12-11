@@ -13,13 +13,13 @@ from ska_dlm_client.register_storage_location.main import setup_testing
 
 log = logging.getLogger(__name__)
 
+
 def _get_id(item, key: str):
     return item[key] if isinstance(item, dict) else getattr(item, key)
 
+
 @pytest.mark.integration
-def test_auto_migration(
-    request_configuration: Configuration
-):
+def test_auto_migration(request_configuration: Configuration):
     """Test auto migration using directory watcher."""
     api_configuration = Configuration(host="http://localhost")
     setup_testing(api_configuration)

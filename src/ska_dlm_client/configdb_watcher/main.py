@@ -3,13 +3,19 @@
 import argparse
 import asyncio
 import logging
-from dataclasses import dataclass
 import os
+from dataclasses import dataclass
 
 import athreading
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Flow
 
+from ska_dlm_client.configdb_watcher.configdb_utils import (
+    create_sdp_migration_dependency,
+    get_data_product_dir,
+    update_dependency_state,
+)
+from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.register_storage_location.main import setup_volume
 from ska_dlm_client.registration_processor import (
@@ -18,12 +24,6 @@ from ska_dlm_client.registration_processor import (
     _item_for_single_file_with_metadata,
     _measurement_set_directory_in,
 )
-from ska_dlm_client.configdb_watcher.configdb_utils import (
-    create_sdp_migration_dependency,
-    get_data_product_dir,
-    update_dependency_state,
-)
-from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
 
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
 
@@ -40,6 +40,7 @@ RCLONE_CONFIG_SOURCE = {
 }
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass
 class SDPIngestConfig:
     """Runtime configuration for the SDP→DLM ConfigDB Watcher."""
@@ -64,7 +65,6 @@ def process_args(args: argparse.Namespace) -> SDPIngestConfig:
     else:
         migration_configuration = None
         logger.warning("No migration server specified. Unable to perform migrations.")
-    
 
     return SDPIngestConfig(
         include_existing=args.include_existing,
@@ -78,7 +78,7 @@ def process_args(args: argparse.Namespace) -> SDPIngestConfig:
     )
 
 
-async def _process_completed_flow(
+async def _process_completed_flow(  # noqa: C901
     configdb: Config,
     dataproduct_key: Flow.Key,
     ingest_config: SDPIngestConfig,
