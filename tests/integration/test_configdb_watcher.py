@@ -239,21 +239,13 @@ async def test_watcher_registers_and_migrates():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-@pytest.mark.skip(reason="We need to trigger a failed registration on the container, but how?")
+@pytest.mark.skip(reason="We need to trigger a failed registration on the container")
 # The current implementation runs a new configdb_watcher locally.
 async def test_watcher_logs_failed_registration():
     """Run the watcher, trigger a Flow, and check failed registration is logged."""
-    # Deliberately use a bad storage name to trigger DLM registration failure
-    # configdb_watcher_config = configdb_watcher_main.SDPIngestConfig(
-    #     include_existing=False,
-    #     ingest_server_url=INGEST_SERVER_URL,
-    #     ingest_configuration=Configuration(host=INGEST_SERVER_URL),
-    #     storage_server_url=STORAGE_SERVER_URL,
-    #     storage_name="NonExistentStorage",  # <- not registered on DLM side
-    #     storage_root_directory=STORAGE["SRC"]["ROOT_DIRECTORY"],
-    #     migration_destination_storage_name=STORAGE["TGT"]["STORAGE_NAME"],
-    #     migration_configuration=Configuration(host=MIGRATION_SERVER_URL),
-    # )
+
+    # We can now use the env-variables to start a new client with a
+    # deliberately bad source_name to trigger DLM registration failure
 
     # 1) Trigger a COMPLETED Flow
     trigger_completed_flow("test-flow-failure")
