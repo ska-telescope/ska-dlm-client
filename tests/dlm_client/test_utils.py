@@ -32,10 +32,8 @@ def test_cmdline_parameters_initialization(parser: argparse.ArgumentParser) -> N
         add_directory_to_watch=True,
         add_storage_name=True,
         add_ingest_server_url=True,
-        add_migration_server_url=True,
         add_request_server_url=True,
         add_readiness_probe_file=True,
-        add_migration_destination_storage_name=True,
         add_do_not_perform_actual_ingest_and_migration=True,
         add_dir_updates_wait_time=True,
     )
@@ -46,7 +44,6 @@ def test_cmdline_parameters_initialization(parser: argparse.ArgumentParser) -> N
     assert cmd_params.add_ingest_server_url is True
     assert cmd_params.add_request_server_url is True
     assert cmd_params.add_readiness_probe_file is True
-    assert cmd_params.add_migration_destination_storage_name is True
     assert cmd_params.add_dev_test_mode is True
     assert cmd_params.add_do_not_perform_actual_ingest_and_migration is True
     assert cmd_params.add_dir_updates_wait_time is True
@@ -73,7 +70,6 @@ def test_cmdline_parameters_default_values(parser: argparse.ArgumentParser) -> N
 
     # Check if attributes exist, if not, they're expected to be False by default
     # when initialized with their respective parameters set to False
-    assert getattr(cmd_params, "add_migration_destination_storage_name", False) is False
     assert getattr(cmd_params, "add_dev_test_mode", False) is False
     assert getattr(cmd_params, "add_do_not_perform_actual_ingest_and_migration", False) is False
 
@@ -90,10 +86,8 @@ def cmd_params_all_enabled_fixture(parser: argparse.ArgumentParser) -> CmdLinePa
         add_directory_to_watch=True,
         add_storage_name=True,
         add_ingest_server_url=True,
-        add_migration_server_url=True,
         add_request_server_url=True,
         add_readiness_probe_file=True,
-        add_migration_destination_storage_name=True,
         add_do_not_perform_actual_ingest_and_migration=True,
         add_dir_updates_wait_time=True,
     )
@@ -140,7 +134,6 @@ def test_parse_arguments(
     assert cmd_params_all_enabled.ingest_server_url == "http://ingest-server:8080"
     assert cmd_params_all_enabled.request_server_url == "http://request-server:8080"
     assert cmd_params_all_enabled.readiness_probe_file == "/tmp/ready"
-    assert cmd_params_all_enabled.migration_destination_storage_name == "dest-storage"
     assert cmd_params_all_enabled.dev_test_mode is True
     assert cmd_params_all_enabled.do_not_perform_actual_ingest_and_migration is True
     assert cmd_params_all_enabled.dir_updates_wait_time == 30
@@ -179,42 +172,6 @@ def test_do_not_perform_requires_dev_test_mode(cmd_params_all_enabled: CmdLinePa
         ),
     ):
         cmd_params_all_enabled.parse_arguments(args)
-
-
-def test_migration_destination_storage_name_requires_migration_server_url(
-    cmd_params_all_enabled: CmdLineParameters,
-) -> None:
-    """Test that migration_destination_storage_name requires migration_server_url to be set.
-
-    This test verifies that a ValueError is raised when migration_destination_storage_name
-    is set but migration_server_url is not.
-
-    :param cmd_params_all_enabled: CmdLineParameters fixture with all parameters enabled
-    """
-    # Create args with migration_destination_storage_name set but migration_server_url not set
-    args = argparse.Namespace(
-        directory_to_watch="/test/dir",
-        storage_name="test-storage",
-        ingest_server_url="http://ingest-server:8080",
-        request_server_url="http://request-server:8080",
-        readiness_probe_file="/tmp/ready",
-        migration_destination_storage_name="dest-storage",
-        migration_server_url=None,
-        dev_test_mode=True,
-        do_not_perform_actual_ingest_and_migration=True,
-        dir_updates_wait_time=30,
-    )
-
-    # Verify that a ValueError is raised
-    with pytest.raises(
-        ValueError,
-        match=(
-            "migration_destination_storage_name can only be used when "
-            "migration_server_url is set"
-        ),
-    ):
-        cmd_params_all_enabled.parse_arguments(args)
-
 
 def test_perform_actual_ingest_and_migration_setting(
     cmd_params_all_enabled: CmdLineParameters,

@@ -43,25 +43,46 @@ def create_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "-i",
-        "--ingest-server-url",
+        "--ingest-url",
         type=str,
         required=True,
         help="Ingest server URL including the service port.",
     )
     parser.add_argument(
+        "-m",
+        "--migration-url",
+        type=str,
+        required=False,
+        help="Migration server URL including the service port.",
+    )
+    parser.add_argument(
         "-n",
-        "--storage-name",
+        "--source-name",
         type=str,
         required=True,
-        help="The name by which the DLM system knows the storage as.",
+        help="The name by which the DLM system knows the source storage as.",
     )
     parser.add_argument(
         "-r",
-        "--storage-root-directory",
+        "--source-root",
         type=str,
         required=True,
         default="",
-        help="The root directory of the associated storage, used to match relative path names.",
+        help="The root directory of the storage containing the directory-to-watch.",
+    )
+    parser.add_argument(
+        "-t",
+        "--target-name",
+        type=str,
+        required=False,
+        help="The name by which the DLM system knows the target storage as.",
+    )
+    parser.add_argument(
+        "--target-root",
+        type=str,
+        required=False,
+        default="",
+        help="The root directory of the target storage.",
     )
     parser.add_argument(
         "--use-polling-watcher",
@@ -117,15 +138,15 @@ def process_args(
     """
     config = WatcherConfig(
         directory_to_watch=args.directory_to_watch,
-        ingest_server_url=args.ingest_server_url,
-        storage_name=args.storage_name,
+        ingest_server_url=args.ingest_url,
+        storage_name=args.source_name,
         status_file_absolute_path=f"{args.directory_to_watch}/{args.status_file_filename}",
-        storage_root_directory=args.storage_root_directory,
+        storage_root_directory=args.source_root,
+        migration_destination_storage_name=args.target_name,
+        migration_server_url=args.migration_url,
         reload_status_file=args.reload_status_file,
         use_status_file=args.use_status_file,
         rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,
-        migration_server_url=cmd_line_parameters.migration_server_url,
-        migration_destination_storage_name=cmd_line_parameters.migration_destination_storage_name,
         perform_actual_ingest_and_migration=(
             cmd_line_parameters.perform_actual_ingest_and_migration
         ),
@@ -146,8 +167,6 @@ def create_directory_watcher() -> DirectoryWatcher:
     parser = create_parser()
     cmd_line_parameters = CmdLineParameters(
         parser=parser,
-        add_migration_server_url=True,
-        add_migration_destination_storage_name=True,
         add_readiness_probe_file=True,
         add_do_not_perform_actual_ingest_and_migration=True,
         add_dir_updates_wait_time=True,

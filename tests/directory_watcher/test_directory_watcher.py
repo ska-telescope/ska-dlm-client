@@ -51,11 +51,11 @@ class TestDirectoryWatcher:
             [
                 "--directory-to-watch",
                 cls.the_watch_dir,
-                "--ingest-server-url",
+                "--ingest-url",
                 cls.INGREST_SERVER_URL,
-                "--storage-name",
+                "--source-name",
                 cls.STORAGE_NAME,
-                "--storage-root-directory",
+                "--source-root",
                 cls.ROOT_DIRECTORY,
             ]
         )
@@ -71,8 +71,8 @@ class TestDirectoryWatcher:
     def test_process_args(self) -> None:
         """Test case for init_data_item_ingest_init_data_item_post."""
         assert self.parsed.directory_to_watch == self.the_watch_dir
-        assert self.parsed.ingest_server_url == self.INGREST_SERVER_URL
-        assert self.parsed.storage_name == self.STORAGE_NAME
+        assert self.parsed.ingest_url == self.INGREST_SERVER_URL
+        assert self.parsed.source_name == self.STORAGE_NAME
         assert self.parsed.reload_status_file is False
         assert self.parsed.status_file_filename == STATUS_FILE_FILENAME
         assert self.parsed.use_status_file is False

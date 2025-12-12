@@ -11,8 +11,8 @@ from ska_dlm_client.registration_processor import RegistrationProcessor
 from ska_dlm_client.utils import CmdLineParameters
 
 
-class TestStorageRootDirectory:
-    """Test class for storage_root_directory parameter."""
+class TestSourceRootDirectory:
+    """Test class for source_root_directory parameter."""
 
     STORAGE_NAME = "test-storage"
     INGEST_SERVER_URL = "http://localhost:8001"
@@ -28,24 +28,22 @@ class TestStorageRootDirectory:
         """Tear down any setup."""
         Path(cls.the_watch_dir).rmdir()
 
-    def test_storage_root_directory_empty(self) -> None:
-        """Test when storage_root_directory is empty."""
+    def test_source_root_empty(self) -> None:
+        """Test when source_root is empty."""
         parsed = self.parser.parse_args(
             [
                 "--directory-to-watch",
                 self.the_watch_dir,
-                "--ingest-server-url",
+                "--ingest-url",
                 self.INGEST_SERVER_URL,
-                "--storage-name",
+                "--source-name",
                 self.STORAGE_NAME,
-                "--storage-root-directory",
+                "--source-root",
                 "",
             ]
         )
         cmd_line_parameters = CmdLineParameters(
             parser=self.parser,
-            add_migration_server_url=True,
-            add_migration_destination_storage_name=True,
             add_readiness_probe_file=True,
             add_do_not_perform_actual_ingest_and_migration=True,
             add_dir_updates_wait_time=True,
@@ -69,8 +67,8 @@ class TestStorageRootDirectory:
         expected_path = os.path.normpath(self.the_watch_dir)
         assert absolute_path == expected_path
 
-    def test_storage_root_directory_non_empty(self) -> None:
-        """Test when storage_root_directory is not empty."""
+    def test_source_root_non_empty(self) -> None:
+        """Test when source_root is not empty."""
         # Create a root directory that is a parent of the watch directory
         root_dir = os.path.dirname(self.the_watch_dir)
         watch_dir_name = os.path.basename(self.the_watch_dir)
@@ -79,11 +77,11 @@ class TestStorageRootDirectory:
             [
                 "--directory-to-watch",
                 self.the_watch_dir,
-                "--ingest-server-url",
+                "--ingest-url",
                 self.INGEST_SERVER_URL,
-                "--storage-name",
+                "--source-name",
                 self.STORAGE_NAME,
-                "--storage-root-directory",
+                "--source-root",
                 root_dir,
                 "--readiness-probe-file",
                 "/tmp/probe",
@@ -91,8 +89,6 @@ class TestStorageRootDirectory:
         )
         cmd_line_parameters = CmdLineParameters(
             parser=self.parser,
-            # add_migration_server_url=True,
-            # add_migration_destination_storage_name=True,
             # add_readiness_probe_file=True,
             # add_do_not_perform_actual_ingest_and_migration=True,
             # add_dir_updates_wait_time=True,
@@ -105,8 +101,8 @@ class TestStorageRootDirectory:
         assert config.storage_root_directory == root_dir
         assert config.ingest_register_path_to_add == watch_dir_name
 
-    def test_storage_root_directory_used_in_registration(self) -> None:
-        """Test that storage_root_directory is used when registering items with DLM."""
+    def test_source_root_used_in_registration(self) -> None:
+        """Test that source_root is used when registering items with DLM."""
         # Create a root directory that is a parent of the watch directory
         root_dir = os.path.dirname(self.the_watch_dir)
         watch_dir_name = os.path.basename(self.the_watch_dir)

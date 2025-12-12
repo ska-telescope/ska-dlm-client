@@ -953,6 +953,43 @@ MarkupSafe = ">=2.0"
 i18n = ["Babel (>=2.7)"]
 
 [[package]]
+name = "jsonargparse"
+version = "4.44.0"
+description = "Minimal effort CLIs derived from type hints and parse from command line, config files and environment variables."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "jsonargparse-4.44.0-py3-none-any.whl", hash = "sha256:7243fd177c29d46a56b4fdf677e3b83acc71fac1ca3710d2954882f220d09741"},
+    {file = "jsonargparse-4.44.0.tar.gz", hash = "sha256:54836d2bbb37483dc93fbd21d67241bb3ff0fad6ec513176776c659b2133b287"},
+]
+
+[package.dependencies]
+PyYAML = ">=3.13"
+
+[package.extras]
+all = ["jsonargparse[fsspec]", "jsonargparse[jsonnet]", "jsonargparse[jsonschema]", "jsonargparse[omegaconf]", "jsonargparse[reconplogger]", "jsonargparse[ruamel]", "jsonargparse[signatures]", "jsonargparse[toml]", "jsonargparse[typing-extensions]", "jsonargparse[urls]"]
+argcomplete = ["argcomplete (>=3.5.1)"]
+coverage = ["jsonargparse[test-no-urls]", "pytest-cov (>=4.0.0)"]
+dev = ["build (>=0.10.0)", "jsonargparse[coverage]", "jsonargparse[doc]", "jsonargparse[test]", "pre-commit (>=2.19.0)", "tox (>=3.25.0)"]
+doc = ["Sphinx (>=1.7.9)", "autodocsumm (>=0.1.10)", "sphinx-autodoc-typehints (>=1.19.5)", "sphinx-rtd-theme (>=1.2.2)"]
+fsspec = ["fsspec (>=0.8.4)"]
+jsonnet = ["jsonnet (>=0.21.0)"]
+jsonschema = ["jsonschema (>=3.2.0)"]
+maintainer = ["bump2version (>=0.5.11)", "twine (>=4.0.2)"]
+omegaconf = ["omegaconf (>=2.1.1)"]
+reconplogger = ["reconplogger (>=4.4.0)"]
+ruamel = ["ruamel.yaml (>=0.18.15)"]
+ruyaml = ["jsonargparse[ruamel]"]
+shtab = ["shtab (>=1.7.1)"]
+signatures = ["docstring-parser (>=0.17)", "jsonargparse[typing-extensions]", "typeshed-client (>=2.8.2)"]
+test = ["attrs (>=22.2.0)", "jsonargparse[argcomplete]", "jsonargparse[shtab]", "jsonargparse[test-no-urls]", "pydantic (>=2.3.0)", "responses (>=0.12.0)", "types-PyYAML (>=6.0.11)", "types-requests (>=2.28.9)"]
+test-no-urls = ["pytest (>=6.2.5)", "pytest-subtests (>=0.8.0)"]
+toml = ["toml (>=0.10.2)"]
+typing-extensions = ["typing-extensions (>=3.10.0.0) ; python_version < \"3.10\""]
+urls = ["requests (>=2.18.4)"]
+
+[[package]]
 name = "jsonschema"
 version = "4.25.1"
 description = "An implementation of JSON Schema validation for Python"
@@ -2781,4 +2818,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "bfc354412363fcbd75ee3c0df972d93a3736522ef7c834ced2e0ba4c58f5c8e2"
+content-hash = "3646b1ef0158d7819e2b461051e04acae0ae7dc48b144f85a935e40bd9959543"

@@ -57,23 +57,23 @@ class SDPIngestConfig:
 
 def process_args(args: argparse.Namespace) -> SDPIngestConfig:
     """Collect all command line parameters and create an SDPIngestConfig object."""
-    ingest_configuration = Configuration(host=args.ingest_server_url)
+    ingest_configuration = Configuration(host=args.ingest_url)
 
     # Only configure migration if the user supplied a migration server URL
-    if args.migration_server_url is not None:
-        migration_configuration = Configuration(host=args.migration_server_url)
+    if args.migration_url is not None:
+        migration_configuration = Configuration(host=args.migration_url)
     else:
         migration_configuration = None
         logger.warning("No migration server specified. Unable to perform migrations.")
 
     return SDPIngestConfig(
         include_existing=args.include_existing,
-        ingest_server_url=args.ingest_server_url,
+        ingest_server_url=args.ingest_url,
         ingest_configuration=ingest_configuration,
-        storage_server_url=args.storage_server_url,
-        storage_name=args.source_storage,
-        storage_root_directory=args.storage_root_directory,
-        migration_destination_storage_name=args.migration_destination_storage_name,
+        storage_server_url=args.storage_url,
+        storage_name=args.source_name,
+        storage_root_directory=args.source_root,
+        migration_destination_storage_name=args.target_name,
         migration_configuration=migration_configuration,
     )
 
@@ -235,7 +235,7 @@ def main() -> None:
     )
     parser.add_argument(
         "-i",
-        "--ingest-server-url",
+        "--ingest-url",
         type=str,
         default="http://dlm_ingest:8001",
         help=(
@@ -243,13 +243,13 @@ def main() -> None:
         ),
     )
     parser.add_argument(
-        "--source-storage",
+        "--source-name",
         type=str,
         required=True,
         help="Source storage name (e.g., 'SDPBuffer').",
     )
     parser.add_argument(
-        "--storage-server-url",
+        "--storage-url",
         type=str,
         default="http://dlm_storage:8003",
         help=(
@@ -258,7 +258,7 @@ def main() -> None:
     )
     parser.add_argument(
         "-r",
-        "--storage-root-directory",
+        "--source-root",
         type=str,
         default="",
         help=(
@@ -267,7 +267,7 @@ def main() -> None:
         ),
     )
     parser.add_argument(
-        "--migration-destination-storage-name",
+        "--target-name",
         type=str,
         default=None,
         help=(
@@ -277,7 +277,7 @@ def main() -> None:
     )
     parser.add_argument(
         "-m",
-        "--migration-server-url",
+        "--migration-url",
         type=str,
         default=None,
         help=(
