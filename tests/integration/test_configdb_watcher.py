@@ -243,7 +243,6 @@ async def test_watcher_registers_and_migrates():
 # The current implementation runs a new configdb_watcher locally.
 async def test_watcher_logs_failed_registration():
     """Run the watcher, trigger a Flow, and check failed registration is logged."""
-
     # We can now use the env-variables to start a new client with a
     # deliberately bad source_name to trigger DLM registration failure
 

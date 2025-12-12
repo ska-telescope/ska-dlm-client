@@ -173,6 +173,7 @@ def test_do_not_perform_requires_dev_test_mode(cmd_params_all_enabled: CmdLinePa
     ):
         cmd_params_all_enabled.parse_arguments(args)
 
+
 def test_perform_actual_ingest_and_migration_setting(
     cmd_params_all_enabled: CmdLineParameters,
 ) -> None:

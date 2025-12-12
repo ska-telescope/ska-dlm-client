@@ -249,6 +249,7 @@ def dlm_stack():
             pass
         _compose("down", "-v", "--remove-orphans")
 
+
 @pytest.fixture(scope="session")
 def storage_configuration(request) -> Configuration:
     """Storage API client config."""
