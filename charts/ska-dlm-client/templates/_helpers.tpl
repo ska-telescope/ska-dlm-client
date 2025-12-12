@@ -59,6 +59,26 @@ intent: production
 {{- end }}
 
 {{/*
+ConfigDB watcher labels
+*/}}
+{{- define "ska-dlm-client.configdb-watcher.labels" }}
+{{- include "ska-dlm-client.labels" . }}
+component: {{ .Values.configdb_watcher.component }}
+subsystem: {{ .Values.configdb_watcher.subsystem }}
+intent: production
+{{- end }}
+
+{{/*
+etcd labels
+*/}}
+{{- define "ska-dlm-client.etcd.labels" }}
+{{- include "ska-dlm-client.labels" . }}
+component: etcd
+subsystem: data-lifecycle-management
+intent: production
+{{- end }}
+
+{{/*
 Kafka watcher labels
 */}}
 {{- define "ska-dlm-client.kafka-watcher.labels" }}

@@ -20,7 +20,7 @@ global:
   development: true
   dataProduct:
     pvc:  # NOTE: This is globally shared all data products volume
-      name: test-pvc
+      name: shared
       read_only: true
 
 nameOverride: ""
@@ -31,20 +31,20 @@ ska_dlm:
   fullname: "ska-dlm"
 
 ska_dlm_client:
-  image: artefact.skao.int/ska-dlm-client
-  version: "1.1.0"
+  image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client #artefact.skao.int/ska-dlm-client
+  version: "afe71bb5" # Change to new release asap!
   imagePullPolicy: Always
   storage_name: dlm
   storage_root_directory: /dlm
   securityContext: {}
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace:port
-  ingest_server_url: "http://ska-dlm-dev-ingest:80" # override for production
-  storage_server_url: "http://ska-dlm-dev-storage:80" # override for production
-  request_server_url: "http://ska-dlm-dev-request:80" # override for production
+  ingest_server_url: "http://ska-dlm-ingest" # override for production
+  storage_server_url: "http://ska-dlm-storage" # override for production
+  request_server_url: "http://ska-dlm-request" # override for production
 
 directory_watcher:
-  enabled: true
+  enabled: false
   component: directory-watcher
   subsystem: data-lifecycle-management
   replicas: 1
@@ -54,6 +54,28 @@ directory_watcher:
   use_polling_watcher: false
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false
+
+configdb_watcher:
+  enabled: true
+  component: configdb-watcher
+  subsystem: data-lifecycle-management
+  replicas: 1
+  include_existing: false
+  ingest_server_url: http://ska-dlm-ingest.dp-dm
+  source_storage: SDPBuffer
+  storage_root_directory: /
+  migration_destination_storage_name: # If omitted, migration will be skipped
+  migration_server_url: # If omitted, migration will be skipped
+  sdp_config:
+    host: ""      # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
+    port: 2379    # default etcd client port
+    path: ""      # optional
+
+# if you want to deploy a local etcd service
+etcd:
+  enabled: true # set to false if you want to use an external etcd
+  image: "artefact.skao.int/ska-sdp-etcd"
+  tag: "3.5.9"
 
 kafka_watcher:
   enabled: false  # kafka-watcher OFF by default

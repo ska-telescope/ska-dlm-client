@@ -1,0 +1,69 @@
+{{- if .Values.configdb_watcher.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ska-dlm-client.fullname" . }}-configdb-watcher
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ska-dlm-client.configdb-watcher.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.configdb_watcher.replicas }}
+  selector:
+    matchLabels:
+      component: {{ .Values.configdb_watcher.component }}
+      subsystem: {{ .Values.configdb_watcher.subsystem }}
+  template:
+    metadata:
+      labels:
+        {{- include "ska-dlm-client.configdb-watcher.labels" . | nindent 8 }}
+    spec:
+      dnsPolicy: ClusterFirst
+      containers:
+        - name: configdb-watcher
+          image: {{ .Values.ska_dlm_client.image }}:{{ .Values.ska_dlm_client.version }}
+          imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
+
+          # Where ska_sdp_config.Config() should look for etcd / ConfigDB
+          env:
+            - name: SDP_CONFIG_HOST
+              value: {{ default (printf "%s-etcd" (include "ska-dlm-client.fullname" .)) .Values.configdb_watcher.sdp_config.host | quote }}
+            - name: SDP_CONFIG_PORT
+              value: {{ .Values.configdb_watcher.sdp_config.port | quote }}
+            {{- if .Values.configdb_watcher.sdp_config.path }}
+            - name: SDP_CONFIG_PATH
+              value: {{ .Values.configdb_watcher.sdp_config.path | quote }}
+            {{- end }}
+
+          command:
+            - "sdp-config-watcher"
+          args:
+          {{- if .Values.configdb_watcher.include_existing }}
+            - "--include-existing"
+          {{- end }}
+            - "--ingest-server-url"
+            - {{ .Values.configdb_watcher.ingest_server_url }}
+            - "--source-storage"
+            - {{ .Values.configdb_watcher.source_storage }}
+            - "--storage-root-directory"
+            - {{ .Values.configdb_watcher.storage_root_directory }}
+          {{- if .Values.configdb_watcher.migration_destination_storage_name }}
+            - "--migration-destination-storage-name"
+            - {{ .Values.configdb_watcher.migration_destination_storage_name }}
+          {{- end }}
+          {{- if .Values.configdb_watcher.migration_server_url }}
+            - "--migration-server-url"
+            - {{ .Values.configdb_watcher.migration_server_url }}
+          {{- end }}
+
+          volumeMounts:
+            - name: data-product-storage
+              mountPath: /dlm
+              {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
+              readOnly: true
+              {{- end }}
+      volumes:
+        - name: data-product-storage
+          persistentVolumeClaim:
+            claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
+
+{{- end }}
