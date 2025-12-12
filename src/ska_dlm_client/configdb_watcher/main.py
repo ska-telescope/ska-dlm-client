@@ -27,17 +27,20 @@ from ska_dlm_client.registration_processor import (
 
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
 
-RCLONE_CONFIG_SOURCE = {
-    "name": "sdp-watcher",
-    "type": "sftp",
-    "parameters": {
-        "host": "dlm_configdb_watcher",
-        "key_file": "/root/.ssh/id_rsa",
-        "shell_type": "unix",
+if "SOURCE_NAME" in os.environ:
+    RCLONE_CONFIG_SOURCE = None
+else:
+    RCLONE_CONFIG_SOURCE = {
+        "name": "sdp-watcher",
         "type": "sftp",
-        "user": "ska-dlm",
-    },
-}
+        "parameters": {
+            "host": "dlm_configdb_watcher",
+            "key_file": "/root/.ssh/id_rsa",
+            "shell_type": "unix",
+            "type": "sftp",
+            "user": "ska-dlm",
+        },
+    }
 
 
 # pylint: disable=too-many-instance-attributes
@@ -194,12 +197,23 @@ async def sdp_to_dlm_ingest_and_migrate(
     """Ingest and migrate SDP data-products using DLM."""
     configdb = Config()  # Share one handle between writer & watcher
     if not dev_test_mode:
+        # setup the source volume
         _ = setup_volume(
             watcher_config=ingest_config,
             api_configuration=ingest_config.ingest_configuration,
             rclone_config=RCLONE_CONFIG_SOURCE,
             storage_server_url=ingest_config.storage_server_url,
         )
+        if "TARGET_NAME" in os.environ:
+            # setup the target volume
+            ingest_config.migration_destination_storage_name = os.environ["TARGET_NAME"]
+            _ = setup_volume(
+                watcher_config=ingest_config,
+                api_configuration=ingest_config.ingest_configuration,
+                rclone_config={},
+                storage_server_url=ingest_config.storage_server_url,
+                setup_target=True,
+            )
     logger.info(
         "Starting SDP Config watcher (include_existing=%s, storage_name=%s)...",
         ingest_config.include_existing,

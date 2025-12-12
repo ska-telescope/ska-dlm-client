@@ -154,22 +154,29 @@ def get_or_init_storage(
     return the_storage_id
 
 
-def setup_volume(
+def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arguments
     watcher_config: Config,
     api_configuration: Configuration,
     rclone_config: str = None,
     location_id: str = None,
     storage_server_url: str = "http://dlm_storage:8003",
+    setup_target: bool = False,
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
     if location_id is None:
         location_id = get_or_init_location(
             api_configuration, location=LOCATION_NAME, storage_url=storage_server_url
         )
+    if setup_target:
+        storage_name = watcher_config.migration_destination_storage_name
+        storage_root_directory = "/data"
+    else:
+        storage_name = watcher_config.storage_name
+        storage_root_directory = watcher_config.storage_root_directory
     storage_id = get_or_init_storage(
-        storage_name=watcher_config.storage_name,
+        storage_name=storage_name,
         api_configuration=api_configuration,
-        storage_root_directory=watcher_config.storage_root_directory,
+        storage_root_directory=storage_root_directory,
         the_location_id=location_id,
         rclone_config=rclone_config,
     )

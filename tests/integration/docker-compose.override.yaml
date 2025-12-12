@@ -18,6 +18,7 @@ services:
       # ska-data-lifecycle/tests/integration/certs
       - ${DLM_SERVER_DIR}/tests/integration/certs:/etc/ssl/localcerts:ro
       - shared-tmpfs:/dlm
+      - ~/.config/rclone:/config/rclone
 
   dlm_storage:
     ports:
@@ -67,6 +68,8 @@ services:
   dlm_configdb_watcher:
     image: dlm_configdb_watcher
     container_name: dlm_configdb_watcher
+    environment:
+      TARGET_NAME: "dlm-archive"
     depends_on:
       - dlm_storage
       - dlm_ingest
