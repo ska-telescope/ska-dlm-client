@@ -25,7 +25,7 @@ def test_auto_migration(request_configuration: Configuration):
     setup_testing(api_configuration)
     sleep(2)
     cmd = "docker exec dlm_directory_watcher cp /etc/group /dlm/watch_dir/."
-    log.info("Migration initializtion copy command: %s", cmd)
+    log.info("Migration initialization copy command: %s", cmd)
     p = subprocess.run(cmd, capture_output=True, shell=True, check=True)
     if p.returncode != 0:
         log.info("[copy file STDOUT]: %s\n", p.stdout)
