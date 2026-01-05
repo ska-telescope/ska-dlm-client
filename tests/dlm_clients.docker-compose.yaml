@@ -6,6 +6,7 @@ services:
     platform: linux/amd64
     image: dlm_directory_watcher
     container_name: dlm_directory_watcher
+    force_recreate: true
     build:
       context: ..
       dockerfile: Dockerfile
@@ -20,6 +21,7 @@ services:
     platform: linux/amd64
     image: dlm_configdb_watcher
     container_name: dlm_configdb_watcher
+    force_recreate: true
     build:
       context: ..
       dockerfile: Dockerfile
