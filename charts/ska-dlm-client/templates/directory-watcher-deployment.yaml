@@ -54,7 +54,7 @@ spec:
               - {{ $readiness_file }}
         volumeMounts:
         - name: data-product-storage
-          mountPath: /dlm
+          mountPath: /dlm-archive
           {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
           readOnly: true
           {{- end }}

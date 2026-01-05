@@ -111,7 +111,7 @@ ssh_storage_access:
     service_name: "ssh-sa-daq"
     pvc:
       name: daq-pvc
-      mount_path: /dlm
+      mount_path: /dlm-archive
       read_only: true
     secret:
       pub_name: "daq-pub"

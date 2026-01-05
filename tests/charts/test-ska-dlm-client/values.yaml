@@ -3,9 +3,16 @@ system: dlm
 ska_dlm:
   fullname: "ska-dlm"
 
-# Definite directory watcher details for use in testing.
+# Directory watcher details for use in testing.
 directory_watcher:
-  image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client
+  image: registry.gitlab.com/ska-telescope/ska-dlm-client-directory_watcher
+  version: "1.1.0"
+  imagePullPolicy: Always
+  replicas: 1
+
+# config_db watcher details for use in testing.
+configdb_watcher:
+  image: registry.gitlab.com/ska-telescope/ska-dlm-client-configdb_watcher
   version: "1.1.0"
   imagePullPolicy: Always
   replicas: 1

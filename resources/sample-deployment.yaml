@@ -20,7 +20,7 @@ ska_dlm_client:
   version: "0.1.0-dev.c787abc90"
   # The path under the data directory that all data will be referenced from. This must match
   # the configuration when the storage location was originally created in the DLM.
-  storage_root_directory: "/dlm/dlmw"
+  storage_root_directory: "/dlm/watch_dir"
   # The URLS of the various DLM services. The "ska-dlm-dev" is the helm deployment name assigned
   # to DLM when it was deployed.
   ingest_server_url: "http://ska-dlm-dev-ingest:80"
@@ -37,8 +37,8 @@ directory_watcher:
   enabled: true
   # The root directory and watch directory will normally be the same. One of these may be removed
   # in a future version.
-  directory_to_watch: "/dlm/dlmw"
-  storage_root_directory: "/dlm/dlmw"
+  directory_to_watch: "/dlm/watch_dir"
+  storage_root_directory: "/dlm/watch_dir"
   # This would normally always be true unless the watch directory is not a networked drive as the
   # alternative iNotify based watcher does not work with networked filesystems.
   use_polling_watcher: true

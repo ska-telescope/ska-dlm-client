@@ -114,7 +114,7 @@ def test_get_data_product_dir(config):
     pvc = PVCPath(
         k8s_namespaces=[],
         k8s_pvc_name="pvc_name",
-        pvc_mount_path="/data",
+        pvc_mount_path="/dlm",
         pvc_subpath=pathlib.Path(f"product/{EB_ID}/ska-sdp/{PB_ID}"),
     )
 
@@ -135,4 +135,4 @@ def test_get_data_product_dir(config):
     # Exercise the helper
     result = get_data_product_dir(config, key)
 
-    assert str(result) == f"/data/product/{EB_ID}/ska-sdp/{PB_ID}"
+    assert str(result) == f"/dlm/product/{EB_ID}/ska-sdp/{PB_ID}"

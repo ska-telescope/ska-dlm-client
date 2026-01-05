@@ -10,7 +10,7 @@ setupStorageLocation: False
 ska_dlm_client:
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
   version: "1.1.0"
-  storage_root_directory: "/data/dlmw"
+  storage_root_directory: "/dlm/watch_dir"
   ingest_server_url: "http://ska-dlm-dev-ingest:80"
   storage_server_url: "http://ska-dlm-dev-storage:80"
   request_server_url: "http://ska-dlm-dev-request:80"
@@ -23,8 +23,8 @@ ska_dlm:
 
 directory_watcher:
   enabled: true
-  directory_to_watch: "/dlm/dlmw"
-  storage_root_directory: "/dlm/dlmw"
+  directory_to_watch: "/dlm/watch_dir"
+  storage_root_directory: "/dlm/watch_dir"
   use_polling_watcher: true
   skip_rclone_access_check_on_register: true
   register_contents_of_watch_directory: true

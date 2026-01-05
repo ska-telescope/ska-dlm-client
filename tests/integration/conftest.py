@@ -152,10 +152,23 @@ def _compose(*args: str):
     # Ensure compose var substitution works for ${DLM_SERVER_DIR} in an override
     env["DLM_SERVER_DIR"] = str(DLM_SERVER_DIR)
 
+    if args[0] == "up":
+        cmd = ["docker", "compose"]
+        for f in [CLIENTS]:
+            cmd += ["-f", str(f)]
+        cmd += ["build"]
+        log.info("client docker compose command: %s", " ".join(cmd))
+        p = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)
+        if p.returncode != 0:
+            log.info("[compose STDOUT]: %s\n", p.stdout)
+            log.error("[compose STDERR] %s\n", p.stderr)
+            raise RuntimeError("docker compose failed")
+
     cmd = ["docker", "compose"]
     for f in COMPOSE_FILES:
         cmd += ["-f", str(f)]
     cmd += list(args)
+
 
     log.info("docker compose command: %s", " ".join(cmd))
     p = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)

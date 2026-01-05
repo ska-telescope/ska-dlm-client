@@ -88,7 +88,7 @@ directory_watcher
 ~~~~~~~~~~~~~~~~~
 
 - ``enabled``: Whether to deploy the ``directory-watcher`` component.
-- ``directory_to_watch``: Filesystem path to monitor for new data products. Must exist within the mounted storage (e.g., ``/data/dlm/watch_dir``).
+- ``directory_to_watch``: Filesystem path to monitor for new data products. Must exist within the mounted storage (e.g., ``/dlm/watch_dir``).
 - ``storage_root_directory``: Root directory used to generate URIs for the DLM database. Should match ``ska_dlm_client.storage_root_directory``.
 - ``skip_rclone_access_check_on_register``: If ``true``, skips verifying rclone access before attempting to register the file.
 - ``register_contents_of_watch_directory``: If ``true``, registers all contents of the watch directory at startup, not just newly detected files.

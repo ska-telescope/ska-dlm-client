@@ -42,7 +42,7 @@ STORAGE = {
         "STORAGE_NAME": "dlm-archive",
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
-        "ROOT_DIRECTORY": "/data",
+        "ROOT_DIRECTORY": "/dlm-archive",
         "STORAGE_CONFIG": {"name": "dlm-archive", "type": "local", "parameters": {}},
     },
     "SRC": {
