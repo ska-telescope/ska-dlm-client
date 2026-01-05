@@ -13,7 +13,7 @@ from ska_sdp_config import Config
 CLIENT_ROOT = Path(__file__).resolve().parents[2]
 CLIENTS = CLIENT_ROOT / "tests/test-services.docker-compose.yml"
 COMPOSE_FILES = [CLIENTS]
-ETCD_URL = "http://localhost:2379"
+ETCD_URL = os.getenv("ETCD_URL", "http://127.0.0.1:2379")
 
 log = logging.getLogger(__name__)
 

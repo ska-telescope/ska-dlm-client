@@ -116,6 +116,7 @@ integration_tests:
     MIGRATION_SERVER_URL: http://docker:8004
     POSTGREST_URL: http://docker:3000
     RCLONE_BASE:   https://docker:5572
+    ETCD_URL: http://docker:2379
     COMPOSE_PROJECT_NAME: integration-tests
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     SDP_CONFIG_HOST: etcd

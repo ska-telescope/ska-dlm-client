@@ -86,6 +86,7 @@ MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", "http://127.0.0.1:8004"
 STORAGE_URL = os.getenv("STORAGE_URL", "http://127.0.0.1:8003")
 POSTGREST_URL = os.getenv("POSTGREST_URL", "http://127.0.0.1:3000")
 RCLONE_BASE = os.getenv("RCLONE_BASE", "https://127.0.0.1:5572")
+ETCD_URL = os.getenv("ETCD_URL", "http://127.0.0.1:2379")
 
 CERT_DIR = SERVER_TESTS / "integration" / "certs"
 KEY_PATH = CERT_DIR / "selfsigned.key"
