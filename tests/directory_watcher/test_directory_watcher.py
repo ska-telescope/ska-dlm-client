@@ -1,6 +1,7 @@
 """Tests for directory watcher."""
 
 import asyncio
+import os
 import tempfile
 from pathlib import Path
 
@@ -37,7 +38,7 @@ class TestDirectoryWatcher:
     """DirectoryWatcher unit test stubs."""
 
     STORAGE_NAME = "dir-watcher"
-    INGREST_SERVER_URL = "http://localhost:8001"
+    INGREST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://localhost:8001")
     ROOT_DIRECTORY = "/dlm"
 
     add_path_successful = False

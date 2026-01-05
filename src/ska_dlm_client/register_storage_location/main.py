@@ -42,7 +42,7 @@ STORAGE_TYPE = "filesystem"
 def get_or_init_location(
     api_configuration: Configuration,
     location: str = LOCATION_NAME,
-    storage_url="http://dlm_storage:8003",
+    storage_url=os.getenv("STORAGE_URL", "http://dlm_storage:8003"),
 ) -> str:
     """Perform location initialisation to be used when testing."""
     with api_client.ApiClient(api_configuration) as the_api_client:
@@ -159,7 +159,7 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     api_configuration: Configuration,
     rclone_config: str = None,
     location_id: str = None,
-    storage_server_url: str = "http://dlm_storage:8003",
+    storage_server_url: str = os.getenv("STORAGE_URL", "http://dlm_storage:8003"),
     setup_target: bool = False,
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
@@ -193,7 +193,7 @@ def setup_testing(api_configuration: Configuration):
     # endpoint will be performed during stratup of the DLM server and
     # then this can be removed as well.
     logger.info("Testing setup.")
-    storage_url = f"{api_configuration.host}:8003"
+    storage_url = os.getenv("STORAGE_URL", f"{api_configuration.host}:8003")
     location_id = get_or_init_location(
         api_configuration, location=LOCATION_NAME, storage_url=storage_url
     )
