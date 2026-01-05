@@ -32,11 +32,11 @@ def returned_items_match(test_path: str, dir_entries: list[Item]):
     assert dir_entries[0].path_rel_to_watch_dir == test_path
     assert dir_entries[0].item_type == ItemType.CONTAINER
     assert dir_entries[0].metadata is not None
-    assert dir_entries[1].path_rel_to_watch_dir == f"{test_path}/weights" or f"{test_path}/data"
+    assert dir_entries[1].path_rel_to_watch_dir == f"{test_path}/weights" or f"{test_path}/dlm"
     assert dir_entries[1].item_type == ItemType.FILE
     assert dir_entries[1].parent == dir_entries[0]
     assert dir_entries[1].metadata is None
-    assert dir_entries[2].path_rel_to_watch_dir == f"{test_path}/weights" or f"{test_path}/data"
+    assert dir_entries[2].path_rel_to_watch_dir == f"{test_path}/weights" or f"{test_path}/dlm"
     assert dir_entries[2].item_type == ItemType.FILE
     assert dir_entries[2].parent == dir_entries[0]
     assert dir_entries[2].metadata is None
@@ -200,7 +200,7 @@ def test_item_list_minus_metadata_file(
         assert item.item_type == ItemType.FILE
         assert item.metadata is None
         assert item.parent == container_item
-        assert item.path_rel_to_watch_dir in [f"{rel_path}/dlm-archive", f"{rel_path}/weights"]
+        assert item.path_rel_to_watch_dir in [f"{rel_path}/data", f"{rel_path}/weights"]
 
 
 def test_measurement_set_directory_in(request, monkeypatch):
