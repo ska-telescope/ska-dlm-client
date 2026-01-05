@@ -144,7 +144,7 @@ Testing
 
 A Helm chart has been created for testing: ``tests/charts/test-ska-dlm-client``.
 
-The test chart is used to configure an existing DLM instance running in the same cluster namespace. Additional tests are planned (see ticket YAN-1910).
+The test chart is used to configure an existing DLM instance running in the same cluster namespace. 
 
 Usage:
 

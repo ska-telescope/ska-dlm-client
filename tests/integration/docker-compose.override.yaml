@@ -11,7 +11,7 @@ services:
       - "3000:3000"
 
   dlm_rclone:
-    image: rclone/rclone
+    image: dlm_rclone
     ports: ["5572:5572"] # Optional: expose RC for local debugging
     volumes: # Mount the certs we generated on the host
       # Uses DLM_SERVER_DIR (set by tests) so certs live in the server repo:
