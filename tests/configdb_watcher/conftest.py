@@ -21,23 +21,10 @@ def _compose(*args: str):
     """Run `docker compose` with the merged compose files and proper env."""
     env = dict(os.environ)
 
-    if args[0] == "up":
-        cmd = ["docker", "compose"]
-        for f in [CLIENTS]:
-            cmd += ["-f", str(f)]
-        cmd += ["build"]
-        log.info("client docker compose command: %s", " ".join(cmd))
-        p = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)
-        if p.returncode != 0:
-            log.info("[compose STDOUT]: %s\n", p.stdout)
-            log.error("[compose STDERR] %s\n", p.stderr)
-            raise RuntimeError("docker compose failed")
-
     cmd = ["docker", "compose"]
     for f in COMPOSE_FILES:
         cmd += ["-f", str(f)]
     cmd += ["up","-d", "etcd"]
-
 
     log.info("docker compose command: %s", " ".join(cmd))
     p = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)
@@ -61,7 +48,7 @@ def _wait_for_http(url: str, timeout_s: int = 120, verify: bool = True, ok=(200,
     raise TimeoutError(f"Timeout waiting for {url}")
 
 
-@pytest.fixture(name="etcd", scope="session")
+@pytest.fixture(name="etcd")
 def dlm_configdb_watcher_stack():
     """Set up and tear down the DLM ConfigDB Watcher stack."""
 

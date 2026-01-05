@@ -80,13 +80,14 @@ COMPOSE_FILES = [
 ]
 
 # URLs can be overridden in CI to hit the DinD host
-REQUEST_URL = os.getenv("REQUEST_URL", "http://127.0.0.1:8002")
-INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://127.0.0.1:8001")
-MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", "http://127.0.0.1:8004")
-STORAGE_URL = os.getenv("STORAGE_URL", "http://127.0.0.1:8003")
-POSTGREST_URL = os.getenv("POSTGREST_URL", "http://127.0.0.1:3000")
-RCLONE_BASE = os.getenv("RCLONE_BASE", "https://127.0.0.1:5572")
-ETCD_URL = os.getenv("ETCD_URL", "http://127.0.0.1:2379")
+DEFAULT_HOST = os.getenv("DEFAULT_HOST", "localhost")
+REQUEST_URL = f"http://{DEFAULT_HOST}:8002"
+INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", f"http://{DEFAULT_HOST}:8001")
+MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", f"http://{DEFAULT_HOST}:8004")
+STORAGE_URL = os.getenv("STORAGE_URL", f"http://{DEFAULT_HOST}:8003")
+POSTGREST_URL = os.getenv("POSTGREST_URL", f"http://{DEFAULT_HOST}:3000")
+RCLONE_BASE = os.getenv("RCLONE_BASE", f"https://{DEFAULT_HOST}:5572")
+ETCD_URL = os.getenv("ETCD_URL", f"http://{DEFAULT_HOST}:2379")
 
 CERT_DIR = SERVER_TESTS / "integration" / "certs"
 KEY_PATH = CERT_DIR / "selfsigned.key"

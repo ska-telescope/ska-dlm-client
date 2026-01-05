@@ -111,12 +111,7 @@ integration_tests:
     DOCKER_TLS_CERTDIR: ""
     DLM_SERVER_REPO: https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/ska-telescope/ska-data-lifecycle.git
     DLM_SERVER_REF: "1.2.0"
-    INGEST_SERVER_URL: http://docker:8001
-    STORAGE_URL:  http://docker:8003
-    MIGRATION_SERVER_URL: http://docker:8004
-    POSTGREST_URL: http://docker:3000
-    RCLONE_BASE:   https://docker:5572
-    ETCD_URL: http://docker:2379
+    DEFAULT_HOST: "docker" # This is correct ONLY for GitLab CI runs
     COMPOSE_PROJECT_NAME: integration-tests
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     SDP_CONFIG_HOST: etcd
