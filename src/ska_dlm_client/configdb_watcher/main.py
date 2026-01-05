@@ -204,16 +204,6 @@ async def sdp_to_dlm_ingest_and_migrate(
             rclone_config=RCLONE_CONFIG_SOURCE,
             storage_server_url=ingest_config.storage_server_url,
         )
-        if "TARGET_NAME" in os.environ:
-            # setup the target volume
-            ingest_config.migration_destination_storage_name = os.environ["TARGET_NAME"]
-            _ = setup_volume(
-                watcher_config=ingest_config,
-                api_configuration=ingest_config.ingest_configuration,
-                rclone_config={},
-                storage_server_url=ingest_config.storage_server_url,
-                setup_target=True,
-            )
     logger.info(
         "Starting SDP Config watcher (include_existing=%s, storage_name=%s)...",
         ingest_config.include_existing,

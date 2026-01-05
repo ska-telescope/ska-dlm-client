@@ -47,7 +47,7 @@ async def test_dataproduct_status_watcher(  # noqa: C901
     # Our data-product flow
     test_dataproduct: Final = Flow(
         key=Flow.Key(pb_id=pb_id, kind="data-product", name=flow_name),
-        sink=DataProduct(data_dir="/datapath", paths=[]),
+        sink=DataProduct(data_dir="/dlm-archive", paths=[]),
         sources=[],
         data_model="Visibility",
     )

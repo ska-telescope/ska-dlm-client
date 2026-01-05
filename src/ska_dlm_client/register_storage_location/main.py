@@ -169,7 +169,7 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
         )
     if setup_target:
         storage_name = watcher_config.migration_destination_storage_name
-        storage_root_directory = "/data"
+        storage_root_directory = "/dlm-archive"
     else:
         storage_name = watcher_config.storage_name
         storage_root_directory = watcher_config.storage_root_directory
