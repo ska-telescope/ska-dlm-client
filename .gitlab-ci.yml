@@ -17,12 +17,6 @@ stages:
   - pages
   - scan
 
-default:
-  image: docker:24.0.5-cli
-  services:
-    - name: docker:24.0.5-dind
-      alias: docker
-
 include:
     # Python
   - project: 'ska-telescope/templates-repository'
@@ -51,32 +45,11 @@ include:
 python-test: # Unit tests
   # Keep in sync with tests/test-services.docker-compose.yml
   stage: test
-  before_script:
-    - |
-      if ! docker compose version >/dev/null 2>&1; then
-        echo "Installing docker compose plugin..."
-        if command -v apt-get >/dev/null 2>&1; then
-          apt-get update -y
-          apt-get install -y docker-compose-plugin || true
-        elif command -v apk >/dev/null 2>&1; then
-          apk add --no-cache docker-cli-compose || true
-        fi
-      fi
-      # Fallback: download the CLI plugin directly if the package route failed
-      if ! docker compose version >/dev/null 2>&1; then
-        echo "Falling back to downloading docker-compose plugin binary…"
-        mkdir -p /usr/local/lib/docker/cli-plugins
-        curl -sSL "https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-$(uname -m)" \
-          -o /usr/local/lib/docker/cli-plugins/docker-compose
-        chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-      fi
-    - docker --version && docker compose version || true
-    # - poetry --version || pip install "poetry==${CI_POETRY_VERSION:-1.8.2}"
-    # - poetry install --no-interaction
   variables:
     # Don't collect integration folder and skip the marker
     PYTHON_VARS_AFTER_PYTEST: '--ignore=tests/integration -m "not integration"'
   services:
+    - docker:27.0.2-dind # DinD service
     - name: artefact.skao.int/ska-sdp-etcd:3.5.9
       alias: etcd
       command:
@@ -86,14 +59,13 @@ python-test: # Unit tests
         - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
         - "--listen-peer-urls=http://0.0.0.0:2380"
         - "--initial-cluster=default=http://0.0.0.0:2380"
-  script:
-    - poetry run make python-test
 
 integration_tests:
   stage: test
   image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
 
   services:
+    - docker:27.0.2-dind # DinD service
     - name: artefact.skao.int/ska-sdp-etcd:3.5.9
       alias: etcd
       command:
