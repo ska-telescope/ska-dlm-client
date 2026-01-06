@@ -81,7 +81,6 @@ COMPOSE_FILES = [
 
 # URLs can be overridden in CI to hit the DinD host
 DEFAULT_HOST = os.getenv("DEFAULT_HOST", "localhost")
-os.environ["DEFAULT_HOST"] = DEFAULT_HOST  # for other test modules
 REQUEST_URL = f"http://{DEFAULT_HOST}:8002"
 INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", f"http://{DEFAULT_HOST}:8001")
 MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", f"http://{DEFAULT_HOST}:8004")

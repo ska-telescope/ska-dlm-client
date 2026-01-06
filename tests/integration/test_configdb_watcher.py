@@ -217,7 +217,8 @@ async def test_watcher_registers_and_migrates():
 
     Test auto migration using configdb watcher.
     """
-    api_configuration = Configuration(host=f"http://{DEFAULT_HOST}")
+    host = "dlm_storage" if os.getenv("DEFAULT_HOST") else "localhost"
+    api_configuration = Configuration(host=f"http://{host}")
     setup_testing(api_configuration)
     sleep(2)
     # --- copying demo.ps ---

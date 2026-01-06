@@ -22,7 +22,7 @@ def _get_id(item, key: str):
 @pytest.mark.integration
 def test_auto_migration(request_configuration: Configuration):
     """Test auto migration using directory watcher."""
-    host = os.getenv("DEFAULT_HOST", "localhost")
+    host = "dlm_storage" if os.getenv("DEFAULT_HOST") else "localhost"
     api_configuration = Configuration(host=f"http://{host}")
     setup_testing(api_configuration)
     sleep(2)
