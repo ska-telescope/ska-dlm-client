@@ -17,21 +17,27 @@ ETCD_URL = os.getenv("ETCD_URL", "http://127.0.0.1:2379")
 
 log = logging.getLogger(__name__)
 
-def _compose():
-    """Run `docker compose` with the merged compose files and proper env."""
+def _docker_run():
+    """Run the ETCD container."""
     env = dict(os.environ)
 
-    cmd = ["docker", "compose"]
-    for f in COMPOSE_FILES:
-        cmd += ["-f", str(f)]
-    cmd += ["up","-d", "etcd"]
+    attr = [
+            "artefact.skao.int/ska-sdp-etcd:3.5.9", 
+            "/usr/bin/etcd", 
+            "--advertise-client-urls=http://0.0.0.0:2379",
+            "--listen-client-urls=http://0.0.0.0:2379",
+            "--initial-advertise-peer-urls=http://0.0.0.0:2380",
+            "--listen-peer-urls=http://0.0.0.0:2380", 
+            "--initial-cluster=default=http://0.0.0.0:2380"]
+    cmd = ["docker", "run", "--rm", "-d", "--name", "etcd", "--network", "dlm_network", "-p", "2379:2379"]
+    cmd += attr
 
-    log.info("docker compose command: %s", " ".join(cmd))
+    log.info("docker run command: %s", " ".join(cmd))
     p = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)
     if p.returncode != 0:
-        log.info("[compose STDOUT]: %s\n", p.stdout)
-        log.error("[compose STDERR] %s\n", p.stderr)
-        raise RuntimeError("docker compose failed")
+        log.info("[run STDOUT]: %s\n", p.stdout)
+        log.error("[run STDERR] %s\n", p.stderr)
+        raise RuntimeError("docker run failed")
     return p
 
 def _wait_for_http(url: str, timeout_s: int = 120, verify: bool = True, ok=(200, 204, 301, 302)):
@@ -48,7 +54,7 @@ def _wait_for_http(url: str, timeout_s: int = 120, verify: bool = True, ok=(200,
     raise TimeoutError(f"Timeout waiting for {url}")
 
 
-@pytest.fixture(name="etcd")
+@pytest.fixture(name="etcd", scope="session")
 def dlm_configdb_watcher_stack():
     """Set up and tear down the DLM ConfigDB Watcher stack."""
 
@@ -63,12 +69,17 @@ def dlm_configdb_watcher_stack():
 
     # Start only what we need; --no-deps avoids auth/gateway
     log.info("Attempting to start required server services...")
-    _compose()
+    _docker_run()
     try:
         _wait_for_http(f"{ETCD_URL}/version", timeout_s=30)
         yield
     finally:  # teardown
-        pass
+        log.info("Tearing down ETCD container...")
+        cmd = ["docker", "rm", "-f", "etcd"]
+        p = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        if p.returncode != 0:
+            log.info("[teardown STDOUT]: %s\n", p.stdout)
+            log.error("[teardown STDERR]: %s\n", p.stderr)
 
 @pytest.fixture(name="config")
 def sdp_config_fixture(etcd: ETCD_URL):

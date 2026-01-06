@@ -8,12 +8,8 @@ DOCKER_COMPOSE = docker compose
 # NOTE: removed the -W option from SPHINXOPTS due to warnings from code generated docs.
 DOCS_SPHINXOPTS = -n --keep-going
 PYTHON_LINE_LENGTH = 99
-
-# GitlabCI services used in CI, docker compose for local testing only
-ifndef GITLAB_CI
-SERVICES_UP=docker-compose-up
-SERVICES_DOWN=docker-compose-down
-endif
+SERVICES_DOWN = "docker rm -f etcd"
+# GitlabCI services used in CI
 
 python-pre-test: ${SERVICES_UP}
 
