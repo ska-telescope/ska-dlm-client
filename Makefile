@@ -14,6 +14,11 @@ python-pre-test: ${SERVICES_UP}
 
 python-post-test: ${SERVICES_DOWN}
 
+integration-tests: docker-compose-up run-integration-tests docker-compose-down
+
+run-integration-tests: 
+	pytest -m "integration"
+
 docs-pre-build:
 	poetry config virtualenvs.create false
 	poetry install --no-root --only docs
