@@ -100,7 +100,7 @@ integration_tests:
   variables: # Job-wide env
     PYTHON_VARS_AFTER_PYTEST: '--ignore=tests/configdb_watcher --ignore=tests/directory_watcher --ignore=tests/dlm_client'
      # Docker-in-Docker settings
-    # DOCKER_HOST: tcp://docker:2375
+    DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
     DLM_SERVER_REPO: https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/ska-telescope/ska-data-lifecycle.git
     DLM_SERVER_REF: "1.2.0"
