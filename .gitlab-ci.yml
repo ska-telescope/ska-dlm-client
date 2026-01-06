@@ -17,6 +17,12 @@ stages:
   - pages
   - scan
 
+default:
+  image: docker:24.0.5-cli
+  services:
+    - name: docker:24.0.5-dind
+      alias: docker
+
 include:
     # Python
   - project: 'ska-telescope/templates-repository'
@@ -71,7 +77,6 @@ python-test: # Unit tests
     # Don't collect integration folder and skip the marker
     PYTHON_VARS_AFTER_PYTEST: '--ignore=tests/integration -m "not integration"'
   services:
-    - docker:24.0.5-dind
     - name: artefact.skao.int/ska-sdp-etcd:3.5.9
       alias: etcd
       command:
