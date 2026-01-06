@@ -21,15 +21,15 @@ def _docker_run():
     """Run the ETCD container."""
     env = dict(os.environ)
 
-    attr = [
-            "artefact.skao.int/ska-sdp-etcd:3.5.9", 
+    attr = [ 
             "/usr/bin/etcd", 
             "--advertise-client-urls=http://0.0.0.0:2379",
             "--listen-client-urls=http://0.0.0.0:2379",
             "--initial-advertise-peer-urls=http://0.0.0.0:2380",
             "--listen-peer-urls=http://0.0.0.0:2380", 
             "--initial-cluster=default=http://0.0.0.0:2380"]
-    cmd = ["docker", "run", "--rm", "-d", "--name", "etcd", "--network", "dlm_network", "-p", "2379:2379"]
+    cmd = ["docker", "run", "--rm", "-d", "--name", "etcd", "-p", "2379:2379", 
+            "artefact.skao.int/ska-sdp-etcd:3.5.9",]
     cmd += attr
 
     log.info("docker run command: %s", " ".join(cmd))
