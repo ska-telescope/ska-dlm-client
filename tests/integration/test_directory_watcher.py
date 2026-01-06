@@ -1,6 +1,7 @@
 """Directory Watcher integration tests."""
 
 import logging
+import os
 import subprocess
 from time import sleep
 
@@ -21,7 +22,8 @@ def _get_id(item, key: str):
 @pytest.mark.integration
 def test_auto_migration(request_configuration: Configuration):
     """Test auto migration using directory watcher."""
-    api_configuration = Configuration(host="http://localhost")
+    host = os.getenv("DEFAULT_HOST", "localhost")
+    api_configuration = Configuration(host=f"http://{host}")
     setup_testing(api_configuration)
     sleep(2)
     cmd = "docker exec dlm_directory_watcher cp /etc/group /dlm/watch_dir/."

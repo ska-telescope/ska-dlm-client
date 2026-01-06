@@ -15,10 +15,9 @@ packages = [{include="ska_dlm_client", from="src"}]
 
 [tool.poetry.scripts]
 dlm-directory-watcher = "ska_dlm_client.directory_watcher.main:main"
-dlm-kafka-watcher = "ska_dlm_client.kafka_watcher.main:main"
+dlm-configdb-watcher = "ska_dlm_client.configdb_watcher.main:main"
 dlm-register-storage-location = "ska_dlm_client.register_storage_location.main:main"
 dlm-startup-verification = "ska_dlm_client.startup_verification.main:main"
-dlm-configdb-watcher = "ska_dlm_client.configdb_watcher.main:main"
 
 [[tool.poetry.source]]
 name = 'skao'

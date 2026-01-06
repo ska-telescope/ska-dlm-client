@@ -15,7 +15,7 @@ class TestSourceRootDirectory:
     """Test class for source_root_directory parameter."""
 
     STORAGE_NAME = "test-storage"
-    INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://localhost:8001")
+    INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://dlm_ingest:8001")
 
     @classmethod
     def setup_class(cls) -> None:

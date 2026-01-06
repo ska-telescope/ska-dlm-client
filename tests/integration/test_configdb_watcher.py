@@ -20,6 +20,7 @@ from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
 from ska_dlm_client.register_storage_location.main import setup_testing
+from tests.integration.conftest import DEFAULT_HOST
 
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -28,7 +29,7 @@ PB_ID = "pb-test-00000000-a"
 DEMO_MS_PATH = f"{dir_path}/../directory_watcher/test_registration_processor/testing1"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://localhost:8001")
-STORAGE_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://localhost:8003")
+STORAGE_SERVER_URL = os.getenv("STORAGE_SERVER_URL", "http://localhost:8003")
 MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", "http://localhost:8004")
 
 LOCATION_NAME = "ThisDLMClientLocationName"
@@ -216,6 +217,7 @@ async def test_watcher_registers_and_migrates():
 
     Test auto migration using configdb watcher.
     """
+    # api_configuration = Configuration(host=f"http://{DEFAULT_HOST}")
     api_configuration = Configuration(host="http://localhost")
     setup_testing(api_configuration)
     sleep(2)

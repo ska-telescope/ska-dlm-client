@@ -17,7 +17,7 @@ ETCD_URL = os.getenv("ETCD_URL", "http://127.0.0.1:2379")
 
 log = logging.getLogger(__name__)
 
-def _compose(*args: str):
+def _compose():
     """Run `docker compose` with the merged compose files and proper env."""
     env = dict(os.environ)
 
@@ -63,12 +63,7 @@ def dlm_configdb_watcher_stack():
 
     # Start only what we need; --no-deps avoids auth/gateway
     log.info("Attempting to start required server services...")
-    _compose(
-        "up",
-        "-d",
-        "--no-deps",
-        "etcd",
-    )
+    _compose()
     try:
         _wait_for_http(f"{ETCD_URL}/version", timeout_s=30)
         yield

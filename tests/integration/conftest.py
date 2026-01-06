@@ -84,7 +84,7 @@ DEFAULT_HOST = os.getenv("DEFAULT_HOST", "localhost")
 REQUEST_URL = f"http://{DEFAULT_HOST}:8002"
 INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", f"http://{DEFAULT_HOST}:8001")
 MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", f"http://{DEFAULT_HOST}:8004")
-STORAGE_URL = os.getenv("STORAGE_URL", f"http://{DEFAULT_HOST}:8003")
+STORAGE_SERVER_URL = os.getenv("STORAGE_SERVER_URL", f"http://{DEFAULT_HOST}:8003")
 POSTGREST_URL = os.getenv("POSTGREST_URL", f"http://{DEFAULT_HOST}:3000")
 RCLONE_BASE = os.getenv("RCLONE_BASE", f"https://{DEFAULT_HOST}:5572")
 ETCD_URL = os.getenv("ETCD_URL", f"http://{DEFAULT_HOST}:2379")
@@ -251,7 +251,7 @@ def dlm_stack():
     )
     try:
         _wait_for_http(POSTGREST_URL, timeout_s=30)
-        _wait_for_http(f"{STORAGE_URL}/openapi.json", timeout_s=30)
+        _wait_for_http(f"{STORAGE_SERVER_URL}/openapi.json", timeout_s=30)
         _wait_for_http(f"{INGEST_SERVER_URL}/openapi.json", timeout_s=30)
         _wait_for_http(f"{MIGRATION_SERVER_URL}/openapi.json", timeout_s=30)
         _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
@@ -264,12 +264,11 @@ def dlm_stack():
             pass
         _compose("down", "-v", "--remove-orphans")
 
-
 @pytest.fixture(scope="session")
 def storage_configuration(request) -> Configuration:
     """Storage API client config."""
     request.getfixturevalue("dlm_stack")  # triggers setup
-    return Configuration(host=STORAGE_URL)
+    return Configuration(host=STORAGE_SERVER_URL)
 
 
 @pytest.fixture(scope="session")

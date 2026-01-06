@@ -58,45 +58,13 @@ python-test: # Unit tests
         - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
         - "--listen-peer-urls=http://0.0.0.0:2380"
         - "--initial-cluster=default=http://0.0.0.0:2380"
-    # - name: quay.io/coreos/etcd:v3.5.9
-    #   alias: etcd
-    #   command:
-    #     - /usr/local/bin/etcd
-    #     - "--advertise-client-urls=http://0.0.0.0:2379"
-    #     - "--listen-client-urls=http://0.0.0.0:2379"
-    #     - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
-    #     - "--listen-peer-urls=http://0.0.0.0:2380"
-    #     - "--initial-cluster=default=http://0.0.0.0:2380"
-
 
 integration_tests:
   stage: test
   image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
 
   services:
-    - docker:27.0.2-dind # DinD service
-    - alias: kafka
-      name: apache/kafka:3.8.0
-      variables:
-        # Internal listeners (inside the container)
-        KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-        KAFKA_LISTENERS_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-        KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-        KAFKA_PROCESS_ROLES: controller,broker
-        KAFKA_NODE_ID: 0
-
-        # Controller should talk to *itself* via localhost
-        KAFKA_CONTROLLER_QUORUM_VOTERS: 0@localhost:9093
-
-        # External clients (your job) will connect to the alias
-        KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-
-        # QoL
-        ALLOW_PLAINTEXT_LISTENER: "yes"
-        KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-        KAFKA_MESSAGE_MAX_BYTES: 134217728
-
-    - name: quay.io/coreos/etcd:v3.5.9
+    - name: artefact.skao.int/ska-sdp-etcd:3.5.9
       alias: etcd
       command:
         - /usr/local/bin/etcd
@@ -113,7 +81,6 @@ integration_tests:
     DLM_SERVER_REF: "1.2.0"
     DEFAULT_HOST: "docker" # This is correct ONLY for GitLab CI runs
     COMPOSE_PROJECT_NAME: integration-tests
-    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     SDP_CONFIG_HOST: etcd
     SDP_CONFIG_PORT: "2379"
     # To debug services, uncomment the line below. For more info see

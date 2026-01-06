@@ -136,8 +136,8 @@ def log_configdb_backend_details(config: Config) -> None:
     backend = getattr(config, "_backend", None)
 
     sdp_backend = os.getenv("SDP_CONFIG_BACKEND")
-    sdp_host = os.getenv("SDP_CONFIG_HOST")
-    sdp_port = os.getenv("SDP_CONFIG_PORT")
+    sdp_host = os.getenv("SDP_CONFIG_HOST", "localhost")
+    sdp_port = os.getenv("SDP_CONFIG_PORT", "2379")
     sdp_path = os.getenv("SDP_CONFIG_PATH")
 
     if isinstance(backend, Etcd3Backend):
