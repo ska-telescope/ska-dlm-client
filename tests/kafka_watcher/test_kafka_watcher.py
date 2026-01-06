@@ -10,7 +10,9 @@ import pytest_mock
 
 from ska_dlm_client.common_types import ItemType
 from ska_dlm_client.openapi.exceptions import OpenApiException
-from src.ska_dlm_client.kafka_watcher.main import main, post_dlm_data_item, watch
+from ska_dlm_client.kafka_watcher.main import main, post_dlm_data_item, watch
+
+pytestmark = pytest.mark.skip(reason="The Kafka-watcher is deprecated!")
 
 KAFKA_HOST = "localhost:9092"
 TEST_TOPIC = "test-events"

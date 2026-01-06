@@ -6,7 +6,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from src.ska_dlm_client.kafka_watcher.main import main, post_dlm_data_item, watch
+from ska_dlm_client.kafka_watcher.main import main, post_dlm_data_item, watch
+
+pytestmark = pytest.mark.skip(reason="The Kafka-watcher is deprecated!")
 
 KAFKA_HOST = "localhost:9092"
 TEST_TOPIC = "test-events"
