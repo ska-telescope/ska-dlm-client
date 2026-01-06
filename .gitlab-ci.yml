@@ -65,6 +65,8 @@ python-test: # Unit tests
         chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
       fi
     - docker --version && docker compose version || true
+    - poetry --version || pip install "poetry==${CI_POETRY_VERSION:-1.8.2}"
+    - poetry install --no-interaction
   variables:
     # Don't collect integration folder and skip the marker
     PYTHON_VARS_AFTER_PYTEST: '--ignore=tests/integration -m "not integration"'
@@ -95,6 +97,8 @@ integration_tests:
         - "--initial-cluster=default=http://0.0.0.0:2380"
 
   variables: # Job-wide env
+    PYTHON_VARS_AFTER_PYTEST: '--ignore=tests/configdb_watcher --ignore=tests/directory_watcher --ignore=tests/dlm_client'
+     # Docker-in-Docker settings
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
     DLM_SERVER_REPO: https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/ska-telescope/ska-data-lifecycle.git

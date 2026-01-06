@@ -192,7 +192,7 @@ def setup_testing(api_configuration: Configuration):
     # server.
     # The setup of the source volume is now performed during the startup
     # of the client. In future the setup of a default (archive) storage
-    # endpoint will be performed during stratup of the DLM server and
+    # endpoint will be performed during startup of the DLM server and
     # then this can be removed as well.
     logger.info("Testing setup.")
     storage_url = f"{api_configuration.host}:8003"
