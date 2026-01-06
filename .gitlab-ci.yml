@@ -67,7 +67,7 @@ integration_tests:
     - name: artefact.skao.int/ska-sdp-etcd:3.5.9
       alias: etcd
       command:
-        - /usr/local/bin/etcd
+        - /usr/bin/etcd
         - "--advertise-client-urls=http://0.0.0.0:2379"
         - "--listen-client-urls=http://0.0.0.0:2379"
         - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
