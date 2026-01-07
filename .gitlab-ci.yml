@@ -112,7 +112,7 @@ integration-tests:
     #     chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
     #   fi
     - docker --version && docker compose version || true
-    - poetry --version || pip install "poetry==${CI_POETRY_VERSION:-1.8.2}"
+    - pip install "poetry==${CI_POETRY_VERSION:-1.8.2}"
     - poetry install --no-interaction
     - git clone --depth 1 --single-branch --branch "$DLM_SERVER_REF" "$DLM_SERVER_REPO" "$CI_PROJECT_DIR/../ska-data-lifecycle"
     - export DLM_SERVER_DIR="$(readlink -f "$CI_PROJECT_DIR/../ska-data-lifecycle")"
