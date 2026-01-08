@@ -17,5 +17,17 @@ storage:
   capacity: 100000000,
   phase_level: "GAS"
 
+
 DLM:
   url: "http://dlm/api"
+  storage_manager:
+    storage_warning_percentage: 80.0
+    polling_interval: 10 # seconds
+  migration_manager:
+    polling_interval: 10 # seconds
+
+REST:
+  base_url: "http://dlm_postgrest:3000"
+
+RCLONE:
+  - "https://dlm_rclone:5572"

@@ -8,16 +8,29 @@ DOCKER_COMPOSE = docker compose
 # NOTE: removed the -W option from SPHINXOPTS due to warnings from code generated docs.
 DOCS_SPHINXOPTS = -n --keep-going
 PYTHON_LINE_LENGTH = 99
+PYTHON_VARS_AFTER_PYTEST = '--ignore=tests/configdb_watcher --ignore=tests/directory_watcher --ignore=tests/dlm_client'
 # GitlabCI services used in CI
 
-python-pre-test: ${SERVICES_UP}
+python-pre-test:
+	$(DOCKER_COMPOSE) --file tests/test-services.docker-compose.yml up --detach --wait etcd
 
 python-post-test: ${SERVICES_DOWN}
+	$(DOCKER_COMPOSE) --file tests/test-services.docker-compose.yml down etcd
+
+docker-test: docker-pre-test docker-do-test docker-post-test
+docker-pre-test:
+	docker compose --file tests/integration/testrunner.docker-compose.yaml -p dlm-client-test build
+docker-do-test:
+	- docker compose --file tests/integration/testrunner.docker-compose.yaml -p dlm-client-test up
+# 	- docker compose logs -f dlm_client_testrunner
+docker-post-test:
+	docker compose --file tests/integration/testrunner.docker-compose.yaml -p dlm-client-test down
 
 integration-tests: docker-compose-up run-integration-tests docker-compose-down
 
-run-integration-tests: 
-	pytest -m "integration"
+run-integration-tests:
+	$(DOCKER_COMPOSE) --file tests/integration/testrunner.docker-compose.yaml up dlm_client_testrunner
+# 	pytest -m "integration"
 
 docs-pre-build:
 	poetry config virtualenvs.create false
@@ -26,10 +39,13 @@ docs-pre-build:
 .PHONY: docs-pre-build openapi-code-from-local-dlm
 
 docker-compose-up: ## Bring up test services in docker
-	$(DOCKER_COMPOSE) --file tests/test-services.docker-compose.yml up --detach --wait
+	$(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml up -d --wait
+	$(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml up -d
 
 docker-compose-down: ## Shut down test services in docker previously started with docker-compose-up
-	$(DOCKER_COMPOSE) --file tests/test-services.docker-compose.yml down
+	$(DOCKER_COMPOSE) --file tests/integration/testrunner.docker-compose.yaml down
+	$(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml down
+	$(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml down
 
 oci-build-dlm_directory_watcher:
 	make oci-build OCI_IMAGE=ska-dlm-directory_watcher \

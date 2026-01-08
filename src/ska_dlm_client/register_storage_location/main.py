@@ -23,7 +23,8 @@ LOCATION_TYPE = LocationType.LOW_INTEGRATION
 LOCATION_COUNTRY = LocationCountry.AU
 LOCATION_CITY = "Kensington"
 LOCATION_FACILITY = "local"
-RCLONE_CONFIG_TARGET = {"name": "dlm-archive", "type": "alias", "parameters": {"remote": "/dlm"}}
+RCLONE_CONFIG_TARGET = {"name": "dlm-archive", "type": "alias", 
+                        "parameters": {"remote": "/dlm-archive"}}
 RCLONE_CONFIG_SOURCE = {
     "name": "dir-watcher",
     "type": "sftp",
@@ -195,7 +196,8 @@ def setup_testing(api_configuration: Configuration):
     # endpoint will be performed during startup of the DLM server and
     # then this can be removed as well.
     logger.info("Testing setup.")
-    storage_url = f"{api_configuration.host}:8003"
+    storage_url = f"{api_configuration.host}:8003" if api_configuration.host.find(":") == -1 \
+        else api_configuration.host
     location_id = get_or_init_location(
         api_configuration, location=LOCATION_NAME, storage_url=storage_url
     )

@@ -80,14 +80,15 @@ COMPOSE_FILES = [
 ]
 
 # URLs can be overridden in CI to hit the DinD host
-DEFAULT_HOST = os.getenv("DEFAULT_HOST", "localhost")
-REQUEST_URL = f"http://{DEFAULT_HOST}:8002"
-INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", f"http://{DEFAULT_HOST}:8001")
-MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", f"http://{DEFAULT_HOST}:8004")
-STORAGE_SERVER_URL = os.getenv("STORAGE_SERVER_URL", f"http://{DEFAULT_HOST}:8003")
-POSTGREST_URL = os.getenv("POSTGREST_URL", f"http://{DEFAULT_HOST}:3000")
-RCLONE_BASE = os.getenv("RCLONE_BASE", f"https://{DEFAULT_HOST}:5572")
-ETCD_URL = os.getenv("ETCD_URL", f"http://{DEFAULT_HOST}:2379")
+REQUEST_URL = "http://dlm_request:8002"
+INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://dlm_ingest:8001")
+MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", "http://dlm_migration:8004")
+STORAGE_SERVER_URL = os.getenv("STORAGE_SERVER_URL", "http://dlm_storage:8003")
+POSTGREST_URL = os.getenv("POSTGREST_URL", "http://dlm_postgrest:3000")
+RCLONE_BASE = os.getenv("RCLONE_BASE", "https://dlm_rclone:5572")
+SDP_CONFIG_HOST = "etcd"
+ETCD_URL = f"http://{SDP_CONFIG_HOST}:2379"
+os.environ["SDP_CONFIG_HOST"] = SDP_CONFIG_HOST
 
 CERT_DIR = SERVER_TESTS / "integration" / "certs"
 KEY_PATH = CERT_DIR / "selfsigned.key"
@@ -209,70 +210,70 @@ def _wait_for_http(url: str, timeout_s: int = 120, verify: bool = True, ok=(200,
     raise TimeoutError(f"Timeout waiting for {url}")
 
 
+# @pytest.fixture(scope="session")
+# def dlm_stack():
+#     """Bring up the minimal DLM stack for integration tests and wait for readiness.
+
+#     Starts only the services needed by the client tests (DB, PostgREST, rclone, storage),
+#     avoiding auth/gateway via `--no-deps`. Generates rclone TLS certs just-in-time so
+#     HTTPS remains enabled without manual steps.
+#     """
+#     log.info(
+#         "Initialising containers for %s…", os.environ.get("COMPOSE_PROJECT_NAME", PROJECT_NAME)
+#     )
+#     if not shutil.which("docker"):
+#         pytest.skip("Docker is required for integration tests.")
+#     missing = [f for f in COMPOSE_FILES if not f.exists()]
+#     if missing:
+#         pytest.skip("Compose file(s) not found: " + ", ".join(map(str, missing)))
+
+#     # We need the dlm server repo
+#     _require_server_repo()
+
+#     # Just-in-time cert generation
+#     _ensure_rclone_certs()
+
+#     # Start only what we need; --no-deps avoids auth/gateway
+#     log.info("Attempting to start required server services...")
+#     _compose(
+#         "up",
+#         "-d",
+#         "--no-deps",
+#         "dlm_db",
+#         "dlm_postgrest",
+#         "dlm_rclone",
+#         "dlm_storage",
+#         "dlm_migration",
+#         "dlm_ingest",
+#         "dlm_request",
+#         "dlm_directory_watcher",
+#         "etcd",
+#         "dlm_configdb_watcher",
+#     )
+#     try:
+#         _wait_for_http(POSTGREST_URL, timeout_s=30)
+#         _wait_for_http(f"{STORAGE_SERVER_URL}/openapi.json", timeout_s=30)
+#         _wait_for_http(f"{INGEST_SERVER_URL}/openapi.json", timeout_s=30)
+#         _wait_for_http(f"{MIGRATION_SERVER_URL}/openapi.json", timeout_s=30)
+#         _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
+#         yield
+#     finally:  # teardown
+#         cmd = "docker exec dlm_directory_watcher rm /dlm/watch_dir/group"
+#         try:
+#             _ = subprocess.run(cmd, capture_output=True, shell=True, check=False)
+#         except Exception:
+#             pass
+#         _compose("down", "-v", "--remove-orphans")
+
 @pytest.fixture(scope="session")
-def dlm_stack():
-    """Bring up the minimal DLM stack for integration tests and wait for readiness.
-
-    Starts only the services needed by the client tests (DB, PostgREST, rclone, storage),
-    avoiding auth/gateway via `--no-deps`. Generates rclone TLS certs just-in-time so
-    HTTPS remains enabled without manual steps.
-    """
-    log.info(
-        "Initialising containers for %s…", os.environ.get("COMPOSE_PROJECT_NAME", PROJECT_NAME)
-    )
-    if not shutil.which("docker"):
-        pytest.skip("Docker is required for integration tests.")
-    missing = [f for f in COMPOSE_FILES if not f.exists()]
-    if missing:
-        pytest.skip("Compose file(s) not found: " + ", ".join(map(str, missing)))
-
-    # We need the dlm server repo
-    _require_server_repo()
-
-    # Just-in-time cert generation
-    _ensure_rclone_certs()
-
-    # Start only what we need; --no-deps avoids auth/gateway
-    log.info("Attempting to start required server services...")
-    _compose(
-        "up",
-        "-d",
-        "--no-deps",
-        "dlm_db",
-        "dlm_postgrest",
-        "dlm_rclone",
-        "dlm_storage",
-        "dlm_migration",
-        "dlm_ingest",
-        "dlm_request",
-        "dlm_directory_watcher",
-        "etcd",
-        "dlm_configdb_watcher",
-    )
-    try:
-        _wait_for_http(POSTGREST_URL, timeout_s=30)
-        _wait_for_http(f"{STORAGE_SERVER_URL}/openapi.json", timeout_s=30)
-        _wait_for_http(f"{INGEST_SERVER_URL}/openapi.json", timeout_s=30)
-        _wait_for_http(f"{MIGRATION_SERVER_URL}/openapi.json", timeout_s=30)
-        _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
-        yield
-    finally:  # teardown
-        cmd = "docker exec dlm_directory_watcher rm /dlm/watch_dir/group"
-        try:
-            _ = subprocess.run(cmd, capture_output=True, shell=True, check=False)
-        except Exception:
-            pass
-        _compose("down", "-v", "--remove-orphans")
-
-@pytest.fixture(scope="session")
-def storage_configuration(request) -> Configuration:
+def storage_configuration() -> Configuration:
     """Storage API client config."""
-    request.getfixturevalue("dlm_stack")  # triggers setup
+    # request.getfixturevalue("dlm_stack")  # triggers setup
     return Configuration(host=STORAGE_SERVER_URL)
 
 
 @pytest.fixture(scope="session")
-def request_configuration(request) -> Configuration:
+def request_configuration() -> Configuration:
     """Storage API client config."""
-    request.getfixturevalue("dlm_stack")  # triggers setup
+    # request.getfixturevalue("dlm_stack")  # triggers setup
     return Configuration(host=REQUEST_URL)

@@ -1,0 +1,23 @@
+FROM python:3.10
+
+RUN apt-get update && apt-get install -y iputils-ping docker.io
+RUN pip install pytest requests_mock docker
+
+ARG POETRY_VERSION=1.8.2
+RUN pip install poetry==${POETRY_VERSION}
+
+RUN mkdir -p /dlm
+
+WORKDIR /app
+
+# cache external dependencies
+COPY pyproject.toml poetry.lock ./
+RUN poetry config virtualenvs.in-project true \
+    && poetry install --only main,test --no-root
+
+COPY ./ ./
+RUN poetry install --only main,test
+
+ENV PATH="/app/.venv/bin:${PATH}"
+
+ENTRYPOINT pytest

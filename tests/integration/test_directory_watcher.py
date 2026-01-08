@@ -22,8 +22,8 @@ def _get_id(item, key: str):
 @pytest.mark.integration
 def test_auto_migration(request_configuration: Configuration):
     """Test auto migration using directory watcher."""
-    host = "dlm_storage" if os.getenv("DEFAULT_HOST") else "localhost"
-    api_configuration = Configuration(host=f"http://{host}")
+    host = "dlm_storage" if os.getenv("DEFAULT_HOST") else "dlm_storage"
+    api_configuration = Configuration(host=f"http://{host}:8003")
     setup_testing(api_configuration)
     sleep(2)
     cmd = "docker exec dlm_directory_watcher cp /etc/group /dlm/watch_dir/."

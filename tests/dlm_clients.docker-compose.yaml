@@ -1,5 +1,6 @@
 include:
-- path: services.docker-compose.yaml
+  - path: services.docker-compose.yaml
+  - path: test_services.docker-compose.yaml
 
 services:
   dlm_directory_watcher:
@@ -14,6 +15,7 @@ services:
       - directory-watcher
     volumes:
       - shared-tmpfs:/dlm
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - dlm_network
   dlm_configdb_watcher:
@@ -28,8 +30,11 @@ services:
       - configdb-watcher
     volumes:
       - shared-tmpfs:/dlm
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - dlm_network
+    depends_on:
+      - etcd
   setup_storage_location:
     platform: linux/amd64
     image: dlm_directory_watcher

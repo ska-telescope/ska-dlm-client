@@ -20,7 +20,6 @@ from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
 from ska_dlm_client.register_storage_location.main import setup_testing
-from tests.integration.conftest import DEFAULT_HOST
 
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -28,9 +27,9 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 PB_ID = "pb-test-00000000-a"
 DEMO_MS_PATH = f"{dir_path}/../directory_watcher/test_registration_processor/testing1"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
-INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://localhost:8001")
-STORAGE_SERVER_URL = os.getenv("STORAGE_SERVER_URL", "http://localhost:8003")
-MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", "http://localhost:8004")
+INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://dlm_ingest:8001")
+STORAGE_SERVER_URL = os.getenv("STORAGE_SERVER_URL", "http://dlm_storage:8003")
+MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", "http://dlm_migration:8004")
 
 LOCATION_NAME = "ThisDLMClientLocationName"
 LOCATION_TYPE = LocationType.LOCAL_DEV
@@ -217,13 +216,13 @@ async def test_watcher_registers_and_migrates():
 
     Test auto migration using configdb watcher.
     """
-    host = "dlm_storage" if os.getenv("DEFAULT_HOST") else "localhost"
-    api_configuration = Configuration(host=f"http://{host}")
+    host = os.getenv("STORAGE_SERVER", "dlm_storage")
+    api_configuration = Configuration(host=f"http://{host}:8003")
     setup_testing(api_configuration)
     sleep(2)
     # --- copying demo.ps ---
     cmd = f"docker container cp {DEMO_MS_PATH} dlm_configdb_watcher:/dlm/."
-    log.info("Move MS into container: %s", cmd)
+    log.info("Copy MS into container: %s", cmd)
     p = subprocess.run(cmd, capture_output=True, shell=True, check=True)
     if p.returncode != 0:
         log.info("[copy file STDOUT]: %s\n", p.stdout)
