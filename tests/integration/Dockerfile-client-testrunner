@@ -4,14 +4,11 @@ RUN apt-get update && apt-get install -y iputils-ping docker.io docker-compose
 RUN pip install pytest requests_mock docker
 
 ARG POETRY_VERSION=1.8.2
-RUN pip install poetry==${POETRY_VERSION}
-
-RUN mkdir -p /dlm
+RUN pip install poetry==${POETRY_VERSION} &&\
+    mkdir -p /dlm &&\
+    useradd -G docker ska-dlm 
 
 WORKDIR /app
-
-# Best practice not to run as root
-RUN useradd -G docker ska-dlm 
 
 # cache external dependencies
 COPY pyproject.toml poetry.lock ./
