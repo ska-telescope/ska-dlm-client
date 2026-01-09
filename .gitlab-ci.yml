@@ -43,8 +43,10 @@ include:
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
 
 python-test:
+  stage: test
   image: docker:27.0.2-dind
 
 integration-tests:
   stage: test
   image: docker:27.0.2-dind
+  script: make integration-test
