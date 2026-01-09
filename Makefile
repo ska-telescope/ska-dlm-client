@@ -14,17 +14,13 @@ PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
 DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:81d01d51
 # GitlabCI services used in CI
 
-python-test: python-pre-test python-do-test python-post-test
+python-test: python-pre-test python-do-test docker-compose-down
 
 python-pre-test:
-	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml up --detach --wait
+	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml up -d
 
 python-do-test:
 	$(DOCKER_COMPOSE) --file tests/integration/testrunner.docker-compose.yaml run --entrypoint="pytest --ignore tests/integration" dlm_client_testrunner
-
-python-post-test: ${SERVICES_DOWN}
-	$(DOCKER_COMPOSE) --file tests/integration/testrunner.docker-compose.yaml down
-	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml down
 
 integration-test: docker-compose-up run-integration-test docker-compose-down
 
