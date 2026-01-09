@@ -44,9 +44,7 @@ include:
 
 python-test:
   image: docker:27.0.2-dind
-  script: make python-test
 
 integration-tests:
   stage: test
   image: docker:27.0.2-dind
-  script: make integration-test

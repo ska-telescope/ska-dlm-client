@@ -5,7 +5,7 @@ include:
 services:
   dlm_migration:
     platform: linux/amd64
-    image: artefact.skao.int/ska-data-lifecycle:1.2.0
+    image: ${SERVER_IMAGE}
     container_name: dlm_migration
     build:
       context: .
@@ -23,7 +23,7 @@ services:
 
   dlm_storage:
     platform: linux/amd64
-    image: artefact.skao.int/ska-data-lifecycle:1.2.0
+    image: ${SERVER_IMAGE}
     container_name: dlm_storage
     build:
       context: .
@@ -43,7 +43,7 @@ services:
       - dlm_network
 
   dlm_request:
-    image: artefact.skao.int/ska-data-lifecycle:1.2.0
+    image: ${SERVER_IMAGE}
     container_name: dlm_request
     build:
       context: .
@@ -62,7 +62,7 @@ services:
 
   dlm_ingest:
     platform: linux/amd64
-    image: artefact.skao.int/ska-data-lifecycle:1.2.0
+    image: ${SERVER_IMAGE}
     container_name: dlm_ingest
     build:
       context: .
