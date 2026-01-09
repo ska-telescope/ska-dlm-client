@@ -44,7 +44,16 @@ include:
 
 python-test:
   stage: test
+  stage: test
   image: docker:27.0.2-dind
+  services:
+    - docker:27.0.2-dind
+  before_script:
+    - docker compose --file tests/testrunner.docker-compose.yaml build
+  script:
+    - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services run dlm_testrunner .
+  after_script:
+    - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services down
 
 integration-tests:
   stage: test
