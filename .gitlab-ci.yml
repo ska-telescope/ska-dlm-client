@@ -42,57 +42,58 @@ include:
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
 
-python-test: # Unit tests
-  # Keep in sync with tests/test-services.docker-compose.yml
-  stage: test
-  variables:
-    # Don't collect integration folder and skip the marker
-    PYTHON_VARS_AFTER_PYTEST: '--ignore=tests/integration -m "not integration"'
-  services:
-    - docker:27.0.2-dind # DinD service
-    - name: artefact.skao.int/ska-sdp-etcd:3.5.9
-      alias: etcd
-      command:
-        - /usr/bin/etcd
-        - "--advertise-client-urls=http://0.0.0.0:2379"
-        - "--listen-client-urls=http://0.0.0.0:2379"
-        - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
-        - "--listen-peer-urls=http://0.0.0.0:2380"
-        - "--initial-cluster=default=http://0.0.0.0:2380"
+# python-test: # Unit tests
+#   # Keep in sync with tests/test-services.docker-compose.yml
+#   stage: test
+#   variables:
+#     # Don't collect integration folder and skip the marker
+#     PYTHON_VARS_AFTER_PYTEST: '--ignore=tests/integration -m "not integration"'
+#   services:
+#     - docker:27.0.2-dind # DinD service
+#     - name: artefact.skao.int/ska-sdp-etcd:3.5.9
+#       alias: etcd
+#       command:
+#         - /usr/bin/etcd
+#         - "--advertise-client-urls=http://0.0.0.0:2379"
+#         - "--listen-client-urls=http://0.0.0.0:2379"
+#         - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
+#         - "--listen-peer-urls=http://0.0.0.0:2380"
+#         - "--initial-cluster=default=http://0.0.0.0:2380"
 
 integration-tests:
   stage: test
   image: docker:27.0.2-dind 
 
-  services:
-    - docker:27.0.2-dind # DinD service
-    - name: artefact.skao.int/ska-sdp-etcd:3.5.9
-      alias: etcd
-      command:
-        - /usr/bin/etcd
-        - "--advertise-client-urls=http://0.0.0.0:2379"
-        - "--listen-client-urls=http://0.0.0.0:2379"
-        - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
-        - "--listen-peer-urls=http://0.0.0.0:2380"
-        - "--initial-cluster=default=http://0.0.0.0:2380"
+  # services:
+  #   - docker:27.0.2-dind # DinD service
+  #   - name: artefact.skao.int/ska-sdp-etcd:3.5.9
+  #     alias: etcd
+  #     command:
+  #       - /usr/bin/etcd
+  #       - "--advertise-client-urls=http://0.0.0.0:2379"
+  #       - "--listen-client-urls=http://0.0.0.0:2379"
+  #       - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
+  #       - "--listen-peer-urls=http://0.0.0.0:2380"
+  #       - "--initial-cluster=default=http://0.0.0.0:2380"
 
-  variables: # Job-wide env
-    PYTHON_VARS_AFTER_PYTEST: '--ignore=tests/configdb_watcher --ignore=tests/directory_watcher --ignore=tests/dlm_client'
-     # Docker-in-Docker settings
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-    DLM_SERVER_REPO: https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/ska-telescope/ska-data-lifecycle.git
-    DLM_SERVER_REF: "1.2.0"
-    DEFAULT_HOST: "docker" # This is correct ONLY for GitLab CI runs
-    COMPOSE_PROJECT_NAME: integration-tests
-    SDP_CONFIG_HOST: "etcd"
-    SDP_CONFIG_PORT: "2379"
-    # To debug services, uncomment the line below. For more info see
-    # https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2119#note_1142144587
-    # CI_DEBUG_SERVICES: trace
+  # variables: # Job-wide env
+  #   PYTHON_VARS_AFTER_PYTEST: '--ignore=tests/configdb_watcher --ignore=tests/directory_watcher --ignore=tests/dlm_client'
+  #    # Docker-in-Docker settings
+  #   DOCKER_HOST: tcp://docker:2375
+  #   DOCKER_TLS_CERTDIR: ""
+  #   # DLM_SERVER_REPO: https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/ska-telescope/ska-data-lifecycle.git
+  #   # DLM_SERVER_REF: "1.2.0"
+  #   # DEFAULT_HOST: "docker" # This is correct ONLY for GitLab CI runs
+  #   COMPOSE_PROJECT_NAME: integration-tests
+  #   SDP_CONFIG_HOST: "etcd"
+  #   SDP_CONFIG_PORT: "2379"
+  #   # To debug services, uncomment the line below. For more info see
+  #   # https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2119#note_1142144587
+  #   # CI_DEBUG_SERVICES: trace
 
   before_script:
     - docker compose --file tests/integration/dlm_servers.docker-compose.yaml up -d --wait
+    - docker compose --file tests/test_services.docker-compose.yaml up -d
     - docker compose --file tests/dlm_clients.docker-compose.yaml up -d
   script:
     - docker compose --file tests/integration/testrunner.docker-compose.yaml up dlm_client_testrunner

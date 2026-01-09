@@ -8,29 +8,25 @@ DOCKER_COMPOSE = docker compose
 # NOTE: removed the -W option from SPHINXOPTS due to warnings from code generated docs.
 DOCS_SPHINXOPTS = -n --keep-going
 PYTHON_LINE_LENGTH = 99
-PYTHON_VARS_AFTER_PYTEST = '--ignore=tests/configdb_watcher --ignore=tests/directory_watcher --ignore=tests/dlm_client'
+PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
 # GitlabCI services used in CI
 
+python-test: python-pre-test python-do-test python-post-test
+
 python-pre-test:
-	$(DOCKER_COMPOSE) --file tests/test-services.docker-compose.yml up --detach --wait etcd
+	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml up --detach --wait
+
+python-do-test:
+	$(DOCKER_COMPOSE) --file tests/integration/testrunner.docker-compose.yaml run --entrypoint="pytest --ignore tests/integration" dlm_client_testrunner
 
 python-post-test: ${SERVICES_DOWN}
-	$(DOCKER_COMPOSE) --file tests/test-services.docker-compose.yml down etcd
+	$(DOCKER_COMPOSE) --file tests/integration/testrunner.docker-compose.yaml down
+	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml down
 
-docker-test: docker-pre-test docker-do-test docker-post-test
-docker-pre-test:
-	docker compose --file tests/integration/testrunner.docker-compose.yaml -p dlm-client-test build
-docker-do-test:
-	- docker compose --file tests/integration/testrunner.docker-compose.yaml -p dlm-client-test up
-# 	- docker compose logs -f dlm_client_testrunner
-docker-post-test:
-	docker compose --file tests/integration/testrunner.docker-compose.yaml -p dlm-client-test down
+integration-test: docker-compose-up run-integration-test docker-compose-down
 
-integration-tests: docker-compose-up run-integration-tests docker-compose-down
-
-run-integration-tests:
+run-integration-test:
 	$(DOCKER_COMPOSE) --file tests/integration/testrunner.docker-compose.yaml up dlm_client_testrunner
-# 	pytest -m "integration"
 
 docs-pre-build:
 	poetry config virtualenvs.create false
@@ -40,12 +36,14 @@ docs-pre-build:
 
 docker-compose-up: ## Bring up test services in docker
 	$(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml up -d --wait
+	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml up -d
 	$(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml up -d
 
 docker-compose-down: ## Shut down test services in docker previously started with docker-compose-up
-	$(DOCKER_COMPOSE) --file tests/integration/testrunner.docker-compose.yaml down
-	$(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml down
-	$(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml down
+	$(DOCKER_COMPOSE) --file tests/integration/testrunner.docker-compose.yaml down --volumes
+	$(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml down --volumes
+	$(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml down --volumes
+	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml down --volumes
 
 oci-build-dlm_directory_watcher:
 	make oci-build OCI_IMAGE=ska-dlm-directory_watcher \

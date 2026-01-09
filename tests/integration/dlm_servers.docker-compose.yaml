@@ -7,6 +7,9 @@ services:
     platform: linux/amd64
     image: artefact.skao.int/ska-data-lifecycle:1.2.0
     container_name: dlm_migration
+    build:
+      context: .
+      dockerfile: Dockerfile-servers
     entrypoint: uvicorn ska_dlm.dlm_migration.dlm_migration_requests:rest --host 0.0.0.0 --port 8004
     ports:
       - 8004:8004
@@ -22,6 +25,9 @@ services:
     platform: linux/amd64
     image: artefact.skao.int/ska-data-lifecycle:1.2.0
     container_name: dlm_storage
+    build:
+      context: .
+      dockerfile: Dockerfile-servers
     environment:
       SSH_PUBLIC_KEY_PATH: "/dlm/.ssh/id_rsa.pub"
     entrypoint: uvicorn ska_dlm.dlm_storage.dlm_storage_requests:rest --host 0.0.0.0 --port 8003
@@ -39,6 +45,9 @@ services:
   dlm_request:
     image: artefact.skao.int/ska-data-lifecycle:1.2.0
     container_name: dlm_request
+    build:
+      context: .
+      dockerfile: Dockerfile-servers
     platform: linux/amd64
     entrypoint: uvicorn ska_dlm.dlm_request.dlm_request_requests:rest --host 0.0.0.0 --port 8002
     ports:
@@ -55,6 +64,9 @@ services:
     platform: linux/amd64
     image: artefact.skao.int/ska-data-lifecycle:1.2.0
     container_name: dlm_ingest
+    build:
+      context: .
+      dockerfile: Dockerfile-servers
     entrypoint: uvicorn ska_dlm.dlm_ingest.dlm_ingest_requests:rest --host 0.0.0.0 --port 8001
     ports:
       - 8001:8001
