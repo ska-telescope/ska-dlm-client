@@ -57,6 +57,7 @@ python-test:
 integration-tests:
   stage: test
   image: docker:27.0.2-dind
+  services:
     - docker:27.0.2-dind
   before_script:
     - docker compose --file tests/integration/testrunner.docker-compose.yaml -p dlm-test-services build
