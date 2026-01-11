@@ -1,4 +1,3 @@
-# pylint: disable=broad-exception-caught
 """
 Integration test harness for ska_dlm_client.
 
@@ -11,7 +10,6 @@ Run with: `pytest -m integration`
 
 import logging
 import os
-import shutil
 import subprocess
 import time
 from pathlib import Path
@@ -172,7 +170,6 @@ def _compose(*args: str):
         cmd += ["-f", str(f)]
     cmd += list(args)
 
-
     log.info("docker compose command: %s", " ".join(cmd))
     p = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)
     if p.returncode != 0:
@@ -264,6 +261,7 @@ def _wait_for_http(url: str, timeout_s: int = 120, verify: bool = True, ok=(200,
 #         except Exception:
 #             pass
 #         _compose("down", "-v", "--remove-orphans")
+
 
 @pytest.fixture(scope="session")
 def storage_configuration() -> Configuration:
