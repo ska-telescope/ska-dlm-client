@@ -5,15 +5,15 @@ RUN pip install pytest requests_mock docker
 
 ARG POETRY_VERSION=1.8.2
 RUN pip install poetry==${POETRY_VERSION} &&\
-    mkdir -p /dlm &&\
-    useradd -G docker ska-dlm 
+    mkdir -p /dlm
+RUN useradd -G docker ska-dlm 
+USER ska-dlm
 
 WORKDIR /app
-
 # cache external dependencies
 COPY pyproject.toml poetry.lock ./
-RUN poetry config virtualenvs.in-project true \
-    && poetry install --only main,test --no-root
+RUN poetry config virtualenvs.in-project true &&\
+    poetry install --only main,test --no-root
 
 COPY ./ ./
 RUN poetry install --only main,test
