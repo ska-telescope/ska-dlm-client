@@ -2,13 +2,9 @@
 
 import logging
 import os
-import shutil
-import subprocess
-import time
 from pathlib import Path
 
 import pytest
-import requests
 from ska_sdp_config import Config
 
 CLIENT_ROOT = Path(__file__).resolve().parents[2]
