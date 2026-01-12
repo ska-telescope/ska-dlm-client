@@ -234,9 +234,9 @@ def dlm_stack():
     """
     try:
         _wait_for_http(POSTGREST_URL, timeout_s=2)
-        _wait_for_http(f"{STORAGE_SERVER_URL}/openapi.json", timeout_s=2)
         _wait_for_http(f"{INGEST_SERVER_URL}/openapi.json", timeout_s=2)
         _wait_for_http(f"{MIGRATION_SERVER_URL}/openapi.json", timeout_s=2)
+        _wait_for_http(f"{STORAGE_SERVER_URL}/openapi.json", timeout_s=2)
         _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
         yield
     finally:
