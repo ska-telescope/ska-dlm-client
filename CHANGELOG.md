@@ -5,6 +5,8 @@
 ### Added
 
 * Config DB watcher calls the DLM server to register data-products at the source destination and creates a DLM Dependency.
+* Added Helm chart configuration for the ConfigDB Watcher.
+* Config DB watcher calls the DLM server to register and migrate data-products, and creates a DLM Dependency.
 * ska-sdp-config DB watcher that yields matching data-product Flow status events.
 * Integration test harness to start DLM services (via Docker Compose).
 * Start of integration tests for directory-watcher and kafka-watcher.

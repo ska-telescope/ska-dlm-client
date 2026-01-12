@@ -6,6 +6,8 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
+import os
+from pathlib import Path
 from typing import Optional
 
 from ska_sdp_config import Config, ConfigCollision
