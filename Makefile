@@ -11,7 +11,8 @@ PYTHON_LINE_LENGTH = 99
 PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
 
 # The DLM server image to use in integration tests is currently not a released version
-DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:067375af
+# This is the OCI image of the last DMAN-124 build
+DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:81d01d51
 # GitlabCI services used in CI
 
 python-test: python-pre-test python-do-test python-post-test
