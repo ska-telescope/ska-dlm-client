@@ -236,6 +236,9 @@ async def test_watcher_registers_and_migrates():
     sleep(1)
     statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow")
     assert "FINISHED" in statuses
+    log.info("Cleaning up copied MS file from watcher container.")
+    cmd = f"docker exec dlm_configdb_watcher rm -rf /dlm/{os.path.basename(DEMO_MS_PATH)}"
+
 
 
 @pytest.mark.asyncio

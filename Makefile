@@ -14,18 +14,26 @@ PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
 DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:81d01d51
 # GitlabCI services used in CI
 
-python-test: python-pre-test python-do-test docker-compose-down
+python-test: python-pre-test python-do-test python-post-test
 
 python-pre-test:
-	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml up -d
+	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml build
+	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml up -d --remove-orphans
 
 python-do-test:
-	$(DOCKER_COMPOSE) --file tests/integration/testrunner.docker-compose.yaml run --entrypoint="pytest --ignore tests/integration" dlm_client_testrunner
+	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest --ignore tests/integration" dlm_client_testrunner
+
+python-post-test: docker-compose-down
 
 integration-test: docker-compose-up run-integration-test docker-compose-down
 
 run-integration-test:
-	$(DOCKER_COMPOSE) --file tests/integration/testrunner.docker-compose.yaml up dlm_client_testrunner
+	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest -m integration" dlm_client_testrunner
+
+all-tests: docker-compose-up run-all-tests docker-compose-down
+
+run-all-tests:
+	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml up dlm_client_testrunner
 
 docs-pre-build:
 	poetry config virtualenvs.create false
@@ -35,14 +43,16 @@ docs-pre-build:
 
 docker-compose-up: ## Bring up test services in docker
 	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml up -d --wait
-	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml up -d
-	$(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml up -d
+	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml up -d --remove-orphans
+	$(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml build
+	$(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml up -d --remove-orphans
 
 docker-compose-down: ## Shut down test services in docker previously started with docker-compose-up
-	$(DOCKER_COMPOSE) --file tests/integration/testrunner.docker-compose.yaml down --volumes --remove-orphans
+	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml down --volumes --remove-orphans
 	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml down --volumes
 	$(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml down --volumes
 	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml down --volumes --remove-orphans
+	docker volume rm shared-tmpfs || true
 
 oci-build-dlm_directory_watcher:
 	make oci-build OCI_IMAGE=ska-dlm-directory_watcher \

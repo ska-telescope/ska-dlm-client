@@ -40,3 +40,4 @@ def test_auto_migration(request_configuration: Configuration):
         assert len(resp2) == 2
         assert resp2 and _get_id(resp2[0], "item_name") == "group"
         assert resp2 and _get_id(resp2[1], "item_name") == "group"
+    cmd = "docker exec dlm_directory_watcher rm /dlm/watch_dir/group"

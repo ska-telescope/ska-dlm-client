@@ -1,13 +1,13 @@
 include:
-  - path: ../services.docker-compose.yaml
+  - path: services.docker-compose.yaml
 services:
   dlm_client_testrunner:
     platform: linux/amd64
     image: dlm_client_testrunner
     container_name: dlm_client_testrunner
     build:
-       context: ../..
-       dockerfile: tests/integration/Dockerfile-client-testrunner
+       context: ..
+       dockerfile: tests/Dockerfile-client-testrunner
     volumes:
       - shared-tmpfs:/dlm
       - /var/run/docker.sock:/var/run/docker.sock
