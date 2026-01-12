@@ -16,6 +16,7 @@ from pathlib import Path
 
 import pytest
 import requests
+import urllib
 
 import ska_dlm_client.openapi.api_client as _dlm_api_client
 from ska_dlm_client.openapi.configuration import Configuration
@@ -192,81 +193,59 @@ def _wait_for_rclone(base=RCLONE_BASE, timeout_s: int = 60):
         time.sleep(0.5)
     raise TimeoutError(f"Timeout waiting for rclone RC at {base}")
 
+def _override_hosts(hostname: str):
+    """Override the hostnames in the environment variables for reaching services."""
+    os.environ["REQUEST_URL"] = f"http://{hostname}:8002"
+    os.environ["INGEST_SERVER_URL"] = f"http://{hostname}:8001"
+    os.environ["MIGRATION_SERVER_URL"] = f"http://{hostname}:8004"
+    os.environ["STORAGE_SERVER_URL"] = f"http://{hostname}:8003"
+    os.environ["POSTGREST_URL"] = f"http://{hostname}:3000"
+    os.environ["RCLONE_BASE"] = f"https://{hostname}:5572"
+    os.environ["SDP_CONFIG_HOST"] = "etcd"
+    return
 
-def _wait_for_http(url: str, timeout_s: int = 120, verify: bool = True, ok=(200, 204, 301, 302)):
-    """Wait for an HTTP endpoint to return a status in `ok`."""
-    end = time.time() + timeout_s
-    while time.time() < end:
+def _wait_for_http(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 204, 301, 302)):
+    """Check HTTP endpoints for server services and replace hostname if required."""
+    url_parts = urllib.parse.urlparse(url)
+    orig_hostname = url_parts.hostname
+    host_options = [orig_hostname] + ["localhost", "docker"]
+    for host in host_options:
+        check_url = f"{url_parts.scheme}://{host}:{url_parts.port}{url_parts.path}"
         try:
-            r = requests.get(url, timeout=2, verify=verify, allow_redirects=True)
+            log.info(">>>> Checking HTTP endpoint: %s for %s", check_url, orig_hostname)
+            r = requests.get(check_url, timeout=2, verify=verify, allow_redirects=True)
             if r.status_code in ok:
+                if host != orig_hostname:
+                    log.info("Overriding all service hosts to use %s", host)
+                    _override_hosts(host)
+                log.info("OK!")
                 return
         except requests.RequestException:
             pass
-        time.sleep(0.5)
-    raise TimeoutError(f"Timeout waiting for {url}")
-
-
-# @pytest.fixture(scope="session")
-# def dlm_stack():
-#     """Bring up the minimal DLM stack for integration tests and wait for readiness.
-
-#     Starts only the services needed by the client tests (DB, PostgREST, rclone, storage),
-#     avoiding auth/gateway via `--no-deps`. Generates rclone TLS certs just-in-time so
-#     HTTPS remains enabled without manual steps.
-#     """
-#     log.info(
-#         "Initialising containers for %s…", os.environ.get("COMPOSE_PROJECT_NAME", PROJECT_NAME)
-#     )
-#     if not shutil.which("docker"):
-#         pytest.skip("Docker is required for integration tests.")
-#     missing = [f for f in COMPOSE_FILES if not f.exists()]
-#     if missing:
-#         pytest.skip("Compose file(s) not found: " + ", ".join(map(str, missing)))
-
-#     # We need the dlm server repo
-#     _require_server_repo()
-
-#     # Just-in-time cert generation
-#     _ensure_rclone_certs()
-
-#     # Start only what we need; --no-deps avoids auth/gateway
-#     log.info("Attempting to start required server services...")
-#     _compose(
-#         "up",
-#         "-d",
-#         "--no-deps",
-#         "dlm_db",
-#         "dlm_postgrest",
-#         "dlm_rclone",
-#         "dlm_storage",
-#         "dlm_migration",
-#         "dlm_ingest",
-#         "dlm_request",
-#         "dlm_directory_watcher",
-#         "etcd",
-#         "dlm_configdb_watcher",
-#     )
-#     try:
-#         _wait_for_http(POSTGREST_URL, timeout_s=30)
-#         _wait_for_http(f"{STORAGE_SERVER_URL}/openapi.json", timeout_s=30)
-#         _wait_for_http(f"{INGEST_SERVER_URL}/openapi.json", timeout_s=30)
-#         _wait_for_http(f"{MIGRATION_SERVER_URL}/openapi.json", timeout_s=30)
-#         _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
-#         yield
-#     finally:  # teardown
-#         cmd = "docker exec dlm_directory_watcher rm /dlm/watch_dir/group"
-#         try:
-#             _ = subprocess.run(cmd, capture_output=True, shell=True, check=False)
-#         except Exception:
-#             pass
-#         _compose("down", "-v", "--remove-orphans")
+        time.sleep(timeout_s)
+    raise ValueError(f"None of the standard hosts reachable for {orig_hostname}")
 
 
 @pytest.fixture(scope="session")
-def storage_configuration() -> Configuration:
+def dlm_stack():
+    """Bring up the minimal DLM stack for integration tests and wait for readiness.
+
+    Wait for the services to start and check hostname options
+    """
+    try:
+        _wait_for_http(POSTGREST_URL, timeout_s=2)
+        _wait_for_http(f"{STORAGE_SERVER_URL}/openapi.json", timeout_s=2)
+        _wait_for_http(f"{INGEST_SERVER_URL}/openapi.json", timeout_s=2)
+        _wait_for_http(f"{MIGRATION_SERVER_URL}/openapi.json", timeout_s=2)
+        _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
+        yield
+    finally:
+        pass
+
+@pytest.fixture(scope="session")
+def storage_configuration(request) -> Configuration:
     """Storage API client config."""
-    # request.getfixturevalue("dlm_stack")  # triggers setup
+    request.getfixturevalue("dlm_stack")  # triggers setup
     return Configuration(host=STORAGE_SERVER_URL)
 
 
