@@ -26,12 +26,13 @@ python-do-test:
 
 python-post-test: docker-compose-down
 
-integration-test: docker-compose-up run-integration-test docker-compose-down
-# integration-test: docker-compose-up run-integration-test
+# integration-test: docker-compose-up run-integration-test docker-compose-down
+integration-test: docker-compose-up run-integration-test
 
 run-integration-test:
 	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml ps -a
-	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest -m integration" dlm_client_testrunner
+	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml logs --no-color dlm_storage
+# 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest -m integration" dlm_client_testrunner
 
 all-tests: docker-compose-up run-all-tests docker-compose-down
 
