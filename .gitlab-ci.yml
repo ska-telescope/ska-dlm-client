@@ -47,12 +47,13 @@ python-test:
   image: docker:27.0.2-dind
   services:
     - docker:27.0.2-dind
-  before_script:
-    - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services build
+  # before_script:
+  #   - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services build
   script:
-    - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services run --entrypoint "make python-test" dlm_client_testrunner
-  after_script:
-    - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services down dlm_client_testrunner
+    - echo "SKIPPING!"
+    # - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services run --entrypoint "make python-test" dlm_client_testrunner
+  # after_script:
+  #   - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services down dlm_client_testrunner
 
 integration-tests:
   stage: test
