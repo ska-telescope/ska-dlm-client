@@ -140,6 +140,8 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
 
 
 def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
+    resp = ""
+    location_id = ""
     try:
         resp = api_storage.query_location(location_name=LOCATION_NAME)
     except ApiException as e:
@@ -151,13 +153,18 @@ def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
         location_id = _get_id(resp[0], "location_id")
         log.info("Location already exists: %s", location_id)
     else:
-        location_id = api_storage.init_location(
-            location_name=LOCATION_NAME,
-            location_type=LOCATION_TYPE,
-            location_country=LOCATION_COUNTRY,
-            location_city=LOCATION_CITY,
-            location_facility=LOCATION_FACILITY,
-        )
+        try:
+            location_id = api_storage.init_location(
+                location_name=LOCATION_NAME,
+                location_type=LOCATION_TYPE,
+                location_country=LOCATION_COUNTRY,
+                location_city=LOCATION_CITY,
+                location_facility=LOCATION_FACILITY,
+            )
+        except ApiException as e:
+            log.error("Failed to create location: %s", e)
+            storage_log = _get_container_log("dlm_storage")
+            log.info("Log from storage container: %s", storage_log)
         assert isinstance(location_id, str) and location_id
         log.info("Location created: %s", location_id)
     return location_id
