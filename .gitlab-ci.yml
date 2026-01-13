@@ -49,6 +49,7 @@ python-test:
     - docker:27.0.2-dind
   before_script:
     - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services build
+    - docker compose --file tests/test_services.docker-compose.yaml up -d --remove-orphans
   script:
     # - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services run --entrypoint "make python-test" dlm_client_testrunner
     - docker compose --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest --ignore tests/integration" dlm_client_testrunner

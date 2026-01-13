@@ -26,8 +26,8 @@ def test_auto_migration(request_configuration: Configuration):
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)
-    timestamp = str(time())
-    cmd = f"docker exec dlm_directory_watcher cp /etc/group /dlm/watch_dir/group.{timestamp}"
+    testfilename = f"group.{str(time())}"
+    cmd = f"docker exec dlm_directory_watcher cp /etc/group /dlm/watch_dir/{testfilename}"
     log.info("Migration initialization copy command: %s", cmd)
     p = subprocess.run(cmd, capture_output=True, shell=True, check=True)
     if p.returncode != 0:
@@ -37,8 +37,8 @@ def test_auto_migration(request_configuration: Configuration):
     with api_client.ApiClient(request_configuration) as the_api_client:
         api_request = request_api.RequestApi(the_api_client)
         sleep(2)
-        resp2 = api_request.query_data_item(item_name="group")
+        resp2 = api_request.query_data_item(item_name=testfilename)
         assert len(resp2) == 2
-        assert resp2 and _get_id(resp2[0], "item_name") == "group"
-        assert resp2 and _get_id(resp2[1], "item_name") == "group"
-    cmd = "docker exec dlm_directory_watcher rm /dlm/watch_dir/group"
+        assert resp2 and _get_id(resp2[0], "item_name") == testfilename
+        assert resp2 and _get_id(resp2[1], "item_name") == testfilename
+    cmd = f"docker exec dlm_directory_watcher rm /dlm/watch_dir/{testfilename}"
