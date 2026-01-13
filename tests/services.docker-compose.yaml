@@ -1,10 +1,10 @@
 # Keep in sync with .gitlab-ci.yml python-tests job services
 networks:
   dlm_network:
-    name: dlm_network
+    # name: dlm_network
     # external: true
 
 volumes:
   shared-tmpfs:
-    name: shared-tmpfs
+    # name: shared-tmpfs
     # external: true

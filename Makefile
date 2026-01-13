@@ -26,8 +26,8 @@ python-do-test:
 
 python-post-test: docker-compose-down
 
-integration-test: docker-compose-up run-integration-test docker-compose-down
-# integration-test: docker-compose-up run-integration-test
+# integration-test: docker-compose-up run-integration-test docker-compose-down
+integration-test: docker-compose-up run-integration-test
 
 run-integration-test:
 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest -m integration" dlm_client_testrunner
