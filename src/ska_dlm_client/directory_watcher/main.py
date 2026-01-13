@@ -138,12 +138,12 @@ def process_args(
     """
     config = WatcherConfig(
         directory_to_watch=args.directory_to_watch,
-        ingest_server_url=args.ingest_url,
+        ingest_url=args.ingest_url,
         storage_name=args.source_name,
         status_file_absolute_path=f"{args.directory_to_watch}/{args.status_file_filename}",
         storage_root_directory=args.source_root,
         migration_destination_storage_name=args.target_name,
-        migration_server_url=args.migration_url,
+        migration_url=args.migration_url,
         reload_status_file=args.reload_status_file,
         use_status_file=args.use_status_file,
         rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,

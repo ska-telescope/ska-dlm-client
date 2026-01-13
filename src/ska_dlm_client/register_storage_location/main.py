@@ -164,14 +164,14 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     api_configuration: Configuration,
     rclone_config: str = None,
     location_id: str = None,
-    storage_server_url: str = None,
+    storage_url: str = None,
     setup_target: bool = False,
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
-    storage_server_url = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    storage_url = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     if location_id is None:
         location_id = get_or_init_location(
-            api_configuration, location=LOCATION_NAME, storage_url=storage_server_url
+            api_configuration, location=LOCATION_NAME, storage_url=storage_url
         )
     if setup_target:
         storage_name = watcher_config.migration_destination_storage_name
@@ -250,7 +250,7 @@ def main():
     """If this is called as a CLI we just register the integration/developer setup volumes."""
     parser = create_parser()
     args = parser.parse_args()
-    api_configuration = Configuration(host=args.storage_server_url)
+    api_configuration = Configuration(host=args.storage_url)
     setup_testing(api_configuration)
 
 

@@ -19,14 +19,14 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
 
     add_directory_to_watch: bool = False
     add_storage_name: bool = False
-    add_ingest_server_url: bool = False
-    add_request_server_url: bool = False
+    add_ingest_url: bool = False
+    add_request_url: bool = False
     add_readiness_probe_file: bool = False
     add_dev_test_mode: bool = False
     directory_to_watch: str = None
     storage_name: str = None
-    ingest_server_url: str = None
-    request_server_url: str = None
+    ingest_url: str = None
+    request_url: str = None
     readiness_probe_file: str = None
     dev_test_mode: bool = False
     do_not_perform_actual_ingest_and_migration: bool = False
@@ -40,8 +40,8 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         parser: argparse.ArgumentParser,
         add_directory_to_watch: bool = False,
         add_storage_name: bool = False,
-        add_ingest_server_url: bool = False,
-        add_request_server_url: bool = False,
+        add_ingest_url: bool = False,
+        add_request_url: bool = False,
         add_readiness_probe_file: bool = False,
         add_do_not_perform_actual_ingest_and_migration: bool = False,
         add_dir_updates_wait_time: bool = False,
@@ -54,12 +54,12 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         if add_storage_name:
             self.add_storage_name_arguments(parser)
             self.add_storage_name = True
-        if add_ingest_server_url:
-            self.add_ingest_server_url_arguments(parser)
-            self.add_ingest_server_url = True
-        if add_request_server_url:
-            self.add_request_server_url_arguments(parser)
-            self.add_request_server_url = True
+        if add_ingest_url:
+            self.add_ingest_url_arguments(parser)
+            self.add_ingest_url = True
+        if add_request_url:
+            self.add_request_url_arguments(parser)
+            self.add_request_url = True
         if add_readiness_probe_file:
             self.add_readiness_probe_file_arguments(parser)
             self.add_readiness_probe_file = True
@@ -79,8 +79,8 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             args = self._parser.parse_args()
         self.directory_to_watch = args.directory_to_watch if self.add_directory_to_watch else None
         self.storage_name = args.storage_name if self.add_storage_name else None
-        self.ingest_server_url = args.ingest_server_url if self.add_ingest_server_url else None
-        self.request_server_url = args.request_server_url if self.add_request_server_url else None
+        self.ingest_url = args.ingest_url if self.add_ingest_url else None
+        self.request_url = args.request_url if self.add_request_url else None
         self.readiness_probe_file = (
             args.readiness_probe_file if self.add_readiness_probe_file else None
         )
@@ -131,7 +131,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             help="The name by which the DLM system knows the storage as.",
         )
 
-    def add_ingest_server_url_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_ingest_url_arguments(self, parser: argparse.ArgumentParser) -> None:
         """Update a parser to add an ingest server url argument."""
         parser.add_argument(
             "-i",
@@ -141,7 +141,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             help="Ingest server URL including the service port.",
         )
 
-    def add_request_server_url_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_request_url_arguments(self, parser: argparse.ArgumentParser) -> None:
         """Update a parser to add a request server url argument."""
         parser.add_argument(
             "--request-url",

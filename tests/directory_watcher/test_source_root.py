@@ -15,7 +15,7 @@ class TestSourceRootDirectory:
     """Test class for source_root_directory parameter."""
 
     STORAGE_NAME = "test-storage"
-    INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://dlm_ingest:8001")
+    INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 
     @classmethod
     def setup_class(cls) -> None:
@@ -35,7 +35,7 @@ class TestSourceRootDirectory:
                 "--directory-to-watch",
                 self.the_watch_dir,
                 "--ingest-url",
-                self.INGEST_SERVER_URL,
+                self.INGEST_URL,
                 "--source-name",
                 self.STORAGE_NAME,
                 "--source-root",
@@ -78,7 +78,7 @@ class TestSourceRootDirectory:
                 "--directory-to-watch",
                 self.the_watch_dir,
                 "--ingest-url",
-                self.INGEST_SERVER_URL,
+                self.INGEST_URL,
                 "--source-name",
                 self.STORAGE_NAME,
                 "--source-root",
@@ -143,7 +143,7 @@ class TestSourceRootDirectory:
         # Create config with non-empty storage_root_directory
         config = WatcherConfig(
             directory_to_watch=self.the_watch_dir,
-            ingest_server_url=self.INGEST_SERVER_URL,
+            ingest_url=self.INGEST_URL,
             storage_name=self.STORAGE_NAME,
             status_file_absolute_path=f"{self.the_watch_dir}/{STATUS_FILE_FILENAME}",
             storage_root_directory=root_dir,

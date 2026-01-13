@@ -49,9 +49,9 @@ class SDPIngestConfig:
     """Runtime configuration for the SDP→DLM ConfigDB Watcher."""
 
     include_existing: bool
-    ingest_server_url: str
+    ingest_url: str
     ingest_configuration: Configuration
-    storage_server_url: str
+    storage_url: str
     storage_name: str
     storage_root_directory: str
     migration_destination_storage_name: str | None = None
@@ -71,9 +71,9 @@ def process_args(args: argparse.Namespace) -> SDPIngestConfig:
 
     return SDPIngestConfig(
         include_existing=args.include_existing,
-        ingest_server_url=args.ingest_url,
+        ingest_url=args.ingest_url,
         ingest_configuration=ingest_configuration,
-        storage_server_url=args.storage_url,
+        storage_url=args.storage_url,
         storage_name=args.source_name,
         storage_root_directory=args.source_root,
         migration_destination_storage_name=args.target_name,
@@ -202,7 +202,7 @@ async def sdp_to_dlm_ingest_and_migrate(
             watcher_config=ingest_config,
             api_configuration=ingest_config.ingest_configuration,
             rclone_config=RCLONE_CONFIG_SOURCE,
-            storage_server_url=ingest_config.storage_server_url,
+            storage_url=ingest_config.storage_url,
         )
     logger.info(
         "Starting SDP Config watcher (include_existing=%s, storage_name=%s)...",

@@ -23,7 +23,7 @@ class MockCmdLineParameters:
 
     def __init__(self):
         """Initialize with default values."""
-        self.migration_server_url = None
+        self.migration_url = None
         self.migration_destination_storage_name = None
         self.perform_actual_ingest_and_migration = True
 
@@ -38,7 +38,7 @@ class TestDirectoryWatcher:
     """DirectoryWatcher unit test stubs."""
 
     STORAGE_NAME = "dir-watcher"
-    INGREST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://dlm_ingest:8001")
+    INGREST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
     ROOT_DIRECTORY = "/dlm"
 
     add_path_successful = False
@@ -53,7 +53,7 @@ class TestDirectoryWatcher:
                 "--directory-to-watch",
                 cls.the_watch_dir,
                 "--ingest-url",
-                cls.INGREST_SERVER_URL,
+                cls.INGREST_URL,
                 "--source-name",
                 cls.STORAGE_NAME,
                 "--source-root",
@@ -72,7 +72,7 @@ class TestDirectoryWatcher:
     def test_process_args(self) -> None:
         """Test case for init_data_item_ingest_init_data_item_post."""
         assert self.parsed.directory_to_watch == self.the_watch_dir
-        assert self.parsed.ingest_url == self.INGREST_SERVER_URL
+        assert self.parsed.ingest_url == self.INGREST_URL
         assert self.parsed.source_name == self.STORAGE_NAME
         assert self.parsed.reload_status_file is False
         assert self.parsed.status_file_filename == STATUS_FILE_FILENAME
@@ -82,7 +82,7 @@ class TestDirectoryWatcher:
     def test_config_generation(self) -> None:
         """Test the correct config is generated from the command line args."""
         assert self.config.directory_to_watch == self.the_watch_dir
-        assert self.config.ingest_server_url == self.INGREST_SERVER_URL
+        assert self.config.ingest_url == self.INGREST_URL
         assert self.config.storage_name == self.STORAGE_NAME
         assert self.config.reload_status_file is False
         assert (
@@ -94,7 +94,7 @@ class TestDirectoryWatcher:
         assert isinstance(self.config.ingest_configuration, Configuration)
 
         # Test migration-related attributes
-        assert self.config.migration_server_url is None
+        assert self.config.migration_url is None
         assert self.config.migration_destination_storage_name is None
         assert self.config.perform_actual_ingest_and_migration is True
 

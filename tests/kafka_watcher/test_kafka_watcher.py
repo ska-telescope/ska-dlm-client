@@ -38,7 +38,7 @@ def test_main(mocker: pytest_mock.MockerFixture):
     mock_args = mock.Mock(
         kafka_broker_url=KAFKA_HOST,
         kafka_topic=[TEST_TOPIC],
-        ingest_server_url=INGEST_HOST,
+        ingest_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
         kafka_base_dir="",
         check_rclone_access=False,
@@ -64,7 +64,7 @@ def test_main(mocker: pytest_mock.MockerFixture):
     mock_watch.assert_called_once_with(
         kafka_broker_url=KAFKA_HOST,
         kafka_topic=[TEST_TOPIC],
-        ingest_server_url=INGEST_HOST,
+        ingest_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
         kafka_base_dir="",
         check_rclone_access=False,
@@ -113,7 +113,7 @@ async def test_watch_post_success(mock_apiingest: MagicMock, mock_kafka_consumer
     await watch(
         kafka_broker_url=[KAFKA_HOST],
         kafka_topic=[TEST_TOPIC],
-        ingest_server_url=INGEST_HOST,
+        ingest_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
         kafka_base_dir="",
         check_rclone_access=False,
@@ -138,7 +138,7 @@ async def test_watch_http_failure(
         await watch(
             kafka_broker_url=[KAFKA_HOST],
             kafka_topic=[TEST_TOPIC],
-            ingest_server_url=INGEST_HOST,
+            ingest_url=INGEST_HOST,
             storage_name=STORAGE_NAME,
             kafka_base_dir="",
             check_rclone_access=False,
@@ -250,7 +250,7 @@ async def test_kafka_base_dir_command_line_parameter(mocker: pytest_mock.MockerF
     mock_args = mock.Mock(
         kafka_broker_url=KAFKA_HOST,
         kafka_topic=[TEST_TOPIC],
-        ingest_server_url=INGEST_HOST,
+        ingest_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
         kafka_base_dir=test_kafka_base_dir,
         check_rclone_access=False,
@@ -288,7 +288,7 @@ async def test_kafka_base_dir_command_line_parameter(mocker: pytest_mock.MockerF
 
     # Call post_dlm_data_item with our test message and the kafka_base_dir
     await post_dlm_data_item(
-        ingest_server_url=INGEST_HOST,
+        ingest_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
         ingest_event_data=test_msg,
         kafka_base_dir=test_kafka_base_dir,

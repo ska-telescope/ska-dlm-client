@@ -162,7 +162,7 @@ def main():
     """Start the integration/developer setup test application."""
     parser = create_parser()
     args = parser.parse_args()
-    storage_configuration = Configuration(host=args.storage_server_url)
+    storage_configuration = Configuration(host=args.storage_url)
     setup_testing(args.storage_name, storage_configuration, args.storage_root_directory)
 
 

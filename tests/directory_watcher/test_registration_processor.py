@@ -298,7 +298,7 @@ def mock_config():
     config.rclone_access_check_on_register = False
     config.migration_destination_storage_name = "test-destination-storage"
     config.directory_watcher_entries = mock.MagicMock(spec=DirectoryWatcherEntries)
-    config.ingest_server_url = "http://test-ingest:8000"
+    config.ingest_url = "http://test-ingest:8000"
 
     # Use real Configuration instances instead of MagicMocks
     config.ingest_configuration = Configuration(host="http://test-ingest:8000")

@@ -100,7 +100,7 @@ async def test_kafka_watcher(producer: AIOKafkaProducer, caplog):
             watch(
                 kafka_broker_url=[KAFKA_HOST],
                 kafka_topic=[TEST_TOPIC],
-                ingest_server_url="http://mockserver:8000",
+                ingest_url="http://mockserver:8000",
                 storage_name="test-storage",
                 kafka_base_dir="",
                 check_rclone_access=False,
@@ -147,6 +147,6 @@ async def test_kafka_watcher(producer: AIOKafkaProducer, caplog):
         args, kwargs = mock_post.call_args
         logger.debug("Called with args: %s, kwargs: %s", args, kwargs)
         assert kwargs["ingest_event_data"] == good_message
-        assert kwargs["ingest_server_url"] == "http://mockserver:8000"
+        assert kwargs["ingest_url"] == "http://mockserver:8000"
         assert kwargs["storage_name"] == "test-storage"
         assert kwargs["check_rclone_access"] is False

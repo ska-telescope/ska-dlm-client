@@ -187,7 +187,7 @@ def test_storage_initialisation(storage_configuration: Configuration):
 
         # --- ensure location exists ---
         log.info("Using storage configuration host for registering: %s", storage_configuration.host)
-        os.environ["STORAGE_SERVER_URL"] = storage_configuration.host
+        os.environ["STORAGE_URL"] = storage_configuration.host
         location_id = _init_location_if_needed(api_storage)
 
         # --- ensure storage exists ---
@@ -218,8 +218,8 @@ async def test_watcher_registers_and_migrates():
 
     Test auto migration using configdb watcher.
     """
-    host = os.getenv("STORAGE_URL", "dlm_storage")
-    api_configuration = Configuration(host=f"http://{host}:8003")
+    host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)
     # --- copying demo.ps ---

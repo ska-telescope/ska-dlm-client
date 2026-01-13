@@ -31,8 +31,8 @@ def test_cmdline_parameters_initialization(parser: argparse.ArgumentParser) -> N
         parser=parser,
         add_directory_to_watch=True,
         add_storage_name=True,
-        add_ingest_server_url=True,
-        add_request_server_url=True,
+        add_ingest_url=True,
+        add_request_url=True,
         add_readiness_probe_file=True,
         add_do_not_perform_actual_ingest_and_migration=True,
         add_dir_updates_wait_time=True,
@@ -41,8 +41,8 @@ def test_cmdline_parameters_initialization(parser: argparse.ArgumentParser) -> N
     # Test that all attributes are set correctly
     assert cmd_params.add_directory_to_watch is True
     assert cmd_params.add_storage_name is True
-    assert cmd_params.add_ingest_server_url is True
-    assert cmd_params.add_request_server_url is True
+    assert cmd_params.add_ingest_url is True
+    assert cmd_params.add_request_url is True
     assert cmd_params.add_readiness_probe_file is True
     assert cmd_params.add_dev_test_mode is True
     assert cmd_params.add_do_not_perform_actual_ingest_and_migration is True
@@ -64,8 +64,8 @@ def test_cmdline_parameters_default_values(parser: argparse.ArgumentParser) -> N
     # Test that all attributes are set to their default values
     assert cmd_params.add_directory_to_watch is False
     assert cmd_params.add_storage_name is False
-    assert cmd_params.add_ingest_server_url is False
-    assert cmd_params.add_request_server_url is False
+    assert cmd_params.add_ingest_url is False
+    assert cmd_params.add_request_url is False
     assert cmd_params.add_readiness_probe_file is False
 
     # Check if attributes exist, if not, they're expected to be False by default
@@ -85,8 +85,8 @@ def cmd_params_all_enabled_fixture(parser: argparse.ArgumentParser) -> CmdLinePa
         parser=parser,
         add_directory_to_watch=True,
         add_storage_name=True,
-        add_ingest_server_url=True,
-        add_request_server_url=True,
+        add_ingest_url=True,
+        add_request_url=True,
         add_readiness_probe_file=True,
         add_do_not_perform_actual_ingest_and_migration=True,
         add_dir_updates_wait_time=True,
@@ -102,9 +102,9 @@ def test_args_fixture() -> argparse.Namespace:
     return argparse.Namespace(
         directory_to_watch="/test/dir",
         storage_name="test-storage",
-        ingest_server_url="http://ingest-server:8080",
-        migration_server_url="http://migration-server:8080",
-        request_server_url="http://request-server:8080",
+        ingest_url="http://ingest-server:8080",
+        migration_url="http://migration-server:8080",
+        request_url="http://request-server:8080",
         readiness_probe_file="/tmp/ready",
         migration_destination_storage_name="dest-storage",
         dev_test_mode=True,
@@ -131,8 +131,8 @@ def test_parse_arguments(
     # Verify the parsed values
     assert cmd_params_all_enabled.directory_to_watch == "/test/dir"
     assert cmd_params_all_enabled.storage_name == "test-storage"
-    assert cmd_params_all_enabled.ingest_server_url == "http://ingest-server:8080"
-    assert cmd_params_all_enabled.request_server_url == "http://request-server:8080"
+    assert cmd_params_all_enabled.ingest_url == "http://ingest-server:8080"
+    assert cmd_params_all_enabled.request_url == "http://request-server:8080"
     assert cmd_params_all_enabled.readiness_probe_file == "/tmp/ready"
     assert cmd_params_all_enabled.dev_test_mode is True
     assert cmd_params_all_enabled.do_not_perform_actual_ingest_and_migration is True
@@ -153,9 +153,9 @@ def test_do_not_perform_requires_dev_test_mode(cmd_params_all_enabled: CmdLinePa
     args = argparse.Namespace(
         directory_to_watch="/test/dir",
         storage_name="test-storage",
-        ingest_server_url="http://ingest-server:8080",
-        migration_server_url="http://migration-server:8080",
-        request_server_url="http://request-server:8080",
+        ingest_url="http://ingest-server:8080",
+        migration_url="http://migration-server:8080",
+        request_url="http://request-server:8080",
         readiness_probe_file="/tmp/ready",
         migration_destination_storage_name="dest-storage",
         dev_test_mode=False,
@@ -189,11 +189,11 @@ def test_perform_actual_ingest_and_migration_setting(
     args_true = argparse.Namespace(
         directory_to_watch="/test/dir",
         storage_name="test-storage",
-        ingest_server_url="http://ingest-server:8080",
-        request_server_url="http://request-server:8080",
+        ingest_url="http://ingest-server:8080",
+        request_url="http://request-server:8080",
         readiness_probe_file="/tmp/ready",
         migration_destination_storage_name="dest-storage",
-        migration_server_url="http://migration-server:8080",
+        migration_url="http://migration-server:8080",
         dev_test_mode=True,
         do_not_perform_actual_ingest_and_migration=True,
         dir_updates_wait_time=30,
@@ -206,11 +206,11 @@ def test_perform_actual_ingest_and_migration_setting(
     args_false = argparse.Namespace(
         directory_to_watch="/test/dir",
         storage_name="test-storage",
-        ingest_server_url="http://ingest-server:8080",
-        request_server_url="http://request-server:8080",
+        ingest_url="http://ingest-server:8080",
+        request_url="http://request-server:8080",
         readiness_probe_file="/tmp/ready",
         migration_destination_storage_name="dest-storage",
-        migration_server_url="http://migration-server:8080",
+        migration_url="http://migration-server:8080",
         dev_test_mode=True,
         do_not_perform_actual_ingest_and_migration=False,
         dir_updates_wait_time=30,

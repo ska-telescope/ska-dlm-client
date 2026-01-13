@@ -39,7 +39,7 @@ async def test_kafka_base_dir_empty():
 
         # Call post_dlm_data_item with empty kafka_base_dir
         await post_dlm_data_item(
-            ingest_server_url=INGEST_HOST,
+            ingest_url=INGEST_HOST,
             storage_name=STORAGE_NAME,
             ingest_event_data=KAFKA_MSG,
             kafka_base_dir="",
@@ -73,7 +73,7 @@ async def test_kafka_base_dir_non_empty():
         # Call post_dlm_data_item with non-empty kafka_base_dir
         kafka_base_dir = "/data/test/"
         await post_dlm_data_item(
-            ingest_server_url=INGEST_HOST,
+            ingest_url=INGEST_HOST,
             storage_name=STORAGE_NAME,
             ingest_event_data=KAFKA_MSG,
             kafka_base_dir=kafka_base_dir,
@@ -99,7 +99,7 @@ async def test_kafka_base_dir_from_command_line():
     mock_args = mock.Mock(
         kafka_broker_url=KAFKA_HOST,
         kafka_topic=[TEST_TOPIC],
-        ingest_server_url=INGEST_HOST,
+        ingest_url=INGEST_HOST,
         storage_name=STORAGE_NAME,
         kafka_base_dir=test_kafka_base_dir,
         check_rclone_access=False,
@@ -154,7 +154,7 @@ async def test_kafka_base_dir_used_in_watch():
         await watch(
             kafka_broker_url=[KAFKA_HOST],
             kafka_topic=[TEST_TOPIC],
-            ingest_server_url=INGEST_HOST,
+            ingest_url=INGEST_HOST,
             storage_name=STORAGE_NAME,
             kafka_base_dir=test_kafka_base_dir,
             check_rclone_access=False,
