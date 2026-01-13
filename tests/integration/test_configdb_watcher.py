@@ -191,6 +191,7 @@ def _init_storage_if_needed(
         log.info("Storage created: %s %s", storage["STORAGE_NAME"], storage_id)
     return storage_id
 
+
 def _get_container_log(container_name: str) -> str:
     cmd = ["docker", "logs", "--since", "600s", container_name]
     p = subprocess.run(cmd, capture_output=True, text=True, check=False)
@@ -199,6 +200,7 @@ def _get_container_log(container_name: str) -> str:
         return p.stderr
     return p.stdout
 
+
 @pytest.mark.integration
 def test_storage_initialisation(storage_configuration: Configuration):
     """Test setting up a location, storage and storage config."""
@@ -206,7 +208,9 @@ def test_storage_initialisation(storage_configuration: Configuration):
         api_storage = storage_api.StorageApi(the_api_client)
 
         # --- ensure location exists ---
-        log.info("Using storage configuration host for registering: %s", storage_configuration.host)
+        log.info(
+            "Using storage configuration host for registering: %s", storage_configuration.host
+        )
         os.environ["STORAGE_URL"] = storage_configuration.host
         storage_log = _get_container_log("dlm_storage")
         log.info("Log from storage container: %s", storage_log)
@@ -261,7 +265,6 @@ async def test_watcher_registers_and_migrates():
     assert "FINISHED" in statuses
     log.info("Cleaning up copied MS file from watcher container.")
     cmd = f"docker exec dlm_configdb_watcher rm -rf /dlm/{os.path.basename(DEMO_MS_PATH)}"
-
 
 
 @pytest.mark.asyncio

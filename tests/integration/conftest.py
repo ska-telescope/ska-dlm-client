@@ -12,11 +12,11 @@ import logging
 import os
 import subprocess
 import time
+import urllib
 from pathlib import Path
 
 import pytest
 import requests
-import urllib
 
 import ska_dlm_client.openapi.api_client as _dlm_api_client
 from ska_dlm_client.openapi.configuration import Configuration
@@ -95,6 +95,7 @@ def pytest_configure(config):
     """Register local pytest markers used by this suite."""
     config.addinivalue_line("markers", "integration: marks integration tests")
 
+
 def _wait_for_rclone(base=RCLONE_BASE, timeout_s: int = 60):
     """Wait until rclone's Remote Control API responds (TLS + routing ready)."""
     end = time.time() + timeout_s
@@ -108,6 +109,7 @@ def _wait_for_rclone(base=RCLONE_BASE, timeout_s: int = 60):
         time.sleep(0.5)
     raise TimeoutError(f"Timeout waiting for rclone RC at {base}")
 
+
 def _override_hosts(hostname: str):
     """Override the hostnames in the environment variables for reaching services."""
     os.environ["REQUEST_URL"] = f"http://{hostname}:8002"
@@ -118,16 +120,10 @@ def _override_hosts(hostname: str):
     os.environ["RCLONE_BASE"] = f"https://{hostname}:5572"
     os.environ["SDP_CONFIG_HOST"] = "etcd"
 
+
 def _get_container_list() -> list[str]:
     """Get the list of running Docker containers for the current compose project."""
-    cmd = [
-        "docker",
-        "compose",
-        "-p",
-        "integration",
-        "-f",
-        SERVER_COMPOSE
-    ]
+    cmd = ["docker", "compose", "-p", "integration", "-f", SERVER_COMPOSE]
     cmd += ["ps", "-a"]
     log.info("Trying to get container list: %s", " ".join(cmd))
     p = subprocess.run(cmd, capture_output=True, text=True, check=True)
@@ -136,6 +132,7 @@ def _get_container_list() -> list[str]:
         return ""
     container_list = p.stdout
     return container_list
+
 
 def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 204, 301, 302)):
     """Check HTTP endpoints for server services and replace hostname if required."""
@@ -155,6 +152,7 @@ def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 2
         time.sleep(timeout_s)
     raise ValueError(f"None of the standard hosts reachable for {orig_hostname}")
 
+
 @pytest.fixture(scope="session")
 def dlm_stack():
     """Bring up the minimal DLM stack for integration tests and wait for readiness.
@@ -171,6 +169,7 @@ def dlm_stack():
         yield
     finally:
         pass
+
 
 @pytest.fixture(scope="session")
 def storage_configuration(request) -> Configuration:
