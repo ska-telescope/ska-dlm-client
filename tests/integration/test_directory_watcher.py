@@ -1,7 +1,6 @@
 """Directory Watcher integration tests."""
 
 import logging
-import os
 import subprocess
 from time import sleep, time
 
