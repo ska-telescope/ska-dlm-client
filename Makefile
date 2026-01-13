@@ -26,7 +26,8 @@ python-do-test:
 
 python-post-test: docker-compose-down
 
-integration-test: docker-compose-up run-integration-test docker-compose-down
+# integration-test: docker-compose-up run-integration-test docker-compose-down
+integration-test: docker-compose-up run-integration-test
 
 run-integration-test:
 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest -m integration" dlm_client_testrunner
@@ -44,6 +45,7 @@ docs-pre-build:
 
 docker-compose-up: ## Bring up test services in docker
 	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml up -d --wait
+	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml ps -a
 	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml up -d --remove-orphans
 	$(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml build
 	$(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml up -d --remove-orphans

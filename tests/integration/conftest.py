@@ -3,7 +3,7 @@ Integration test harness for ska_dlm_client.
 
 Brings up a minimal DLM stack via Docker Compose using the server repo’s compose files
 plus a local override. The server repo is assumed to be a sibling directory; override with
-DLM_SERVER_DIR.
+DLM_DIR.
 
 Run with: `pytest -m integration`
 """
@@ -59,20 +59,17 @@ setattr(_dlm_api_client.ApiClient, "_ApiClient__deserialize", __lenient_deserial
 # For local, default to sibling: x/ska-dlm-client -> x/ska-data-lifecycle
 CLIENT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BASE = Path(os.getenv("CI_PROJECT_DIR", str(CLIENT_ROOT))).parent
-DEFAULT_SERVER_DIR = (DEFAULT_BASE / "ska-data-lifecycle").resolve()
 
-# Allow CI/job to override explicitly
-DLM_SERVER_DIR = Path(os.getenv("DLM_SERVER_DIR", str(DEFAULT_SERVER_DIR))).resolve()
-
-SERVER_TESTS = DLM_SERVER_DIR / "tests"
+SERVER_COMPOSE = f"{CLIENT_ROOT}/tests/integration/dlm_servers.docker-compose.yaml"
 
 HELPERS = CLIENT_ROOT / "tests/test-services.docker-compose.yml"
 CLIENTS = CLIENT_ROOT / "tests/dlm_clients.docker-compose.yaml"
 OVERRIDE = Path(__file__).with_name("docker-compose.override.yaml")
 
 COMPOSE_FILES = [
-    SERVER_TESTS / "services.docker-compose.yaml",
-    SERVER_TESTS / "dlm.docker-compose.yaml",
+    # SERVER_TESTS / "services.docker-compose.yaml",
+    # SERVER_TESTS / "dlm.docker-compose.yaml",
+    SERVER_COMPOSE,
     HELPERS,
     CLIENTS,
     OVERRIDE,
@@ -80,105 +77,23 @@ COMPOSE_FILES = [
 
 # URLs can be overridden in CI to hit the DinD host
 REQUEST_URL = "http://dlm_request:8002"
-INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://dlm_ingest:8001")
-MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", "http://dlm_migration:8004")
-STORAGE_SERVER_URL = os.getenv("STORAGE_SERVER_URL", "http://dlm_storage:8003")
+INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
+MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
+STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 POSTGREST_URL = os.getenv("POSTGREST_URL", "http://dlm_postgrest:3000")
 RCLONE_BASE = os.getenv("RCLONE_BASE", "https://dlm_rclone:5572")
 SDP_CONFIG_HOST = "etcd"
 ETCD_URL = f"http://{SDP_CONFIG_HOST}:2379"
 os.environ["SDP_CONFIG_HOST"] = SDP_CONFIG_HOST
 
-CERT_DIR = SERVER_TESTS / "integration" / "certs"
-KEY_PATH = CERT_DIR / "selfsigned.key"
-CRT_PATH = CERT_DIR / "selfsigned.cert"
-
-
-def _require_server_repo() -> None:
-    """Fail only when the integration stack is actually used."""
-    if not DLM_SERVER_DIR.exists():
-        pytest.skip(
-            f"DLM_SERVER_DIR not found at {DLM_SERVER_DIR}. "
-            "Set DLM_SERVER_DIR to your ska-data-lifecycle repo, or clone it as a sibling."
-            "Skipping integration tests..."
-        )
-
-
-def _ensure_rclone_certs() -> None:
-    """
-    Ensure rclone RC TLS certs exist where the server compose expects.
-
-    To keep HTTPS and avoid flakiness, we auto-create self-signed certs on first run in the server
-    repo’s expected path.
-    """
-    CERT_DIR.mkdir(parents=True, exist_ok=True)
-
-    # Guard file-vs-directory mistake
-    for p in (KEY_PATH, CRT_PATH):
-        if p.exists() and p.is_dir():
-            raise RuntimeError(f"{p} is a directory; it must be a file. Delete/rename it.")
-
-    if KEY_PATH.exists() and CRT_PATH.exists():
-        return
-
-    subprocess.run(
-        [
-            "openssl",
-            "req",
-            "-x509",
-            "-newkey",
-            "rsa:2048",
-            "-nodes",
-            "-days",
-            "365",
-            "-subj",
-            "/CN=dlm_rclone",
-            "-keyout",
-            str(KEY_PATH),
-            "-out",
-            str(CRT_PATH),
-        ],
-        check=True,
-    )
+# CERT_DIR = SERVER_TESTS / "integration" / "certs"
+# KEY_PATH = CERT_DIR / "selfsigned.key"
+# CRT_PATH = CERT_DIR / "selfsigned.cert"
 
 
 def pytest_configure(config):
     """Register local pytest markers used by this suite."""
     config.addinivalue_line("markers", "integration: marks integration tests")
-
-
-def _compose(*args: str):
-    """Run `docker compose` with the merged compose files and proper env."""
-    env = dict(os.environ)
-    env.setdefault("COMPOSE_PROJECT_NAME", PROJECT_NAME)
-    # Ensure compose var substitution works for ${DLM_SERVER_DIR} in an override
-    env["DLM_SERVER_DIR"] = str(DLM_SERVER_DIR)
-
-    if args[0] == "up":
-        cmd = ["docker", "compose"]
-        for f in [CLIENTS]:
-            cmd += ["-f", str(f)]
-        cmd += ["build"]
-        log.info("client docker compose command: %s", " ".join(cmd))
-        p = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)
-        if p.returncode != 0:
-            log.info("[compose STDOUT]: %s\n", p.stdout)
-            log.error("[compose STDERR] %s\n", p.stderr)
-            raise RuntimeError("docker compose failed")
-
-    cmd = ["docker", "compose"]
-    for f in COMPOSE_FILES:
-        cmd += ["-f", str(f)]
-    cmd += list(args)
-
-    log.info("docker compose command: %s", " ".join(cmd))
-    p = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)
-    if p.returncode != 0:
-        log.info("[compose STDOUT]: %s\n", p.stdout)
-        log.error("[compose STDERR] %s\n", p.stderr)
-        raise RuntimeError("docker compose failed")
-    return p
-
 
 def _wait_for_rclone(base=RCLONE_BASE, timeout_s: int = 60):
     """Wait until rclone's Remote Control API responds (TLS + routing ready)."""
@@ -196,15 +111,33 @@ def _wait_for_rclone(base=RCLONE_BASE, timeout_s: int = 60):
 def _override_hosts(hostname: str):
     """Override the hostnames in the environment variables for reaching services."""
     os.environ["REQUEST_URL"] = f"http://{hostname}:8002"
-    os.environ["INGEST_SERVER_URL"] = f"http://{hostname}:8001"
-    os.environ["MIGRATION_SERVER_URL"] = f"http://{hostname}:8004"
-    os.environ["STORAGE_SERVER_URL"] = f"http://{hostname}:8003"
+    os.environ["INGEST_URL"] = f"http://{hostname}:8001"
+    os.environ["MIGRATION_URL"] = f"http://{hostname}:8004"
+    os.environ["STORAGE_URL"] = f"http://{hostname}:8003"
     os.environ["POSTGREST_URL"] = f"http://{hostname}:3000"
     os.environ["RCLONE_BASE"] = f"https://{hostname}:5572"
     os.environ["SDP_CONFIG_HOST"] = "etcd"
-    return
 
-def _wait_for_http(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 204, 301, 302)):
+def _get_container_list() -> list[str]:
+    """Get the list of running Docker containers for the current compose project."""
+    cmd = [
+        "docker",
+        "compose",
+        "-p",
+        "integration",
+        "-f",
+        SERVER_COMPOSE
+    ]
+    cmd += ["ps", "-a"]
+    log.info("Trying to get container list: %s", " ".join(cmd))
+    p = subprocess.run(cmd, capture_output=True, text=True, check=True)
+    if p.returncode != 0:
+        log.error("Failed to get container list: %s", p.stderr)
+        return ""
+    container_list = p.stdout
+    return container_list
+
+def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 204, 301, 302)):
     """Check HTTP endpoints for server services and replace hostname if required."""
     url_parts = urllib.parse.urlparse(url)
     orig_hostname = url_parts.hostname
@@ -223,8 +156,21 @@ def _wait_for_http(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 2
         except requests.RequestException:
             pass
         time.sleep(timeout_s)
+    # logs = _get_container_log(f"{orig_hostname}")
+    # if logs:
+    #     log.info(">>>> Logs for %s:\n%s", orig_hostname, logs)
+    # containers = _get_container_list()
+    # if containers:
+    #     log.info(">>>> Containers:\n%s", containers)
     raise ValueError(f"None of the standard hosts reachable for {orig_hostname}")
 
+def _get_container_log(container_name: str, since: int = 0) -> str:
+    cmd = ["docker", "logs", "--since", f"{since}s", container_name]
+    p = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    if p.returncode != 0:
+        log.error("Failed to get logs for container %s: %s", container_name, p.stderr)
+        return ""
+    return p.stdout
 
 @pytest.fixture(scope="session")
 def dlm_stack():
@@ -233,10 +179,11 @@ def dlm_stack():
     Wait for the services to start and check hostname options
     """
     try:
-        _wait_for_http(POSTGREST_URL, timeout_s=2)
-        _wait_for_http(f"{INGEST_SERVER_URL}/openapi.json", timeout_s=2)
-        _wait_for_http(f"{MIGRATION_SERVER_URL}/openapi.json", timeout_s=2)
-        _wait_for_http(f"{STORAGE_SERVER_URL}/openapi.json", timeout_s=2)
+        _check_service(POSTGREST_URL, timeout_s=2)
+        _check_service(f"{INGEST_URL}/openapi.json", timeout_s=2)
+        _check_service(f"{REQUEST_URL}/openapi.json", timeout_s=2)
+        _check_service(f"{MIGRATION_URL}/openapi.json", timeout_s=2)
+        _check_service(f"{STORAGE_URL}/openapi.json", timeout_s=2)
         _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
         yield
     finally:
@@ -246,7 +193,7 @@ def dlm_stack():
 def storage_configuration(request) -> Configuration:
     """Storage API client config."""
     request.getfixturevalue("dlm_stack")  # triggers setup
-    return Configuration(host=STORAGE_SERVER_URL)
+    return Configuration(host=STORAGE_URL)
 
 
 @pytest.fixture(scope="session")
