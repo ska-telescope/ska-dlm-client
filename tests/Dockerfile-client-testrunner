@@ -1,13 +1,12 @@
 FROM python:3.10
 
-RUN apt-get update && apt-get install -y iputils-ping docker.io docker-compose
-RUN pip install pytest requests_mock docker
-
 ARG POETRY_VERSION=1.8.2
-RUN pip install poetry==${POETRY_VERSION} &&\
-    mkdir -p /dlm
-# RUN useradd -G docker ska-dlm 
-# USER ska-dlm
+RUN apt-get update && apt-get install -y iputils-ping docker.io docker-compose &&\
+    pip install pytest requests_mock docker &&\
+    pip install poetry==${POETRY_VERSION} &&\
+    mkdir -p /dlm &&\
+    useradd -m -G docker ska-dlm
+USER ska-dlm
 
 WORKDIR /app
 # cache external dependencies
@@ -20,4 +19,4 @@ RUN poetry install --only main,test
 
 ENV PATH="/app/.venv/bin:${PATH}"
 
-ENTRYPOINT pytest
+ENTRYPOINT ["pytest"]

@@ -27,9 +27,9 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 PB_ID = "pb-test-00000000-a"
 DEMO_MS_PATH = f"{dir_path}/../directory_watcher/test_registration_processor/testing1"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
-INGEST_SERVER_URL = os.getenv("INGEST_SERVER_URL", "http://dlm_ingest:8001")
-STORAGE_SERVER_URL = os.getenv("STORAGE_SERVER_URL", "http://dlm_storage:8003")
-MIGRATION_SERVER_URL = os.getenv("MIGRATION_SERVER_URL", "http://dlm_migration:8004")
+INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
+STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
 
 LOCATION_NAME = "ThisDLMClientLocationName"
 LOCATION_TYPE = LocationType.LOCAL_DEV
@@ -186,6 +186,8 @@ def test_storage_initialisation(storage_configuration: Configuration):
         api_storage = storage_api.StorageApi(the_api_client)
 
         # --- ensure location exists ---
+        log.info("Using storage configuration host for registering: %s", storage_configuration.host)
+        os.environ["STORAGE_SERVER_URL"] = storage_configuration.host
         location_id = _init_location_if_needed(api_storage)
 
         # --- ensure storage exists ---
@@ -216,7 +218,7 @@ async def test_watcher_registers_and_migrates():
 
     Test auto migration using configdb watcher.
     """
-    host = os.getenv("STORAGE_SERVER", "dlm_storage")
+    host = os.getenv("STORAGE_URL", "dlm_storage")
     api_configuration = Configuration(host=f"http://{host}:8003")
     setup_testing(api_configuration)
     sleep(2)

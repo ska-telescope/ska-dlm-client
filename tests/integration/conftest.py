@@ -148,20 +148,11 @@ def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 2
             log.info(">>>> Checking HTTP endpoint: %s for %s", check_url, orig_hostname)
             r = requests.get(check_url, timeout=2, verify=verify, allow_redirects=True)
             if r.status_code in ok:
-                if host != orig_hostname:
-                    log.info("Overriding all service hosts to use %s", host)
-                    _override_hosts(host)
                 log.info("OK!")
                 return
         except requests.RequestException:
             pass
         time.sleep(timeout_s)
-    # logs = _get_container_log(f"{orig_hostname}")
-    # if logs:
-    #     log.info(">>>> Logs for %s:\n%s", orig_hostname, logs)
-    # containers = _get_container_list()
-    # if containers:
-    #     log.info(">>>> Containers:\n%s", containers)
     raise ValueError(f"None of the standard hosts reachable for {orig_hostname}")
 
 def _get_container_log(container_name: str, since: int = 0) -> str:
@@ -184,7 +175,7 @@ def dlm_stack():
         _check_service(f"{REQUEST_URL}/openapi.json", timeout_s=2)
         _check_service(f"{MIGRATION_URL}/openapi.json", timeout_s=2)
         _check_service(f"{STORAGE_URL}/openapi.json", timeout_s=2)
-        _wait_for_rclone(base=RCLONE_BASE, timeout_s=30)
+        # _check_service(f"{RCLONE_BASE}/", timeout_s=2)
         yield
     finally:
         pass

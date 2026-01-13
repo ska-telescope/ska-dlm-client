@@ -168,7 +168,7 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     setup_target: bool = False,
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
-    storage_server_url = os.getenv("STORAGE_SERVER_URL", "http://dlm_storage:8003")
+    storage_server_url = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     if location_id is None:
         location_id = get_or_init_location(
             api_configuration, location=LOCATION_NAME, storage_url=storage_server_url

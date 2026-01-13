@@ -11,7 +11,7 @@ services:
     ports:
       - 8004:8004
     volumes:
-      - $HOME:/home/ska-dlm
+      - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
     depends_on:
       - dlm_postgrest
       - dlm_rclone
@@ -29,7 +29,7 @@ services:
       - 8003:8003
     volumes:
       - shared-tmpfs:/dlm
-      - $HOME:/home/ska-dlm
+      - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
     depends_on:
       - dlm_postgrest
       - dlm_rclone
@@ -44,7 +44,7 @@ services:
     ports:
       - 8002:8002
     volumes:
-      - $HOME:/home/ska-dlm
+      - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
     depends_on:
       - dlm_postgrest
       - dlm_rclone
@@ -60,7 +60,7 @@ services:
       - 8001:8001
     volumes:
       - shared-tmpfs:/data
-      - $HOME:/home/ska-dlm
+      - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
     depends_on:
       - dlm_postgrest
       - dlm_rclone
