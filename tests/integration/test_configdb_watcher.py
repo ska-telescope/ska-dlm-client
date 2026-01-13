@@ -145,7 +145,7 @@ def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
         assert isinstance(resp, list)
     except ApiException as e:
         log.error("Failed to query location: %s", e)
-        storage_log = _get_container_log("dlm_storage")
+        storage_log = _get_container_log("dlm_postgrest")
         log.info("Log from storage container: %s", storage_log)
         return ""
     if resp:
