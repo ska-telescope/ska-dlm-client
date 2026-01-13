@@ -178,6 +178,13 @@ def _init_storage_if_needed(
         log.info("Storage created: %s %s", storage["STORAGE_NAME"], storage_id)
     return storage_id
 
+def _get_container_log(container_name: str) -> str:
+    cmd = ["docker", "logs", container_name]
+    p = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    if p.returncode != 0:
+        log.error("Failed to get logs for container %s: %s", container_name, p.stderr)
+        return p.stderr
+    return p.stdout
 
 @pytest.mark.integration
 def test_storage_initialisation(storage_configuration: Configuration):
@@ -189,7 +196,8 @@ def test_storage_initialisation(storage_configuration: Configuration):
         log.info("Using storage configuration host for registering: %s", storage_configuration.host)
         os.environ["STORAGE_URL"] = storage_configuration.host
         location_id = _init_location_if_needed(api_storage)
-
+        storage_log = _get_container_log("dlm_storage")
+        log.info("Log from storage container: %s", storage_log)
         # --- ensure storage exists ---
         storage_id = _init_storage_if_needed(api_storage, location_id, storage=STORAGE["TGT"])
 

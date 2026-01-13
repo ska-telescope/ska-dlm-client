@@ -155,14 +155,6 @@ def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 2
         time.sleep(timeout_s)
     raise ValueError(f"None of the standard hosts reachable for {orig_hostname}")
 
-def _get_container_log(container_name: str, since: int = 0) -> str:
-    cmd = ["docker", "logs", "--since", f"{since}s", container_name]
-    p = subprocess.run(cmd, capture_output=True, text=True, check=False)
-    if p.returncode != 0:
-        log.error("Failed to get logs for container %s: %s", container_name, p.stderr)
-        return ""
-    return p.stdout
-
 @pytest.fixture(scope="session")
 def dlm_stack():
     """Bring up the minimal DLM stack for integration tests and wait for readiness.
