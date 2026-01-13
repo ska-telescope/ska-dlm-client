@@ -6,12 +6,14 @@ services:
   dlm_migration:
     platform: linux/amd64
     image: ${SERVER_IMAGE}
+    user: root
     container_name: dlm_migration
     entrypoint: uvicorn ska_dlm.dlm_migration.dlm_migration_requests:rest --host 0.0.0.0 --port 8004
     ports:
       - 8004:8004
     volumes:
       - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
+      - $PWD/tests/integration/ska-dlm-home/.dlm:/root/.dlm
     depends_on:
       - dlm_postgrest
       - dlm_rclone
@@ -22,6 +24,7 @@ services:
     platform: linux/amd64
     image: ${SERVER_IMAGE}
     container_name: dlm_storage
+    user: root
     environment:
       SSH_PUBLIC_KEY_PATH: "/dlm/.ssh/id_rsa.pub"
     entrypoint: uvicorn ska_dlm.dlm_storage.dlm_storage_requests:rest --host 0.0.0.0 --port 8003
@@ -29,6 +32,7 @@ services:
       - 8003:8003
     volumes:
       - shared-tmpfs:/dlm
+      - $PWD/tests/integration/ska-dlm-home/.dlm:/root/.dlm
       - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
     depends_on:
       - dlm_postgrest
@@ -39,11 +43,13 @@ services:
   dlm_request:
     image: ${SERVER_IMAGE}
     container_name: dlm_request
+    user: root
     platform: linux/amd64
     entrypoint: uvicorn ska_dlm.dlm_request.dlm_request_requests:rest --host 0.0.0.0 --port 8002
     ports:
       - 8002:8002
     volumes:
+      - $PWD/tests/integration/ska-dlm-home/.dlm:/root/.dlm
       - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
     depends_on:
       - dlm_postgrest
@@ -55,11 +61,13 @@ services:
     platform: linux/amd64
     image: ${SERVER_IMAGE}
     container_name: dlm_ingest
+    user: root
     entrypoint: uvicorn ska_dlm.dlm_ingest.dlm_ingest_requests:rest --host 0.0.0.0 --port 8001
     ports:
       - 8001:8001
     volumes:
       - shared-tmpfs:/data
+      - $PWD/tests/integration/ska-dlm-home/.dlm:/root/.dlm
       - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
     depends_on:
       - dlm_postgrest

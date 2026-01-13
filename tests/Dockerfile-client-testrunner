@@ -6,16 +6,16 @@ RUN apt-get update && apt-get install -y iputils-ping docker.io docker-compose &
     pip install poetry==${POETRY_VERSION} &&\
     mkdir -p /dlm &&\
     useradd -m -G docker ska-dlm
-USER ska-dlm
+# USER ska-dlm
 
 WORKDIR /app
 # cache external dependencies
 COPY pyproject.toml poetry.lock ./
-RUN poetry config virtualenvs.in-project true &&\
-    poetry install --only main,test --no-root
+RUN poetry config virtualenvs.in-project true
 
 COPY ./ ./
-RUN poetry install --only main,test
+RUN poetry install --only main,test &&\
+    chown -R ska-dlm:ska-dlm /app
 
 ENV PATH="/app/.venv/bin:${PATH}"
 
