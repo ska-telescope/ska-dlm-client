@@ -17,6 +17,7 @@ from ska_dlm_client.common_types import (
     StorageType,
 )
 from ska_dlm_client.openapi import api_client
+from ska_dlm_client.openapi.api_client import ApiException
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
 from ska_dlm_client.register_storage_location.main import setup_testing
@@ -139,7 +140,12 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
 
 
 def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
-    resp = api_storage.query_location(location_name=LOCATION_NAME)
+    try:
+        resp = api_storage.query_location(location_name=LOCATION_NAME)
+    except ApiException as e:
+        log.error("Failed to query location: %s", e)
+        storage_log = _get_container_log("dlm_storage")
+        log.info("Log from storage container: %s", storage_log)
     assert isinstance(resp, list)
     if resp:
         location_id = _get_id(resp[0], "location_id")
