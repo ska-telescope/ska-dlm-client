@@ -62,6 +62,6 @@ integration-tests:
   before_script:
     - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services build
   script:
-    - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services run --entrypoint "make integration-test" dlm_client_testrunner
+    - docker compose --file tests/testrunner.docker-compose.yaml -u root -p dlm-test-services run --entrypoint "make integration-test" dlm_client_testrunner
   after_script:
     - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services down dlm_client_testrunner
