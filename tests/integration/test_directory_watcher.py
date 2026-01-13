@@ -3,7 +3,7 @@
 import logging
 import os
 import subprocess
-from time import sleep
+from time import sleep, time
 
 import pytest
 
@@ -26,7 +26,8 @@ def test_auto_migration(request_configuration: Configuration):
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)
-    cmd = "docker exec dlm_directory_watcher cp /etc/group /dlm/watch_dir/."
+    timestamp = str(time())
+    cmd = f"docker exec dlm_directory_watcher cp /etc/group /dlm/watch_dir/group.{timestamp}"
     log.info("Migration initialization copy command: %s", cmd)
     p = subprocess.run(cmd, capture_output=True, shell=True, check=True)
     if p.returncode != 0:
