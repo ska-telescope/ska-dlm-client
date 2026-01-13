@@ -22,25 +22,25 @@ include:
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/python.gitlab-ci.yml'
 
-    # Docs pages
-  - project: 'ska-telescope/templates-repository'
-    file: 'gitlab-ci/includes/docs.gitlab-ci.yml'
+  #   # Docs pages
+  # - project: 'ska-telescope/templates-repository'
+  #   file: 'gitlab-ci/includes/docs.gitlab-ci.yml'
 
-    # Tag Based GitLab Release Management
-  - project: 'ska-telescope/templates-repository'
-    file: 'gitlab-ci/includes/release.gitlab-ci.yml'
+  #   # Tag Based GitLab Release Management
+  # - project: 'ska-telescope/templates-repository'
+  #   file: 'gitlab-ci/includes/release.gitlab-ci.yml'
 
-    # Build and push the docker image
-  - project: 'ska-telescope/templates-repository'
-    file: 'gitlab-ci/includes/oci-image.gitlab-ci.yml'
+  #   # Build and push the docker image
+  # - project: 'ska-telescope/templates-repository'
+  #   file: 'gitlab-ci/includes/oci-image.gitlab-ci.yml'
 
-    # Build and push the Helm chart
-  - project: 'ska-telescope/templates-repository'
-    file: 'gitlab-ci/includes/helm-chart.gitlab-ci.yml'
+  #   # Build and push the Helm chart
+  # - project: 'ska-telescope/templates-repository'
+  #   file: 'gitlab-ci/includes/helm-chart.gitlab-ci.yml'
 
-    # .post step finalisers eg: badges
-  - project: 'ska-telescope/templates-repository'
-    file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
+  #   # .post step finalisers eg: badges
+  # - project: 'ska-telescope/templates-repository'
+  #   file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
 
 python-test:
   stage: test
@@ -63,6 +63,6 @@ integration-tests:
   before_script:
     - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services build
   script:
-    - docker compose --file tests/testrunner.docker-compose.yaml -u root -p dlm-test-services run --entrypoint "make integration-test" dlm_client_testrunner
+    - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services run -u root --entrypoint "make integration-test" dlm_client_testrunner
   after_script:
     - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services down dlm_client_testrunner
