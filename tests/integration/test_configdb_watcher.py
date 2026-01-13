@@ -140,15 +140,14 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
 
 
 def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
-    resp = ""
-    location_id = ""
     try:
         resp = api_storage.query_location(location_name=LOCATION_NAME)
+        assert isinstance(resp, list)
     except ApiException as e:
         log.error("Failed to query location: %s", e)
         storage_log = _get_container_log("dlm_storage")
         log.info("Log from storage container: %s", storage_log)
-    assert isinstance(resp, list)
+        return ""
     if resp:
         location_id = _get_id(resp[0], "location_id")
         log.info("Location already exists: %s", location_id)
@@ -161,11 +160,12 @@ def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
                 location_city=LOCATION_CITY,
                 location_facility=LOCATION_FACILITY,
             )
+            assert isinstance(location_id, str) and location_id
         except ApiException as e:
             log.error("Failed to create location: %s", e)
             storage_log = _get_container_log("dlm_storage")
             log.info("Log from storage container: %s", storage_log)
-        assert isinstance(location_id, str) and location_id
+            return ""
         log.info("Location created: %s", location_id)
     return location_id
 
@@ -192,7 +192,7 @@ def _init_storage_if_needed(
     return storage_id
 
 def _get_container_log(container_name: str) -> str:
-    cmd = ["docker", "logs", container_name]
+    cmd = ["docker", "logs", "--since", "600s", container_name]
     p = subprocess.run(cmd, capture_output=True, text=True, check=False)
     if p.returncode != 0:
         log.error("Failed to get logs for container %s: %s", container_name, p.stderr)
@@ -208,9 +208,9 @@ def test_storage_initialisation(storage_configuration: Configuration):
         # --- ensure location exists ---
         log.info("Using storage configuration host for registering: %s", storage_configuration.host)
         os.environ["STORAGE_URL"] = storage_configuration.host
-        location_id = _init_location_if_needed(api_storage)
         storage_log = _get_container_log("dlm_storage")
         log.info("Log from storage container: %s", storage_log)
+        location_id = _init_location_if_needed(api_storage)
         # --- ensure storage exists ---
         storage_id = _init_storage_if_needed(api_storage, location_id, storage=STORAGE["TGT"])
 
