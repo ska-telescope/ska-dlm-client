@@ -44,8 +44,13 @@ STORAGE = {
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
         "ROOT_DIRECTORY": "/dlm-archive",
-        "STORAGE_CONFIG": {"name": "dlm-archive", "type": "local", "root_path": "/dlm-archive", "parameters": {}},
-            },
+        "STORAGE_CONFIG": {
+            "name": "dlm-archive",
+            "type": "local",
+            "root_path": "/dlm-archive",
+            "parameters": {},
+        },
+    },
     "SRC": {
         "STORAGE_NAME": "sdp-watcher",
         "STORAGE_TYPE": StorageType.FILESYSTEM,
