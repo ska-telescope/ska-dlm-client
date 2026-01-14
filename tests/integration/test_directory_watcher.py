@@ -25,14 +25,19 @@ def test_auto_migration(request_configuration: Configuration):
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)
+
     testfilename = f"group.{str(time())}"
-    cmd = f"docker exec dlm_directory_watcher cp /etc/group /dlm/watch_dir/{testfilename}"
+    dst = f"/dlm/watch_dir/{testfilename}"
+
+    cmd = f"docker exec dlm_directory_watcher cp /etc/group {dst}"
     log.info("Migration initialization copy command: %s", cmd)
-    p = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+
+    p = subprocess.run(cmd, capture_output=True, shell=True, check=False, text=True)
     if p.returncode != 0:
         log.info("[copy file STDOUT]: %s\n", p.stdout)
         log.error("[copy file STDERR]: %s\n", p.stderr)
     assert p.returncode == 0
+
     with api_client.ApiClient(request_configuration) as the_api_client:
         api_request = request_api.RequestApi(the_api_client)
         sleep(2)
@@ -40,4 +45,15 @@ def test_auto_migration(request_configuration: Configuration):
         assert len(resp2) == 2
         assert resp2 and _get_id(resp2[0], "item_name") == testfilename
         assert resp2 and _get_id(resp2[1], "item_name") == testfilename
-    cmd = f"docker exec dlm_directory_watcher rm /dlm/watch_dir/{testfilename}"
+
+    cleanup_cmd = f"docker exec dlm_directory_watcher rm -f {dst}"
+    cleanup = subprocess.run(
+        cleanup_cmd,
+        capture_output=True,
+        shell=True,
+        check=False,
+        text=True,
+    )
+    if cleanup.returncode != 0:
+        log.info("[cleanup STDOUT]: %s\n", cleanup.stdout)
+        log.error("[cleanup STDERR]: %s\n", cleanup.stderr)

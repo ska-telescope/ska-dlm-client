@@ -37,7 +37,7 @@ see https://kubernetes.io/docs/concepts/overview/working-with-objects/common-lab
 */}}
 {{- define "ska-dlm-client.labels" }}
 {{- if .Values.global.labels}}
-app.kubernetes.io/name: {{ coalesce .Values.global.labels.app "ska-dlm-client.name" }}
+app.kubernetes.io/name: {{ coalesce .Values.global.labels.app (include "ska-dlm-client.name" .) }}
 {{- else }}
 app.kubernetes.io/name: {{ include "ska-dlm-client.name" . }}
 {{- end }}
