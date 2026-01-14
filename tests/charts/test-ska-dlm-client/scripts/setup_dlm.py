@@ -35,7 +35,7 @@ LOCATION_TYPE = LocationType.LOW_INTEGRATION
 LOCATION_COUNTRY = LocationCountry.AU
 LOCATION_CITY = "Marksville"
 LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
-STORAGE_CONFIG = {"name": "dir-watcher", "type": "local", "parameters": {}}
+STORAGE_CONFIG = {"name": "dir-watcher", "type": "local", "root_path": "", "parameters": {}}
 STORAGE_INTERFACE = StorageInterface.POSIX
 STORAGE_TYPE = StorageType.FILESYSTEM
 
