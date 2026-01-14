@@ -33,8 +33,8 @@ spec:
         - "{{ .Values.kafka_watcher.kafka_topic }}"
         - "--storage-name"
         - "{{ .Values.kafka_watcher.storage_name }}"
-        - "--ingest-server-url"
-        - "{{ .Values.ska_dlm_client.ingest_server_url }}"
+        - "--ingest-url"
+        - "{{ .Values.ska_dlm_client.ingest_url }}"
         # Optional flag to enable rclone access check:
         {{- if .Values.kafka_watcher.check_rclone_access }}
         - "--check-rclone-access"

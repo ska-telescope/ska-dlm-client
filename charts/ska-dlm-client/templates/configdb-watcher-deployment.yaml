@@ -54,19 +54,21 @@ spec:
           {{- if .Values.configdb_watcher.include_existing }}
             - "--include-existing"
           {{- end }}
-            - "--ingest-server-url"
-            - {{ .Values.configdb_watcher.ingest_server_url | quote }}
-            - "--source-storage"
-            - {{ .Values.configdb_watcher.source_storage | quote }}
-            - "--storage-root-directory"
-            - {{ .Values.configdb_watcher.storage_root_directory | quote }}
-          {{- if .Values.configdb_watcher.migration_destination_storage_name }}
-            - "--migration-destination-storage-name"
-            - {{ .Values.configdb_watcher.migration_destination_storage_name | quote }}
+            - "--ingest-url"
+            - {{ .Values.configdb_watcher.ingest_url | quote }}
+            - "--source-name"
+            - {{ .Values.configdb_watcher.storage_name | quote }}
+            - "--storage-url"
+            - {{ .Values.configdb_watcher.storage_url | quote }}
+            - "--source-root"
+            - {{ .Values.configdb_watcher.source_root | quote }}
+          {{- if .Values.configdb_watcher.target_name }}
+            - "--target-name"
+            - {{ .Values.configdb_watcher.target_name | quote }}
           {{- end }}
-          {{- if .Values.configdb_watcher.migration_server_url }}
-            - "--migration-server-url"
-            - {{ .Values.configdb_watcher.migration_server_url | quote }}
+          {{- if .Values.configdb_watcher.migration_url }}
+            - "--migration-url"
+            - {{ .Values.configdb_watcher.migration_url | quote }}
           {{- end }}
 
           volumeMounts:
