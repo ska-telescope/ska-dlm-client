@@ -56,7 +56,7 @@ directory_watcher:
   register_contents_of_watch_directory: false
 
 configdb_watcher:
-  enabled: true
+  enabled: false
   component: configdb-watcher
   subsystem: data-lifecycle-management
   replicas: 1
@@ -70,12 +70,10 @@ configdb_watcher:
     host: ""      # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
     port: 2379    # default etcd client port
     path: ""      # optional
-
-# if you want to deploy a local etcd service
-etcd:
-  enabled: true # set to false if you want to use an external etcd
-  image: "artefact.skao.int/ska-sdp-etcd"
-  tag: "3.5.9"
+    etcd:
+      enabled: true # deploy a local etcd service
+      image: "artefact.skao.int/ska-sdp-etcd"
+      tag: "3.5.9"
 
 kafka_watcher:
   enabled: false  # kafka-watcher OFF by default

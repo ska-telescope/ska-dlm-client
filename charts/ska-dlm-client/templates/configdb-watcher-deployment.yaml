@@ -1,4 +1,18 @@
-{{- if .Values.configdb_watcher.enabled }}
+{{- if .Values.configdb_watcher.enabled -}}
+{{- $host := .Values.configdb_watcher.sdp_config.host | default "" | trim -}}
+{{- $local := .Values.configdb_watcher.sdp_config.etcd.enabled -}}
+{{- $defaultEtcdSvc := printf "%s-etcd" (include "ska-dlm-client.fullname" .) -}}
+
+{{- /* 1) User selected BOTH local and external */ -}}
+{{- if and $local (ne $host "") -}}
+{{- fail "Invalid config: choose ONE etcd option for configdb_watcher. Either (a) external: set configdb_watcher.sdp_config.host and set configdb_watcher.sdp_config.etcd.enabled=false, OR (b) local: leave configdb_watcher.sdp_config.host empty and set configdb_watcher.sdp_config.etcd.enabled=true." -}}
+{{- end -}}
+
+{{- /* 2) User selected NEITHER local nor external */ -}}
+{{- if and (not $local) (eq $host "") -}}
+{{- fail "Invalid config: configdb_watcher.enabled=true but no etcd configured. Either set configdb_watcher.sdp_config.host (external etcd) OR set configdb_watcher.sdp_config.etcd.enabled=true (deploy local etcd)." -}}
+{{- end -}}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,10 +40,10 @@ spec:
           # Where ska_sdp_config.Config() should look for etcd / ConfigDB
           env:
             - name: SDP_CONFIG_HOST
-              value: {{ default (printf "%s-etcd" (include "ska-dlm-client.fullname" .)) .Values.configdb_watcher.sdp_config.host | quote }}
+              value: {{ .Values.configdb_watcher.sdp_config.host | default $defaultEtcdSvc | quote }}
             - name: SDP_CONFIG_PORT
               value: {{ .Values.configdb_watcher.sdp_config.port | quote }}
-            {{- if .Values.configdb_watcher.sdp_config.path }}
+            {{- if .Values.configdb_watcher.sdp_config.path | default "" | trim }}
             - name: SDP_CONFIG_PATH
               value: {{ .Values.configdb_watcher.sdp_config.path | quote }}
             {{- end }}
@@ -41,24 +55,24 @@ spec:
             - "--include-existing"
           {{- end }}
             - "--ingest-server-url"
-            - {{ .Values.configdb_watcher.ingest_server_url }}
+            - {{ .Values.configdb_watcher.ingest_server_url | quote }}
             - "--source-storage"
-            - {{ .Values.configdb_watcher.source_storage }}
+            - {{ .Values.configdb_watcher.source_storage | quote }}
             - "--storage-root-directory"
-            - {{ .Values.configdb_watcher.storage_root_directory }}
+            - {{ .Values.configdb_watcher.storage_root_directory | quote }}
           {{- if .Values.configdb_watcher.migration_destination_storage_name }}
             - "--migration-destination-storage-name"
-            - {{ .Values.configdb_watcher.migration_destination_storage_name }}
+            - {{ .Values.configdb_watcher.migration_destination_storage_name | quote }}
           {{- end }}
           {{- if .Values.configdb_watcher.migration_server_url }}
             - "--migration-server-url"
-            - {{ .Values.configdb_watcher.migration_server_url }}
+            - {{ .Values.configdb_watcher.migration_server_url | quote }}
           {{- end }}
 
           volumeMounts:
             - name: data-product-storage
               mountPath: /dlm
-              {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
+              {{- if $.Values.global.dataProduct.pvc.read_only }}
               readOnly: true
               {{- end }}
       volumes:
