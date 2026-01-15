@@ -6,7 +6,7 @@ import subprocess
 from time import sleep
 
 import pytest
-from ska_sdp_config import Config, ConfigCollision
+from ska_sdp_config import Config
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
@@ -26,7 +26,7 @@ log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 PB_ID = "pb-test-00000000-a"
-DEMO_MS_PATH = f"{dir_path}/../directory_watcher/test_registration_processor/testing1"
+DEMO_MS_PATH = f"{dir_path}/../directory_watcher/test_registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
@@ -50,7 +50,7 @@ STORAGE = {
         "STORAGE_NAME": "sdp-watcher",
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
-        "ROOT_DIRECTORY": "/dlm",
+        "ROOT_DIRECTORY": "/dlm/product_dir",
         "STORAGE_CONFIG": {
             "name": "dlm",
             "type": "sftp",
@@ -99,11 +99,7 @@ def _create_completed_flow(data_dir: str, flow_name_arg: str) -> None:
     )
 
     for txn in cfg.txn():
-        try:
-            txn.flow.create(test_dataproduct)
-            print(f"Flow created: {test_dataproduct.key}")
-        except ConfigCollision:
-            print(f"ERROR: Flow already exists: {test_dataproduct.key}")
+        txn.flow.create(test_dataproduct)
         ops = txn.flow.state(test_dataproduct.key)
         ops.create({"status": "COMPLETED"})
 
@@ -198,17 +194,11 @@ def _init_storage_if_needed(
 
 def _get_container_log(container_name: str) -> str:
     cmd = ["docker", "logs", "--since", "600s", container_name]
-    try:
-        p = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        return p.stdout
-    except subprocess.CalledProcessError as e:
-        log.error(
-            "Failed to get logs for container %s\nSTDERR:\n%s\nSTDOUT:\n%s",
-            container_name,
-            e.stderr,
-            e.stdout,
-        )
-        raise
+    p = subprocess.run(cmd, capture_output=True, text=True, check=True)
+    if p.returncode != 0:
+        log.error("Failed to get logs for container %s: %s", container_name, p.stderr)
+        return p.stderr
+    return p.stdout
 
 
 @pytest.mark.integration
@@ -254,9 +244,13 @@ async def test_watcher_registers_and_migrates():
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
-    sleep(3)  # TODO: DMAN-193
-    # --- copying demo.ms ---
-    cmd = f"docker container cp {DEMO_MS_PATH} dlm_configdb_watcher:/dlm/."
+    sleep(2)  # TODO: DMAN-193
+    # --- copying demo.ps ---
+    cmd = (
+        f"docker container cp {DEMO_MS_PATH}/ "
+        + f"{STORAGE['SRC']['STORAGE_CONFIG']['parameters']['host']}:"
+        + f"{STORAGE['SRC']['ROOT_DIRECTORY']}/.."
+    )
     log.info("Copy MS into container: %s", cmd)
     p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
     if p.returncode != 0:
@@ -268,14 +262,14 @@ async def test_watcher_registers_and_migrates():
         return
 
     trigger_completed_flow("test-flow")
-    log.info("Pytest SDP_CONFIG_HOST=%s", os.getenv("SDP_CONFIG_HOST"))
-    log.info("Pytest SDP_CONFIG_PORT=%s", os.getenv("SDP_CONFIG_PORT"))
-    log.info("Pytest SDP_CONFIG_BACKEND=%s", os.getenv("SDP_CONFIG_BACKEND"))
-    sleep(3)
+    sleep(1)
     statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow")
     assert "FINISHED" in statuses
     log.info("Cleaning up copied MS file from watcher container.")
-    cmd = f"docker exec dlm_configdb_watcher rm -rf /dlm/{os.path.basename(DEMO_MS_PATH)}"
+    cmd = (
+        "docker exec dlm_configdb_watcher "
+        + f"rm -rf /dlm/product_dir/{os.path.basename(DEMO_MS_PATH)}"
+    )
 
 
 @pytest.mark.asyncio
