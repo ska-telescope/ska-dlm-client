@@ -36,7 +36,7 @@ async def consumer_fixture():
     await consumer.stop()
 
 
-@pytest.mark.skip("Kafka is now deprecated")
+@pytest.mark.skip("Kafka is now deprecated (DMAN-168)")
 @pytest.mark.asyncio
 async def test_kafka_data_roundtrip(producer: AIOKafkaProducer, consumer: AIOKafkaConsumer):
     """Test sending and receiving messages between Kafka producer and consumer."""
@@ -75,7 +75,7 @@ async def receive_messages(consumer: AIOKafkaConsumer, max_num_messages: int) ->
 
 
 # Send a real Kafka message to the Kafka watcher
-@pytest.mark.skip("Kafka is now deprecated")
+@pytest.mark.skip("Kafka is now deprecated (DMAN-168)")
 @pytest.mark.asyncio
 async def test_kafka_watcher(producer: AIOKafkaProducer, caplog):
     """Test that a Kafka message triggers a call to post_dlm_data_item()."""

@@ -118,12 +118,12 @@ class TestDirectoryWatcher:
             )
         asyncio.get_event_loop().create_task(directory_watcher.watch())
         # Now let the directory_watcher start and listen on given directory
-        await asyncio.sleep(2)
+        await asyncio.sleep(2)  # TODO: DMAN-193
         # Add a file to the watcher directory
         with open(a_temp_file, "w", encoding="utf-8") as the_file:
             the_file.write("nothing string")
         # Wait again now to allow the watcher to process the added file
-        await asyncio.sleep(2)
+        await asyncio.sleep(2)  # TODO: DMAN-193
         a_temp_file_relative_path = a_temp_file.replace(f"{self.the_watch_dir}/", "")
         # On MacOS the system messes with the path by adding a /private
         absolute_path = registration_processor.absolute_path.replace("/private", "")

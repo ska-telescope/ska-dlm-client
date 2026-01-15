@@ -49,31 +49,31 @@ spec:
             {{- end }}
 
           command:
-            - "sdp-config-watcher"
+            - "dlm-configdb-watcher"
           args:
           {{- if .Values.configdb_watcher.include_existing }}
             - "--include-existing"
           {{- end }}
             - "--ingest-url"
-            - {{ .Values.configdb_watcher.ingest_url | quote }}
+            - {{ .Values.configdb_watcher.ingest_server_url | quote }}
             - "--source-name"
-            - {{ .Values.configdb_watcher.storage_name | quote }}
+            - {{ .Values.configdb_watcher.source_storage | quote }}
             - "--storage-url"
-            - {{ .Values.configdb_watcher.storage_url | quote }}
+            - {{ .Values.configdb_watcher.storage_server_url | quote }}
             - "--source-root"
-            - {{ .Values.configdb_watcher.source_root | quote }}
-          {{- if .Values.configdb_watcher.target_name }}
+            - {{ .Values.configdb_watcher.storage_root_directory | quote }}
+          {{- if .Values.configdb_watcher.migration_destination_storage_name }}
             - "--target-name"
-            - {{ .Values.configdb_watcher.target_name | quote }}
+            - {{ .Values.configdb_watcher.migration_destination_storage_name | quote }}
           {{- end }}
-          {{- if .Values.configdb_watcher.migration_url }}
+          {{- if .Values.configdb_watcher.migration_server_url }}
             - "--migration-url"
-            - {{ .Values.configdb_watcher.migration_url | quote }}
+            - {{ .Values.configdb_watcher.migration_server_url | quote }}
           {{- end }}
 
           volumeMounts:
             - name: data-product-storage
-              mountPath: /dlm
+              mountPath: /dlm/product_dir
               {{- if $.Values.global.dataProduct.pvc.read_only }}
               readOnly: true
               {{- end }}

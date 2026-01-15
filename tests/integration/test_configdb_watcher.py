@@ -44,18 +44,13 @@ STORAGE = {
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
         "ROOT_DIRECTORY": "/dlm-archive",
-        "STORAGE_CONFIG": {
-            "name": "dlm-archive",
-            "type": "local",
-            "root_path": "/dlm-archive",
-            "parameters": {},
-        },
+        "STORAGE_CONFIG": {"name": "dlm-archive", "type": "local", "parameters": {}},
     },
     "SRC": {
         "STORAGE_NAME": "sdp-watcher",
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
-        "ROOT_DIRECTORY": "/dlm/testing1",
+        "ROOT_DIRECTORY": "/dlm/product_dir",
         "STORAGE_CONFIG": {
             "name": "dlm",
             "type": "sftp",
@@ -251,7 +246,7 @@ async def test_watcher_registers_and_migrates():
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
-    sleep(2)
+    sleep(2)  # TODO: DMAN-193
     # --- copying demo.ps ---
     cmd = f"docker container cp {DEMO_MS_PATH} dlm_configdb_watcher:/dlm/."
     log.info("Copy MS into container: %s", cmd)

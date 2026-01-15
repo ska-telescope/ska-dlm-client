@@ -143,7 +143,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "-s",
-        "--storage-server-url",
+        "--storage-url",
         type=str,
         required=True,
         help="Storage service URL.",

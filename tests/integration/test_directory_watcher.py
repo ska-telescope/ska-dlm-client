@@ -24,7 +24,7 @@ def test_auto_migration(request_configuration: Configuration):
     host = "http://dlm_storage:8003"
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
-    sleep(2)
+    sleep(2)  # TODO: DMAN-193
 
     testfilename = f"group.{str(time())}"
     dst = f"/dlm/watch_dir/{testfilename}"
@@ -40,7 +40,7 @@ def test_auto_migration(request_configuration: Configuration):
 
     with api_client.ApiClient(request_configuration) as the_api_client:
         api_request = request_api.RequestApi(the_api_client)
-        sleep(2)
+        sleep(2)  # TODO: DMAN-193
         resp2 = api_request.query_data_item(item_name=testfilename)
         assert len(resp2) == 2
         assert resp2 and _get_id(resp2[0], "item_name") == testfilename

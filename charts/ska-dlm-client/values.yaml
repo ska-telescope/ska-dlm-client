@@ -8,7 +8,7 @@
 #   - ska_dlm_client.request_server_url
 #
 # All services are disabled by default.
-# Local developers may use --set to enable kafka / kafka_watcher / directory watcher
+# Local developers may use --set to enable directory watcher / configdb watcher
 # ----------------------------------------------------------------------------------
 
 system: dlm
@@ -32,16 +32,16 @@ ska_dlm:
 
 ska_dlm_client:
   image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client #artefact.skao.int/ska-dlm-client
-  version: "afe71bb5" # Change to new release asap!
+  version: "67f77a57" #"afe71bb5" #"1.1.0" #"67f77a57" # Change to new release asap!
   imagePullPolicy: Always
   storage_name: dlm
   storage_root_directory: /dlm
   securityContext: {}
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace:port
-  ingest_server_url: "http://ska-dlm-ingest" # override for production
-  storage_server_url: "http://ska-dlm-storage" # override for production
-  request_server_url: "http://ska-dlm-request" # override for production
+  ingest_server_url: "http://ska-dlm-ingest.dp-dm-nadiasteyn" # override for production
+  storage_server_url: "http://ska-dlm-storage.dp-dm-nadiasteyn" # override for production
+  request_server_url: "http://ska-dlm-request.dp-dm-nadiasteyn" # override for production
 
 directory_watcher:
   enabled: false
@@ -56,12 +56,13 @@ directory_watcher:
   register_contents_of_watch_directory: false
 
 configdb_watcher:
-  enabled: false
+  enabled: true
   component: configdb-watcher
   subsystem: data-lifecycle-management
   replicas: 1
   include_existing: false
-  ingest_server_url: http://ska-dlm-ingest.dp-dm
+  ingest_server_url: http://ska-dlm-ingest.dp-dm-nadiasteyn
+  storage_server_url: http://ska-dlm-storage.dp-dm-nadiasteyn
   source_storage: SDPBuffer
   storage_root_directory: /
   migration_destination_storage_name: # If omitted, migration will be skipped

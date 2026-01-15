@@ -16,6 +16,12 @@ from ska_dlm_client.openapi.dlm_api import storage_api
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+logger.info(
+    "[env] STORAGE_URL=%r INGEST_URL=%r SOURCE_NAME=%r",
+    os.getenv("STORAGE_URL"),
+    os.getenv("INGEST_URL"),
+    os.getenv("SOURCE_NAME"),
+)
 
 # Constants that can be used for testing.
 LOCATION_NAME = "ThisDLMClientLocationName"
@@ -56,6 +62,10 @@ def get_or_init_location(
         # get the location_id
         logger.info("Checking location: %s", location)
         api_storage.api_client.configuration.host = storage_url
+        logger.info(
+            "[get_or_init_location] calling query_location with host=%s",
+            api_storage.api_client.configuration.host,
+        )
         response = api_storage.query_location(location_name=location)
         logger.info("query_location response: %s", response)
         if not isinstance(response, list):
@@ -98,6 +108,12 @@ def get_or_init_storage(
     logger.info("Data directory %s created (or already existed)", storage_root_directory)
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
+        # Ensure storage API calls go to the storage service, not ingest
+        api_storage.api_client.configuration.host = api_configuration.host
+        logger.info(
+            "[get_or_init_storage] calling query_storage with host=%s",
+            api_storage.api_client.configuration.host,
+        )
         # Get the storage_id
         response = api_storage.query_storage(storage_name=storage_name)
         logger.info("query_storage response: %s", response)
@@ -168,7 +184,13 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     setup_target: bool = False,
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
-    storage_url = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    storage_url = storage_url or os.getenv("STORAGE_URL") or "http://dlm_storage:8003"
+    logger.info(
+        "[setup_volume] storage_url resolved to: %s", storage_url
+    )
+    logger.info(
+        "[setup_volume] api_configuration.host = %s", api_configuration.host
+    )
     if location_id is None:
         location_id = get_or_init_location(
             api_configuration, location=LOCATION_NAME, storage_url=storage_url
@@ -231,7 +253,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "-s",
-        "--storage-server-url",
+        "--storage-url",
         type=str,
         required=True,
         help="Storage service URL.",

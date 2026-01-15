@@ -63,7 +63,7 @@ integration-tests:
     - docker:27.0.2-dind
   before_script:
     # - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services build
-    - export SERVER_IMAGE=registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:81d01d51 && docker compose --file tests/integration/dlm_servers.docker-compose.yaml up -d --wait
+    - export SERVER_IMAGE=registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:c395bfa17 && docker compose --file tests/integration/dlm_servers.docker-compose.yaml up -d --wait
     - docker compose --file tests/test_services.docker-compose.yaml up -d --remove-orphans
     - docker compose --file tests/dlm_clients.docker-compose.yaml build
     - docker compose --file tests/dlm_clients.docker-compose.yaml up -d --remove-orphans
