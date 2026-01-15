@@ -7,8 +7,6 @@
 #   - ska_dlm_client.storage_server_url
 #   - ska_dlm_client.request_server_url
 #
-# All services are disabled by default.
-# Local developers may use --set to enable directory watcher / configdb watcher
 # ----------------------------------------------------------------------------------
 
 system: dlm
@@ -32,19 +30,19 @@ ska_dlm:
 
 ska_dlm_client:
   image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client #artefact.skao.int/ska-dlm-client
-  version: "67f77a57" #"afe71bb5" #"1.1.0" #"67f77a57" # Change to new release asap!
+  version: "1c6fd796" #"1.1.0" # Change to new release asap!
   imagePullPolicy: Always
   storage_name: dlm
   storage_root_directory: /dlm
   securityContext: {}
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace:port
-  ingest_server_url: "http://ska-dlm-ingest.dp-dm-nadiasteyn" # override for production
-  storage_server_url: "http://ska-dlm-storage.dp-dm-nadiasteyn" # override for production
-  request_server_url: "http://ska-dlm-request.dp-dm-nadiasteyn" # override for production
+  ingest_server_url: "http://ska-dlm-ingest.dp-dm" # override for production
+  storage_server_url: "http://ska-dlm-storage.dp-dm" # override for production
+  request_server_url: "http://ska-dlm-request.dp-dm" # override for production
 
 directory_watcher:
-  enabled: false
+  enabled: true
   component: directory-watcher
   subsystem: data-lifecycle-management
   replicas: 1
@@ -61,10 +59,10 @@ configdb_watcher:
   subsystem: data-lifecycle-management
   replicas: 1
   include_existing: false
-  ingest_server_url: http://ska-dlm-ingest.dp-dm-nadiasteyn
-  storage_server_url: http://ska-dlm-storage.dp-dm-nadiasteyn
+  ingest_server_url: http://ska-dlm-ingest.dp-dm
+  storage_server_url: http://ska-dlm-storage.dp-dm
   source_storage: SDPBuffer
-  storage_root_directory: /
+  storage_root_directory: /dlm/product_dir
   migration_destination_storage_name: # If omitted, migration will be skipped
   migration_server_url: # If omitted, migration will be skipped
   sdp_config:
