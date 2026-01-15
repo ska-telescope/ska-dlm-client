@@ -6,7 +6,7 @@ import subprocess
 from time import sleep
 
 import pytest
-from ska_sdp_config import Config
+from ska_sdp_config import Config, ConfigCollision
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
@@ -99,7 +99,11 @@ def _create_completed_flow(data_dir: str, flow_name_arg: str) -> None:
     )
 
     for txn in cfg.txn():
-        txn.flow.create(test_dataproduct)
+        try:
+            txn.flow.create(test_dataproduct)
+            print(f"Flow created: {test_dataproduct.key}")
+        except ConfigCollision:
+            print(f"ERROR: Flow already exists: {test_dataproduct.key}")
         ops = txn.flow.state(test_dataproduct.key)
         ops.create({"status": "COMPLETED"})
 
@@ -241,8 +245,6 @@ def test_storage_initialisation(storage_configuration: Configuration):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-# TODO: This does not work at all since it is running the client locally and not in
-# a container.
 async def test_watcher_registers_and_migrates():
     """
     Run the real watcher, wait for success logs, then cancel it cleanly.
@@ -252,7 +254,7 @@ async def test_watcher_registers_and_migrates():
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
-    sleep(2)  # TODO: DMAN-193
+    sleep(3)  # TODO: DMAN-193
     # --- copying demo.ms ---
     cmd = f"docker container cp {DEMO_MS_PATH} dlm_configdb_watcher:/dlm/product_dir/."
     log.info("Copy MS into container: %s", cmd)
