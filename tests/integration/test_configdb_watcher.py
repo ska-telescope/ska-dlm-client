@@ -194,11 +194,17 @@ def _init_storage_if_needed(
 
 def _get_container_log(container_name: str) -> str:
     cmd = ["docker", "logs", "--since", "600s", container_name]
-    p = subprocess.run(cmd, capture_output=True, text=True, check=True)
-    if p.returncode != 0:
-        log.error("Failed to get logs for container %s: %s", container_name, p.stderr)
-        return p.stderr
-    return p.stdout
+    try:
+        p = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        return p.stdout
+    except subprocess.CalledProcessError as e:
+        log.error(
+            "Failed to get logs for container %s\nSTDERR:\n%s\nSTDOUT:\n%s",
+            container_name,
+            e.stderr,
+            e.stdout,
+        )
+        raise
 
 
 @pytest.mark.integration
@@ -247,8 +253,8 @@ async def test_watcher_registers_and_migrates():
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
-    # --- copying demo.ps ---
-    cmd = f"docker container cp {DEMO_MS_PATH} dlm_configdb_watcher:/dlm/product_dir."
+    # --- copying demo.ms ---
+    cmd = f"docker container cp {DEMO_MS_PATH} dlm_configdb_watcher:/dlm/product_dir/."
     log.info("Copy MS into container: %s", cmd)
     p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
     if p.returncode != 0:
@@ -260,7 +266,10 @@ async def test_watcher_registers_and_migrates():
         return
 
     trigger_completed_flow("test-flow")
-    sleep(1)
+    log.info("Pytest SDP_CONFIG_HOST=%s", os.getenv("SDP_CONFIG_HOST"))
+    log.info("Pytest SDP_CONFIG_PORT=%s", os.getenv("SDP_CONFIG_PORT"))
+    log.info("Pytest SDP_CONFIG_BACKEND=%s", os.getenv("SDP_CONFIG_BACKEND"))
+    sleep(3)
     statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow")
     assert "FINISHED" in statuses
     log.info("Cleaning up copied MS file from watcher container.")
