@@ -194,7 +194,7 @@ def _init_storage_if_needed(
 
 def _get_container_log(container_name: str) -> str:
     cmd = ["docker", "logs", "--since", "600s", container_name]
-    p = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    p = subprocess.run(cmd, capture_output=True, text=True, check=True)
     if p.returncode != 0:
         log.error("Failed to get logs for container %s: %s", container_name, p.stderr)
         return p.stderr
@@ -248,9 +248,9 @@ async def test_watcher_registers_and_migrates():
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
     # --- copying demo.ps ---
-    cmd = f"docker container cp {DEMO_MS_PATH} dlm_configdb_watcher:/dlm/."
+    cmd = f"docker container cp {DEMO_MS_PATH} dlm_configdb_watcher:/dlm/product_dir."
     log.info("Copy MS into container: %s", cmd)
-    p = subprocess.run(cmd, capture_output=True, shell=True, check=True)
+    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
     if p.returncode != 0:
         log.info("[copy file STDOUT]: %s\n", p.stdout)
         log.error("[copy file STDERR]: %s\n", p.stderr)
@@ -264,7 +264,7 @@ async def test_watcher_registers_and_migrates():
     statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow")
     assert "FINISHED" in statuses
     log.info("Cleaning up copied MS file from watcher container.")
-    cmd = f"docker exec dlm_configdb_watcher rm -rf /dlm/{os.path.basename(DEMO_MS_PATH)}"
+    cmd = f"docker exec dlm_configdb_watcher rm -rf /dlm/product_dir/{os.path.basename(DEMO_MS_PATH)}"
 
 
 @pytest.mark.asyncio

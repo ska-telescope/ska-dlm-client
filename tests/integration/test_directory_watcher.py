@@ -32,7 +32,7 @@ def test_auto_migration(request_configuration: Configuration):
     cmd = f"docker exec dlm_directory_watcher cp /etc/group {dst}"
     log.info("Migration initialization copy command: %s", cmd)
 
-    p = subprocess.run(cmd, capture_output=True, shell=True, check=False, text=True)
+    p = subprocess.run(cmd, capture_output=True, shell=True, check=True, text=True)
     if p.returncode != 0:
         log.info("[copy file STDOUT]: %s\n", p.stdout)
         log.error("[copy file STDERR]: %s\n", p.stderr)
