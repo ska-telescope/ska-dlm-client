@@ -29,19 +29,31 @@ spec:
         command:
         - dlm-directory-watcher
         - "--directory-to-watch"
-        - {{ .Values.directory_watcher.directory_to_watch }}
-        - "--storage-name"
-        - {{ .Values.directory_watcher.storage_name }}
-        - "--storage-root-directory"
-        - {{ .Values.directory_watcher.storage_root_directory }}
+        - {{ .Values.directory_watcher.directory_to_watch | quote }}
+        - "--source-name"
+        - {{ .Values.directory_watcher.source_storage | quote }}
+        - "--source-root"
+        - {{ .Values.directory_watcher.source_root | quote }}
+        {{- if .Values.directory_watcher.target_name }}
+          - "--target-name"
+          - {{ .Values.directory_watcher.target_name | quote }}
+        {{- end }}
+        {{- if .Values.directory_watcher.target_root }}
+          - "--target-root"
+          - {{ .Values.directory_watcher.target_root | quote }}
+        {{- end }}
         {{- if eq $.Values.directory_watcher.use_polling_watcher true }}
         - "--use-polling-watcher"
         {{- end }}
         {{- if eq $.Values.directory_watcher.skip_rclone_access_check_on_register true }}
         - "--skip-rclone-access-check-on-register"
         {{- end }}
-        - "--ingest-server-url"
-        - {{ .Values.ska_dlm_client.ingest_server_url }}
+        - "--ingest-url"
+        - {{ .Values.ska_dlm_client.ingest_url | quote }}
+        {{- if .Values.directory_watcher.migration_url }}
+          - "--migration-url"
+          - {{ .Values.directory_watcher.migration_url | quote }}
+        {{- end }}
         {{- if eq $.Values.directory_watcher.register_contents_of_watch_directory true }}
         - "--register-contents-of-watch-directory"
         {{- end }}
@@ -54,7 +66,7 @@ spec:
               - {{ $readiness_file }}
         volumeMounts:
         - name: data-product-storage
-          mountPath: /dlm
+          mountPath: /dlm-archive
           {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
           readOnly: true
           {{- end }}

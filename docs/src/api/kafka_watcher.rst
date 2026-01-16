@@ -8,7 +8,7 @@ The Kafka watcher subscribes to a specified Kafka topic and triggers an ingestio
 .. code-block:: sh
 
     $ dlm-kafka-watcher
-    usage: dlm-kafka-watcher [-h] [--kafka-topic [KAFKA_TOPIC ...]] --kafka-broker-url KAFKA_BROKER_URL [KAFKA_BROKER_URL ...] --storage-name STORAGE_NAME --ingest-server-url INGEST_SERVER_URL [--check-rclone-access]
+    usage: dlm-kafka-watcher [-h] [--kafka-topic [KAFKA_TOPIC ...]] --kafka-broker-url KAFKA_BROKER_URL [KAFKA_BROKER_URL ...] --storage-name STORAGE_NAME --ingest-server-url INGEST_URL [--check-rclone-access]
     dlm-kafka-watcher: error: the following arguments are required: --kafka-broker-url, --storage-name, --ingest-server-url
 
 

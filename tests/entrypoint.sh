@@ -1,6 +1,38 @@
 #!/bin/bash
+mkdir -p /dlm/watch_dir
 chown -R ska-dlm:ska-dlm /dlm/watch_dir
 chmod g+w /dlm/watch_dir
 /etc/init.d/ssh start
-source /dlm/.venv/bin/activate
-python3 -m ska_dlm_client.directory_watcher.main --directory-to-watch /dlm/watch_dir --storage-name dlm-watcher --storage-root-directory /dlm/watch_dir --use-polling-watcher --ingest-server-url "http://dlm_ingest:8001" --migration-server-url http://dlm_migration:8004 --migration-destination-storage-name data --readiness-probe-file "/tmp/dlm-client-ready" --skip-rclone-access-check-on-register
+
+case "$1" in
+    "directory-watcher")
+        CMD="dlm-directory-watcher \
+          --directory-to-watch ${SOURCE_ROOT:-/dlm/watch_dir} \
+          --source-name ${SOURCE_NAME:-dir-watcher} \
+          --source-root ${SOURCE_ROOT:-/dlm/watch_dir} \
+          --target-name ${TARGET_NAME:-dlm-archive} \
+          --migration-url ${MIGRATION_URL:-http://dlm_migration:8004} \
+          --ingest-url ${INGEST_URL:-http://dlm_ingest:8001} \
+          --readiness-probe-file /tmp/dlm-client-ready \
+          --skip-rclone-access-check-on-register \
+          --use-polling-watcher"
+        ;;
+    "configdb-watcher")
+        # Keep the “inline env var + command” style your colleague used,
+        # but allow overriding SDP_CONFIG_HOST from the environment.
+        CMD="SDP_CONFIG_HOST='${SDP_CONFIG_HOST:-etcd}' dlm-configdb-watcher \
+          --source-name ${SOURCE_NAME:-SDPBuffer} \
+          --source-root ${SOURCE_ROOT:-/dlm/product_dir} \
+          --target-name ${TARGET_NAME:-dlm-archive} \
+          --storage-url ${STORAGE_URL:-http://dlm_storage:8003} \
+          --migration-url ${MIGRATION_URL:-http://dlm_migration:8004} \
+          --ingest-url ${INGEST_URL:-http://dlm_ingest:8001}"
+        ;;
+    *)
+        echo "Usage: entrypoint.sh <directory-watcher|configdb-watcher>"
+        exit 0;;
+esac
+
+source /app/.venv/bin/activate
+echo "Executing command: $CMD"
+eval $CMD

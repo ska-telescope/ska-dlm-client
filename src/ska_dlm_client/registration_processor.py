@@ -144,7 +144,9 @@ class RegistrationProcessor:
 
         result: str | None = None
         with api_client.ApiClient(migration_configuration) as migration_api_client:
-            logger.info("Initiating migration of data item %s", item_name)
+            logger.info(
+                "Initiating migration of data_item '%s' to %s", item_name, destination_storage_name
+            )
             api_migration = migration_api.MigrationApi(migration_api_client)
             api_migration.api_client.configuration.host = migration_configuration.host
             try:
@@ -179,19 +181,19 @@ class RegistrationProcessor:
 
         # --- Common config needed by BOTH Directory Watcher and ConfigDB Watcher
         ingest_configuration = getattr(cfg, "ingest_configuration", None)
-        ingest_server_url = getattr(cfg, "ingest_server_url", None)
+        ingest_url = getattr(cfg, "ingest_url", None)
 
         # storage_name for Directory Watcher; source_storage for ConfigDB Watcher
         storage_name = getattr(cfg, "storage_name", None)
         if storage_name is None:
             storage_name = getattr(cfg, "source_storage", None)
 
-        if ingest_configuration is None or ingest_server_url is None or storage_name is None:
+        if ingest_configuration is None or ingest_url is None or storage_name is None:
             logger.error(
                 "RegistrationProcessor config missing required ingest settings "
-                "(ingest_configuration=%r, ingest_server_url=%r, storage_name=%r)",
+                "(ingest_configuration=%r, ingest_url=%r, storage_name=%r)",
                 ingest_configuration,
-                ingest_server_url,
+                ingest_url,
                 storage_name,
             )
             return None
@@ -204,7 +206,7 @@ class RegistrationProcessor:
 
         with api_client.ApiClient(ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
-            api_ingest.api_client.configuration.host = ingest_server_url
+            api_ingest.api_client.configuration.host = ingest_url
             try:
                 logger.info(
                     "Using URI: %s for data_item registration",

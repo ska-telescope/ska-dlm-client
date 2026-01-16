@@ -79,8 +79,8 @@ def main():
         os.mkdir(output_directory)
         logging.info(f"Directory '{output_directory}' created successfully.")
     except FileExistsError:
-        logging.warn(f"Directory '{output_directory}' already exists.")
-        logging.warn(f"Any files of the same name will be over written.")
+        logging.warning(f"Directory '{output_directory}' already exists.")
+        logging.warning("Any files of the same name will be over written.")
 
     for service_key in OPENAPI_SPECS:
         service_value = OPENAPI_SPECS[service_key]
@@ -89,7 +89,7 @@ def main():
 
         url_stream = stream_from_url(OPENAPI_SPEC_URL)
         if url_stream is None:
-            logging.error(f"Failed to open connection to DLM service, cannot retrieve specs.")
+            logging.error("Failed to open connection to DLM service, cannot retrieve specs.")
             exit(1)
         new_field_spec = [service_key]
         add_field_to_openapi_spec(service_key, url_stream, output_directory, new_field_spec)

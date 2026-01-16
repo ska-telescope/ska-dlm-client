@@ -62,7 +62,7 @@ def main():
         watch(
             kafka_broker_url=args.kafka_broker_url,
             kafka_topic=args.kafka_topic,
-            ingest_server_url=args.ingest_server_url,
+            ingest_url=args.ingest_url,
             storage_name=args.storage_name,
             kafka_base_dir=args.kafka_base_dir,
             check_rclone_access=args.check_rclone_access,
@@ -87,14 +87,14 @@ async def _start_consumer(consumer: aiokafka.AIOKafkaConsumer, max_retries: int 
 
 
 async def post_dlm_data_item(
-    ingest_server_url: str,
+    ingest_url: str,
     storage_name: str,
     ingest_event_data: dict,
     kafka_base_dir: str,
     check_rclone_access: bool = True,
 ):
     """Call DLM via the OpenAPI spec."""
-    ingest_configuration = configuration.Configuration(host=ingest_server_url)
+    ingest_configuration = configuration.Configuration(host=ingest_url)
     with api_client.ApiClient(ingest_configuration) as ingest_api_client:
         api_ingest = ingest_api.IngestApi(ingest_api_client)
         try:
@@ -130,7 +130,7 @@ async def post_dlm_data_item(
 async def watch(  # pylint: disable=too-many-arguments, too-many-positional-arguments
     kafka_broker_url: list[str],
     kafka_topic: list[str],
-    ingest_server_url: str,
+    ingest_url: str,
     storage_name: str,
     kafka_base_dir: str,
     check_rclone_access: bool,
@@ -153,16 +153,16 @@ async def watch(  # pylint: disable=too-many-arguments, too-many-positional-argu
 
                 # Call the DLM (to be handled separately)
                 logger.debug(
-                    "calling DLM with ingest_server_url=%s, storage_name=%s, "
+                    "calling DLM with ingest_url=%s, storage_name=%s, "
                     "ingest_event_data=%s, kafka_base_dir=%s, check_rclone_access=%s",
-                    ingest_server_url,
+                    ingest_url,
                     storage_name,
                     ingest_event_data,
                     kafka_base_dir,
                     check_rclone_access,
                 )
                 await post_dlm_data_item(
-                    ingest_server_url=ingest_server_url,
+                    ingest_url=ingest_url,
                     storage_name=storage_name,
                     ingest_event_data=ingest_event_data,
                     kafka_base_dir=kafka_base_dir,

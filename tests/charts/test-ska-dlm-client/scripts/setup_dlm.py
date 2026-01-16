@@ -35,7 +35,7 @@ LOCATION_TYPE = LocationType.LOW_INTEGRATION
 LOCATION_COUNTRY = LocationCountry.AU
 LOCATION_CITY = "Marksville"
 LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
-STORAGE_CONFIG = {"name": "data", "type": "local", "parameters": {}}
+STORAGE_CONFIG = {"name": "dir-watcher", "type": "local", "root_path": "", "parameters": {}}
 STORAGE_INTERFACE = StorageInterface.POSIX
 STORAGE_TYPE = StorageType.FILESYSTEM
 
@@ -143,7 +143,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "-s",
-        "--storage-server-url",
+        "--storage-url",
         type=str,
         required=True,
         help="Storage service URL.",
@@ -162,7 +162,7 @@ def main():
     """Start the integration/developer setup test application."""
     parser = create_parser()
     args = parser.parse_args()
-    storage_configuration = Configuration(host=args.storage_server_url)
+    storage_configuration = Configuration(host=args.storage_url)
     setup_testing(args.storage_name, storage_configuration, args.storage_root_directory)
 
 

@@ -7,7 +7,7 @@ CLI call example::
 
 
     $ dlm_directory_watcher
-    usage: dlm_directory_watcher [-h] -d DIRECTORY_TO_WATCH -i INGEST_SERVER_URL
+    usage: dlm_directory_watcher [-h] -d DIRECTORY_TO_WATCH -i INGEST_URL
                                  -n STORAGE_NAME [-p REGISTER_DIR_PREFIX]
                                  [--use-polling-watcher | --no-use-polling-watcher]
                                  [--use-status-file | --no-use-status-file]

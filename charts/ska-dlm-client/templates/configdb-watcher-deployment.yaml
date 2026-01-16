@@ -1,0 +1,85 @@
+{{- if .Values.configdb_watcher.enabled -}}
+{{- $host := .Values.configdb_watcher.sdp_config.host | default "" | trim -}}
+{{- $local := .Values.configdb_watcher.sdp_config.etcd.enabled -}}
+{{- $defaultEtcdSvc := printf "%s-etcd" (include "ska-dlm-client.fullname" .) -}}
+
+{{- /* 1) User selected BOTH local and external */ -}}
+{{- if and $local (ne $host "") -}}
+{{- fail "Invalid config: choose ONE etcd option for configdb_watcher. Either (a) external: set configdb_watcher.sdp_config.host and set configdb_watcher.sdp_config.etcd.enabled=false, OR (b) local: leave configdb_watcher.sdp_config.host empty and set configdb_watcher.sdp_config.etcd.enabled=true." -}}
+{{- end -}}
+
+{{- /* 2) User selected NEITHER local nor external */ -}}
+{{- if and (not $local) (eq $host "") -}}
+{{- fail "Invalid config: configdb_watcher.enabled=true but no etcd configured. Either set configdb_watcher.sdp_config.host (external etcd) OR set configdb_watcher.sdp_config.etcd.enabled=true (deploy local etcd)." -}}
+{{- end -}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ska-dlm-client.fullname" . }}-configdb-watcher
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ska-dlm-client.configdb-watcher.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.configdb_watcher.replicas }}
+  selector:
+    matchLabels:
+      component: {{ .Values.configdb_watcher.component }}
+      subsystem: {{ .Values.configdb_watcher.subsystem }}
+  template:
+    metadata:
+      labels:
+        {{- include "ska-dlm-client.configdb-watcher.labels" . | nindent 8 }}
+    spec:
+      dnsPolicy: ClusterFirst
+      containers:
+        - name: configdb-watcher
+          image: {{ .Values.ska_dlm_client.image }}:{{ .Values.ska_dlm_client.version }}
+          imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
+
+          # Where ska_sdp_config.Config() should look for etcd / ConfigDB
+          env:
+            - name: SDP_CONFIG_HOST
+              value: {{ .Values.configdb_watcher.sdp_config.host | default $defaultEtcdSvc | quote }}
+            - name: SDP_CONFIG_PORT
+              value: {{ .Values.configdb_watcher.sdp_config.port | quote }}
+            {{- if .Values.configdb_watcher.sdp_config.path | default "" | trim }}
+            - name: SDP_CONFIG_PATH
+              value: {{ .Values.configdb_watcher.sdp_config.path | quote }}
+            {{- end }}
+
+          command:
+            - "dlm-configdb-watcher"
+          args:
+          {{- if .Values.configdb_watcher.include_existing }}
+            - "--include-existing"
+          {{- end }}
+            - "--ingest-url"
+            - {{ .Values.configdb_watcher.ingest_server_url | quote }}
+            - "--source-name"
+            - {{ .Values.configdb_watcher.source_storage | quote }}
+            - "--storage-url"
+            - {{ .Values.configdb_watcher.storage_server_url | quote }}
+            - "--source-root"
+            - {{ .Values.configdb_watcher.storage_root_directory | quote }}
+          {{- if .Values.configdb_watcher.migration_destination_storage_name }}
+            - "--target-name"
+            - {{ .Values.configdb_watcher.migration_destination_storage_name | quote }}
+          {{- end }}
+          {{- if .Values.configdb_watcher.migration_server_url }}
+            - "--migration-url"
+            - {{ .Values.configdb_watcher.migration_server_url | quote }}
+          {{- end }}
+
+          volumeMounts:
+            - name: data-product-storage
+              mountPath: /dlm/product_dir
+              {{- if $.Values.global.dataProduct.pvc.read_only }}
+              readOnly: true
+              {{- end }}
+      volumes:
+        - name: data-product-storage
+          persistentVolumeClaim:
+            claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
+
+{{- end }}

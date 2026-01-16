@@ -37,14 +37,14 @@ class StartupVerification:  # pylint: disable=too-few-public-methods
     """Class to perform the startup verification."""
 
     _dir_to_watch: str
-    _request_server_url: str
+    _request_url: str
     _storage_name: str
     data_item_name: str = None
 
-    def __init__(self, directory_to_watch: str, storage_name: str, request_server_url: str):
+    def __init__(self, directory_to_watch: str, storage_name: str, request_url: str):
         """Initialize the StartupVerification class."""
         self._dir_to_watch = directory_to_watch
-        self._request_server_url = request_server_url
+        self._request_url = request_url
         self._storage_name = storage_name
         now = datetime.now()
         timestamp: int = int(now.timestamp())
@@ -71,7 +71,7 @@ class StartupVerification:  # pylint: disable=too-few-public-methods
 
     def verify_registration(self) -> bool:
         """Verify the data item was added by querying the DLM."""
-        request_configuration = configuration.Configuration(host=self._request_server_url)
+        request_configuration = configuration.Configuration(host=self._request_url)
         with api_client.ApiClient(request_configuration) as request_api_client:
             api_request = request_api.RequestApi(request_api_client)
             try:
@@ -92,14 +92,14 @@ def main():
     try:
         parser = argparse.ArgumentParser(prog="dlm_startup_verification")
         cmd_line_parameters = CmdLineParameters(
-            parser, add_directory_to_watch=True, add_storage_name=True, add_request_server_url=True
+            parser, add_directory_to_watch=True, add_storage_name=True, add_request_url=True
         )
         cmd_line_parameters.parse_arguments()
 
         startup_verification = StartupVerification(
             directory_to_watch=cmd_line_parameters.directory_to_watch,
             storage_name=cmd_line_parameters.storage_name,
-            request_server_url=cmd_line_parameters.request_server_url,
+            request_url=cmd_line_parameters.request_url,
         )
         verification_passed = startup_verification.verify_registration()
     finally:

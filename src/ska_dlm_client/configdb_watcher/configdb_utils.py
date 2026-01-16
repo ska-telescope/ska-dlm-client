@@ -4,10 +4,12 @@
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from typing import Optional
 
 from ska_sdp_config import Config, ConfigCollision
+from ska_sdp_config.backend.etcd3 import Etcd3Backend
 from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
 logging.basicConfig(level=logging.INFO)
@@ -127,3 +129,47 @@ def update_dependency_state(txn, dep: Dependency, status: str = "WORKING") -> No
         txn.dependency.state(dep).create({"status": status})
     except ConfigCollision:
         txn.dependency.state(dep).update({"status": status})
+
+
+def log_configdb_backend_details(config: Config) -> None:
+    """Log backend and environment details for the SDP ConfigDB connection."""
+    backend = getattr(config, "_backend", None)
+
+    sdp_backend = os.getenv("SDP_CONFIG_BACKEND")
+    sdp_host = os.getenv("SDP_CONFIG_HOST", "etcd")
+    sdp_port = os.getenv("SDP_CONFIG_PORT", "2379")
+    sdp_path = os.getenv("SDP_CONFIG_PATH")
+
+    os.environ["SDP_CONFIG_HOST"] = sdp_host  # make sure that this is in sync
+
+    if isinstance(backend, Etcd3Backend):
+        client = getattr(backend, "_client", None)
+        root = getattr(backend, "_root", None)
+
+        # MultiEndpointEtcd3Client usually has some notion of endpoints;
+        # this is defensive so it won't explode if the attribute name changes.
+        endpoints = None
+        if client is not None:
+            endpoints = getattr(client, "endpoints", None)
+            if endpoints is None:
+                endpoints = getattr(client, "_endpoints", None)
+
+        logger.info(
+            "ConfigDB backend: etcd3 "
+            "(env backend=%r, host=%r, port=%r, path=%r, root=%r, endpoints=%r)",
+            sdp_backend,
+            sdp_host,
+            sdp_port,
+            sdp_path,
+            root,
+            endpoints,
+        )
+    else:
+        logger.info(
+            "ConfigDB backend: %s (env backend=%r, host=%r, port=%r, path=%r)",
+            type(backend).__name__ if backend is not None else None,
+            sdp_backend,
+            sdp_host,
+            sdp_port,
+            sdp_path,
+        )

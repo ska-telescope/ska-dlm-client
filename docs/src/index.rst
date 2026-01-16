@@ -80,15 +80,15 @@ ska_dlm_client
 - ``storage_name``: The DLM storage location name used during data registration.
 - ``storage_root_directory``: Used as the root directory when generating URIs for DLM DB.
 - ``securityContext``: Kubernetes context updated during deployment.
-- ``ingest_server_url``: Full HTTP URL of the ingest server.
-- ``storage_server_url``: Full HTTP URL of the storage server.
-- ``request_server_url``: Full HTTP URL of the request server.
+- ``ingest_url``: Full HTTP URL of the ingest server.
+- ``storage_url``: Full HTTP URL of the storage server.
+- ``request_url``: Full HTTP URL of the request server.
 
 directory_watcher
 ~~~~~~~~~~~~~~~~~
 
 - ``enabled``: Whether to deploy the ``directory-watcher`` component.
-- ``directory_to_watch``: Filesystem path to monitor for new data products. Must exist within the mounted storage (e.g., ``/data/dlm/watch_dir``).
+- ``directory_to_watch``: Filesystem path to monitor for new data products. Must exist within the mounted storage (e.g., ``/dlm/watch_dir``).
 - ``storage_root_directory``: Root directory used to generate URIs for the DLM database. Should match ``ska_dlm_client.storage_root_directory``.
 - ``skip_rclone_access_check_on_register``: If ``true``, skips verifying rclone access before attempting to register the file.
 - ``register_contents_of_watch_directory``: If ``true``, registers all contents of the watch directory at startup, not just newly detected files.
@@ -103,13 +103,13 @@ kafka_watcher
 - ``kafka_broker_url``: The Kafka bootstrap server to connect to. Required in production.
 
   - **In production:**
-    - Keep ``kafka_server_local`` as ``false``
+    - Keep ``kafka_local`` as ``false``
     - Provide the following explicitly:
       - ``kafka_broker_url`` as ``<service>.<namespace>:<port>`` (e.g., ``ska-sdp-kafka.dp-shared:9092``)
-      - ``ska_dlm_client.ingest_server_url`` as ``http://<service>.<namespace>:<port>`` (e.g., ``http://ska-dlm-dev-ingest.dp-shared:80``)
+      - ``ska_dlm_client.ingest_url`` as ``http://<service>.<namespace>:<port>`` (e.g., ``http://ska-dlm-dev-ingest.dp-shared:80``)
   - **In local development:**
-    - Set ``kafka_server_local: true``
-    - Set ``ska_dlm_client.ingest_server_url`` to a local service (e.g., ``http://ska-dlm-dev-ingest:80``)
+    - Set ``kafka_local: true``
+    - Set ``ska_dlm_client.ingest_url`` to a local service (e.g., ``http://ska-dlm-dev-ingest:80``)
     - The Helm chart will automatically construct internal URLs using Kubernetes DNS:
       - Kafka broker URL: ``<service>.<namespace>:<port>``
       - Ingest URL: ``http://<service>.<namespace>:<port>``
@@ -144,7 +144,7 @@ Testing
 
 A Helm chart has been created for testing: ``tests/charts/test-ska-dlm-client``.
 
-The test chart is used to configure an existing DLM instance running in the same cluster namespace. Additional tests are planned (see ticket YAN-1910).
+The test chart is used to configure an existing DLM instance running in the same cluster namespace. 
 
 Usage:
 

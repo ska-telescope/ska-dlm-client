@@ -1,0 +1,56 @@
+{{- if and .Values.configdb_watcher.enabled .Values.configdb_watcher.sdp_config.etcd.enabled -}}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ska-dlm-client.fullname" . }}-etcd
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ska-dlm-client.etcd.labels" . | nindent 4 }}
+spec:
+  ports:
+    - name: client
+      port: 2379
+      targetPort: 2379
+  selector:
+    # Must match the pod template labels below
+    component: etcd
+    subsystem: data-lifecycle-management
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ska-dlm-client.fullname" . }}-etcd
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ska-dlm-client.etcd.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      # Must also match pod template labels
+      component: etcd
+      subsystem: data-lifecycle-management
+  template:
+    metadata:
+      labels:
+        {{- include "ska-dlm-client.etcd.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: etcd
+          image: "{{ .Values.configdb_watcher.sdp_config.etcd.image }}:{{ .Values.configdb_watcher.sdp_config.etcd.tag }}"
+          ports:
+            - name: client
+              containerPort: 2379
+            - name: peer
+              containerPort: 2380
+          command:
+            - /usr/bin/etcd
+            - "--advertise-client-urls=http://0.0.0.0:2379"
+            - "--listen-client-urls=http://0.0.0.0:2379"
+            - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
+            - "--listen-peer-urls=http://0.0.0.0:2380"
+            - "--initial-cluster=default=http://0.0.0.0:2380"
+
+{{- end }}

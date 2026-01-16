@@ -1,6 +1,7 @@
 """Tests for directory watcher."""
 
 import asyncio
+import os
 import tempfile
 from pathlib import Path
 
@@ -22,7 +23,7 @@ class MockCmdLineParameters:
 
     def __init__(self):
         """Initialize with default values."""
-        self.migration_server_url = None
+        self.migration_url = None
         self.migration_destination_storage_name = None
         self.perform_actual_ingest_and_migration = True
 
@@ -36,8 +37,8 @@ class MockCmdLineParameters:
 class TestDirectoryWatcher:
     """DirectoryWatcher unit test stubs."""
 
-    STORAGE_NAME = "data"
-    INGREST_SERVER_URL = "http://localhost:8001"
+    STORAGE_NAME = "dir-watcher"
+    INGREST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
     ROOT_DIRECTORY = "/dlm"
 
     add_path_successful = False
@@ -51,11 +52,11 @@ class TestDirectoryWatcher:
             [
                 "--directory-to-watch",
                 cls.the_watch_dir,
-                "--ingest-server-url",
-                cls.INGREST_SERVER_URL,
-                "--storage-name",
+                "--ingest-url",
+                cls.INGREST_URL,
+                "--source-name",
                 cls.STORAGE_NAME,
-                "--storage-root-directory",
+                "--source-root",
                 cls.ROOT_DIRECTORY,
             ]
         )
@@ -71,8 +72,8 @@ class TestDirectoryWatcher:
     def test_process_args(self) -> None:
         """Test case for init_data_item_ingest_init_data_item_post."""
         assert self.parsed.directory_to_watch == self.the_watch_dir
-        assert self.parsed.ingest_server_url == self.INGREST_SERVER_URL
-        assert self.parsed.storage_name == self.STORAGE_NAME
+        assert self.parsed.ingest_url == self.INGREST_URL
+        assert self.parsed.source_name == self.STORAGE_NAME
         assert self.parsed.reload_status_file is False
         assert self.parsed.status_file_filename == STATUS_FILE_FILENAME
         assert self.parsed.use_status_file is False
@@ -81,7 +82,7 @@ class TestDirectoryWatcher:
     def test_config_generation(self) -> None:
         """Test the correct config is generated from the command line args."""
         assert self.config.directory_to_watch == self.the_watch_dir
-        assert self.config.ingest_server_url == self.INGREST_SERVER_URL
+        assert self.config.ingest_url == self.INGREST_URL
         assert self.config.storage_name == self.STORAGE_NAME
         assert self.config.reload_status_file is False
         assert (
@@ -93,7 +94,7 @@ class TestDirectoryWatcher:
         assert isinstance(self.config.ingest_configuration, Configuration)
 
         # Test migration-related attributes
-        assert self.config.migration_server_url is None
+        assert self.config.migration_url is None
         assert self.config.migration_destination_storage_name is None
         assert self.config.perform_actual_ingest_and_migration is True
 
@@ -117,12 +118,12 @@ class TestDirectoryWatcher:
             )
         asyncio.get_event_loop().create_task(directory_watcher.watch())
         # Now let the directory_watcher start and listen on given directory
-        await asyncio.sleep(2)
+        await asyncio.sleep(2)  # TODO: DMAN-193
         # Add a file to the watcher directory
         with open(a_temp_file, "w", encoding="utf-8") as the_file:
             the_file.write("nothing string")
         # Wait again now to allow the watcher to process the added file
-        await asyncio.sleep(2)
+        await asyncio.sleep(2)  # TODO: DMAN-193
         a_temp_file_relative_path = a_temp_file.replace(f"{self.the_watch_dir}/", "")
         # On MacOS the system messes with the path by adding a /private
         absolute_path = registration_processor.absolute_path.replace("/private", "")

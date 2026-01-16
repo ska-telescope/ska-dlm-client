@@ -37,7 +37,7 @@ see https://kubernetes.io/docs/concepts/overview/working-with-objects/common-lab
 */}}
 {{- define "ska-dlm-client.labels" }}
 {{- if .Values.global.labels}}
-app.kubernetes.io/name: {{ coalesce .Values.global.labels.app "ska-dlm-client.name" }}
+app.kubernetes.io/name: {{ coalesce .Values.global.labels.app (include "ska-dlm-client.name" .) }}
 {{- else }}
 app.kubernetes.io/name: {{ include "ska-dlm-client.name" . }}
 {{- end }}
@@ -55,6 +55,26 @@ Directory watcher labels
 {{- include "ska-dlm-client.labels" . }}
 component: {{ .Values.directory_watcher.component }}
 subsystem: {{ .Values.directory_watcher.subsystem }}
+intent: production
+{{- end }}
+
+{{/*
+ConfigDB watcher labels
+*/}}
+{{- define "ska-dlm-client.configdb-watcher.labels" }}
+{{- include "ska-dlm-client.labels" . }}
+component: {{ .Values.configdb_watcher.component }}
+subsystem: {{ .Values.configdb_watcher.subsystem }}
+intent: production
+{{- end }}
+
+{{/*
+etcd labels
+*/}}
+{{- define "ska-dlm-client.etcd.labels" }}
+{{- include "ska-dlm-client.labels" . }}
+component: etcd
+subsystem: data-lifecycle-management
 intent: production
 {{- end }}
 

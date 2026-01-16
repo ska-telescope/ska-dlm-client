@@ -1,0 +1,49 @@
+include:
+  - path: services.docker-compose.yaml
+  - path: test_services.docker-compose.yaml
+
+services:
+  dlm_directory_watcher:
+    platform: linux/amd64
+    image: dlm_directory_watcher
+    container_name: dlm_directory_watcher
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    entrypoint:
+      - /entrypoint.sh
+      - directory-watcher
+    volumes:
+      - shared-tmpfs:/dlm
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - dlm_network
+  dlm_configdb_watcher:
+    platform: linux/amd64
+    image: dlm_configdb_watcher
+    container_name: dlm_configdb_watcher
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    entrypoint:
+      - /entrypoint.sh
+      - configdb-watcher
+    volumes:
+      - shared-tmpfs:/dlm
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - dlm_network
+    depends_on:
+      - etcd
+  setup_storage_location:
+    platform: linux/amd64
+    image: dlm_directory_watcher
+    container_name: dlm_setup_storage_location
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    # NOTE: the IP address is fixed here but need to work out how to connect in
+    # the general case via a service name or similar.
+    entrypoint: python3 -m ska_dlm_client.register_storage_location.main --storage-name data --storage-root-directory /dlm --storage-url "http://dlm_storage:8003"
+    networks:
+      - dlm_network

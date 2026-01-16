@@ -15,10 +15,9 @@ packages = [{include="ska_dlm_client", from="src"}]
 
 [tool.poetry.scripts]
 dlm-directory-watcher = "ska_dlm_client.directory_watcher.main:main"
-dlm-kafka-watcher = "ska_dlm_client.kafka_watcher.main:main"
+dlm-configdb-watcher = "ska_dlm_client.configdb_watcher.main:main"
 dlm-register-storage-location = "ska_dlm_client.register_storage_location.main:main"
 dlm-startup-verification = "ska_dlm_client.startup_verification.main:main"
-sdp-config-watcher = "ska_dlm_client.sdp_ingest.main:main"
 
 [[tool.poetry.source]]
 name = 'skao'
@@ -40,9 +39,10 @@ pyyaml = "^6.0.2"
 ska-sdp-dataproduct-metadata = ">=0.7.0"
 watchdog = "^6.0.0"
 crc32c = "^2.7.1"
-ska-sdp-config = "^1.3.1"
+ska-sdp-config = "==1.3.1"
 athreading = "^0.2.0"
 async-timeout = "^5.0.1"
+jsonargparse = "^4.44.0"
 
 [tool.poetry.group.test.dependencies]
 black = "^24.8.0"

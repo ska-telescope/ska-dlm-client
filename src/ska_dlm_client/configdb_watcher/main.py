@@ -3,37 +3,56 @@
 import argparse
 import asyncio
 import logging
+import os
 from dataclasses import dataclass
 
 import athreading
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Flow
 
+from ska_dlm_client.configdb_watcher.configdb_utils import (
+    create_sdp_migration_dependency,
+    get_data_product_dir,
+    update_dependency_state,
+)
+from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
 from ska_dlm_client.openapi.configuration import Configuration
+from ska_dlm_client.register_storage_location.main import setup_volume
 from ska_dlm_client.registration_processor import (
     RegistrationProcessor,
     _directory_contains_metadata_file,
     _item_for_single_file_with_metadata,
     _measurement_set_directory_in,
 )
-from ska_dlm_client.sdp_ingest.configdb_utils import (
-    create_sdp_migration_dependency,
-    get_data_product_dir,
-    update_dependency_state,
-)
-from ska_dlm_client.sdp_ingest.configdb_watcher import watch_dataproduct_status
 
-logger = logging.getLogger("ska_dlm_client.sdp_ingest")
+logger = logging.getLogger("ska_dlm_client.configdb_watcher")
+
+if "SOURCE_NAME" in os.environ:
+    RCLONE_CONFIG_SOURCE = None
+else:
+    RCLONE_CONFIG_SOURCE = {
+        "name": "sdp-watcher",
+        "type": "sftp",
+        "parameters": {
+            "host": "dlm_configdb_watcher",
+            "key_file": "/root/.ssh/id_rsa",
+            "shell_type": "unix",
+            "type": "sftp",
+            "user": "ska-dlm",
+        },
+    }
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass
 class SDPIngestConfig:
     """Runtime configuration for the SDP→DLM ConfigDB Watcher."""
 
     include_existing: bool
-    ingest_server_url: str
+    ingest_url: str
     ingest_configuration: Configuration
-    source_storage: str
+    storage_url: str
+    storage_name: str
     storage_root_directory: str
     migration_destination_storage_name: str | None = None
     migration_configuration: Configuration | None = None
@@ -41,27 +60,28 @@ class SDPIngestConfig:
 
 def process_args(args: argparse.Namespace) -> SDPIngestConfig:
     """Collect all command line parameters and create an SDPIngestConfig object."""
-    ingest_configuration = Configuration(host=args.ingest_server_url)
+    ingest_configuration = Configuration(host=args.ingest_url)
 
     # Only configure migration if the user supplied a migration server URL
-    migration_configuration = (
-        Configuration(host=args.migration_server_url)
-        if args.migration_server_url is not None
-        else None
-    )
+    if args.migration_url is not None:
+        migration_configuration = Configuration(host=args.migration_url)
+    else:
+        migration_configuration = None
+        logger.warning("No migration server specified. Unable to perform migrations.")
 
     return SDPIngestConfig(
         include_existing=args.include_existing,
-        ingest_server_url=args.ingest_server_url,
+        ingest_url=args.ingest_url,
         ingest_configuration=ingest_configuration,
-        source_storage=args.source_storage,
-        storage_root_directory=args.storage_root_directory,
-        migration_destination_storage_name=args.migration_destination_storage_name,
+        storage_url=args.storage_url,
+        storage_name=args.source_name,
+        storage_root_directory=args.source_root,
+        migration_destination_storage_name=args.target_name,
         migration_configuration=migration_configuration,
     )
 
 
-async def _process_completed_flow(
+async def _process_completed_flow(  # noqa: C901
     configdb: Config,
     dataproduct_key: Flow.Key,
     ingest_config: SDPIngestConfig,
@@ -83,7 +103,8 @@ async def _process_completed_flow(
         """Async wrapper for updating Dependency state."""
         for txn in configdb.txn():
             update_dependency_state(txn, new_dep, status=status)
-            logger.info("Dependency %s status set to %s.", new_dep, status)
+            state = txn.dependency.state(new_dep).get()
+            logger.info("Dependency %s status set to %s.", new_dep, state.get("status"))
 
     # Resolve the source directory from the Flow sink
     src_dir = get_data_product_dir(configdb, dataproduct_key)
@@ -92,9 +113,14 @@ async def _process_completed_flow(
         dataproduct_key,
         src_dir,
     )
-
+    if os.path.exists(src_dir) is False or not os.path.isdir(src_dir):
+        logger.error("Data-product source directory does not exist or is not a directory.")
+        return
     # Identify the .ms file
     ms_file_name = _measurement_set_directory_in(src_dir)
+    if ms_file_name is None:
+        logger.error("No Measurement Set found in directory %s", src_dir)
+        return
     logger.info("Found MS file: %s", ms_file_name)
 
     # Create a DLM dependency (no state yet)
@@ -165,13 +191,23 @@ async def _process_completed_flow(
         await _aupdate_dependency_state(dep_status)
 
 
-async def sdp_to_dlm_ingest_and_migrate(ingest_config: SDPIngestConfig) -> None:
+async def sdp_to_dlm_ingest_and_migrate(
+    ingest_config: SDPIngestConfig, dev_test_mode=False
+) -> None:
     """Ingest and migrate SDP data-products using DLM."""
     configdb = Config()  # Share one handle between writer & watcher
+    if not dev_test_mode:
+        # setup the source volume
+        _ = setup_volume(
+            watcher_config=ingest_config,
+            api_configuration=ingest_config.ingest_configuration,
+            rclone_config=RCLONE_CONFIG_SOURCE,
+            storage_url=ingest_config.storage_url,
+        )
     logger.info(
-        "Starting SDP Config watcher (include_existing=%s, source_storage=%s)...",
+        "Starting SDP Config watcher (include_existing=%s, storage_name=%s)...",
         ingest_config.include_existing,
-        ingest_config.source_storage,
+        ingest_config.storage_name,
     )
 
     async with watch_dataproduct_status(
@@ -203,7 +239,7 @@ def main() -> None:
     )
     parser.add_argument(
         "-i",
-        "--ingest-server-url",
+        "--ingest-url",
         type=str,
         default="http://dlm_ingest:8001",
         help=(
@@ -211,14 +247,22 @@ def main() -> None:
         ),
     )
     parser.add_argument(
-        "--source-storage",
+        "--source-name",
         type=str,
         required=True,
         help="Source storage name (e.g., 'SDPBuffer').",
     )
     parser.add_argument(
+        "--storage-url",
+        type=str,
+        default="http://dlm_storage:8003",
+        help=(
+            "Storage server URL including the service port. " "Default 'http://dlm_storage:8003'."
+        ),
+    )
+    parser.add_argument(
         "-r",
-        "--storage-root-directory",
+        "--source-root",
         type=str,
         default="",
         help=(
@@ -227,7 +271,7 @@ def main() -> None:
         ),
     )
     parser.add_argument(
-        "--migration-destination-storage-name",
+        "--target-name",
         type=str,
         default=None,
         help=(
@@ -237,7 +281,7 @@ def main() -> None:
     )
     parser.add_argument(
         "-m",
-        "--migration-server-url",
+        "--migration-url",
         type=str,
         default=None,
         help=(

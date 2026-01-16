@@ -19,17 +19,15 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
 
     add_directory_to_watch: bool = False
     add_storage_name: bool = False
-    add_ingest_server_url: bool = False
-    add_request_server_url: bool = False
+    add_ingest_url: bool = False
+    add_request_url: bool = False
     add_readiness_probe_file: bool = False
     add_dev_test_mode: bool = False
     directory_to_watch: str = None
     storage_name: str = None
-    ingest_server_url: str = None
-    migration_server_url: str = None
-    request_server_url: str = None
+    ingest_url: str = None
+    request_url: str = None
     readiness_probe_file: str = None
-    migration_destination_storage_name: str = None
     dev_test_mode: bool = False
     do_not_perform_actual_ingest_and_migration: bool = False
     dir_updates_wait_time: int = 0
@@ -42,11 +40,9 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         parser: argparse.ArgumentParser,
         add_directory_to_watch: bool = False,
         add_storage_name: bool = False,
-        add_ingest_server_url: bool = False,
-        add_migration_server_url: bool = False,
-        add_request_server_url: bool = False,
+        add_ingest_url: bool = False,
+        add_request_url: bool = False,
         add_readiness_probe_file: bool = False,
-        add_migration_destination_storage_name: bool = False,
         add_do_not_perform_actual_ingest_and_migration: bool = False,
         add_dir_updates_wait_time: bool = False,
     ):
@@ -58,21 +54,15 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         if add_storage_name:
             self.add_storage_name_arguments(parser)
             self.add_storage_name = True
-        if add_ingest_server_url:
-            self.add_ingest_server_url_arguments(parser)
-            self.add_ingest_server_url = True
-        if add_migration_server_url:
-            self.add_migration_server_url_arguments(parser)
-            self.add_migration_server_url = True
-        if add_request_server_url:
-            self.add_request_server_url_arguments(parser)
-            self.add_request_server_url = True
+        if add_ingest_url:
+            self.add_ingest_url_arguments(parser)
+            self.add_ingest_url = True
+        if add_request_url:
+            self.add_request_url_arguments(parser)
+            self.add_request_url = True
         if add_readiness_probe_file:
             self.add_readiness_probe_file_arguments(parser)
             self.add_readiness_probe_file = True
-        if add_migration_destination_storage_name:
-            self.add_migration_destination_storage_name_arguments(parser)
-            self.add_migration_destination_storage_name = True
         if add_do_not_perform_actual_ingest_and_migration:
             if not self.add_dev_test_mode:
                 self.add_dev_test_mode_arguments(parser)
@@ -89,26 +79,11 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             args = self._parser.parse_args()
         self.directory_to_watch = args.directory_to_watch if self.add_directory_to_watch else None
         self.storage_name = args.storage_name if self.add_storage_name else None
-        self.ingest_server_url = args.ingest_server_url if self.add_ingest_server_url else None
-        self.migration_server_url = (
-            args.migration_server_url if self.add_migration_server_url else None
-        )
-        self.request_server_url = args.request_server_url if self.add_request_server_url else None
+        self.ingest_url = args.ingest_url if self.add_ingest_url else None
+        self.request_url = args.request_url if self.add_request_url else None
         self.readiness_probe_file = (
             args.readiness_probe_file if self.add_readiness_probe_file else None
         )
-        self.migration_destination_storage_name = (
-            args.migration_destination_storage_name
-            if self.add_migration_destination_storage_name
-            else None
-        )
-        if self.migration_destination_storage_name and not self.migration_server_url:
-            error_msg = (
-                "migration_destination_storage_name can only be used when "
-                "migration_server_url is set"
-            )
-            logger.error(error_msg)
-            raise ValueError(error_msg)
         self.dev_test_mode = args.dev_test_mode if self.add_dev_test_mode else False
 
         self.do_not_perform_actual_ingest_and_migration = (
@@ -150,36 +125,26 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         """Update a parser to add a storage name argument."""
         parser.add_argument(
             "-n",
-            "--storage-name",
+            "--source-name",
             type=str,
             required=True,
             help="The name by which the DLM system knows the storage as.",
         )
 
-    def add_ingest_server_url_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_ingest_url_arguments(self, parser: argparse.ArgumentParser) -> None:
         """Update a parser to add an ingest server url argument."""
         parser.add_argument(
             "-i",
-            "--ingest-server-url",
+            "--ingest-url",
             type=str,
             required=True,
             help="Ingest server URL including the service port.",
         )
 
-    def add_migration_server_url_arguments(self, parser: argparse.ArgumentParser) -> None:
-        """Update a parser to add an ingest server url argument."""
-        parser.add_argument(
-            "-m",
-            "--migration-server-url",
-            type=str,
-            required=False,
-            help="Migration server URL including the service port.",
-        )
-
-    def add_request_server_url_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_request_url_arguments(self, parser: argparse.ArgumentParser) -> None:
         """Update a parser to add a request server url argument."""
         parser.add_argument(
-            "--request-server-url",
+            "--request-url",
             type=str,
             required=True,
             help="Request server URL including the service port.",
@@ -192,17 +157,6 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             type=str,
             required=True,
             help="The path to the readiness probe file.",
-        )
-
-    def add_migration_destination_storage_name_arguments(
-        self, parser: argparse.ArgumentParser
-    ) -> None:
-        """Update a parser to add a migration destination storage name argument."""
-        parser.add_argument(
-            "--migration-destination-storage-name",
-            type=str,
-            required=False,
-            help="The DLM 'storage_name' to migrate to.",
         )
 
     def add_dev_test_mode_arguments(self, parser: argparse.ArgumentParser) -> None:

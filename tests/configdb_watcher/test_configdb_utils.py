@@ -8,7 +8,7 @@ from ska_sdp_config import ConfigCollision
 from ska_sdp_config.entity.common import PVCPath
 from ska_sdp_config.entity.flow import DataProduct, Flow
 
-from ska_dlm_client.sdp_ingest.configdb_utils import (
+from ska_dlm_client.configdb_watcher.configdb_utils import (
     _initialise_dependency,
     create_sdp_migration_dependency,
     get_data_product_dir,
@@ -114,7 +114,7 @@ def test_get_data_product_dir(config):
     pvc = PVCPath(
         k8s_namespaces=[],
         k8s_pvc_name="pvc_name",
-        pvc_mount_path="/data",
+        pvc_mount_path="/dlm",
         pvc_subpath=pathlib.Path(f"product/{EB_ID}/ska-sdp/{PB_ID}"),
     )
 
@@ -135,4 +135,4 @@ def test_get_data_product_dir(config):
     # Exercise the helper
     result = get_data_product_dir(config, key)
 
-    assert str(result) == f"/data/product/{EB_ID}/ska-sdp/{PB_ID}"
+    assert str(result) == f"/dlm/product/{EB_ID}/ska-sdp/{PB_ID}"
