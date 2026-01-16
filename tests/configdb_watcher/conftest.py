@@ -7,9 +7,6 @@ from pathlib import Path
 import pytest
 from ska_sdp_config import Config
 
-CLIENT_ROOT = Path(__file__).resolve().parents[2]
-CLIENTS = CLIENT_ROOT / "tests/test-services.docker-compose.yml"
-COMPOSE_FILES = [CLIENTS]
 SDP_CONFIG_HOST = "etcd"
 SDP_CONFIG_PORT = "2379"
 
