@@ -15,7 +15,10 @@
 
 * Kafka Docker image switched from bitnami/kafka to apache/kafka
 * kubectl image switched from bitnami/kubectl to artefact.skao.int/ska-ser-utils
-
+* Renamed client CLI arguments and aligned the corresponding Helm values.
+* Changed the tests to use a 'testrunner' container, rather than directly running pytest on the host machine.
+* Tests now run against OCI images of DLM server, instead of building the DLM server from the GitLab repo.
+* Client and server containers in the tests now consistently use the same network.
 ## 1.1.0
 
 ### Added
