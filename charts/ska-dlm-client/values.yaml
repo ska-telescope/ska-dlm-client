@@ -30,7 +30,7 @@ ska_dlm:
 
 ska_dlm_client:
   image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client #artefact.skao.int/ska-dlm-client
-  version: "1c6fd796" #"1.1.0" # Change to new release asap!
+  version: "1.1.0-dev.c90e0d34b" # Change to new release asap!
   imagePullPolicy: Always
   storage_name: dlm
   storage_root_directory: /dlm
@@ -49,6 +49,8 @@ directory_watcher:
   storage_name: dlm
   storage_root_directory: /dlm/watch_dir
   directory_to_watch: /dlm/watch_dir
+  target_name:
+  target_root:
   use_polling_watcher: false
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false

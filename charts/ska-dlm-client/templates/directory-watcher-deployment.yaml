@@ -26,6 +26,11 @@ spec:
       - name: directory-watcher
         image: {{ .Values.ska_dlm_client.image}}:{{ .Values.ska_dlm_client.version }}
         imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
+
+        env:
+          - name: STORAGE_URL
+            value: {{ .Values.ska_dlm_client.storage_server_url }}
+
         command:
         - dlm-directory-watcher
         - "--directory-to-watch"
@@ -33,7 +38,7 @@ spec:
         - "--source-name"
         - {{ .Values.directory_watcher.source_storage | quote }}
         - "--source-root"
-        - {{ .Values.directory_watcher.source_root | quote }}
+        - {{ .Values.directory_watcher.storage_root_directory | quote }}
         {{- if .Values.directory_watcher.target_name }}
           - "--target-name"
           - {{ .Values.directory_watcher.target_name | quote }}
