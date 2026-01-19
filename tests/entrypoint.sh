@@ -18,8 +18,7 @@ case "$1" in
           --use-polling-watcher"
         ;;
     "configdb-watcher")
-        # Keep the “inline env var + command” style your colleague used,
-        # but allow overriding SDP_CONFIG_HOST from the environment.
+        # allow overriding SDP_CONFIG_HOST from the environment.
         CMD="SDP_CONFIG_HOST='${SDP_CONFIG_HOST:-etcd}' dlm-configdb-watcher \
           --source-name ${SOURCE_NAME:-SDPBuffer} \
           --source-root ${SOURCE_ROOT:-/dlm/product_dir} \
