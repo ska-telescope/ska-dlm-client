@@ -24,6 +24,7 @@ from ska_dlm_client.registration_processor import (
     _item_for_single_file_with_metadata,
     _measurement_set_directory_in,
 )
+from ska_dlm_client.utils import CmdLineParameters
 
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
 
@@ -231,6 +232,14 @@ async def sdp_to_dlm_ingest_and_migrate(
 
 def main() -> None:
     """Control the main execution of the program."""
+    parser = create_parser()
+    cmd_line_parameters = CmdLineParameters(
+        parser=parser,
+        add_readiness_probe_file=True,
+        add_do_not_perform_actual_ingest_and_migration=True,
+        add_dir_updates_wait_time=True,
+    )
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--include-existing",

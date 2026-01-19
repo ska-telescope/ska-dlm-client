@@ -164,14 +164,16 @@ def create_directory_watcher() -> DirectoryWatcher:
     Returns:
         A DirectoryWatcher instance configured with the parsed command line arguments.
     """
-    parser = create_parser()
+    parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
+    # This is only enabling the additional parameters required only for the directory watcher.
     cmd_line_parameters = CmdLineParameters(
         parser=parser,
+        add_directory_to_watch=True,
         add_readiness_probe_file=True,
-        add_do_not_perform_actual_ingest_and_migration=True,
+        add_do_not_perform_actual_ingest_and_migration=False,
         add_dir_updates_wait_time=True,
     )
-    args = parser.parse_args()
+    # args = parser.parse_args()
     cmd_line_parameters.parse_arguments(args)
     config = process_args(args=args, cmd_line_parameters=cmd_line_parameters)
 

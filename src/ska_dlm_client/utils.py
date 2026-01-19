@@ -18,9 +18,11 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
     """Class to contain the common/required command line parameters."""
 
     add_directory_to_watch: bool = False
-    add_storage_name: bool = False
-    add_ingest_url: bool = False
-    add_request_url: bool = False
+    add_storage_name: bool = True
+    add_storage_url: bool = True
+    add_migration_url: bool = True
+    add_ingest_url: bool = True
+    add_request_url: bool = True
     add_readiness_probe_file: bool = False
     add_dev_test_mode: bool = False
     directory_to_watch: str = None
@@ -129,6 +131,26 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             type=str,
             required=True,
             help="The name by which the DLM system knows the storage as.",
+        )
+
+    def add_storage_url_arguments(self, parser: argparse.ArgumentParser) -> None:
+        """Update a parser include the url to the storage service."""
+        parser.add_argument(
+            "-s",
+            "--storage-url",
+            type=str,
+            required=True,
+            help="Storage server URL including the service port.",
+        )
+
+    def add_migration_url_arguments(self, parser: argparse.ArgumentParser) -> None:
+        """Update a parser include the url to the migration service."""
+        parser.add_argument(
+            "-m",
+            "--migration-url",
+            type=str,
+            required=True,
+            help="Migration server URL including the service port.",
         )
 
     def add_ingest_url_arguments(self, parser: argparse.ArgumentParser) -> None:
