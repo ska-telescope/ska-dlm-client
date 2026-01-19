@@ -1,7 +1,6 @@
 {{- if .Values.configdb_watcher.enabled -}}
 {{- $host := .Values.configdb_watcher.sdp_config.host | default "" | trim -}}
 {{- $local := .Values.configdb_watcher.sdp_config.etcd.enabled -}}
-{{- $defaultEtcdSvc := printf "%s-etcd" (include "ska-dlm-client.fullname" .) -}}
 
 {{- /* 1) User selected BOTH local and external */ -}}
 {{- if and $local (ne $host "") -}}
@@ -32,6 +31,27 @@ spec:
         {{- include "ska-dlm-client.configdb-watcher.labels" . | nindent 8 }}
     spec:
       dnsPolicy: ClusterFirst
+
+      # if bringing up a local etcd service, wait for the pod to be ready
+      {{ if .Values.configdb_watcher.sdp_config.etcd.enabled }}
+      initContainers:
+        - name: wait-for-etcd
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          env:
+            {{ include "ska-dlm-client.configdb-watcher.sdp-config-env" . | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for etcd at ${SDP_CONFIG_HOST}:${SDP_CONFIG_PORT}..."
+              until nc -z -w 2 "${SDP_CONFIG_HOST}" "${SDP_CONFIG_PORT}"; do
+                sleep 2
+              done
+              echo "etcd service is ready."
+
+      {{ end }}
+
       containers:
         - name: configdb-watcher
           image: {{ .Values.ska_dlm_client.image }}:{{ .Values.ska_dlm_client.version }}
@@ -39,14 +59,7 @@ spec:
 
           # Where ska_sdp_config.Config() should look for etcd / ConfigDB
           env:
-            - name: SDP_CONFIG_HOST
-              value: {{ .Values.configdb_watcher.sdp_config.host | default $defaultEtcdSvc | quote }}
-            - name: SDP_CONFIG_PORT
-              value: {{ .Values.configdb_watcher.sdp_config.port | quote }}
-            {{- if .Values.configdb_watcher.sdp_config.path | default "" | trim }}
-            - name: SDP_CONFIG_PATH
-              value: {{ .Values.configdb_watcher.sdp_config.path | quote }}
-            {{- end }}
+            {{ include "ska-dlm-client.configdb-watcher.sdp-config-env" . | nindent 12 }}
 
           command:
             - "dlm-configdb-watcher"
