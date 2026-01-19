@@ -38,7 +38,7 @@ ska_dlm_client:
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace:port
   ingest_url: "http://ska-dlm-ingest.dp-dm" # override for production
-  storage_server_url: "http://ska-dlm-storage.dp-dm" # override for production
+  storage_url: "http://ska-dlm-storage.dp-dm" # override for production
   request_server_url: "http://ska-dlm-request.dp-dm" # override for production
 
 directory_watcher:
@@ -54,6 +54,7 @@ directory_watcher:
   use_polling_watcher: false
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false
+  migration_url: "http://ska-dlm-migration.dp-dm"
 
 configdb_watcher:
   enabled: true
@@ -66,7 +67,7 @@ configdb_watcher:
   source_storage: SDPBuffer
   source_root_directory: /dlm/product_dir
   migration_destination_storage_name: PawseyS3 # If omitted, migration will be skipped
-  migration_server_url: http://ska-dlm-migration.dp-dm # If omitted, migration will be skipped
+  migration_url: http://ska-dlm-migration.dp-dm # If omitted, migration will be skipped
   sdp_config:
     host: ""      # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
     port: 2379    # default etcd client port
