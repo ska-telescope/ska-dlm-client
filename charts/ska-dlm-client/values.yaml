@@ -64,7 +64,7 @@ configdb_watcher:
   ingest_server_url: http://ska-dlm-ingest.dp-dm
   storage_server_url: http://ska-dlm-storage.dp-dm
   source_storage: SDPBuffer
-  storage_root_directory: /dlm/product_dir
+  source_root_directory: /dlm/product_dir
   migration_destination_storage_name: # If omitted, migration will be skipped
   migration_server_url: # If omitted, migration will be skipped
   sdp_config:

@@ -74,7 +74,7 @@ spec:
             - "--storage-url"
             - {{ .Values.configdb_watcher.storage_server_url | quote }}
             - "--source-root"
-            - {{ .Values.configdb_watcher.storage_root_directory | quote }}
+            - {{ .Values.configdb_watcher.source_root_directory | quote }}
           {{- if .Values.configdb_watcher.migration_destination_storage_name }}
             - "--target-name"
             - {{ .Values.configdb_watcher.migration_destination_storage_name | quote }}
