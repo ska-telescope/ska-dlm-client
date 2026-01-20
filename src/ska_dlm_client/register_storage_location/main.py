@@ -91,7 +91,7 @@ def install_ssh_key(api_storage):
     try:
         with open(os.path.expanduser("~/.ssh/authorized_keys"), "a", encoding="utf-8") as key_file:
             key_file.write(f"\n{key}\n")
-        if (
+        if os.path.exists("/home/ska-dlm/.ssh") and (
             "USER" not in os.environ or os.environ["USER"] == "root"
         ):  # assume running inside a client container
             shutil.copyfile(
