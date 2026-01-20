@@ -7,6 +7,7 @@ services:
     platform: linux/amd64
     image: dlm_directory_watcher
     container_name: dlm_directory_watcher
+    hostname: ska-dlm-directory-watcher
     build:
       context: ..
       dockerfile: Dockerfile
@@ -22,6 +23,7 @@ services:
     platform: linux/amd64
     image: dlm_configdb_watcher
     container_name: dlm_configdb_watcher
+    hostname: ska-dlm-configdb-watcher
     build:
       context: ..
       dockerfile: Dockerfile
