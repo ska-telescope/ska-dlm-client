@@ -17,7 +17,7 @@ spec:
     component: {{ .Values.directory_watcher.component }}
     subsystem: {{ .Values.directory_watcher.subsystem }}
 ---
-{{- $readiness_file := "/tmp/dlm-client-ready" -}}
+{{ $readiness_file := "/tmp/dlm-client-ready" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -58,10 +58,10 @@ spec:
         - {{ .Values.directory_watcher.source_storage | quote }}
         - "--source-root"
         - {{ .Values.directory_watcher.storage_root_directory | quote }}
-        # {{- if .Values.directory_watcher.target_name }}
-        #   - "--target-name"
-        #   - {{ .Values.directory_watcher.target_name | quote }}
-        # {{- end }}
+        {{- if .Values.directory_watcher.target_name }}
+        - "--target-name"
+        - {{ .Values.directory_watcher.target_name | quote }}
+        {{- end }}
         {{- if .Values.directory_watcher.target_root }}
           - "--target-root"
           - {{ .Values.directory_watcher.target_root | quote }}
