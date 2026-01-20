@@ -36,7 +36,7 @@ Common labels
 see https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
 */}}
 {{- define "ska-dlm-client.labels" }}
-{{- if .Values.global.labels}}
+{{- if .Values.global.labels }}
 app.kubernetes.io/name: {{ coalesce .Values.global.labels.app (include "ska-dlm-client.name" .) }}
 {{- else }}
 app.kubernetes.io/name: {{ include "ska-dlm-client.name" . }}
@@ -69,14 +69,38 @@ intent: production
 {{- end }}
 
 {{/*
-etcd labels
+ConfigDB / SDP Config environment variables
+Used by both the configdb-watcher container and the wait-for-etcd initContainer.
+If configdb_watcher.sdp_config.host is empty, default to local etcd Service name "<fullname>-etcd".
 */}}
-{{- define "ska-dlm-client.etcd.labels" }}
-{{- include "ska-dlm-client.labels" . }}
+{{- define "ska-dlm-client.configdb-watcher.sdp-config-env" -}}
+- name: SDP_CONFIG_HOST
+  value: {{ .Values.configdb_watcher.sdp_config.host | default (printf "%s-etcd" (include "ska-dlm-client.fullname" .)) | quote }}
+- name: SDP_CONFIG_PORT
+  value: {{ .Values.configdb_watcher.sdp_config.port | quote }}
+{{- if .Values.configdb_watcher.sdp_config.path | default "" | trim }}
+- name: SDP_CONFIG_PATH
+  value: {{ .Values.configdb_watcher.sdp_config.path | quote }}
+{{- end }}
+{{- end }}
+
+{{/*
+Local etcd (for ConfigDB watcher) selector labels.
+Keep these stable: they are used in Service selectors and Deployment selectors.
+*/}}
+{{- define "ska-dlm-client.etcd.selectorLabels" -}}
 component: etcd
 subsystem: data-lifecycle-management
+{{- end -}}
+
+{{/*
+Local etcd labels (for ConfigDB watcher)
+*/}}
+{{- define "ska-dlm-client.etcd.labels" -}}
+{{ include "ska-dlm-client.labels" . }}
+{{ include "ska-dlm-client.etcd.selectorLabels" . }}
 intent: production
-{{- end }}
+{{- end -}}
 
 {{/*
 Kafka watcher labels
@@ -89,7 +113,7 @@ intent: production
 {{- end }}
 
 {{/*
-Startup Verification labels
+Startup verification labels
 */}}
 {{- define "ska-dlm-client.startup-verification.labels" }}
 {{- include "ska-dlm-client.labels" . }}
@@ -106,7 +130,7 @@ Storage location labels
 {{- end }}
 
 {{/*
-ssh storage access
+ssh storage access labels
 */}}
 {{- define "ska-dlm-client.ssh-storage-access.labels" }}
 {{- include "ska-dlm-client.labels" . }}

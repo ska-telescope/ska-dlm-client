@@ -1,10 +1,11 @@
 #!/bin/bash
+watcher_mode=${MODE:-$1}
 mkdir -p /dlm/watch_dir
 chown -R ska-dlm:ska-dlm /dlm/watch_dir
 chmod g+w /dlm/watch_dir
 /etc/init.d/ssh start
 
-case "$1" in
+case "$watcher_mode" in
     "directory-watcher")
         CMD="dlm-directory-watcher \
           --directory-to-watch ${SOURCE_ROOT:-/dlm/watch_dir} \
@@ -12,15 +13,15 @@ case "$1" in
           --source-root ${SOURCE_ROOT:-/dlm/watch_dir} \
           --target-name ${TARGET_NAME:-dlm-archive} \
           --migration-url ${MIGRATION_URL:-http://dlm_migration:8004} \
+          --storage-url ${STORAGE_URL:-http://dlm_storage:8003} \
           --ingest-url ${INGEST_URL:-http://dlm_ingest:8001} \
-          --readiness-probe-file /tmp/dlm-client-ready \
-          --skip-rclone-access-check-on-register \
-          --use-polling-watcher"
+          --readiness-probe-file "${READINESS_PROBE_FILE:-/tmp/dlm-client-ready}" \
+          ${SKIP_RCLONE_ACCESS_CHECK_ON_REGISTER:+--skip-rclone-access-check-on-register} \
+          ${USE_POLLING_WATCHER:+--use-polling-watcher}"
         ;;
     "configdb-watcher")
-        # Keep the “inline env var + command” style your colleague used,
-        # but allow overriding SDP_CONFIG_HOST from the environment.
-        CMD="SDP_CONFIG_HOST='${SDP_CONFIG_HOST:-etcd}' dlm-configdb-watcher \
+        # allow overriding SDP_CONFIG_HOST from the environment.
+        CMD="SDP_CONFIG_HOST=${SDP_CONFIG_HOST:-etcd} dlm-configdb-watcher \
           --source-name ${SOURCE_NAME:-SDPBuffer} \
           --source-root ${SOURCE_ROOT:-/dlm/product_dir} \
           --target-name ${TARGET_NAME:-dlm-archive} \

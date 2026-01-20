@@ -1,7 +1,6 @@
 {{- if .Values.configdb_watcher.enabled -}}
 {{- $host := .Values.configdb_watcher.sdp_config.host | default "" | trim -}}
 {{- $local := .Values.configdb_watcher.sdp_config.etcd.enabled -}}
-{{- $defaultEtcdSvc := printf "%s-etcd" (include "ska-dlm-client.fullname" .) -}}
 
 {{- /* 1) User selected BOTH local and external */ -}}
 {{- if and $local (ne $host "") -}}
@@ -32,51 +31,75 @@ spec:
         {{- include "ska-dlm-client.configdb-watcher.labels" . | nindent 8 }}
     spec:
       dnsPolicy: ClusterFirst
-      containers:
-        - name: configdb-watcher
-          image: {{ .Values.ska_dlm_client.image }}:{{ .Values.ska_dlm_client.version }}
-          imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
 
-          # Where ska_sdp_config.Config() should look for etcd / ConfigDB
+      # if bringing up a local etcd service, wait for the pod to be ready
+      {{ if .Values.configdb_watcher.sdp_config.etcd.enabled }}
+      initContainers:
+        - name: wait-for-etcd
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
           env:
-            - name: SDP_CONFIG_HOST
-              value: {{ .Values.configdb_watcher.sdp_config.host | default $defaultEtcdSvc | quote }}
-            - name: SDP_CONFIG_PORT
-              value: {{ .Values.configdb_watcher.sdp_config.port | quote }}
-            {{- if .Values.configdb_watcher.sdp_config.path | default "" | trim }}
-            - name: SDP_CONFIG_PATH
-              value: {{ .Values.configdb_watcher.sdp_config.path | quote }}
+            {{ include "ska-dlm-client.configdb-watcher.sdp-config-env" . | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for etcd at ${SDP_CONFIG_HOST}:${SDP_CONFIG_PORT}..."
+              until nc -z -w 2 "${SDP_CONFIG_HOST}" "${SDP_CONFIG_PORT}"; do
+                sleep 2
+              done
+              echo "etcd service is ready."
+
+      {{ end }}
+
+      containers:
+      - name: configdb-watcher
+        image: {{ .Values.ska_dlm_client.image }}:{{ .Values.ska_dlm_client.version }}
+        imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
+
+        env:
+          # Where ska_sdp_config.Config() should look for etcd / ConfigDB
+          {{- include "ska-dlm-client.configdb-watcher.sdp-config-env" . | nindent 10 }}
+
+          - name: INGEST_URL
+            value: {{ .Values.configdb_watcher.ingest_server_url | quote }}
+
+          - name: STORAGE_URL
+            value: {{ .Values.configdb_watcher.storage_server_url | quote }}
+
+          - name: SOURCE_NAME
+            value: {{ .Values.configdb_watcher.source_storage | quote }}
+
+          - name: SOURCE_ROOT
+            value: {{ .Values.configdb_watcher.source_root_directory | quote }}
+
+          {{- if .Values.configdb_watcher.migration_destination_storage_name }}
+          - name: TARGET_NAME
+            value: {{ .Values.configdb_watcher.migration_destination_storage_name | quote }}
+          {{- end }}
+
+          {{- if .Values.configdb_watcher.migration_url }}
+          - name: MIGRATION_URL
+            value: {{ .Values.configdb_watcher.migration_url | quote }}
+          {{- end }}
+
+          {{- if .Values.configdb_watcher.include_existing }}
+          - name: INCLUDE_EXISTING
+            value: "true"
+          {{- end }}
+
+        command:
+          - /entrypoint.sh
+        args:
+          - configdb-watcher
+
+        volumeMounts:
+          - name: data-product-storage
+            mountPath: /dlm/product_dir
+            {{- if $.Values.global.dataProduct.pvc.read_only }}
+            readOnly: true
             {{- end }}
 
-          command:
-            - "dlm-configdb-watcher"
-          args:
-          {{- if .Values.configdb_watcher.include_existing }}
-            - "--include-existing"
-          {{- end }}
-            - "--ingest-url"
-            - {{ .Values.configdb_watcher.ingest_server_url | quote }}
-            - "--source-name"
-            - {{ .Values.configdb_watcher.source_storage | quote }}
-            - "--storage-url"
-            - {{ .Values.configdb_watcher.storage_server_url | quote }}
-            - "--source-root"
-            - {{ .Values.configdb_watcher.storage_root_directory | quote }}
-          {{- if .Values.configdb_watcher.migration_destination_storage_name }}
-            - "--target-name"
-            - {{ .Values.configdb_watcher.migration_destination_storage_name | quote }}
-          {{- end }}
-          {{- if .Values.configdb_watcher.migration_server_url }}
-            - "--migration-url"
-            - {{ .Values.configdb_watcher.migration_server_url | quote }}
-          {{- end }}
-
-          volumeMounts:
-            - name: data-product-storage
-              mountPath: /dlm/product_dir
-              {{- if $.Values.global.dataProduct.pvc.read_only }}
-              readOnly: true
-              {{- end }}
       volumes:
         - name: data-product-storage
           persistentVolumeClaim:

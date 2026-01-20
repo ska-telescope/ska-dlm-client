@@ -18,6 +18,7 @@ class WatcherConfig:  # pylint: disable=too-few-public-methods
     directory_to_watch: str
     ingest_url: str
     storage_name: str
+    storage_url: str
     status_file_absolute_path: str
     storage_root_directory: str
     reload_status_file: bool
@@ -38,6 +39,7 @@ class WatcherConfig:  # pylint: disable=too-few-public-methods
         directory_to_watch: str,
         ingest_url: str,
         storage_name: str,
+        storage_url: str,
         status_file_absolute_path: str,
         storage_root_directory: str,
         reload_status_file: bool = False,
@@ -65,6 +67,7 @@ class WatcherConfig:  # pylint: disable=too-few-public-methods
         self.directory_to_watch = directory_to_watch
         self.ingest_url = ingest_url
         self.storage_name = storage_name
+        self.storage_url = storage_url
         self.status_file_absolute_path = status_file_absolute_path
         self.storage_root_directory = storage_root_directory
         self.reload_status_file = reload_status_file
@@ -99,6 +102,7 @@ class WatcherConfig:  # pylint: disable=too-few-public-methods
             f"directory_to_watch {self.directory_to_watch}\n"
             f"ingest_url {self.ingest_url}\n"
             f"storage_name {self.storage_name}\n"
+            f"storage_url {self.storage_url}\n"
             f"status_file_absolute_path {self.status_file_absolute_path}\n"
             f"storage_root_directory {self.storage_root_directory}\n"
             f"reload_status_file {self.reload_status_file}\n"
