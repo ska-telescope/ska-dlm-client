@@ -45,10 +45,46 @@ spec:
         image: {{ .Values.ska_dlm_client.image}}:{{ .Values.ska_dlm_client.version }}
         imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
 
+        env:
+          - name: STORAGE_URL
+            value: {{ .Values.ska_dlm_client.storage_url | quote }}
+          - name: SOURCE_ROOT
+            value: {{ .Values.directory_watcher.directory_to_watch | quote }}
+          - name: SOURCE_NAME
+            value: {{ .Values.directory_watcher.source_storage | quote }}
+          {{- if .Values.directory_watcher.target_name }}
+          - name: TARGET_NAME
+            value: {{ .Values.directory_watcher.target_name | quote }}
+          {{- end }}
+          {{- if .Values.directory_watcher.target_root }}
+          - name: TARGET_ROOT
+            value: {{ .Values.directory_watcher.target_root | quote }}
+          {{- end }}
+          {{- if .Values.directory_watcher.migration_url }}
+          - name: MIGRATION_URL
+            value: {{ .Values.directory_watcher.migration_url | quote }}
+          {{- end }}
+          - name: INGEST_URL
+            value: {{ .Values.ska_dlm_client.ingest_url | quote }}
+          - name: READINESS_PROBE_FILE
+            value: {{ $readiness_file | quote }}
+          {{- if eq $.Values.directory_watcher.skip_rclone_access_check_on_register true }}
+          - name: SKIP_RCLONE_ACCESS_CHECK_ON_REGISTER
+            value: "true"
+          {{- end }}
+          {{- if eq $.Values.directory_watcher.use_polling_watcher true }}
+          - name: USE_POLLING_WATCHER
+            value: "true"
+          {{- end }}
+          {{- if eq $.Values.directory_watcher.register_contents_of_watch_directory true }}
+          - name: REGISTER_CONTENTS_OF_WATCH_DIRECTORY
+            value: "true"
+          {{- end }}
+
         command:
-         - /entrypoint.sh
+          - /entrypoint.sh
         args:
-         - directory-watcher
+          - directory-watcher
 
         readinessProbe:
           exec:

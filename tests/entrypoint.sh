@@ -15,9 +15,9 @@ case "$watcher_mode" in
           --migration-url ${MIGRATION_URL:-http://dlm_migration:8004} \
           --storage-url ${STORAGE_URL:-http://dlm_storage:8003} \
           --ingest-url ${INGEST_URL:-http://dlm_ingest:8001} \
-          --readiness-probe-file /tmp/dlm-client-ready \
-          --skip-rclone-access-check-on-register \
-          --use-polling-watcher"
+          --readiness-probe-file "${READINESS_PROBE_FILE:-/tmp/dlm-client-ready}" \
+          ${SKIP_RCLONE_ACCESS_CHECK_ON_REGISTER:+--skip-rclone-access-check-on-register} \
+          ${USE_POLLING_WATCHER:+--use-polling-watcher}"
         ;;
     "configdb-watcher")
         # allow overriding SDP_CONFIG_HOST from the environment.
