@@ -5,6 +5,7 @@ import asyncio
 import functools
 import logging
 import signal
+import sys
 
 import ska_dlm_client.config
 from ska_dlm_client.directory_watcher.directory_watcher import (
@@ -22,119 +23,70 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
-def create_parser() -> argparse.ArgumentParser:
-    """Define a parser for all the command line parameters.
-
-    Creates and configures an ArgumentParser with all the command line options
-    needed for the ska-dlm-clinet's various components.
-
-    Returns:
-        An ArgumentParser instance configured with all required and optional arguments.
+def add_arguments(cmd_line_parameters) -> CmdLineParameters:
+    """Add parser arguments for this application.
     """
-    parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
-
-    # Adding optional argument.
-    parser.add_argument(
+    cmd_line_parameters.parser.add_argument(
         "-d",
         "--directory-to-watch",
         type=str,
         required=True,
         help="Full path to directory to watch.",
     )
-    parser.add_argument(
-        "-i",
-        "--ingest-url",
-        type=str,
-        required=True,
-        help="Ingest server URL including the service port.",
-    )
-    parser.add_argument(
-        "--storage-url",
-        type=str,
-        default="http://dlm_storage:8003",
-        help=(
-            "Storage server URL including the service port. " "Default 'http://dlm_storage:8003'."
-        ),
-    )
-    parser.add_argument(
-        "-m",
-        "--migration-url",
-        type=str,
-        required=False,
-        help="Migration server URL including the service port.",
-    )
-    parser.add_argument(
-        "-n",
-        "--source-name",
-        type=str,
-        required=True,
-        help="The name by which the DLM system knows the source storage as.",
-    )
-    parser.add_argument(
-        "-r",
-        "--source-root",
-        type=str,
-        required=True,
-        default="",
-        help="The root directory of the storage containing the directory-to-watch.",
-    )
-    parser.add_argument(
-        "-t",
-        "--target-name",
-        type=str,
-        required=False,
-        help="The name by which the DLM system knows the target storage as.",
-    )
-    parser.add_argument(
-        "--target-root",
-        type=str,
-        required=False,
-        default="",
-        help="The root directory of the target storage.",
-    )
-    parser.add_argument(
+    cmd_line_parameters.directory_to_watch = ""
+    cmd_line_parameters.parser.add_argument(
         "--use-polling-watcher",
         action=argparse.BooleanOptionalAction,
         default=False,
         help="When defined using the polling watcher rather than iNotify event driven watcher.",
     )
-    parser.add_argument(
+    cmd_line_parameters.parser.add_argument(
+        "--dir-updates-wait-time",
+        default=1,
+        help="If set, a directory will only be added once its contents has been static "
+            + "for at least the given number of seconds.",
+    )
+    cmd_line_parameters.dir_updates_wait_time = True
+    cmd_line_parameters.parser.add_argument(
         "--use-status-file",
         action=argparse.BooleanOptionalAction,
         default=False,
         help="Use the status file, default is NOT to use, this may change in a future release.",
     )
-    parser.add_argument(
+    cmd_line_parameters.use_status_file = False
+    cmd_line_parameters.parser.add_argument(
         "--reload-status-file",
         action=argparse.BooleanOptionalAction,
         default=False,
         help="Reload the status file that already exists in the watch directory.",
     )
-    parser.add_argument(
+    cmd_line_parameters.reload_status_file = True
+    cmd_line_parameters.parser.add_argument(
         "--status-file-filename",
         type=str,
         required=False,
         default=ska_dlm_client.config.STATUS_FILE_FILENAME,
         help="",
     )
-    parser.add_argument(
+    cmd_line_parameters.status_file_filename = ska_dlm_client.config.STATUS_FILE_FILENAME
+    cmd_line_parameters.parser.add_argument(
         "--skip-rclone-access-check-on-register",
         action=argparse.BooleanOptionalAction,
         default=False,
         help="Skip performing the rclone access check when registering a data item with DLM.",
     )
-    parser.add_argument(
+    cmd_line_parameters.skip_rclone_access_check_on_register = False
+    cmd_line_parameters.parser.add_argument(
         "--register-contents-of-watch-directory",
         action=argparse.BooleanOptionalAction,
         default=False,
         help="First register each file/directory in the watch directory as a data product.",
     )
-    return parser
+    cmd_line_parameters.register_contents_of_watch_directory = False
+    return cmd_line_parameters
 
 
-def process_args(
-    args: argparse.Namespace, cmd_line_parameters: CmdLineParameters
-) -> WatcherConfig:
+def process_args(args: argparse.Namespace) -> WatcherConfig:
     """Collect all command line parameters and create a Config object.
 
     Args:
@@ -160,7 +112,7 @@ def process_args(
         use_status_file=args.use_status_file,
         rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,
         perform_actual_ingest_and_migration=(
-            cmd_line_parameters.perform_actual_ingest_and_migration
+            args.perform_actual_ingest_and_migration
         ),
     )
     return config
@@ -176,22 +128,20 @@ def create_directory_watcher() -> DirectoryWatcher:
     Returns:
         A DirectoryWatcher instance configured with the parsed command line arguments.
     """
-    parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
+    # parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
     # This is only enabling the additional parameters required only for the directory watcher.
     cmd_line_parameters = CmdLineParameters(
-        parser=parser,
-        add_directory_to_watch=True,
         add_readiness_probe_file=True,
         add_do_not_perform_actual_ingest_and_migration=False,
-        add_dir_updates_wait_time=True,
     )
-    # args = parser.parse_args()
+    cmd_line_parameters = add_arguments(cmd_line_parameters)
+    args = cmd_line_parameters.parser.parse_args()
     cmd_line_parameters.parse_arguments(args)
-    config = process_args(args=args, cmd_line_parameters=cmd_line_parameters)
+    config = process_args(args=args)
 
     # For the directory_watcher we need to register the volume where the watch
     # directory is located, if not registered already, but only in non-dev-test-mode.
-    logger.info("Watcher Config: %s", config)
+    # logger.info("Watcher Config: %s", config)
     if not cmd_line_parameters.dev_test_mode:
         _ = setup_volume(
             watcher_config=config,

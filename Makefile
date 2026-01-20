@@ -57,7 +57,7 @@ docker-compose-down: ## Shut down test services in docker previously started wit
 	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml down --volumes
 	$(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml down --volumes
 	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml down --volumes --remove-orphans
-	docker volume rm shared-tmpfs || true
+# 	docker volume rm shared-tmpfs || true
 
 oci-build-dlm_directory_watcher:
 	make oci-build OCI_IMAGE=ska-dlm-directory_watcher \

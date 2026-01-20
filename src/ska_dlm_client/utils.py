@@ -6,6 +6,7 @@ use by other applications making up the DLM Client.
 """
 
 import argparse
+from dataclasses import dataclass, field
 import logging
 import os
 from pathlib import Path
@@ -13,75 +14,83 @@ from pathlib import Path
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-
+@dataclass
 class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
     """Class to contain the common/required command line parameters."""
-
-    add_directory_to_watch: bool = False
-    add_storage_name: bool = True
+    source_name: str = ""
+    source_root: str = ""
+    target_name: str = ""
+    storage_url: str = ""
+    ingest_url: str = ""
+    request_url: str = ""
+    migration_url: str = ""
+    readiness_probe_file: str = ""
+    do_not_perform_actual_ingest_and_migration: bool=False
+    dev_test_mode: bool=False
+    add_source_name: bool = True
+    add_source_root: bool = True
+    add_target_name: bool = True
     add_storage_url: bool = True
-    add_migration_url: bool = True
     add_ingest_url: bool = True
     add_request_url: bool = True
+    add_migration_url: bool = True
     add_readiness_probe_file: bool = False
+    add_do_not_perform_actual_ingest_and_migration: bool = False
     add_dev_test_mode: bool = False
-    directory_to_watch: str = None
-    storage_name: str = None
-    ingest_url: str = None
-    request_url: str = None
-    readiness_probe_file: str = None
-    dev_test_mode: bool = False
-    do_not_perform_actual_ingest_and_migration: bool = False
-    dir_updates_wait_time: int = 0
-    # This is not a settable command line param but required for code convenience
-    perform_actual_ingest_and_migration: bool = True
+    parser: argparse.ArgumentParser = argparse.ArgumentParser()
 
-    def __init__(  # noqa: C901
+    def __post_init__(  # noqa: C901
         # pylint: disable=too-many-arguments, disable=too-many-positional-arguments
         self,
-        parser: argparse.ArgumentParser,
-        add_directory_to_watch: bool = False,
-        add_storage_name: bool = False,
-        add_ingest_url: bool = False,
-        add_request_url: bool = False,
-        add_readiness_probe_file: bool = False,
-        add_do_not_perform_actual_ingest_and_migration: bool = False,
-        add_dir_updates_wait_time: bool = False,
     ):
         """Initiale with which parameters to include on the command line."""
-        self._parser = parser
-        if add_directory_to_watch:
-            self.add_directory_to_watch_arguments(parser)
-            self.add_directory_to_watch = True
-        if add_storage_name:
-            self.add_storage_name_arguments(parser)
-            self.add_storage_name = True
-        if add_ingest_url:
-            self.add_ingest_url_arguments(parser)
+        self.parser = argparse.ArgumentParser()
+        self.add_dev_test_mode = False
+        self.add_do_not_perform_actual_ingest_and_migration = False
+        self.perform_actual_ingest_and_migration = True
+        if self.add_source_name:
+            self.add_source_name_arguments()
+            self.add_source_name = True
+        if self.add_source_root:
+            self.add_source_root_arguments()
+            self.add_source_root = True
+        if self.add_target_name:
+            self.add_target_name_arguments()
+            self.add_target_name = True
+        if self.add_storage_url:
+            self.add_storage_url_arguments()
+            self.add_storage_url = True
+        if self.add_ingest_url:
+            self.add_ingest_url_arguments()
             self.add_ingest_url = True
-        if add_request_url:
-            self.add_request_url_arguments(parser)
+        if self.add_migration_url:
+            self.add_migration_url_arguments()
+            self.add_migration_url = True
+        if self.add_request_url:
+            self.add_request_url_arguments()
             self.add_request_url = True
-        if add_readiness_probe_file:
-            self.add_readiness_probe_file_arguments(parser)
+        if self.add_readiness_probe_file:
+            self.add_readiness_probe_file_arguments()
             self.add_readiness_probe_file = True
-        if add_do_not_perform_actual_ingest_and_migration:
+        if self.add_dev_test_mode:
+            self.add_dev_test_mode = self.add_dev_test_mode
+        if self.add_do_not_perform_actual_ingest_and_migration:
             if not self.add_dev_test_mode:
-                self.add_dev_test_mode_arguments(parser)
+                self.add_dev_test_mode_arguments()
                 self.add_dev_test_mode = True
-            self.add_do_not_perform_actual_ingest_and_migration_arguments(parser)
+            self.add_do_not_perform_actual_ingest_and_migration_arguments()
             self.add_do_not_perform_actual_ingest_and_migration = True
-        if add_dir_updates_wait_time:
-            self.add_dir_updates_wait_time_argument(parser)
-            self.add_dir_updates_wait_time = True
 
     def parse_arguments(self, args: argparse.Namespace = None):
         """Parse command line arguments and assign to class parameters."""
         if args is None:
-            args = self._parser.parse_args()
-        self.directory_to_watch = args.directory_to_watch if self.add_directory_to_watch else None
-        self.storage_name = args.storage_name if self.add_storage_name else None
+            args = self.parser.parse_args()
+        self.source_name = args.source_name if self.add_source_name else None
+        self.source_root = args.source_root if self.add_source_root else None
+        self.target_name = args.target_name if self.add_target_name else None
         self.ingest_url = args.ingest_url if self.add_ingest_url else None
+        self.storage_url = args.storage_url if self.add_storage_url else None
+        self.migration_url = args.migration_url if self.add_migration_url else None
         self.request_url = args.request_url if self.add_request_url else None
         self.readiness_probe_file = (
             args.readiness_probe_file if self.add_readiness_probe_file else None
@@ -107,15 +116,12 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             self.perform_actual_ingest_and_migration = False
         else:
             self.perform_actual_ingest_and_migration = True
+            args.perform_actual_ingest_and_migration = True
 
-        if self.add_dir_updates_wait_time:
-            self.dir_updates_wait_time = (
-                args.dir_updates_wait_time if self.add_dir_updates_wait_time else 0
-            )
 
-    def add_directory_to_watch_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_directory_to_watch_arguments(self) -> None:
         """Update a parser to a directory watcher file path."""
-        parser.add_argument(
+        self.parser.add_argument(
             "-d",
             "--directory-to-watch",
             type=str,
@@ -123,19 +129,39 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             help="Full path to directory to watch.",
         )
 
-    def add_storage_name_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_source_name_arguments(self) -> None:
         """Update a parser to add a storage name argument."""
-        parser.add_argument(
+        self.parser.add_argument(
             "-n",
             "--source-name",
             type=str,
             required=True,
-            help="The name by which the DLM system knows the storage as.",
+            help="The name by which the DLM system knows the source storage as.",
         )
 
-    def add_storage_url_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_source_root_arguments(self) -> None:
+        """Update a parser to add a storage root argument."""
+        self.parser.add_argument(
+            "-r",
+            "--source-root",
+            type=str,
+            required=True,
+            help="The root directory of the source volume.",
+        )
+
+    def add_target_name_arguments(self) -> None:
+        """Update a parser to add a target name argument."""
+        self.parser.add_argument(
+            "-t",
+            "--target-name",
+            type=str,
+            required=True,
+            help="The name by which the DLM system knows the target storage as.",
+        )
+
+    def add_storage_url_arguments(self) -> None:
         """Update a parser include the url to the storage service."""
-        parser.add_argument(
+        self.parser.add_argument(
             "-s",
             "--storage-url",
             type=str,
@@ -143,9 +169,9 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             help="Storage server URL including the service port.",
         )
 
-    def add_migration_url_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_migration_url_arguments(self) -> None:
         """Update a parser include the url to the migration service."""
-        parser.add_argument(
+        self.parser.add_argument(
             "-m",
             "--migration-url",
             type=str,
@@ -153,9 +179,9 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             help="Migration server URL including the service port.",
         )
 
-    def add_ingest_url_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_ingest_url_arguments(self) -> None:
         """Update a parser to add an ingest server url argument."""
-        parser.add_argument(
+        self.parser.add_argument(
             "-i",
             "--ingest-url",
             type=str,
@@ -163,27 +189,28 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             help="Ingest server URL including the service port.",
         )
 
-    def add_request_url_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_request_url_arguments(self) -> None:
         """Update a parser to add a request server url argument."""
-        parser.add_argument(
+        self.parser.add_argument(
             "--request-url",
             type=str,
-            required=True,
+            required=False,
             help="Request server URL including the service port.",
         )
 
-    def add_readiness_probe_file_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_readiness_probe_file_arguments(self) -> None:
         """Update a parser to a readiness probe file path."""
-        parser.add_argument(
+        self.parser.add_argument(
+            "-p",
             "--readiness-probe-file",
             type=str,
             required=True,
             help="The path to the readiness probe file.",
         )
 
-    def add_dev_test_mode_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_dev_test_mode_arguments(self) -> None:
         """Update a parser to add a dev test mode argument."""
-        parser.add_argument(
+        self.parser.add_argument(
             "--dev-test-mode",
             required=False,
             action="store_true",
@@ -191,24 +218,14 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         )
 
     def add_do_not_perform_actual_ingest_and_migration_arguments(
-        self, parser: argparse.ArgumentParser
+        self
     ) -> None:
         """Update a parser to add a flag to disable actual ingest and migration."""
-        parser.add_argument(
+        self.parser.add_argument(
             "--do-not-perform-actual-ingest-and-migration",
             required=False,
             action="store_true",
             help="If set, do not perform actual ingest and migration operations.",
-        )
-
-    def add_dir_updates_wait_time_argument(self, parser: argparse.ArgumentParser) -> None:
-        """Update a parser to add a flag to disable actual ingest and migration."""
-        parser.add_argument(
-            "--dir-updates-wait-time",
-            default=0,
-            required=False,
-            help="If set, a directory will only be added once its contents has been static "
-            + "for at least the given number of seconds.",
         )
 
     def set_application_ready(self):

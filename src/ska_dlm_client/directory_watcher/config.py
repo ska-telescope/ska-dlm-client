@@ -1,14 +1,13 @@
+# pylint: disable=too-many-instance-attributes
 """Class to hold the configuration used by the directory_watcher package."""
-
+from dataclasses import dataclass, field
 import os.path
 
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntries
-from ska_dlm_client.openapi import configuration
 from ska_dlm_client.openapi.configuration import Configuration
 
-
-class WatcherConfig:  # pylint: disable=too-few-public-methods
-    # pylint: disable=too-many-instance-attributes
+@dataclass
+class WatcherConfig:
     """Running configuration of the SKA DLM client directory watcher.
 
     This class holds all configuration parameters needed for the directory watcher
@@ -18,101 +17,29 @@ class WatcherConfig:  # pylint: disable=too-few-public-methods
     directory_to_watch: str
     ingest_url: str
     storage_name: str
+    migration_url: str
+    migration_destination_storage_name: str
     storage_url: str
     status_file_absolute_path: str
     storage_root_directory: str
     reload_status_file: bool
-    use_status_file: bool
-    rclone_access_check_on_register: bool
-    directory_watcher_entries: DirectoryWatcherEntries
-    ingest_configuration: Configuration
-    ingest_register_path_to_add: str
-    migration_url: str
-    migration_destination_storage_name: str
-    # This is used for dev testing reasons! When this value is false it will stop the watcher
-    # from connecting to and sending messages to DLM server to ingest and then migrate the
-    # found data item. All other logging continues.
-    perform_actual_ingest_and_migration: bool
+    ingest_configuration: Configuration = field(init=False)
+    migration_configuration: Configuration = field(init=False)
+    directory_watcher_entries: DirectoryWatcherEntries = field(init=False)
+    use_status_file: bool = False
+    rclone_access_check_on_register: bool = False
+    ingest_register_path_to_add: str = field(init=False)
+    perform_actual_ingest_and_migration: bool = True
 
-    def __init__(  # pylint: disable=too-many-arguments, disable=too-many-positional-arguments
-        self,
-        directory_to_watch: str,
-        ingest_url: str,
-        storage_name: str,
-        storage_url: str,
-        status_file_absolute_path: str,
-        storage_root_directory: str,
-        reload_status_file: bool = False,
-        use_status_file: bool = False,
-        rclone_access_check_on_register: bool = True,
-        migration_url: str = None,
-        migration_destination_storage_name: str = None,
-        perform_actual_ingest_and_migration: bool = True,
-    ):
-        """Initialize the configuration with values required for directory_watcher operation.
-
-        Args:
-            directory_to_watch: The directory path to monitor for new files/directories.
-            ingest_url: The URL of the DLM ingest server.
-            storage_name: The name of the storage location in DLM.
-            status_file_absolute_path: The absolute path to the status file.
-            storage_root_directory: The root directory of the storage location.
-            reload_status_file: Whether to reload the status file on startup.
-            use_status_file: Whether to use and update the status file.
-            rclone_access_check_on_register: Whether to perform rclone access check.
-            migration_url: The URL of the DLM migration server.
-            migration_destination_storage_name: The name of the destination storage.
-            perform_actual_ingest_and_migration: Whether to perform ingest and migration.
-        """
-        self.directory_to_watch = directory_to_watch
-        self.ingest_url = ingest_url
-        self.storage_name = storage_name
-        self.storage_url = storage_url
-        self.status_file_absolute_path = status_file_absolute_path
-        self.storage_root_directory = storage_root_directory
-        self.reload_status_file = reload_status_file
-        self.use_status_file = use_status_file
-        self.rclone_access_check_on_register = rclone_access_check_on_register
+    def __post_init__(self):
         self.directory_watcher_entries = DirectoryWatcherEntries(
             entries_file=self.status_file_absolute_path,
             reload_from_status_file=self.reload_status_file,
-            write_directory_entries_file=use_status_file,
+            write_directory_entries_file=self.use_status_file,
         )
-        self.ingest_configuration = configuration.Configuration(host=self.ingest_url)
-        # We need to know the relative path from the storage root directory to the watch directory
-        # as this path is prepended to any found files/directories in the watch directory.
+        self.ingest_configuration = Configuration(host=self.ingest_url)
         self.ingest_register_path_to_add = os.path.relpath(
             path=self.directory_to_watch, start=self.storage_root_directory
-        )
-
+        )            
         # Migration related options
-        self.migration_url = migration_url
-        self.migration_configuration = configuration.Configuration(host=migration_url)
-        self.migration_destination_storage_name = migration_destination_storage_name
-
-        self.perform_actual_ingest_and_migration = perform_actual_ingest_and_migration
-
-    def __str__(self):
-        """Create a string representation of this configuration.
-
-        Returns:
-            A string containing all configuration parameters and their values.
-        """
-        return (
-            f"directory_to_watch {self.directory_to_watch}\n"
-            f"ingest_url {self.ingest_url}\n"
-            f"storage_name {self.storage_name}\n"
-            f"storage_url {self.storage_url}\n"
-            f"status_file_absolute_path {self.status_file_absolute_path}\n"
-            f"storage_root_directory {self.storage_root_directory}\n"
-            f"reload_status_file {self.reload_status_file}\n"
-            f"use_status_file {self.use_status_file}\n"
-            f"rclone_access_check_on_register {self.rclone_access_check_on_register}\n"
-            f"ingest_configuration {self.ingest_configuration}\n"
-            f"directory_watcher_entries {self.directory_watcher_entries}\n"
-            f"ingest_register_path_to_add {self.ingest_register_path_to_add}\n"
-            f"migration_url {self.migration_url}\n"
-            f"migration_configuration {self.migration_configuration}\n"
-            f"migration_destination_storage_name {self.migration_destination_storage_name}\n"
-            f"perform_actual_ingest_and_migration {self.perform_actual_ingest_and_migration}\n"
-        )
+        self.migration_configuration = Configuration(host=self.migration_url)

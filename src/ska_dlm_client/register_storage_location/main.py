@@ -19,11 +19,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Constants that can be used for testing.
-LOCATION_NAME = "ThisDLMClientLocationName"
-LOCATION_TYPE = LocationType.LOW_INTEGRATION
-LOCATION_COUNTRY = LocationCountry.AU
-LOCATION_CITY = "Kensington"
-LOCATION_FACILITY = "local"
+LOCATION_NAME = os.getenv("LOCATION_NAME","MyDLMClient")
+LOCATION_TYPE = os.getenv("LOCATION_TYPE", LocationType.LOCAL_DEV)
+LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY",LocationCountry.AU)
+LOCATION_CITY = os.getenv("LOCATION_CITY","Perth")
+LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")
 RCLONE_CONFIG_TARGET = {
     "name": "dlm-archive",
     "type": "alias",
@@ -37,7 +37,7 @@ RCLONE_CONFIG_SOURCE = {
         "key_file": "/root/.ssh/id_rsa",
         "shell_type": "unix",
         "type": "sftp",
-        "user": "ska-dlm",
+        "user": f"{os.getenv('USER', 'ska-dlm')}",
     },
 }
 STORAGE_INTERFACE = "posix"

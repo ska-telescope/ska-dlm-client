@@ -28,22 +28,6 @@ from ska_dlm_client.utils import CmdLineParameters
 
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
 
-# if "SOURCE_NAME" in os.environ:
-#     RCLONE_CONFIG_SOURCE = None
-# else:
-#     RCLONE_CONFIG_SOURCE = {
-#         "name": "sdp-watcher",
-#         "type": "sftp",
-#         "parameters": {
-#             "host": "dlm_configdb_watcher",
-#             "key_file": "/root/.ssh/id_rsa",
-#             "shell_type": "unix",
-#             "type": "sftp",
-#             "user": "ska-dlm",
-#         },
-#     }
-
-
 # pylint: disable=too-many-instance-attributes
 @dataclass
 class SDPIngestConfig:
@@ -232,76 +216,33 @@ async def sdp_to_dlm_ingest_and_migrate(
                 logger.exception("Failed to process Flow %s", dataproduct_key)
                 logger.info("Continuing to look for new Flows")
 
-
-def main() -> None:
-    """Control the main execution of the program."""
-    parser = create_parser()
-    cmd_line_parameters = CmdLineParameters(
-        parser=parser,
-        add_readiness_probe_file=True,
-        add_do_not_perform_actual_ingest_and_migration=True,
-        add_dir_updates_wait_time=True,
-    )
-
-    parser = argparse.ArgumentParser()
+def add_arguments(parser):
+    """
+    Add the arguments specific to the configdb_watcher
+    """
     parser.add_argument(
         "--include-existing",
         action="store_true",
         help="If set, first yield existing dataproduct keys with matching status.",
     )
-    parser.add_argument(
-        "-i",
-        "--ingest-url",
-        type=str,
-        default="http://dlm_ingest:8001",
-        help=(
-            "Ingest server URL including the service port. " "Default 'http://dlm_ingest:8001'."
-        ),
+
+def main() -> None:
+    """Control the main execution of the program."""
+    # parser = create_parser()
+    cmd_line_parameters = CmdLineParameters(
+        add_readiness_probe_file=True,
+        add_do_not_perform_actual_ingest_and_migration=True,
+        add_dir_updates_wait_time=True,
     )
-    parser.add_argument(
-        "--source-name",
-        type=str,
-        required=True,
-        help="Source storage name (e.g., 'SDPBuffer').",
-    )
-    parser.add_argument(
-        "--storage-url",
-        type=str,
-        default="http://dlm_storage:8003",
-        help=(
-            "Storage server URL including the service port. " "Default 'http://dlm_storage:8003'."
-        ),
-    )
-    parser.add_argument(
-        "-r",
-        "--source-root",
-        type=str,
-        default="",
-        help=(
-            "The root directory of the source storage, used to match "
-            "relative path names. Default ''."
-        ),
-    )
-    parser.add_argument(
-        "--target-name",
-        type=str,
-        default=None,
-        help=(
-            "Destination storage name used for migration. "
-            "If omitted, migration will be skipped."
-        ),
-    )
-    parser.add_argument(
-        "-m",
-        "--migration-url",
-        type=str,
-        default=None,
-        help=(
-            "Migration server URL including the service port. "
-            "If omitted, migration will be skipped."
-        ),
-    )
+
+    parser = cmd_line_parameters.parser
+    add_arguments(parser)
+    
     args = parser.parse_args()
+
+    parser = argparse.ArgumentParser()
+    args = parser.parse_args()
+    cmd_line_parameters.parse_arguments(args)
     ingest_config = process_args(args)
 
     asyncio.run(sdp_to_dlm_ingest_and_migrate(ingest_config))
