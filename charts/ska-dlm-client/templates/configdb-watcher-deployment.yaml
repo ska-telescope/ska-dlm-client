@@ -79,9 +79,9 @@ spec:
             - "--target-name"
             - {{ .Values.configdb_watcher.migration_destination_storage_name | quote }}
           {{- end }}
-          {{- if .Values.configdb_watcher.migration_server_url }}
+          {{- if .Values.configdb_watcher.migration_url }}
             - "--migration-url"
-            - {{ .Values.configdb_watcher.migration_server_url | quote }}
+            - {{ .Values.configdb_watcher.migration_url | quote }}
           {{- end }}
 
           volumeMounts:
