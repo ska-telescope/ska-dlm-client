@@ -8,12 +8,12 @@ services:
     image: dlm_directory_watcher
     container_name: dlm_directory_watcher
     hostname: ska-dlm-directory-watcher
+    env_file:
+      - directory_watcher.env
+    entrypoint: /entrypoint.sh
     build:
       context: ..
       dockerfile: Dockerfile
-    entrypoint:
-      - /entrypoint.sh
-      - directory-watcher
     volumes:
       - shared-tmpfs:/dlm
       - /var/run/docker.sock:/var/run/docker.sock
@@ -24,12 +24,16 @@ services:
     image: dlm_configdb_watcher
     container_name: dlm_configdb_watcher
     hostname: ska-dlm-configdb-watcher
-    build:
-      context: ..
-      dockerfile: Dockerfile
+    env:
+      - watcher-mode
+    # env_file:
+    #   - configdb_watcher.env
     entrypoint:
       - /entrypoint.sh
       - configdb-watcher
+    build:
+      context: ..
+      dockerfile: Dockerfile
     volumes:
       - shared-tmpfs:/dlm
       - /var/run/docker.sock:/var/run/docker.sock

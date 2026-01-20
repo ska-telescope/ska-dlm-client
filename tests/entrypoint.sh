@@ -1,10 +1,11 @@
 #!/bin/bash
+watcher_mode=${MODE:-$1}
 mkdir -p /dlm/watch_dir
 chown -R ska-dlm:ska-dlm /dlm/watch_dir
 chmod g+w /dlm/watch_dir
 /etc/init.d/ssh start
 
-case "$1" in
+case "$watcher_mode" in
     "directory-watcher")
         CMD="dlm-directory-watcher \
           --directory-to-watch ${SOURCE_ROOT:-/dlm/watch_dir} \
@@ -12,6 +13,7 @@ case "$1" in
           --source-root ${SOURCE_ROOT:-/dlm/watch_dir} \
           --target-name ${TARGET_NAME:-dlm-archive} \
           --migration-url ${MIGRATION_URL:-http://dlm_migration:8004} \
+          --storage-url ${STORAGE_URL:-http://dlm_storage:8003} \
           --ingest-url ${INGEST_URL:-http://dlm_ingest:8001} \
           --readiness-probe-file /tmp/dlm-client-ready \
           --skip-rclone-access-check-on-register \

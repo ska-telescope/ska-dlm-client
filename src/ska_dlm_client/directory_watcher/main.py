@@ -49,6 +49,14 @@ def create_parser() -> argparse.ArgumentParser:
         help="Ingest server URL including the service port.",
     )
     parser.add_argument(
+        "--storage-url",
+        type=str,
+        default="http://dlm_storage:8003",
+        help=(
+            "Storage server URL including the service port. " "Default 'http://dlm_storage:8003'."
+        ),
+    )
+    parser.add_argument(
         "-m",
         "--migration-url",
         type=str,
