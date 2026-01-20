@@ -114,6 +114,7 @@ def install_ssh_key(api_storage):
 
 def get_or_init_storage(
     storage_name: str,
+    storage_url: str,
     api_configuration: Configuration,
     storage_root_directory: str,
     the_location_id: str,
@@ -133,7 +134,7 @@ def get_or_init_storage(
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
         # Ensure storage API calls go to the storage service, not ingest
-        api_storage.api_client.configuration.host = api_configuration.host
+        api_storage.api_client.configuration.host = storage_url
         # Get the storage_id
         response = api_storage.query_storage(storage_name=storage_name)
         logger.info("query_storage response: %s", response)
@@ -182,6 +183,7 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
     storage_url = storage_url or os.getenv("STORAGE_URL") or "http://dlm_storage:8003"
+    logger.info("Using storage URL: %s", storage_url)
     if location_id is None:
         location_id = get_or_init_location(
             api_configuration, location=LOCATION_NAME, storage_url=storage_url
@@ -194,6 +196,7 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
         storage_root_directory = watcher_config.storage_root_directory
     storage_id = get_or_init_storage(
         storage_name=storage_name,
+        storage_url=storage_url,
         api_configuration=api_configuration,
         storage_root_directory=storage_root_directory,
         the_location_id=location_id,
@@ -222,6 +225,7 @@ def setup_testing(api_configuration: Configuration):
     )
     storage_id = get_or_init_storage(
         storage_name=RCLONE_CONFIG_TARGET["name"],
+        storage_url=storage_url,
         api_configuration=api_configuration,
         storage_root_directory=RCLONE_CONFIG_TARGET["parameters"]["remote"],
         the_location_id=location_id,
