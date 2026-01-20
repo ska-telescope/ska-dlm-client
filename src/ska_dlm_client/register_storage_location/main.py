@@ -30,7 +30,7 @@ RCLONE_CONFIG_TARGET = {
     "parameters": {"remote": "/dlm-archive"},
 }
 RCLONE_CONFIG_SOURCE = {
-    "name": "dir-watcher",
+    "name": f"{os.getenv('SOURCE_NAME', 'dir-watcher')}",
     "type": "sftp",
     "parameters": {
         "host": f"{socket.gethostname()}",

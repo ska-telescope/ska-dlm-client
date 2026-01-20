@@ -17,7 +17,7 @@ from ska_dlm_client.configdb_watcher.configdb_utils import (
 )
 from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
 from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.register_storage_location.main import setup_volume
+from ska_dlm_client.register_storage_location.main import RCLONE_CONFIG_SOURCE, setup_volume
 from ska_dlm_client.registration_processor import (
     RegistrationProcessor,
     _directory_contains_metadata_file,
@@ -27,20 +27,20 @@ from ska_dlm_client.registration_processor import (
 
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
 
-if "SOURCE_NAME" in os.environ:
-    RCLONE_CONFIG_SOURCE = None
-else:
-    RCLONE_CONFIG_SOURCE = {
-        "name": "sdp-watcher",
-        "type": "sftp",
-        "parameters": {
-            "host": "dlm_configdb_watcher",
-            "key_file": "/root/.ssh/id_rsa",
-            "shell_type": "unix",
-            "type": "sftp",
-            "user": "ska-dlm",
-        },
-    }
+# if "SOURCE_NAME" in os.environ:
+#     RCLONE_CONFIG_SOURCE = None
+# else:
+#     RCLONE_CONFIG_SOURCE = {
+#         "name": "sdp-watcher",
+#         "type": "sftp",
+#         "parameters": {
+#             "host": "dlm_configdb_watcher",
+#             "key_file": "/root/.ssh/id_rsa",
+#             "shell_type": "unix",
+#             "type": "sftp",
+#             "user": "ska-dlm",
+#         },
+#     }
 
 
 # pylint: disable=too-many-instance-attributes
@@ -68,6 +68,9 @@ def process_args(args: argparse.Namespace) -> SDPIngestConfig:
     else:
         migration_configuration = None
         logger.warning("No migration server specified. Unable to perform migrations.")
+
+    if args.source_name:
+        RCLONE_CONFIG_SOURCE["name"] = args.source_name
 
     return SDPIngestConfig(
         include_existing=args.include_existing,

@@ -144,6 +144,9 @@ def process_args(
     Returns:
         A Config object initialized with all the command line parameters.
     """
+    if args.source_name:
+        RCLONE_CONFIG_SOURCE["name"] = args.source_name
+
     config = WatcherConfig(
         directory_to_watch=args.directory_to_watch,
         ingest_url=args.ingest_url,
