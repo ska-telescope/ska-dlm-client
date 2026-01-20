@@ -53,43 +53,53 @@ spec:
       {{ end }}
 
       containers:
-        - name: configdb-watcher
-          image: {{ .Values.ska_dlm_client.image }}:{{ .Values.ska_dlm_client.version }}
-          imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
+      - name: configdb-watcher
+        image: {{ .Values.ska_dlm_client.image }}:{{ .Values.ska_dlm_client.version }}
+        imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
 
+        env:
           # Where ska_sdp_config.Config() should look for etcd / ConfigDB
-          env:
-            {{ include "ska-dlm-client.configdb-watcher.sdp-config-env" . | nindent 12 }}
+          {{- include "ska-dlm-client.configdb-watcher.sdp-config-env" . | nindent 10 }}
 
-          command:
-            - "dlm-configdb-watcher"
-          args:
-          {{- if .Values.configdb_watcher.include_existing }}
-            - "--include-existing"
-          {{- end }}
-            - "--ingest-url"
-            - {{ .Values.configdb_watcher.ingest_server_url | quote }}
-            - "--source-name"
-            - {{ .Values.configdb_watcher.source_storage | quote }}
-            - "--storage-url"
-            - {{ .Values.configdb_watcher.storage_server_url | quote }}
-            - "--source-root"
-            - {{ .Values.configdb_watcher.source_root_directory | quote }}
+          - name: INGEST_URL
+            value: {{ .Values.configdb_watcher.ingest_server_url | quote }}
+
+          - name: STORAGE_URL
+            value: {{ .Values.configdb_watcher.storage_server_url | quote }}
+
+          - name: SOURCE_NAME
+            value: {{ .Values.configdb_watcher.source_storage | quote }}
+
+          - name: SOURCE_ROOT
+            value: {{ .Values.configdb_watcher.source_root_directory | quote }}
+
           {{- if .Values.configdb_watcher.migration_destination_storage_name }}
-            - "--target-name"
-            - {{ .Values.configdb_watcher.migration_destination_storage_name | quote }}
-          {{- end }}
-          {{- if .Values.configdb_watcher.migration_url }}
-            - "--migration-url"
-            - {{ .Values.configdb_watcher.migration_url | quote }}
+          - name: TARGET_NAME
+            value: {{ .Values.configdb_watcher.migration_destination_storage_name | quote }}
           {{- end }}
 
-          volumeMounts:
-            - name: data-product-storage
-              mountPath: /dlm/product_dir
-              {{- if $.Values.global.dataProduct.pvc.read_only }}
-              readOnly: true
-              {{- end }}
+          {{- if .Values.configdb_watcher.migration_url }}
+          - name: MIGRATION_URL
+            value: {{ .Values.configdb_watcher.migration_url | quote }}
+          {{- end }}
+
+          {{- if .Values.configdb_watcher.include_existing }}
+          - name: INCLUDE_EXISTING
+            value: "true"
+          {{- end }}
+
+        command:
+          - /entrypoint.sh
+        args:
+          - configdb-watcher
+
+        volumeMounts:
+          - name: data-product-storage
+            mountPath: /dlm/product_dir
+            {{- if $.Values.global.dataProduct.pvc.read_only }}
+            readOnly: true
+            {{- end }}
+
       volumes:
         - name: data-product-storage
           persistentVolumeClaim:
