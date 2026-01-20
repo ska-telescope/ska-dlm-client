@@ -8,8 +8,8 @@ The Kafka watcher subscribes to a specified Kafka topic and triggers an ingestio
 .. code-block:: sh
 
     $ dlm-kafka-watcher
-    usage: dlm-kafka-watcher [-h] [--kafka-topic [KAFKA_TOPIC ...]] --kafka-broker-url KAFKA_BROKER_URL [KAFKA_BROKER_URL ...] --storage-name STORAGE_NAME --ingest-server-url INGEST_URL [--check-rclone-access]
-    dlm-kafka-watcher: error: the following arguments are required: --kafka-broker-url, --storage-name, --ingest-server-url
+    usage: dlm-kafka-watcher [-h] [--kafka-topic [KAFKA_TOPIC ...]] --kafka-broker-url KAFKA_BROKER_URL [KAFKA_BROKER_URL ...] --storage-name STORAGE_NAME --ingest-url INGEST_URL [--check-rclone-access]
+    dlm-kafka-watcher: error: the following arguments are required: --kafka-broker-url, --storage-name, --ingest-url
 
 
 **Required parameters:**
@@ -17,7 +17,7 @@ The Kafka watcher subscribes to a specified Kafka topic and triggers an ingestio
 - Kafka broker URL: A URL pointing to the Kafka broker. (``--kafka-broker-url``)
 - Kafka topic: The Kafka topic to watch. (``--kafka-topic``)
 - Storage name: The storage name to use for registering the files. (``--storage-name``)
-- DLM server URL: The URL to the DLM server (``--ingest-server-url``).
+- DLM server URL: The URL to the DLM server (``--ingest-url``).
 
 **Optional parameters:**
 

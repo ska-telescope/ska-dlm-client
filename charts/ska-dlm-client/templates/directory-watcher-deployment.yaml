@@ -34,13 +34,13 @@ spec:
         - {{ .Values.directory_watcher.source_storage | quote }}
         - "--source-root"
         - {{ .Values.directory_watcher.source_root | quote }}
-        {{- if .Values.directory_watcher.target_name }}
+        {{- if .Values.ska_dlm_client.target_name }}
           - "--target-name"
-          - {{ .Values.directory_watcher.target_name | quote }}
+          - {{ .Values.ska_dlm_client.target_name | quote }}
         {{- end }}
-        {{- if .Values.directory_watcher.target_root }}
+        {{- if .Values.ska_dlm_client.target_root }}
           - "--target-root"
-          - {{ .Values.directory_watcher.target_root | quote }}
+          - {{ .Values.ska_dlm_client.target_root | quote }}
         {{- end }}
         {{- if eq $.Values.directory_watcher.use_polling_watcher true }}
         - "--use-polling-watcher"

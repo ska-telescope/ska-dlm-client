@@ -19,12 +19,12 @@ spec:
         imagePullPolicy: {{ .Values.kafka_watcher.imagePullPolicy }}
         command:
         - "dlm-register-storage-location"
-        - "--storage-server-url"
-        - {{ .Values.ska_dlm_client.storage_server_url }}
+        - "--storage-url"
+        - {{ .Values.ska_dlm_client.storage_url }}
         - "--storage-name"
         - {{ .Values.ska_dlm_client.storage_name }}
         - "--storage-root-directory"
-        - {{ .Values.ska_dlm_client.storage_root_directory }}
+        - {{ .Values.ska_dlm_client.source_root | quote }}
         volumeMounts:
         - name: dlm-configmap
           mountPath: "/home/ska-dlm/.dlm"

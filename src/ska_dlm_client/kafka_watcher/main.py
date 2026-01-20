@@ -39,7 +39,7 @@ def main():
         help="The storage name to register data items against.",
     )
     parser.add_argument(
-        "--ingest-server-url",
+        "--ingest-url",
         type=str,
         required=True,
         help="Ingest server URL including the service port. E.g., http://ska-dlm-dev-ingest:80",

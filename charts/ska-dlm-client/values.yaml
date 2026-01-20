@@ -29,29 +29,34 @@ ska_dlm:
   fullname: "ska-dlm"
 
 ska_dlm_client:
+  # Generic dlm_client settings
   image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client #artefact.skao.int/ska-dlm-client
-  version: "1c6fd796" #"1.1.0" # Change to new release asap!
+  version: "1.1.0"
+  # version: "1c6fd796" #"1.1.0" # Change to new release asap!
   imagePullPolicy: Always
-  storage_name: dlm
-  storage_root_directory: /dlm
+  target_name: dlm-archive
+  target_root: /dlm
   securityContext: {}
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace:port
-  ingest_server_url: "http://ska-dlm-ingest.dp-dm" # override for production
-  storage_server_url: "http://ska-dlm-storage.dp-dm" # override for production
-  request_server_url: "http://ska-dlm-request.dp-dm" # override for production
+  ingest_url: "http://ska-dlm-ingest.dp-dm" # override for production
+  storage_url: "http://ska-dlm-storage.dp-dm" # override for production
+  request_url: "http://ska-dlm-request.dp-dm" # override for production
+  migration_url: "http://ska-dlm-migration.dp-dm" # override for production
 
 directory_watcher:
+  # Settings specific to directory_watcher
   enabled: true
   component: directory-watcher
   subsystem: data-lifecycle-management
   replicas: 1
-  storage_name: dlm
-  storage_root_directory: /dlm/watch_dir
+  source_name: dlm
+  source_root: /dlm/watch_dir
   directory_to_watch: /dlm/watch_dir
   use_polling_watcher: false
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false
+  migration_destination_storage_name: dlm-archive
 
 configdb_watcher:
   enabled: true
@@ -59,12 +64,9 @@ configdb_watcher:
   subsystem: data-lifecycle-management
   replicas: 1
   include_existing: false
-  ingest_server_url: http://ska-dlm-ingest.dp-dm
-  storage_server_url: http://ska-dlm-storage.dp-dm
   source_storage: SDPBuffer
-  storage_root_directory: /dlm/product_dir
-  migration_destination_storage_name: # If omitted, migration will be skipped
-  migration_server_url: # If omitted, migration will be skipped
+  source_root: /dlm/product_dir
+  migration_destination_storage_name: dlm-archive
   sdp_config:
     host: ""      # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
     port: 2379    # default etcd client port

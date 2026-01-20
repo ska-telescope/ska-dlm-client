@@ -13,7 +13,7 @@ CLI call example::
                                  [--use-status-file | --no-use-status-file]
                                  [--reload-status-file | --no-reload-status-file]
                                  [--status-file-filename STATUS_FILE_FILENAME]
-    dlm_directory_watcher: error: the following arguments are required: -d/--directory-to-watch, -i/--ingest-server-url, -n/--storage-name
+    dlm_directory_watcher: error: the following arguments are required: -d/--directory-to-watch, -i/--ingest-url, -n/--storage-name
 
 
 The directory_watcher requires the following parameters:
