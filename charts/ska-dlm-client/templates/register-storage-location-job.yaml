@@ -16,15 +16,16 @@ spec:
       containers:
       - name: register-storage-location
         image: {{ .Values.ska_dlm_client.image }}:{{ .Values.ska_dlm_client.version }}
-        imagePullPolicy: {{ .Values.kafka_watcher.imagePullPolicy }}
+        imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
         command:
-        - "dlm-register-storage-location"
-        - "--storage-server-url"
-        - {{ .Values.ska_dlm_client.storage_server_url }}
-        - "--storage-name"
-        - {{ .Values.ska_dlm_client.storage_name }}
-        - "--storage-root-directory"
-        - {{ .Values.ska_dlm_client.storage_root_directory }}
+          - "dlm-register-storage-location"
+        args:
+          - "--storage-url"
+          - {{ .Values.ska_dlm_client.storage_url }}
+          - "--storage-name"
+          - {{ .Values.ska_dlm_client.storage_name }}
+          - "--storage-root-directory"
+          - {{ .Values.ska_dlm_client.storage_root_directory }}
         volumeMounts:
         - name: dlm-configmap
           mountPath: "/home/ska-dlm/.dlm"

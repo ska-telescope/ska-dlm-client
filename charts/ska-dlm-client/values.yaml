@@ -23,7 +23,7 @@ global:
 
 nameOverride: ""
 fullnameOverride: ""
-setupStorageLocation: false
+setupStorageLocation: true
 
 ska_dlm:
   fullname: "ska-dlm"
