@@ -16,6 +16,7 @@ class TestSourceRootDirectory:
 
     STORAGE_NAME = "test-storage"
     INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
+    STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 
     @classmethod
     def setup_class(cls) -> None:
@@ -38,6 +39,8 @@ class TestSourceRootDirectory:
                 self.INGEST_URL,
                 "--source-name",
                 self.STORAGE_NAME,
+                "--storage-url",
+                self.STORAGE_URL,
                 "--source-root",
                 "",
             ]
@@ -81,6 +84,8 @@ class TestSourceRootDirectory:
                 self.INGEST_URL,
                 "--source-name",
                 self.STORAGE_NAME,
+                "--storage-url",
+                self.STORAGE_URL,
                 "--source-root",
                 root_dir,
                 "--readiness-probe-file",
@@ -145,6 +150,7 @@ class TestSourceRootDirectory:
             directory_to_watch=self.the_watch_dir,
             ingest_url=self.INGEST_URL,
             storage_name=self.STORAGE_NAME,
+            storage_url=self.STORAGE_URL,
             status_file_absolute_path=f"{self.the_watch_dir}/{STATUS_FILE_FILENAME}",
             storage_root_directory=root_dir,
         )

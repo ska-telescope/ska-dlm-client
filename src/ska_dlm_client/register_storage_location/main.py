@@ -46,11 +46,10 @@ STORAGE_TYPE = "filesystem"
 
 def get_or_init_location(
     api_configuration: Configuration,
-    location: str = LOCATION_NAME,
-    storage_url=None,
+    storage_url: str,
+    location: str,
 ) -> str:
     """Perform location initialisation to be used when testing."""
-    storage_url = api_configuration.host if storage_url is None else storage_url
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
 
@@ -183,11 +182,10 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     setup_target: bool = False,
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
-    storage_url = storage_url or os.getenv("STORAGE_URL") or "http://dlm_storage:8003"
     logger.info("Using storage URL: %s", storage_url)
     if location_id is None:
         location_id = get_or_init_location(
-            api_configuration, location=LOCATION_NAME, storage_url=storage_url
+            api_configuration, storage_url=storage_url, location=LOCATION_NAME
         )
     if setup_target:
         storage_name = watcher_config.migration_destination_storage_name
@@ -222,7 +220,7 @@ def setup_testing(api_configuration: Configuration):
         else api_configuration.host
     )
     location_id = get_or_init_location(
-        api_configuration, location=LOCATION_NAME, storage_url=storage_url
+        api_configuration, storage_url=storage_url, location=LOCATION_NAME
     )
     storage_id = get_or_init_storage(
         storage_name=RCLONE_CONFIG_TARGET["name"],
