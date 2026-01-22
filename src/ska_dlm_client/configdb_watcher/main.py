@@ -27,21 +27,6 @@ from ska_dlm_client.registration_processor import (
 
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
 
-# if "SOURCE_NAME" in os.environ:
-#     RCLONE_CONFIG_SOURCE = None
-# else:
-#     RCLONE_CONFIG_SOURCE = {
-#         "name": "sdp-watcher",
-#         "type": "sftp",
-#         "parameters": {
-#             "host": "dlm_configdb_watcher",
-#             "key_file": "/root/.ssh/id_rsa",
-#             "shell_type": "unix",
-#             "type": "sftp",
-#             "user": "ska-dlm",
-#         },
-#     }
-
 
 # pylint: disable=too-many-instance-attributes
 @dataclass

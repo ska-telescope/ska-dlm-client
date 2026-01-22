@@ -2,23 +2,41 @@
 
 ## Development
 
+### Updated
+
+* Updated the readme file.
+
+### Fixed
+
+* Directory Watcher now correctly accepts a configurable storage URL (via --storage-url).
+* Various small bug fixes.
+
 ### Added
 
-* Config DB watcher calls the DLM server to register data-products at the source destination and creates a DLM Dependency.
+* When deploying a local etcd service, the ConfigDB Watcher pod waits for the etcd pod.
+* ConfigDB watcher calls the DLM server to register data-products at the source destination and creates a DLM Dependency.
 * Added Helm chart configuration for the ConfigDB Watcher.
-* Config DB watcher calls the DLM server to register and migrate data-products, and creates a DLM Dependency.
-* ska-sdp-config DB watcher that yields matching data-product Flow status events.
+* ConfigDB watcher calls the DLM server to register and migrate data-products, and creates a DLM Dependency.
+* ska-sdp-configDB watcher that yields matching data-product Flow status events.
 * Integration test harness to start DLM services (via Docker Compose).
 * Start of integration tests for directory-watcher and kafka-watcher.
 
 ### Changed
 
+* DLM Client tests now run against OCI images of DLM server (instead of building the DLM server).
+* Refactored the directory-watcher and configdb-watcher helm templates to set arguments using environment variables (instead of CLI args).
+* Docker tests now also use environment variables.
+* Moved the etcd configuration from a top-level values.yaml section to configdb_watcher.sdp_config.etcd.
+* The SSH key is always installed, to allow for re-starts of the container.
+* Testing against the new server image (1.3.0).
+* Various changes to variable names, e.g. storage_name --> source_storage.
 * Kafka Docker image switched from bitnami/kafka to apache/kafka
 * kubectl image switched from bitnami/kubectl to artefact.skao.int/ska-ser-utils
 * Renamed client CLI arguments and aligned the corresponding Helm values.
 * Changed the tests to use a 'testrunner' container, rather than directly running pytest on the host machine.
 * Tests now run against OCI images of DLM server, instead of building the DLM server from the GitLab repo.
 * Client and server containers in the tests now consistently use the same network.
+
 ## 1.1.0
 
 ### Added
