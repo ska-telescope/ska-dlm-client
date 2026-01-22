@@ -49,7 +49,7 @@ directory_watcher:
   source_storage: watch_dir
   storage_root_directory: /dlm/watch_dir
   directory_to_watch: /dlm/watch_dir
-  target_name: PawseyS3
+  target_name: DP_S3
   target_root:
   use_polling_watcher: false
   skip_rclone_access_check_on_register: false
@@ -66,7 +66,7 @@ configdb_watcher:
   storage_server_url: http://ska-dlm-storage.dp-dm
   source_storage: SDPBuffer
   source_root_directory: /dlm/product_dir
-  migration_destination_storage_name: PawseyS3 # If omitted, migration will be skipped
+  migration_destination_storage_name: DP_S3 # If omitted, migration will be skipped
   migration_url: http://ska-dlm-migration.dp-dm # If omitted, migration will be skipped
   sdp_config:
     host: ""      # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name

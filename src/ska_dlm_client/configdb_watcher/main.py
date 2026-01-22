@@ -111,7 +111,7 @@ async def _process_completed_flow(  # noqa: C901
 
     # Resolve the source directory from the Flow sink
     src_dir = get_data_product_dir(configdb, dataproduct_key)
-    logger.info(
+    logger.info(  # TODO: check that it's actually looking in the specified sink
         "New COMPLETED data-product identified: key=%s, src_path=%s",
         dataproduct_key,
         src_dir,
@@ -208,9 +208,10 @@ async def sdp_to_dlm_ingest_and_migrate(
             storage_url=ingest_config.storage_url,
         )
     logger.info(
-        "Starting SDP Config watcher (include_existing=%s, storage_name=%s)...",
+        "Starting SDP Config watcher (include_existing=%s, source storage=%s, target storage=%s)",
         ingest_config.include_existing,
         ingest_config.storage_name,
+        ingest_config.migration_destination_storage_name,
     )
 
     async with watch_dataproduct_status(

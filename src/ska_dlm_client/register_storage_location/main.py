@@ -182,7 +182,6 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     setup_target: bool = False,
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
-    logger.info("Using storage URL: %s", storage_url)
     if location_id is None:
         location_id = get_or_init_location(
             api_configuration, storage_url=storage_url, location=LOCATION_NAME
