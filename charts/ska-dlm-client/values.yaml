@@ -25,7 +25,7 @@ ska_dlm:
 
 ska_dlm_client:
   image: artefact.skao.int/ska-dlm-client
-  version: "1.2.0
+  version: "1.2.0"
   imagePullPolicy: Always
   storage_name: dlm
   storage_root_directory: /dlm
