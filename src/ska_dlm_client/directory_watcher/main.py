@@ -5,9 +5,9 @@ import asyncio
 import functools
 import logging
 import signal
-import sys
 
 import ska_dlm_client.config
+from ska_dlm_client import CONFIG
 from ska_dlm_client.directory_watcher.directory_watcher import (
     DirectoryWatcher,
     INotifyDirectoryWatcher,
@@ -130,10 +130,7 @@ def create_directory_watcher() -> DirectoryWatcher:
     """
     # parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
     # This is only enabling the additional parameters required only for the directory watcher.
-    cmd_line_parameters = CmdLineParameters(
-        add_readiness_probe_file=True,
-        add_do_not_perform_actual_ingest_and_migration=False,
-    )
+    cmd_line_parameters = CmdLineParameters(add_readiness_probe_file=True)
     cmd_line_parameters = add_arguments(cmd_line_parameters)
     args = cmd_line_parameters.parser.parse_args()
     cmd_line_parameters.parse_arguments(args)
@@ -191,6 +188,8 @@ def main():
     Creates a new asyncio event loop and runs the amain coroutine in it.
     This function is the entry point when the module is executed directly.
     """
+    print(f">>>>CONFIG: {CONFIG}")
+
     asyncio.run(amain())
 
 

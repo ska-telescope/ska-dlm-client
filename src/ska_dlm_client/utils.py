@@ -6,7 +6,7 @@ use by other applications making up the DLM Client.
 """
 
 import argparse
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 import logging
 import os
 from pathlib import Path
@@ -71,7 +71,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             self.add_request_url = True
         if self.add_readiness_probe_file:
             self.add_readiness_probe_file_arguments()
-            self.add_readiness_probe_file = True
+            self.add_readiness_probe_file = False
         if self.add_dev_test_mode:
             self.add_dev_test_mode = self.add_dev_test_mode
         if self.add_do_not_perform_actual_ingest_and_migration:
@@ -142,7 +142,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
     def add_source_root_arguments(self) -> None:
         """Update a parser to add a storage root argument."""
         self.parser.add_argument(
-            "-r",
+            "-o",
             "--source-root",
             type=str,
             required=True,
@@ -192,6 +192,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
     def add_request_url_arguments(self) -> None:
         """Update a parser to add a request server url argument."""
         self.parser.add_argument(
+            "-r",
             "--request-url",
             type=str,
             required=False,

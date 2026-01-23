@@ -216,24 +216,31 @@ async def sdp_to_dlm_ingest_and_migrate(
                 logger.exception("Failed to process Flow %s", dataproduct_key)
                 logger.info("Continuing to look for new Flows")
 
-def add_arguments(parser):
+def add_arguments(cmd_line_parameters):
     """
     Add the arguments specific to the configdb_watcher
     """
-    parser.add_argument(
+    cmd_line_parameters.parser.add_argument(
+        "-c",
+        "--sdp-config-url",
+        type=str,
+        required=True,
+        help="The URL to access the SDP ConfigDB.",
+    )
+    cmd_line_parameters.parser.add_argument(
         "--include-existing",
         action="store_true",
         help="If set, first yield existing dataproduct keys with matching status.",
     )
+    return cmd_line_parameters
 
 def main() -> None:
     """Control the main execution of the program."""
-    # parser = create_parser()
-    cmd_line_parameters = CmdLineParameters(
-        add_readiness_probe_file=True,
-        add_do_not_perform_actual_ingest_and_migration=True,
-        add_dir_updates_wait_time=True,
-    )
+    cmd_line_parameters = CmdLineParameters(add_readiness_probe_file=False)
+    cmd_line_parameters = add_arguments(cmd_line_parameters)
+    args = cmd_line_parameters.parser.parse_args()
+    cmd_line_parameters.parse_arguments(args)
+    config = process_args(args=args)
 
     parser = cmd_line_parameters.parser
     add_arguments(parser)
