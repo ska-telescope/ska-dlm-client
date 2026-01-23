@@ -49,6 +49,14 @@ def create_parser() -> argparse.ArgumentParser:
         help="Ingest server URL including the service port.",
     )
     parser.add_argument(
+        "--storage-url",
+        type=str,
+        default="http://dlm_storage:8003",
+        help=(
+            "Storage server URL including the service port. " "Default 'http://dlm_storage:8003'."
+        ),
+    )
+    parser.add_argument(
         "-m",
         "--migration-url",
         type=str,
@@ -136,9 +144,13 @@ def process_args(
     Returns:
         A Config object initialized with all the command line parameters.
     """
+    if args.source_name:
+        RCLONE_CONFIG_SOURCE["name"] = args.source_name
+
     config = WatcherConfig(
         directory_to_watch=args.directory_to_watch,
         ingest_url=args.ingest_url,
+        storage_url=args.storage_url,
         storage_name=args.source_name,
         status_file_absolute_path=f"{args.directory_to_watch}/{args.status_file_filename}",
         storage_root_directory=args.source_root,
@@ -183,6 +195,7 @@ def create_directory_watcher() -> DirectoryWatcher:
             watcher_config=config,
             api_configuration=config.ingest_configuration,
             rclone_config=RCLONE_CONFIG_SOURCE,
+            storage_url=config.storage_url,
         )
     registration_processor = RegistrationProcessor(config)
     if args.register_contents_of_watch_directory:

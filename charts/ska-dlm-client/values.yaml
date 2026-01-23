@@ -1,12 +1,7 @@
 # ----------------------------------------------------------------------------------
 # Default Helm configuration for ska-dlm-client
-#
-# Production users must override:
-#   - kafka_watcher.kafka_broker_url
-#   - ska_dlm_client.ingest_server_url
-#   - ska_dlm_client.storage_server_url
-#   - ska_dlm_client.request_server_url
-#
+
+# Production users must override the appropriate service endpoints and URLs.
 # ----------------------------------------------------------------------------------
 
 system: dlm
@@ -23,22 +18,22 @@ global:
 
 nameOverride: ""
 fullnameOverride: ""
-setupStorageLocation: false
+setupStorageLocation: true
 
 ska_dlm:
   fullname: "ska-dlm"
 
 ska_dlm_client:
   image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client #artefact.skao.int/ska-dlm-client
-  version: "1c6fd796" #"1.1.0" # Change to new release asap!
+  version: "1.1.0-dev.cb92236df" # Change to new release asap!
   imagePullPolicy: Always
   storage_name: dlm
   storage_root_directory: /dlm
   securityContext: {}
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace:port
-  ingest_server_url: "http://ska-dlm-ingest.dp-dm" # override for production
-  storage_server_url: "http://ska-dlm-storage.dp-dm" # override for production
+  ingest_url: "http://ska-dlm-ingest.dp-dm"          # override for production
+  storage_url: "http://ska-dlm-storage.dp-dm"        # override for production
   request_server_url: "http://ska-dlm-request.dp-dm" # override for production
 
 directory_watcher:
@@ -46,12 +41,15 @@ directory_watcher:
   component: directory-watcher
   subsystem: data-lifecycle-management
   replicas: 1
-  storage_name: dlm
+  source_storage: watch_dir
   storage_root_directory: /dlm/watch_dir
   directory_to_watch: /dlm/watch_dir
+  target_name: dlm-archive
+  target_root:
   use_polling_watcher: false
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false
+  migration_url: "http://ska-dlm-migration.dp-dm"  # override for production
 
 configdb_watcher:
   enabled: true
@@ -59,12 +57,12 @@ configdb_watcher:
   subsystem: data-lifecycle-management
   replicas: 1
   include_existing: false
-  ingest_server_url: http://ska-dlm-ingest.dp-dm
-  storage_server_url: http://ska-dlm-storage.dp-dm
+  ingest_server_url: http://ska-dlm-ingest.dp-dm   # override for production
+  storage_server_url: http://ska-dlm-storage.dp-dm # override for production
   source_storage: SDPBuffer
-  storage_root_directory: /dlm/product_dir
-  migration_destination_storage_name: # If omitted, migration will be skipped
-  migration_server_url: # If omitted, migration will be skipped
+  source_root_directory: /dlm/product_dir
+  migration_destination_storage_name: dlm-archive # If omitted, migration will be skipped
+  migration_url: http://ska-dlm-migration.dp-dm   # If omitted, migration will be skipped
   sdp_config:
     host: ""      # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
     port: 2379    # default etcd client port

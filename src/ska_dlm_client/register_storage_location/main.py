@@ -6,6 +6,7 @@ import logging
 import os
 import pwd
 import shutil
+import socket
 import sys
 
 from ska_dlm_client.common_types import LocationCountry, LocationType
@@ -29,10 +30,10 @@ RCLONE_CONFIG_TARGET = {
     "parameters": {"remote": "/dlm-archive"},
 }
 RCLONE_CONFIG_SOURCE = {
-    "name": "dir-watcher",
+    "name": f"{os.getenv('SOURCE_NAME', 'dir-watcher')}",
     "type": "sftp",
     "parameters": {
-        "host": "dlm_directory_watcher",
+        "host": f"{socket.gethostname()}",
         "key_file": "/root/.ssh/id_rsa",
         "shell_type": "unix",
         "type": "sftp",
@@ -45,11 +46,10 @@ STORAGE_TYPE = "filesystem"
 
 def get_or_init_location(
     api_configuration: Configuration,
-    location: str = LOCATION_NAME,
-    storage_url=None,
+    storage_url: str,
+    location: str,
 ) -> str:
     """Perform location initialisation to be used when testing."""
-    storage_url = api_configuration.host if storage_url is None else storage_url
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
 
@@ -78,8 +78,43 @@ def get_or_init_location(
     return the_location_id
 
 
+def install_ssh_key(api_storage):
+    """
+    Retrieve and install the rclone ssh public key.
+
+    Parameters
+    ----------
+    api_storage : ska_dlm_client.openapi.dlm_api.storage_api.StorageApi
+        The storage API client to use to retrieve the key.
+    """
+    key = api_storage.get_ssh_public_key()
+    try:
+        with open(os.path.expanduser("~/.ssh/authorized_keys"), "a", encoding="utf-8") as key_file:
+            key_file.write(f"\n{key}\n")
+        if os.path.exists("/home/ska-dlm/.ssh") and (
+            "USER" not in os.environ or os.environ["USER"] == "root"
+        ):  # assume running inside a client container
+            shutil.copyfile(
+                os.path.expanduser("~/.ssh/authorized_keys"),
+                "/home/ska-dlm/.ssh/authorized_keys",
+            )
+            os.chown(
+                "/home/ska-dlm/.ssh/authorized_keys",
+                pwd.getpwnam("ska-dlm").pw_uid,
+                pwd.getpwnam("ska-dlm").pw_gid,
+            )
+            os.chmod("/home/ska-dlm/.ssh/authorized_keys", 0o600)
+            logger.info("rclone SSH public key installed.")
+        else:
+            logger.info("rclone SSH public key installed for current user.")
+    except Exception as e:
+        logger.error("Unable to install SSH key: %s", e)
+
+
 def get_or_init_storage(
+    # pylint: disable=too-many-arguments, disable=too-many-positional-arguments
     storage_name: str,
+    storage_url: str,
     api_configuration: Configuration,
     storage_root_directory: str,
     the_location_id: str,
@@ -99,13 +134,15 @@ def get_or_init_storage(
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
         # Ensure storage API calls go to the storage service, not ingest
-        api_storage.api_client.configuration.host = api_configuration.host
+        api_storage.api_client.configuration.host = storage_url
         # Get the storage_id
         response = api_storage.query_storage(storage_name=storage_name)
         logger.info("query_storage response: %s", response)
         if not isinstance(response, list):
             logger.error("Unexpected response from query_storage_storage")
             sys.exit(1)
+        # we always install the SSH key to allow for re-starts of the container
+        install_ssh_key(api_storage)
         if len(response) == 1:
             the_storage_id = response[0]["storage_id"]
             logger.info("storage %s already exists in DLM", storage_name)
@@ -133,31 +170,6 @@ def get_or_init_storage(
                 storage_config_id = response
                 logger.info("Storage config created with id: %s", storage_config_id)
 
-                # Retrieve and install the rclone ssh public key
-                key = api_storage.get_ssh_public_key()
-                try:
-                    with open(
-                        os.path.expanduser("~/.ssh/authorized_keys"), "a", encoding="utf-8"
-                    ) as key_file:
-                        key_file.write(f"\n{key}\n")
-                    if (
-                        "USER" not in os.environ or os.environ["USER"] == "root"
-                    ):  # assume running inside a client container
-                        shutil.copyfile(
-                            os.path.expanduser("~/.ssh/authorized_keys"),
-                            "/home/ska-dlm/.ssh/authorized_keys",
-                        )
-                        os.chown(
-                            "/home/ska-dlm/.ssh/authorized_keys",
-                            pwd.getpwnam("ska-dlm").pw_uid,
-                            pwd.getpwnam("ska-dlm").pw_gid,
-                        )
-                        os.chmod("/home/ska-dlm/.ssh/authorized_keys", 0o600)
-                        logger.info("rclone SSH public key installed.")
-                    else:
-                        logger.info("rclone SSH public key installed for current user.")
-                except Exception as e:
-                    logger.error("Unable to install SSH key: %s", e)
     return the_storage_id
 
 
@@ -170,10 +182,9 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     setup_target: bool = False,
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
-    storage_url = storage_url or os.getenv("STORAGE_URL") or "http://dlm_storage:8003"
     if location_id is None:
         location_id = get_or_init_location(
-            api_configuration, location=LOCATION_NAME, storage_url=storage_url
+            api_configuration, storage_url=storage_url, location=LOCATION_NAME
         )
     if setup_target:
         storage_name = watcher_config.migration_destination_storage_name
@@ -183,6 +194,7 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
         storage_root_directory = watcher_config.storage_root_directory
     storage_id = get_or_init_storage(
         storage_name=storage_name,
+        storage_url=storage_url,
         api_configuration=api_configuration,
         storage_root_directory=storage_root_directory,
         the_location_id=location_id,
@@ -207,10 +219,11 @@ def setup_testing(api_configuration: Configuration):
         else api_configuration.host
     )
     location_id = get_or_init_location(
-        api_configuration, location=LOCATION_NAME, storage_url=storage_url
+        api_configuration, storage_url=storage_url, location=LOCATION_NAME
     )
     storage_id = get_or_init_storage(
         storage_name=RCLONE_CONFIG_TARGET["name"],
+        storage_url=storage_url,
         api_configuration=api_configuration,
         storage_root_directory=RCLONE_CONFIG_TARGET["parameters"]["remote"],
         the_location_id=location_id,
