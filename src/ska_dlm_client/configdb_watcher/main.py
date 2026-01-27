@@ -5,6 +5,7 @@ import asyncio
 import logging
 import os
 from dataclasses import dataclass
+from pathlib import Path
 
 import athreading
 from ska_sdp_config import Config
@@ -12,7 +13,7 @@ from ska_sdp_config.entity.flow import Flow
 
 from ska_dlm_client.configdb_watcher.configdb_utils import (
     create_sdp_migration_dependency,
-    get_data_product_dir,
+    get_pvc_subpath,
     update_dependency_state,
 )
 from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
@@ -95,19 +96,30 @@ async def _process_completed_flow(  # noqa: C901
             logger.info("Dependency %s status set to %s.", new_dep, state.get("status"))
 
     # Resolve the source directory from the Flow sink
-    src_dir = get_data_product_dir(configdb, dataproduct_key)
-    logger.info(  # TODO: check that it's actually looking in the specified sink
-        "New COMPLETED data-product identified: key=%s, src_path=%s",
+    source_subpath = get_pvc_subpath(configdb, dataproduct_key)
+    source_root = Path(ingest_config.storage_root_directory)
+    source_path_full = source_root / Path(source_subpath)
+
+    logger.info(
+        "New COMPLETED data-product identified: key=%s, source_root=%s, source_subpath=%s, "
+        "source_path_full=%s",
         dataproduct_key,
-        src_dir,
+        source_root,
+        source_subpath,
+        source_path_full,
     )
-    if os.path.exists(src_dir) is False or not os.path.isdir(src_dir):
-        logger.error("Data-product source directory does not exist or is not a directory.")
+
+    if not source_path_full.exists() or not source_path_full.is_dir():
+        logger.error(
+            "Data-product source directory does not exist or is not a directory: %s",
+            source_path_full,
+        )
         return
+
     # Identify the .ms file
-    ms_file_name = _measurement_set_directory_in(src_dir)
+    ms_file_name = _measurement_set_directory_in(source_subpath)
     if ms_file_name is None:
-        logger.error("No Measurement Set found in directory %s", src_dir)
+        logger.error("No Measurement Set found in directory %s", source_subpath)
         return
     logger.info("Found MS file: %s", ms_file_name)
 
@@ -122,14 +134,14 @@ async def _process_completed_flow(  # noqa: C901
         logger.info("New dependency created: %s", new_dep)
 
     # Look for the metadata file
-    if not _directory_contains_metadata_file(src_dir):
+    if not _directory_contains_metadata_file(source_subpath):
         logger.error("No metadata file found!")
     else:
         logger.debug("Found the metadata file!")
 
     # Build Item object
     item = _item_for_single_file_with_metadata(
-        absolute_path=src_dir,
+        absolute_path=source_subpath,
         path_rel_to_watch_dir=ms_file_name,
     )
 
@@ -253,11 +265,8 @@ def main() -> None:
         "-r",
         "--source-root",
         type=str,
-        default="",
-        help=(
-            "The root directory of the source storage, used to match "
-            "relative path names. Default ''."
-        ),
+        default="/dlm/product_dir",
+        help=("Local mount directory of the shared PVC inside the configdb-watcher pod."),
     )
     parser.add_argument(
         "--target-name",

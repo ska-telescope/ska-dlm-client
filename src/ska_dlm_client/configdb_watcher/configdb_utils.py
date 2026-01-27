@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Mapping, Optional
 
 from ska_sdp_config import Config, ConfigCollision
 from ska_sdp_config.backend.etcd3 import Etcd3Backend
@@ -65,12 +65,14 @@ async def create_sdp_migration_dependency(config, dataproduct_key: Flow.Key):
     return dep
 
 
-def get_data_product_dir(config: Config, key: Flow.Key) -> Path:
+def get_pvc_subpath(config: Config, key: Flow.Key) -> Path:
     """
-    Get the directory path to a data product in the SDP configuration database.
+    Get the PVC-internal subpath for a data product from the SDP ConfigDB.
+
+    Expects Flow.sink.data_dir to be a mapping containing a 'pvc_subpath' key.
 
     Returns:
-        absolute path on the local filesystem.
+        Path relative to the root of the PVC.
     """
     flow: Flow | None
     for txn in config.txn():
@@ -80,9 +82,23 @@ def get_data_product_dir(config: Config, key: Flow.Key) -> Path:
         raise KeyError(f"Flow key not found: {key}")
 
     if not isinstance(flow.sink, DataProduct):
-        raise TypeError(f"Expected data product key: {key}")
+        raise TypeError(f"Expected DataProduct sink for Flow key: {key}")
 
-    return Path(str(flow.sink.data_dir))
+    data_dir = flow.sink.data_dir
+
+    # Prefer the typed object case (PVCPath has `.pvc_subpath`)
+    pvc_subpath = getattr(data_dir, "pvc_subpath", None)
+    if pvc_subpath is not None:
+        return Path(str(pvc_subpath).lstrip("/"))
+
+    # Fall back to mapping form (what you see in JSON)
+    if isinstance(data_dir, Mapping) and "pvc_subpath" in data_dir:
+        return Path(str(data_dir["pvc_subpath"]).lstrip("/"))
+
+    raise TypeError(
+        "Expected sink.data_dir to expose 'pvc_subpath' (PVCPath or mapping). "
+        f"Got {data_dir!r}."
+    )
 
 
 def log_flow_dependencies(txn, product_key: Flow.Key) -> None:

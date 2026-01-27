@@ -3,11 +3,13 @@
 import logging
 import os
 import subprocess
+from pathlib import Path
 from time import sleep
 
 import pytest
 from ska_sdp_config import Config
 from ska_sdp_config.entity import ProcessingBlock, Script
+from ska_sdp_config.entity.common import PVCPath
 from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
 from ska_dlm_client.common_types import (
@@ -26,7 +28,7 @@ log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 PB_ID = "pb-test-00000000-a"
-DEMO_MS_PATH = f"{dir_path}/../directory_watcher/test_registration_processor/product_dir"
+MS_PATH = f"{dir_path}/../directory_watcher/test_registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
@@ -88,12 +90,20 @@ def _ensure_processing_block() -> None:
             print(f"ProcessingBlock {PB_ID} already exists")
 
 
-def _create_completed_flow(data_dir: str, flow_name_arg: str) -> None:
+def _create_completed_flow(subpath: str, flow_name_arg: str) -> None:
     """Create a Flow and set its state to COMPLETED."""
     cfg = _get_cfg()
     test_dataproduct = Flow(
         key=Flow.Key(pb_id=PB_ID, kind="data-product", name=flow_name_arg),
-        sink=DataProduct(data_dir=data_dir, paths=[]),
+        sink=DataProduct(
+            data_dir=PVCPath(
+                k8s_namespaces=["dp-shared", "dp-shared-p"],
+                k8s_pvc_name="shared-storage",
+                pvc_mount_path=Path("/data"),
+                pvc_subpath=Path(subpath),
+            ),
+            paths=[],
+        ),
         sources=[],
         data_model="Visibility",
     )
@@ -111,7 +121,7 @@ def trigger_completed_flow(flow_name) -> None:
     #   - same `storage_root_directory`
     #   - points at a directory that actually contains the .ms + metadata
     _create_completed_flow(
-        data_dir=STORAGE["SRC"]["ROOT_DIRECTORY"],
+        subpath="product/eb-00000000/ska-sdp/pb-madeup-00000000-a",
         flow_name_arg=flow_name,
     )
 
@@ -247,7 +257,7 @@ async def test_watcher_registers_and_migrates():
     sleep(2)  # TODO: DMAN-193
     # --- copying demo.ps ---
     cmd = (
-        f"docker container cp {DEMO_MS_PATH}/ "
+        f"docker container cp {MS_PATH}/ "
         + f"{STORAGE['SRC']['STORAGE_CONFIG']['parameters']['host']}:"
         + f"{STORAGE['SRC']['ROOT_DIRECTORY']}/.."
     )
@@ -268,7 +278,7 @@ async def test_watcher_registers_and_migrates():
     log.info("Cleaning up copied MS file from watcher container.")
     cmd = (
         "docker exec dlm_configdb_watcher "
-        + f"rm -rf /dlm/product_dir/{os.path.basename(DEMO_MS_PATH)}"
+        + f"rm -rf /dlm/product_dir/{os.path.basename(MS_PATH)}"
     )
 
 

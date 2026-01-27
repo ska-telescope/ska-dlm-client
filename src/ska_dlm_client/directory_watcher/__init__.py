@@ -6,7 +6,7 @@ register data products with the Data Lifecycle Management (DLM) system.
 
 __author__ = """Mark Boulton"""
 __email__ = "mark.boulton@uwa.edu.au"
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 from .config import WatcherConfig
 
