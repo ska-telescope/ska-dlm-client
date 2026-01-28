@@ -3,7 +3,6 @@
 import argparse
 import asyncio
 import logging
-import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -117,9 +116,9 @@ async def _process_completed_flow(  # noqa: C901
         return
 
     # Identify the .ms file
-    ms_file_name = _measurement_set_directory_in(source_subpath)
+    ms_file_name = _measurement_set_directory_in(source_path_full)
     if ms_file_name is None:
-        logger.error("No Measurement Set found in directory %s", source_subpath)
+        logger.error("No Measurement Set found in directory %s", source_path_full)
         return
     logger.info("Found MS file: %s", ms_file_name)
 
@@ -134,14 +133,14 @@ async def _process_completed_flow(  # noqa: C901
         logger.info("New dependency created: %s", new_dep)
 
     # Look for the metadata file
-    if not _directory_contains_metadata_file(source_subpath):
+    if not _directory_contains_metadata_file(source_path_full):
         logger.error("No metadata file found!")
     else:
         logger.debug("Found the metadata file!")
 
     # Build Item object
     item = _item_for_single_file_with_metadata(
-        absolute_path=source_subpath,
+        absolute_path=source_path_full,
         path_rel_to_watch_dir=ms_file_name,
     )
 
@@ -205,7 +204,8 @@ async def sdp_to_dlm_ingest_and_migrate(
             storage_url=ingest_config.storage_url,
         )
     logger.info(
-        "Starting SDP Config watcher (include_existing=%s, source storage=%s, target storage=%s)",
+        "Starting SDP ConfigDB Watcher (include_existing=%s, source storage=%s, "
+        "target storage=%s)",
         ingest_config.include_existing,
         ingest_config.storage_name,
         ingest_config.migration_destination_storage_name,

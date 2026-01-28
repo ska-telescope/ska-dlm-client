@@ -67,6 +67,9 @@ STORAGE = {
     },
 }
 
+PVC_SUBPATH = "product/eb-00000000/ska-sdp/pb-madeup-00000000-a"
+WATCHER_SOURCE_DIR = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}/{PVC_SUBPATH}"
+
 
 def _get_cfg() -> Config:
     """Return a Config using the same env-based backend settings as the watcher."""
@@ -121,7 +124,7 @@ def trigger_completed_flow(flow_name) -> None:
     #   - same `storage_root_directory`
     #   - points at a directory that actually contains the .ms + metadata
     _create_completed_flow(
-        subpath="product/eb-00000000/ska-sdp/pb-madeup-00000000-a",
+        subpath=PVC_SUBPATH,
         flow_name_arg=flow_name,
     )
 
@@ -255,31 +258,37 @@ async def test_watcher_registers_and_migrates():
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
-    # --- copying demo.ps ---
-    cmd = (
-        f"docker container cp {MS_PATH}/ "
-        + f"{STORAGE['SRC']['STORAGE_CONFIG']['parameters']['host']}:"
-        + f"{STORAGE['SRC']['ROOT_DIRECTORY']}/.."
-    )
-    log.info("Copy MS into container: %s", cmd)
+
+    # --- copy the test MS directory into the watcher container under WATCHER_SOURCE_DIR ---
+    src_host = STORAGE["SRC"]["STORAGE_CONFIG"]["parameters"]["host"]
+    cmd = f"docker exec {src_host} sh -lc 'mkdir -p {WATCHER_SOURCE_DIR}'"
+    log.info("Ensure watcher source dir exists: %s", cmd)
+    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
+    if p.returncode != 0:
+        log.info("[mkdir STDOUT]: %s\n", p.stdout)
+        log.error("[mkdir STDERR]: %s\n", p.stderr)
+    assert p.returncode == 0
+
+    # Copy MS_PATH contents into that directory
+    cmd = f"docker container cp {MS_PATH}/. {src_host}:{WATCHER_SOURCE_DIR}/"
+    log.info("Copy MS into watcher container: %s", cmd)
     p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
     if p.returncode != 0:
         log.info("[copy file STDOUT]: %s\n", p.stdout)
         log.error("[copy file STDERR]: %s\n", p.stderr)
     assert p.returncode == 0
-    if p.returncode != 0:
-        log.error("Failed to copy MS to watcher container.")
-        return
 
+    # Trigger a COMPLETED Flow
     trigger_completed_flow("test-flow")
     sleep(1)
+
     statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow")
     assert "FINISHED" in statuses
-    log.info("Cleaning up copied MS file from watcher container.")
-    cmd = (
-        "docker exec dlm_configdb_watcher "
-        + f"rm -rf /dlm/product_dir/{os.path.basename(MS_PATH)}"
-    )
+
+    log.info("Cleaning up copied MS file(s) from watcher container.")
+    cmd = f"docker exec {src_host} sh -lc 'rm -rf {WATCHER_SOURCE_DIR}'"
+    log.info("Cleanup cmd: %s", cmd)
+    subprocess.run(cmd, shell=True, check=False)
 
 
 @pytest.mark.asyncio

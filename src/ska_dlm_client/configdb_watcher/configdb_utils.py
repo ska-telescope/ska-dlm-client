@@ -91,7 +91,7 @@ def get_pvc_subpath(config: Config, key: Flow.Key) -> Path:
     if pvc_subpath is not None:
         return Path(str(pvc_subpath).lstrip("/"))
 
-    # Fall back to mapping form (what you see in JSON)
+    # Fall back to mapping form in case
     if isinstance(data_dir, Mapping) and "pvc_subpath" in data_dir:
         return Path(str(data_dir["pvc_subpath"]).lstrip("/"))
 

@@ -25,6 +25,7 @@ FLOW_NAME = "vis-receive-mswriter-processor"
 # Note: This fixture mirrors the structure used in ska-sdp-config test_flow.py
 @pytest.fixture
 def dataproduct_flow(config):
+    """Persist a DataProduct Flow."""
     key = Flow.Key(
         pb_id=PB_ID,
         kind="data-product",
