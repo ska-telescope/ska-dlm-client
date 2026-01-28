@@ -1,5 +1,11 @@
 # Version History
 
+## Development
+
+### Fixed
+
+* ConfigDB Watcher derives the data-product path from the sink’s PVCPath.pvc_subpath.
+
 ## 1.2.0
 
 ### Updated
