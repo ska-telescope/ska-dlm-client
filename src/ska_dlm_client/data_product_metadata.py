@@ -46,10 +46,11 @@ class DataProductMetadata:
 
     dp_path: str
     dp_metadata_loaded_from_a_file: bool
-    root: dict
+    root: dict | None
 
     def __init__(self, dp_path: str, create_metadata: bool = False):
         """Init the class."""
+        self.root = None
         self.dp_path = dp_path
         if not os.path.exists(self.dp_path):
             raise FileNotFoundError(f"Path not found {self.dp_path}")

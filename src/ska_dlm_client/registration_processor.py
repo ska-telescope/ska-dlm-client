@@ -209,7 +209,7 @@ class RegistrationProcessor:
                 migration_result,
             )
 
-    def _register_single_item(self, item: Item) -> str | None:
+    def _register_single_item(self, item: Item, migrate:bool=True) -> str | None:
         """Register a single data item with the DLM.
 
         Sends a registration request to the DLM API for the given item,
@@ -217,6 +217,9 @@ class RegistrationProcessor:
 
         Args:
             item: The data item to register with the DLM.
+            migrate: Whether to migrate the item. This is being used to make sure that
+                 the top-level container item is synced including the whole sub-tree,
+                 but not each item individually in addition.
 
         Returns:
             The UUID of the registered data item, or None if registration failed.
@@ -304,8 +307,10 @@ class RegistrationProcessor:
         Args:
             item_list: A list of data items to register with the DLM.
         """
+        migrate = True
         for item in item_list:
-            _ = self._register_single_item(item=item)
+            _ = self._register_single_item(item=item, migrate=migrate)
+            migrate = False # Only the top-level container item triggers migration
             time.sleep(0.01)
 
     def add_path(self, absolute_path: str, path_rel_to_watch_dir: str) -> str | None:
@@ -409,7 +414,7 @@ def _generate_dir_item_list(absolute_path: str, path_rel_to_watch_dir: str) -> l
         elif os.path.isdir(os.path.realpath(entry_path)):
             # Found a non-MS subdirectory
             # recursion !!
-            item_list.append(_generate_dir_item_list(entry_path, entry_rel_path))
+            item_list += _generate_dir_item_list(entry_path, entry_rel_path)
             continue
         item = Item(
             path_rel_to_watch_dir=entry_rel_path,
