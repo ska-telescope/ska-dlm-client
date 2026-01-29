@@ -67,6 +67,7 @@ def process_args(args: argparse.Namespace) -> SDPIngestConfig:
         migration_configuration=migration_configuration,
     )
 
+
 def _register_and_migrate_path(
     processor: RegistrationProcessor,
     src_dir: str,
@@ -120,6 +121,7 @@ def _register_and_migrate_path(
             dep_status = "FINISHED"
     return dep_status
 
+
 async def _process_completed_flow(  # noqa: C901
     configdb: Config,
     dataproduct_key: Flow.Key,
@@ -159,11 +161,9 @@ async def _process_completed_flow(  # noqa: C901
     ms_sets = 0
     for entry in os.listdir(src_dir):
         entry = os.path.join(src_dir, entry)
-        logger.info("Checking: %s",entry)
-        if (os.path.isdir(entry) and
-            entry.lower().endswith(DIRECTORY_IS_MEASUREMENT_SET_SUFFIX)
-        ):
-            ms_sets +=1
+        logger.info("Checking: %s", entry)
+        if os.path.isdir(entry) and entry.lower().endswith(DIRECTORY_IS_MEASUREMENT_SET_SUFFIX):
+            ms_sets += 1
 
     if ms_sets == 0:
         logger.error("No Measurement Set found in directory %s", src_dir)
@@ -193,11 +193,7 @@ async def _process_completed_flow(  # noqa: C901
     processor = RegistrationProcessor(ingest_config)
     processor.last_migration_result = None  # Clear any stale migration result
     dep_status = _register_and_migrate_path(
-        processor,
-        src_dir,
-        ingest_config.storage_root_directory,
-        dataproduct_key,
-        new_dep
+        processor, src_dir, ingest_config.storage_root_directory, dataproduct_key, new_dep
     )  # register+migrate everything in src_dir
     # Update the dependency state to FAILED/FINISHED
     if new_dep and dep_status:

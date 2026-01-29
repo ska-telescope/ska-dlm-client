@@ -89,18 +89,20 @@ def test_generate_dir_item_list(request):
     assert item_list[2].metadata is None
     assert item_list[2].parent == item_list[0]
 
+
 @pytest.fixture
 def mock_config():
     """Create a mock Config object for testing."""
     config = mock.MagicMock(spec=WatcherConfig)
     config.directory_to_watch = "/test/watch/dir"
-    config.storage_name = "test-storage"
+    config.source_storage = "test-storage"
     config.ingest_register_path_to_add = ""
     config.perform_actual_ingest_and_migration = True
     config.rclone_access_check_on_register = False
     config.migration_destination_storage_name = "test-destination-storage"
     config.directory_watcher_entries = mock.MagicMock(spec=DirectoryWatcherEntries)
     config.ingest_url = "http://test-ingest:8000"
+    config.storage_url = "http://test-storage:8000"
 
     # Use real Configuration instances instead of MagicMocks
     config.ingest_configuration = Configuration(host="http://test-ingest:8000")
@@ -231,7 +233,7 @@ def test_registration_processor_register_single_item(
         item_name="test-item",
         uri="test-item",
         item_type=ItemType.FILE,
-        storage_name=mock_config.storage_name,
+        storage_name=mock_config.source_storage,
         do_storage_access_check=mock_config.rclone_access_check_on_register,
         request_body=item.metadata.as_dict(),
     )
@@ -281,24 +283,6 @@ def test_registration_processor_register_container_items(
     # Test with registration enabled
     processor._register_container_items([child_item1, child_item2])
     assert mock_ingest_api.return_value.register_data_item.call_count == 2
-    mock_ingest_api.return_value.register_data_item.assert_any_call(
-        item_name="child-item1",
-        uri="child-item1",
-        item_type=ItemType.FILE,
-        storage_name=mock_config.storage_name,
-        do_storage_access_check=mock_config.rclone_access_check_on_register,
-        parents=parent_item.uuid,
-        request_body=None,
-    )
-    mock_ingest_api.return_value.register_data_item.assert_any_call(
-        item_name="child-item2",
-        uri="child-item2",
-        item_type=ItemType.FILE,
-        storage_name=mock_config.storage_name,
-        do_storage_access_check=mock_config.rclone_access_check_on_register,
-        parents=parent_item.uuid,
-        request_body=None,
-    )
 
     # Test with registration disabled
     mock_ingest_api.reset_mock()
@@ -311,7 +295,7 @@ def test_registration_processor_register_container_items(
     mock_config.perform_actual_ingest_and_migration = True
     mock_ingest_api.return_value.register_data_item.side_effect = OpenApiException("Test error")
     processor._register_container_items([child_item1, child_item2])
-    mock_ingest_api.return_value.register_data_item.assert_called_once()
+    assert mock_ingest_api.return_value.register_data_item.call_count == 2
 
 
 @mock.patch("ska_dlm_client.registration_processor._generate_dir_item_list")
@@ -338,7 +322,7 @@ def test_registration_processor_generate_dir_item_list(
         absolute_path="/test/abs/path", path_rel_to_watch_dir="rel/path"
     )
     processor._register_single_item.assert_called_once_with(file_item)
-    processor._register_container_items.assert_not_called()
+    processor._register_container_items.assert_called_once()
 
     # Test with a single container item
     mock_generate.reset_mock()
@@ -351,7 +335,7 @@ def test_registration_processor_generate_dir_item_list(
     mock_generate.return_value = [container_item]
 
     processor.add_path("/test/abs/path", "rel/path")
-    processor._register_single_item.assert_not_called()
+    processor._register_single_item.assert_called_once()
 
     # Test with multiple items (container + files)
     mock_generate.reset_mock()

@@ -48,15 +48,15 @@ class DataProductMetadata:
     dp_metadata_loaded_from_a_file: bool
     root: dict
 
-    def __init__(self, dp_path: str, create_metadata:bool=False):
+    def __init__(self, dp_path: str, create_metadata: bool = False):
         """Init the class."""
         self.dp_path = dp_path
         if not os.path.exists(self.dp_path):
             raise FileNotFoundError(f"Path not found {self.dp_path}")
         dir_path = ""
         if os.path.isfile(self.dp_path) or (
-            os.path.isdir(self.dp_path)
-            and os.path.splitext(self.dp_path)[1] == ".ms"):
+            os.path.isdir(self.dp_path) and os.path.splitext(self.dp_path)[1] == ".ms"
+        ):
             # always use the containing directory
             dir_path = os.path.dirname(self.dp_path)
         elif os.path.isdir(self.dp_path):
@@ -104,15 +104,17 @@ class DataProductMetadata:
                 )
             self.root = metadata
 
-    def get_execution_block_value(self) -> str | None:
+    def get_execution_block_value(self) -> str:
         """Return the execution block value/attribute/id as defined in the metadata file.
 
         Returns
         -------
-        str | None
-            Returns the execution block as in the metadata file or None if not found.
+        str
+            Returns the execution block as in the metadata file or an empty string if not found.
         """
-        return self.root.get(METADATA_EXECUTION_BLOCK_KEY, None)
+        if getattr(self, "root", None) is None:
+            return ""
+        return self.root.get(METADATA_EXECUTION_BLOCK_KEY, "")
 
     def as_dict(self) -> dict:
         """Return a dictitonary representation of the metadata."""

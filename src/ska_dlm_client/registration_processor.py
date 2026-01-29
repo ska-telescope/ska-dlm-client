@@ -4,7 +4,7 @@ import logging
 import os
 import time
 from dataclasses import dataclass
-from os.path import isdir, isfile
+from os.path import isfile
 from pathlib import Path
 from typing import Any
 
@@ -248,7 +248,6 @@ class RegistrationProcessor:
             )
             return None
 
-
         with api_client.ApiClient(ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
             api_ingest.api_client.configuration.host = ingest_url
@@ -305,10 +304,9 @@ class RegistrationProcessor:
         Args:
             item_list: A list of data items to register with the DLM.
         """
-        with api_client.ApiClient(self._config.ingest_configuration) as ingest_api_client:
-            for item in item_list:
-                _ = self._register_single_item(item=item)
-                time.sleep(0.01)
+        for item in item_list:
+            _ = self._register_single_item(item=item)
+            time.sleep(0.01)
 
     def add_path(self, absolute_path: str, path_rel_to_watch_dir: str) -> str | None:
         """Add the given path to the DLM.
@@ -317,8 +315,8 @@ class RegistrationProcessor:
         1) If absolute_path is a file, it will be registered with the DLM without metadata
         2) If absolute_path is a MS directory it will be registered without metadata (TBC).
         3) If absolute_path is a directory it will be registered as a container with metadata if
-           found. All files within it will be registered as children. Any subdirectory
-           will be treated recursively using the same logic.
+        found. All files within it will be registered as children. Any subdirectory
+        will be treated recursively using the same logic.
 
         Args:
             absolute_path: The absolute path to the file or directory to register.
@@ -357,9 +355,7 @@ class RegistrationProcessor:
             logger.info("\n\n##############################\n")
 
 
-def _generate_dir_item_list(
-    absolute_path: str, path_rel_to_watch_dir: str
-) -> list[Item]:
+def _generate_dir_item_list(absolute_path: str, path_rel_to_watch_dir: str) -> list[Item]:
     """Generate a list of Item objects for a directory.
 
     Analyzes the directory structure and metadata to create Item objects
@@ -377,6 +373,9 @@ def _generate_dir_item_list(
         A list of Item objects representing the directory and its children.
     """
     item_list: list[Item] = []
+    if not os.path.exists(absolute_path):
+        logger.error("Path does not exist: %s", absolute_path)
+        return item_list
 
     # We have to make sure that symlinked dirs are treated correctly
     if isfile(os.path.realpath(absolute_path)):
@@ -422,13 +421,14 @@ def _generate_dir_item_list(
 
     return item_list
 
+
 def directory_contains_metadata_file(absolute_path: str) -> bool:
     """Check if the given directory contains a metadata file.
 
     Args:
         absolute_path: The absolute path to the directory.
     Returns:
-        True if the metadata file exists in the directory, False otherwise. 
+        True if the metadata file exists in the directory, False otherwise.
     """
     metadata_file_path = os.path.join(absolute_path, ska_dlm_client.config.METADATA_FILENAME)
     return os.path.isfile(metadata_file_path)
