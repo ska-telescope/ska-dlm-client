@@ -139,9 +139,10 @@ async def _process_completed_flow(  # noqa: C901
         logger.debug("Found the metadata file!")
 
     # Build Item object
+    uri = f"{source_subpath.rstrip('/')}/{ms_file_name.lstrip('/')}"
     item = _item_for_single_file_with_metadata(
-        absolute_path=source_path_full,
-        path_rel_to_watch_dir=ms_file_name,
+        absolute_path=source_path_full / ms_file_name,
+        path_rel_to_watch_dir=uri,
     )
 
     processor = RegistrationProcessor(ingest_config)
@@ -166,7 +167,8 @@ async def _process_completed_flow(  # noqa: C901
         )
         dep_status = "FAILED"
     else:
-        migration_result = processor.last_migration_result  # Inspect migration outcome
+        migration_result = processor.last_migration_result
+        # TODO DMAN-213: Inspect migration outcome
         logger.debug("migration_result: %s", migration_result)
 
         if migration_result is None:
@@ -176,7 +178,7 @@ async def _process_completed_flow(  # noqa: C901
                 new_dep,
             )
             dep_status = "FAILED"
-        else:
+        else:  # TODO DMAN-213: Just because a migration record appeared doesn't imply success
             logger.info(
                 "Registration and migration succeeded for %s; "
                 "marking dependency %s as FINISHED.",
