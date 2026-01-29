@@ -5,11 +5,12 @@ from __future__ import annotations
 
 import logging
 import os
-from pathlib import Path
-from typing import Mapping, Optional
+from pathlib import Path, PurePath
+from typing import Optional
 
 from ska_sdp_config import Config, ConfigCollision
 from ska_sdp_config.backend.etcd3 import Etcd3Backend
+from ska_sdp_config.entity.common import PVCPath
 from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
 logging.basicConfig(level=logging.INFO)
@@ -84,21 +85,11 @@ def get_pvc_subpath(config: Config, key: Flow.Key) -> Path:
     if not isinstance(flow.sink, DataProduct):
         raise TypeError(f"Expected DataProduct sink for Flow key: {key}")
 
-    data_dir = flow.sink.data_dir
+    data_dir: PVCPath | PurePath = flow.sink.data_dir
+    if not isinstance(data_dir, PVCPath):
+        raise TypeError("only PVCPath supported for flow data_dir.")
 
-    # Prefer the typed object case (PVCPath has `.pvc_subpath`)
-    pvc_subpath = getattr(data_dir, "pvc_subpath", None)
-    if pvc_subpath is not None:
-        return Path(str(pvc_subpath).lstrip("/"))
-
-    # Fall back to mapping form in case
-    if isinstance(data_dir, Mapping) and "pvc_subpath" in data_dir:
-        return Path(str(data_dir["pvc_subpath"]).lstrip("/"))
-
-    raise TypeError(
-        "Expected sink.data_dir to expose 'pvc_subpath' (PVCPath or mapping). "
-        f"Got {data_dir!r}."
-    )
+    return data_dir.pvc_subpath
 
 
 def log_flow_dependencies(txn, product_key: Flow.Key) -> None:

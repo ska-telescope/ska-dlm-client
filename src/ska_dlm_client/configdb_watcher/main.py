@@ -97,7 +97,7 @@ async def _process_completed_flow(  # noqa: C901
     # Resolve the source directory from the Flow sink
     source_subpath = get_pvc_subpath(configdb, dataproduct_key)
     source_root = Path(ingest_config.storage_root_directory)
-    source_path_full = source_root / Path(source_subpath)
+    source_path_full = source_root / source_subpath
 
     logger.info(
         "New COMPLETED data-product identified: key=%s, source_root=%s, source_subpath=%s, "
