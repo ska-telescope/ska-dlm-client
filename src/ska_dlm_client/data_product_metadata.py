@@ -48,13 +48,16 @@ class DataProductMetadata:
     dp_metadata_loaded_from_a_file: bool
     root: dict
 
-    def __init__(self, dp_path: str):
+    def __init__(self, dp_path: str, create_metadata:bool=False):
         """Init the class."""
         self.dp_path = dp_path
         if not os.path.exists(self.dp_path):
-            raise FileNotFoundError(f"File not found {self.dp_path}")
+            raise FileNotFoundError(f"Path not found {self.dp_path}")
         dir_path = ""
-        if os.path.isfile(self.dp_path):
+        if os.path.isfile(self.dp_path) or (
+            os.path.isdir(self.dp_path)
+            and os.path.splitext(self.dp_path)[1] == ".ms"):
+            # always use the containing directory
             dir_path = os.path.dirname(self.dp_path)
         elif os.path.isdir(self.dp_path):
             dir_path = self.dp_path
@@ -62,7 +65,7 @@ class DataProductMetadata:
         if os.path.exists(metadata_path):
             self.load_metadata(metadata_path)
             self.dp_metadata_loaded_from_a_file = True
-        else:
+        elif create_metadata:
             self.root = minimal_metadata_generator(dp_path)
             self.dp_metadata_loaded_from_a_file = False
 

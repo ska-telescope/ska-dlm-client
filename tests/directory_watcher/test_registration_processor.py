@@ -18,7 +18,7 @@ from ska_dlm_client.registration_processor import (
     _directory_contains_only_directories,
     _directory_contains_only_files,
     _directory_list_minus_metadata_file,
-    _generate_item_list_for_data_product,
+    _generate_dir_item_list,
     _generate_paths_and_metadata,
     _generate_paths_and_metadata_for_directory,
     _item_for_single_file_with_metadata,
@@ -246,7 +246,7 @@ def test_generate_item_list_for_data_product(request):
     directory_path = os.path.join(watch_dir, "directory_entry")
     rel_path = os.path.split(directory_path)[1]
 
-    item_list = _generate_item_list_for_data_product(directory_path, rel_path)
+    item_list = _generate_dir_item_list(directory_path, rel_path)
 
     assert len(item_list) == 3
     assert item_list[0].item_type == ItemType.CONTAINER
@@ -385,7 +385,7 @@ def test_registration_processor_copy_data_item_to_new_storage(
     processor = RegistrationProcessor(mock_config)
 
     # Test with migration enabled
-    result = processor._copy_data_item_to_new_storage("test-uuid")
+    result = processor._initiate_migration("test-uuid")
     assert result == "test-migration-uuid"
     mock_migration_api.return_value.copy_data_item.assert_called_once_with(
         uid="test-uuid", destination_name=mock_config.migration_destination_storage_name
@@ -393,19 +393,19 @@ def test_registration_processor_copy_data_item_to_new_storage(
 
     # Test with migration disabled
     mock_config.perform_actual_ingest_and_migration = False
-    result = processor._copy_data_item_to_new_storage("test-uuid")
+    result = processor._initiate_migration("test-uuid")
     assert result is None
 
     # Test with missing destination storage name
     mock_config.perform_actual_ingest_and_migration = True
     mock_config.migration_destination_storage_name = None
-    result = processor._copy_data_item_to_new_storage("test-uuid")
+    result = processor._initiate_migration("test-uuid")
     assert result is None
 
     # Test with API exception
     mock_config.migration_destination_storage_name = "test-destination-storage"
     mock_migration_api.return_value.copy_data_item.side_effect = OpenApiException("Test error")
-    result = processor._copy_data_item_to_new_storage("test-uuid")
+    result = processor._initiate_migration("test-uuid")
     assert result is None
 
 
