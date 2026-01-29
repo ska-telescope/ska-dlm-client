@@ -4,7 +4,7 @@ import argparse
 import asyncio
 import logging
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import athreading
 from ska_sdp_config import Config
@@ -139,7 +139,7 @@ async def _process_completed_flow(  # noqa: C901
         logger.debug("Found the metadata file!")
 
     # Build Item object
-    uri = f"{source_subpath.rstrip('/')}/{ms_file_name.lstrip('/')}"
+    uri = str(PurePosixPath(source_subpath) / ms_file_name.lstrip("/"))
     item = _item_for_single_file_with_metadata(
         absolute_path=source_path_full / ms_file_name,
         path_rel_to_watch_dir=uri,

@@ -28,6 +28,7 @@ log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 PB_ID = "pb-test-00000000-a"
+EB_ID = "eb-00000000"
 MS_PATH = f"{dir_path}/../directory_watcher/test_registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
@@ -67,7 +68,7 @@ STORAGE = {
     },
 }
 
-PVC_SUBPATH = "product/eb-00000000/ska-sdp/pb-madeup-00000000-a"
+PVC_SUBPATH = f"product/{EB_ID}/ska-sdp/{PB_ID}"
 WATCHER_SOURCE_DIR = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}/{PVC_SUBPATH}"
 
 
@@ -280,7 +281,7 @@ async def test_watcher_registers_and_migrates():
 
     # Trigger a COMPLETED Flow
     trigger_completed_flow("test-flow")
-    sleep(1)
+    sleep(3)
 
     statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow")
     assert "FINISHED" in statuses
