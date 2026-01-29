@@ -260,8 +260,8 @@ class RegistrationProcessor:
                 response = None
                 if perform_actual_ingest_and_migration:
                     response = api_ingest.register_data_item(
-                        item_name=item.path_rel_to_watch_dir,
-                        uri=item.path_rel_to_watch_dir,
+                        item_name=str(item.path_rel_to_watch_dir),
+                        uri=str(item.path_rel_to_watch_dir),
                         item_type=item.item_type,
                         storage_name=source_storage,
                         do_storage_access_check=rclone_access_check_on_register,
@@ -378,7 +378,8 @@ def _generate_dir_item_list(
     """
     item_list: list[Item] = []
 
-    if isfile(absolute_path):
+    # We have to make sure that symlinked dirs are treated correctly
+    if isfile(os.path.realpath(absolute_path)):
         # Single file case – no metadata
         item = Item(
             path_rel_to_watch_dir=path_rel_to_watch_dir,
@@ -406,7 +407,7 @@ def _generate_dir_item_list(
         entry_rel_path = os.path.join(path_rel_to_watch_dir, entry)
         if entry.lower().endswith(ska_dlm_client.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX):
             item_type = ItemType.CONTAINER
-        elif os.path.isdir(entry_path):
+        elif os.path.isdir(os.path.realpath(entry_path)):
             # Found a non-MS subdirectory
             # recursion !!
             item_list.append(_generate_dir_item_list(entry_path, entry_rel_path))

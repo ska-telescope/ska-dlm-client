@@ -10,6 +10,7 @@ import athreading
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Flow
 
+from ska_dlm_client.config import DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
 from ska_dlm_client.configdb_watcher.configdb_utils import (
     create_sdp_migration_dependency,
     get_data_product_dir,
@@ -66,9 +67,10 @@ def process_args(args: argparse.Namespace) -> SDPIngestConfig:
         migration_configuration=migration_configuration,
     )
 
-async def _register_and_migrate_path(
+def _register_and_migrate_path(
     processor: RegistrationProcessor,
     src_dir: str,
+    root_dir: str,
     dataproduct_key: Flow.Key,
     new_dep: str,
 ) -> str | None:
@@ -77,16 +79,16 @@ async def _register_and_migrate_path(
     Args:
         processor: The RegistrationProcessor instance to use.
         src_dir: The source directory to register and migrate.
+        rooot_dir: The root directory of the source storage.
         dataproduct_key: The Flow.Key of the data-product being processed.
         new_dep: The dependency created for this data-product.
 
     Returns:
         The dependency status.
     """
-    dlm_source_uuid = await asyncio.to_thread(
-        processor.add_path,
+    dlm_source_uuid = processor.add_path(
         absolute_path=src_dir,
-        path_rel_to_watch_dir=src_dir
+        path_rel_to_watch_dir=os.path.relpath(src_dir, start=root_dir),
     )
     logger.debug("dlm_source_uuid: %s", dlm_source_uuid)
 
@@ -156,8 +158,10 @@ async def _process_completed_flow(  # noqa: C901
     # Is there any MS here?
     ms_sets = 0
     for entry in os.listdir(src_dir):
+        entry = os.path.join(src_dir, entry)
+        logger.info("Checking: %s",entry)
         if (os.path.isdir(entry) and
-            entry.lower().endswith(ska_dlm_client.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX)
+            entry.lower().endswith(DIRECTORY_IS_MEASUREMENT_SET_SUFFIX)
         ):
             ms_sets +=1
 
@@ -180,7 +184,7 @@ async def _process_completed_flow(  # noqa: C901
     if not directory_contains_metadata_file(src_dir):
         logger.error("No metadata file found!")
     else:
-        logger.debug("Found the metadata file!")
+        logger.info("Found the metadata file!")
 
     # If we have a dependency, mark it WORKING before we start register+migrate
     if new_dep:
@@ -191,6 +195,7 @@ async def _process_completed_flow(  # noqa: C901
     dep_status = _register_and_migrate_path(
         processor,
         src_dir,
+        ingest_config.storage_root_directory,
         dataproduct_key,
         new_dep
     )  # register+migrate everything in src_dir
