@@ -209,6 +209,50 @@ class RegistrationProcessor:
                 migration_result,
             )
 
+    def _migrate_item(self, migrate, item, uuid, api_ingest) -> None:
+        """Migrate the last registered item."""
+        source_storage = getattr(self._config, "storage_name", None)
+        if migrate:
+            # We are only migrating the top-level containers, since rclone is
+            # performing a sync including all children.
+            migration_result = self._initiate_migration(
+                uid=uuid,
+                item_name=item.path_rel_to_watch_dir,
+            )
+            self.last_migration_result = migration_result
+            self._bookkeeping_after_registration(
+                item=item,
+                dlm_registration_uuid=uuid,
+                storage_name=source_storage,
+                migration_result=migration_result,
+            )
+        else:
+            # register not explicitly migrated items on target storage
+            target_storage = getattr(
+                self._config,
+                "migration_destination_storage_name",
+                None,
+            )
+            try:
+                response = api_ingest.register_data_item(
+                    item_name=str(item.path_rel_to_watch_dir),
+                    uri=str(item.path_rel_to_watch_dir),
+                    item_type=item.item_type,
+                    storage_name=target_storage,
+                    do_storage_access_check=False,
+                    request_body=(None if item.metadata is None else item.metadata.as_dict()),
+                )
+                logger.debug("register_data_item response: %s", response)
+            except OpenApiException as err:
+                logger.error(
+                    "OpenApiException caught during register_container_parent_item",
+                )
+                if isinstance(err, ApiException):
+                    logger.error("ApiException: %s", err.body)
+                logger.error("%s", err)
+                logger.error("Ignoring and continuing.....")
+        # The return value is the UUID of the top level item.
+
     def _register_single_item(self, item: Item, migrate: bool = True) -> str | None:
         """Register a single data item with the DLM.
 
@@ -271,7 +315,9 @@ class RegistrationProcessor:
                     )
                     logger.debug("register_data_item response: %s", response)
                 else:
-                    logger.warning("Skipping regisdlm_registration_uuidter_data_item due to config")
+                    logger.warning(
+                        "Skipping regisdlm_registration_uuidter_data_item due to config"
+                    )
             except OpenApiException as err:
                 logger.error(
                     "OpenApiException caught during register_container_parent_item",
@@ -285,45 +331,12 @@ class RegistrationProcessor:
         dlm_registration_uuid = str(response) if response is not None else None
 
         # This should be refactored out and made an asic transaction.
-        if migrate and perform_actual_ingest_and_migration:
-            # Attempt to migrate the data item to the new storage
-            migration_result = self._initiate_migration(
-                uid=dlm_registration_uuid,
-                item_name=item.path_rel_to_watch_dir,
-            )
-            self.last_migration_result = migration_result
-            self._bookkeeping_after_registration(
-                item=item,
-                dlm_registration_uuid=dlm_registration_uuid,
-                storage_name=source_storage,
-                migration_result=migration_result,
-            )
-        else:
-            # register not explicitly migrated items on target storage
-            target_storage = getattr(
-                cfg,
-                "migration_destination_storage_name",
-                None,
-            )
-            try:
-                response = api_ingest.register_data_item(
-                    item_name=str(item.path_rel_to_watch_dir),
-                    uri=str(item.path_rel_to_watch_dir),
-                    item_type=item.item_type,
-                    storage_name=target_storage,
-                    do_storage_access_check=False,
-                    request_body=(None if item.metadata is None else item.metadata.as_dict()),
-                )
-                logger.debug("register_data_item response: %s", response)
-            except OpenApiException as err:
-                logger.error(
-                    "OpenApiException caught during register_container_parent_item",
-                )
-                if isinstance(err, ApiException):
-                    logger.error("ApiException: %s", err.body)
-                logger.error("%s", err)
-                logger.error("Ignoring and continuing.....")
-        # The return value is the UUID of the top level item.
+        self._migrate_item(
+            migrate=(migrate and perform_actual_ingest_and_migration),
+            item=item,
+            uuid=dlm_registration_uuid,
+            api_ingest=api_ingest,
+        )
         return dlm_registration_uuid
 
     def _register_container_items(self, item_list: list[Item]):
