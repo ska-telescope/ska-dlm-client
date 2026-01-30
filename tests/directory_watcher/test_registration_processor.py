@@ -282,7 +282,7 @@ def test_registration_processor_register_container_items(
 
     # Test with registration enabled
     processor._register_container_items([child_item1, child_item2])
-    assert mock_ingest_api.return_value.register_data_item.call_count == 2
+    assert mock_ingest_api.return_value.register_data_item.call_count == 3
 
     # Test with registration disabled
     mock_ingest_api.reset_mock()

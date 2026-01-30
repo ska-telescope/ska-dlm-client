@@ -298,13 +298,14 @@ class RegistrationProcessor:
         with api_client.ApiClient(ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
             api_ingest.api_client.configuration.host = ingest_url
+            dlm_registration_uuid = None
             try:
-                logger.info(
-                    "Using URI: %s for data_item registration",
-                    item.path_rel_to_watch_dir,
-                )
-                response = None
                 if perform_actual_ingest_and_migration:
+                    logger.info(
+                        "Using URI: %s for data_item registration",
+                        item.path_rel_to_watch_dir,
+                    )
+                    response = None
                     response = api_ingest.register_data_item(
                         item_name=str(item.path_rel_to_watch_dir),
                         uri=str(item.path_rel_to_watch_dir),
@@ -314,10 +315,9 @@ class RegistrationProcessor:
                         request_body=(None if item.metadata is None else item.metadata.as_dict()),
                     )
                     logger.debug("register_data_item response: %s", response)
+                    dlm_registration_uuid = str(response) if response is not None else None
                 else:
-                    logger.warning(
-                        "Skipping regisdlm_registration_uuidter_data_item due to config"
-                    )
+                    logger.warning("Skipping registration of data_item due to config")
             except OpenApiException as err:
                 logger.error(
                     "OpenApiException caught during register_container_parent_item",
@@ -327,8 +327,6 @@ class RegistrationProcessor:
                 logger.error("%s", err)
                 logger.error("Ignoring and continuing.....")
                 return None
-
-        dlm_registration_uuid = str(response) if response is not None else None
 
         # This should be refactored out and made an asic transaction.
         self._migrate_item(
@@ -349,10 +347,16 @@ class RegistrationProcessor:
             item_list: A list of data items to register with the DLM.
         """
         migrate = True
-        for item in item_list:
-            _ = self._register_single_item(item=item, migrate=migrate)
-            migrate = False  # Only the top-level container item triggers migration
-            time.sleep(0.01)
+        perform_actual_ingest_and_migration = getattr(
+            self._config, "perform_actual_ingest_and_migration", True
+        )
+        if perform_actual_ingest_and_migration:
+            for item in item_list:
+                _ = self._register_single_item(item=item, migrate=migrate)
+                migrate = False  # Only the top-level container item triggers migration
+                time.sleep(0.01)
+        else:
+            logger.info("Ingest and migration is disabled in the configuration!")
 
     def add_path(self, absolute_path: str, path_rel_to_watch_dir: str) -> str | None:
         """Add the given path to the DLM.
