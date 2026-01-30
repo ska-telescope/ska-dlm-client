@@ -209,7 +209,7 @@ class RegistrationProcessor:
                 migration_result,
             )
 
-    def _register_single_item(self, item: Item, migrate:bool=True) -> str | None:
+    def _register_single_item(self, item: Item, migrate: bool = True) -> str | None:
         """Register a single data item with the DLM.
 
         Sends a registration request to the DLM API for the given item,
@@ -218,8 +218,8 @@ class RegistrationProcessor:
         Args:
             item: The data item to register with the DLM.
             migrate: Whether to migrate the item. This is being used to make sure that
-                 the top-level container item is synced including the whole sub-tree,
-                 but not each item individually in addition.
+            the top-level container item is synced including the whole sub-tree,
+            but not each item individually in addition.
 
         Returns:
             The UUID of the registered data item, or None if registration failed.
@@ -271,7 +271,7 @@ class RegistrationProcessor:
                     )
                     logger.debug("register_data_item response: %s", response)
                 else:
-                    logger.warning("Skipping register_data_item due to config")
+                    logger.warning("Skipping regisdlm_registration_uuidter_data_item due to config")
             except OpenApiException as err:
                 logger.error(
                     "OpenApiException caught during register_container_parent_item",
@@ -284,18 +284,46 @@ class RegistrationProcessor:
 
         dlm_registration_uuid = str(response) if response is not None else None
 
-        # Attempt to migrate the data item to the new storage
-        migration_result = self._initiate_migration(
-            uid=dlm_registration_uuid,
-            item_name=item.path_rel_to_watch_dir,
-        )
-        self.last_migration_result = migration_result
-        self._bookkeeping_after_registration(
-            item=item,
-            dlm_registration_uuid=dlm_registration_uuid,
-            storage_name=source_storage,
-            migration_result=migration_result,
-        )
+        # This should be refactored out and made an asic transaction.
+        if migrate and perform_actual_ingest_and_migration:
+            # Attempt to migrate the data item to the new storage
+            migration_result = self._initiate_migration(
+                uid=dlm_registration_uuid,
+                item_name=item.path_rel_to_watch_dir,
+            )
+            self.last_migration_result = migration_result
+            self._bookkeeping_after_registration(
+                item=item,
+                dlm_registration_uuid=dlm_registration_uuid,
+                storage_name=source_storage,
+                migration_result=migration_result,
+            )
+        else:
+            # register not explicitly migrated items on target storage
+            target_storage = getattr(
+                cfg,
+                "migration_destination_storage_name",
+                None,
+            )
+            try:
+                response = api_ingest.register_data_item(
+                    item_name=str(item.path_rel_to_watch_dir),
+                    uri=str(item.path_rel_to_watch_dir),
+                    item_type=item.item_type,
+                    storage_name=target_storage,
+                    do_storage_access_check=False,
+                    request_body=(None if item.metadata is None else item.metadata.as_dict()),
+                )
+                logger.debug("register_data_item response: %s", response)
+            except OpenApiException as err:
+                logger.error(
+                    "OpenApiException caught during register_container_parent_item",
+                )
+                if isinstance(err, ApiException):
+                    logger.error("ApiException: %s", err.body)
+                logger.error("%s", err)
+                logger.error("Ignoring and continuing.....")
+        # The return value is the UUID of the top level item.
         return dlm_registration_uuid
 
     def _register_container_items(self, item_list: list[Item]):
@@ -310,7 +338,7 @@ class RegistrationProcessor:
         migrate = True
         for item in item_list:
             _ = self._register_single_item(item=item, migrate=migrate)
-            migrate = False # Only the top-level container item triggers migration
+            migrate = False  # Only the top-level container item triggers migration
             time.sleep(0.01)
 
     def add_path(self, absolute_path: str, path_rel_to_watch_dir: str) -> str | None:
