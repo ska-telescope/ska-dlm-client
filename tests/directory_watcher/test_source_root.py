@@ -7,7 +7,7 @@ from pathlib import Path
 from ska_dlm_client.config import STATUS_FILE_FILENAME
 from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.directory_watcher.main import create_parser, process_args
-from ska_dlm_client.registration_processor import RegistrationProcessor, Item
+from ska_dlm_client.registration_processor import Item, RegistrationProcessor
 from ska_dlm_client.utils import CmdLineParameters
 
 
@@ -128,7 +128,7 @@ class TestSourceRootDirectory:
                 self.register_data_item_args = None
                 self.dry_run_for_debug = True  # Prevent actual API calls
 
-            def _register_single_item(self, item: Item, migrate: bool=True) -> str | None:
+            def _register_single_item(self, item: Item, migrate: bool = True) -> str | None:
                 """Capture the URI that would be used for registration."""
                 # Generate the uri relative to the root directory
                 item_path_rel_to_watch_dir = item.path_rel_to_watch_dir
