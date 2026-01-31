@@ -5,6 +5,7 @@
 ### Updated
 
 * Updated the readme file.
+* Extensive re-factoring of the scanning and registration logic, and the migration calls.
 
 ### Fixed
 

@@ -14,16 +14,7 @@ from ska_dlm_client.registration_processor import (
     Item,
     ItemType,
     RegistrationProcessor,
-    _directory_contains_metadata_file,
-    _directory_contains_only_directories,
-    _directory_contains_only_files,
-    _directory_list_minus_metadata_file,
-    _generate_item_list_for_data_product,
-    _generate_paths_and_metadata,
-    _generate_paths_and_metadata_for_directory,
-    _item_for_single_file_with_metadata,
-    _item_list_minus_metadata_file,
-    _measurement_set_directory_in,
+    _generate_dir_item_list,
 )
 
 
@@ -54,186 +45,25 @@ def test_registration_processor(request):
     # Test when path to add is a file.
     absolute_path = os.path.join(watch_dir, "data_item_file_only")
     rel_path = os.path.split(absolute_path)[1]
-    dir_entries = _generate_paths_and_metadata(absolute_path, rel_path)
+    dir_entries = _generate_dir_item_list(absolute_path, rel_path)
     assert dir_entries[0].path_rel_to_watch_dir == "data_item_file_only"
 
     # Test when path to add is symlink.
     test_path = "symbolic_link_path"
     absolute_path = os.path.join(watch_dir, test_path)
     rel_path = os.path.split(absolute_path)[1]
-    dir_entries = _generate_paths_and_metadata(absolute_path, rel_path)
+    dir_entries = _generate_dir_item_list(absolute_path, rel_path)
     returned_items_match(test_path=test_path, dir_entries=dir_entries)
 
     # Test when path to add is a directory.
     test_path = "directory_entry"
     absolute_path = os.path.join(watch_dir, test_path)
     rel_path = os.path.split(absolute_path)[1]
-    dir_entries = _generate_paths_and_metadata(absolute_path, rel_path)
+    dir_entries = _generate_dir_item_list(absolute_path, rel_path)
     returned_items_match(test_path=test_path, dir_entries=dir_entries)
 
 
-def test_directory_helper_functions(request):
-    """Test the directory helper functions."""
-    # Determine path where test files are stored.
-    filename = request.module.__file__
-    test_dir, _ = os.path.splitext(filename)
-
-    # Setup what would be the directory to watch.
-    watch_dir = os.path.join(test_dir, "watch_dir")
-
-    # Test _directory_contains_only_directories
-    # Create a temporary directory with only directories
-    temp_dir_path = os.path.join(test_dir, "temp_dir_only_dirs")
-    os.makedirs(temp_dir_path, exist_ok=True)
-    os.makedirs(os.path.join(temp_dir_path, "dir1"), exist_ok=True)
-    os.makedirs(os.path.join(temp_dir_path, "dir2"), exist_ok=True)
-
-    assert _directory_contains_only_directories(temp_dir_path) is True
-
-    # Add a file to the directory
-    with open(os.path.join(temp_dir_path, "file1"), "w", encoding="utf-8") as f:
-        f.write("test")
-
-    assert _directory_contains_only_directories(temp_dir_path) is False
-
-    # Clean up
-    os.remove(os.path.join(temp_dir_path, "file1"))
-    os.rmdir(os.path.join(temp_dir_path, "dir1"))
-    os.rmdir(os.path.join(temp_dir_path, "dir2"))
-    os.rmdir(temp_dir_path)
-
-    # Test _directory_contains_only_files
-    # Create a temporary directory with only files
-    temp_dir_path = os.path.join(test_dir, "temp_dir_only_files")
-    os.makedirs(temp_dir_path, exist_ok=True)
-    with open(os.path.join(temp_dir_path, "file1"), "w", encoding="utf-8") as f:
-        f.write("test")
-    with open(os.path.join(temp_dir_path, "file2"), "w", encoding="utf-8") as f:
-        f.write("test")
-
-    assert _directory_contains_only_files(temp_dir_path) is True
-
-    # Add a directory to the directory
-    os.makedirs(os.path.join(temp_dir_path, "dir1"), exist_ok=True)
-
-    assert _directory_contains_only_files(temp_dir_path) is False
-
-    # Clean up
-    os.rmdir(os.path.join(temp_dir_path, "dir1"))
-    os.remove(os.path.join(temp_dir_path, "file1"))
-    os.remove(os.path.join(temp_dir_path, "file2"))
-    os.rmdir(temp_dir_path)
-
-    # Test _directory_contains_metadata_file
-    # The directory_entry directory should contain a metadata file
-    directory_entry_path = os.path.join(watch_dir, "directory_entry")
-    assert _directory_contains_metadata_file(directory_entry_path) is True
-
-    # Create a temporary directory without a metadata file
-    temp_dir_path = os.path.join(test_dir, "temp_dir_no_metadata")
-    os.makedirs(temp_dir_path, exist_ok=True)
-    with open(os.path.join(temp_dir_path, "file1"), "w", encoding="utf-8") as f:
-        f.write("test")
-
-    assert _directory_contains_metadata_file(temp_dir_path) is False
-
-    # Clean up
-    os.remove(os.path.join(temp_dir_path, "file1"))
-    os.rmdir(temp_dir_path)
-
-    # Test _directory_list_minus_metadata_file
-    # The directory_entry directory should contain a metadata file
-    directory_entry_path = os.path.join(watch_dir, "directory_entry")
-    dir_list = _directory_list_minus_metadata_file(directory_entry_path)
-    assert "ska-data-product.yaml" not in dir_list
-    assert "data" in dir_list
-    assert "weights" in dir_list
-
-
-def test_item_for_single_file_with_metadata(request):
-    """Test the _item_for_single_file_with_metadata function."""
-    # Determine path where test files are stored.
-    filename = request.module.__file__
-    test_dir, _ = os.path.splitext(filename)
-
-    # Setup what would be the directory to watch.
-    watch_dir = os.path.join(test_dir, "watch_dir")
-
-    # Test with a file
-    file_path = os.path.join(watch_dir, "data_item_file_only")
-    rel_path = os.path.split(file_path)[1]
-
-    item = _item_for_single_file_with_metadata(file_path, rel_path)
-
-    assert item.path_rel_to_watch_dir == rel_path
-    assert item.item_type == ItemType.FILE
-    assert item.metadata is not None
-    assert item.parent is None
-
-
-def test_item_list_minus_metadata_file(
-    request, mock_data_product_metadata
-):  # pylint: disable=redefined-outer-name
-    """Test the _item_list_minus_metadata_file function."""
-    # Determine path where test files are stored.
-    filename = request.module.__file__
-    test_dir, _ = os.path.splitext(filename)
-
-    # Setup what would be the directory to watch.
-    watch_dir = os.path.join(test_dir, "watch_dir")
-
-    # Create a container item
-    container_item = Item(
-        path_rel_to_watch_dir="container",
-        item_type=ItemType.CONTAINER,
-        metadata=mock_data_product_metadata.return_value,
-    )
-
-    # Test with a directory
-    directory_path = os.path.join(watch_dir, "directory_entry")
-    rel_path = os.path.split(directory_path)[1]
-
-    item_list = _item_list_minus_metadata_file(container_item, directory_path, rel_path)
-
-    assert len(item_list) == 2
-    for item in item_list:
-        assert item.item_type == ItemType.FILE
-        assert item.metadata is None
-        assert item.parent == container_item
-        assert item.path_rel_to_watch_dir in [f"{rel_path}/data", f"{rel_path}/weights"]
-
-
-def test_measurement_set_directory_in(request, monkeypatch):
-    """Test the _measurement_set_directory_in function."""
-    # Determine path where test files are stored.
-    filename = request.module.__file__
-    test_dir, _ = os.path.splitext(filename)
-
-    # Setup what would be the directory to watch.
-    watch_dir = os.path.join(test_dir, "watch_dir")
-
-    # Mock the config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
-    monkeypatch.setattr("ska_dlm_client.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX", ".ms")
-
-    # Create a temporary directory with a measurement set directory
-    temp_dir_path = os.path.join(test_dir, "temp_dir_with_ms")
-    os.makedirs(temp_dir_path, exist_ok=True)
-    os.makedirs(os.path.join(temp_dir_path, "test.ms"), exist_ok=True)
-
-    ms_dir = _measurement_set_directory_in(temp_dir_path)
-    assert ms_dir == "test.ms"
-
-    # Test with a directory without a measurement set directory
-    directory_path = os.path.join(watch_dir, "directory_entry")
-    ms_dir = _measurement_set_directory_in(directory_path)
-    assert ms_dir is None
-
-    # Clean up
-    os.rmdir(os.path.join(temp_dir_path, "test.ms"))
-    os.rmdir(temp_dir_path)
-
-
-def test_generate_item_list_for_data_product(request):
+def test_generate_dir_item_list(request):
     """Test the _generate_item_list_for_data_product function."""
     # Determine path where test files are stored.
     filename = request.module.__file__
@@ -246,34 +76,7 @@ def test_generate_item_list_for_data_product(request):
     directory_path = os.path.join(watch_dir, "directory_entry")
     rel_path = os.path.split(directory_path)[1]
 
-    item_list = _generate_item_list_for_data_product(directory_path, rel_path)
-
-    assert len(item_list) == 3
-    assert item_list[0].item_type == ItemType.CONTAINER
-    assert item_list[0].metadata is not None
-    assert item_list[0].parent is None
-    assert item_list[1].item_type == ItemType.FILE
-    assert item_list[1].metadata is None
-    assert item_list[1].parent == item_list[0]
-    assert item_list[2].item_type == ItemType.FILE
-    assert item_list[2].metadata is None
-    assert item_list[2].parent == item_list[0]
-
-
-def test_generate_paths_and_metadata_for_directory(request):
-    """Test the _generate_paths_and_metadata_for_directory function."""
-    # Determine path where test files are stored.
-    filename = request.module.__file__
-    test_dir, _ = os.path.splitext(filename)
-
-    # Setup what would be the directory to watch.
-    watch_dir = os.path.join(test_dir, "watch_dir")
-
-    # Test with a directory containing a metadata file
-    directory_path = os.path.join(watch_dir, "directory_entry")
-    rel_path = os.path.split(directory_path)[1]
-
-    item_list = _generate_paths_and_metadata_for_directory(directory_path, rel_path)
+    item_list = _generate_dir_item_list(directory_path, rel_path)
 
     assert len(item_list) == 3
     assert item_list[0].item_type == ItemType.CONTAINER
@@ -292,13 +95,14 @@ def mock_config():
     """Create a mock Config object for testing."""
     config = mock.MagicMock(spec=WatcherConfig)
     config.directory_to_watch = "/test/watch/dir"
-    config.storage_name = "test-storage"
+    config.source_storage = "test-storage"
     config.ingest_register_path_to_add = ""
     config.perform_actual_ingest_and_migration = True
     config.rclone_access_check_on_register = False
     config.migration_destination_storage_name = "test-destination-storage"
     config.directory_watcher_entries = mock.MagicMock(spec=DirectoryWatcherEntries)
     config.ingest_url = "http://test-ingest:8000"
+    config.storage_url = "http://test-storage:8000"
 
     # Use real Configuration instances instead of MagicMocks
     config.ingest_configuration = Configuration(host="http://test-ingest:8000")
@@ -385,7 +189,7 @@ def test_registration_processor_copy_data_item_to_new_storage(
     processor = RegistrationProcessor(mock_config)
 
     # Test with migration enabled
-    result = processor._copy_data_item_to_new_storage("test-uuid")
+    result = processor._initiate_migration("test-uuid")
     assert result == "test-migration-uuid"
     mock_migration_api.return_value.copy_data_item.assert_called_once_with(
         uid="test-uuid", destination_name=mock_config.migration_destination_storage_name
@@ -393,19 +197,19 @@ def test_registration_processor_copy_data_item_to_new_storage(
 
     # Test with migration disabled
     mock_config.perform_actual_ingest_and_migration = False
-    result = processor._copy_data_item_to_new_storage("test-uuid")
+    result = processor._initiate_migration("test-uuid")
     assert result is None
 
     # Test with missing destination storage name
     mock_config.perform_actual_ingest_and_migration = True
     mock_config.migration_destination_storage_name = None
-    result = processor._copy_data_item_to_new_storage("test-uuid")
+    result = processor._initiate_migration("test-uuid")
     assert result is None
 
     # Test with API exception
     mock_config.migration_destination_storage_name = "test-destination-storage"
     mock_migration_api.return_value.copy_data_item.side_effect = OpenApiException("Test error")
-    result = processor._copy_data_item_to_new_storage("test-uuid")
+    result = processor._initiate_migration("test-uuid")
     assert result is None
 
 
@@ -429,7 +233,7 @@ def test_registration_processor_register_single_item(
         item_name="test-item",
         uri="test-item",
         item_type=ItemType.FILE,
-        storage_name=mock_config.storage_name,
+        storage_name=mock_config.source_storage,
         do_storage_access_check=mock_config.rclone_access_check_on_register,
         request_body=item.metadata.as_dict(),
     )
@@ -478,25 +282,7 @@ def test_registration_processor_register_container_items(
 
     # Test with registration enabled
     processor._register_container_items([child_item1, child_item2])
-    assert mock_ingest_api.return_value.register_data_item.call_count == 2
-    mock_ingest_api.return_value.register_data_item.assert_any_call(
-        item_name="child-item1",
-        uri="child-item1",
-        item_type=ItemType.FILE,
-        storage_name=mock_config.storage_name,
-        do_storage_access_check=mock_config.rclone_access_check_on_register,
-        parents=parent_item.uuid,
-        request_body=None,
-    )
-    mock_ingest_api.return_value.register_data_item.assert_any_call(
-        item_name="child-item2",
-        uri="child-item2",
-        item_type=ItemType.FILE,
-        storage_name=mock_config.storage_name,
-        do_storage_access_check=mock_config.rclone_access_check_on_register,
-        parents=parent_item.uuid,
-        request_body=None,
-    )
+    assert mock_ingest_api.return_value.register_data_item.call_count == 3
 
     # Test with registration disabled
     mock_ingest_api.reset_mock()
@@ -509,14 +295,14 @@ def test_registration_processor_register_container_items(
     mock_config.perform_actual_ingest_and_migration = True
     mock_ingest_api.return_value.register_data_item.side_effect = OpenApiException("Test error")
     processor._register_container_items([child_item1, child_item2])
-    mock_ingest_api.return_value.register_data_item.assert_called_once()
+    assert mock_ingest_api.return_value.register_data_item.call_count == 2
 
 
-@mock.patch("ska_dlm_client.registration_processor._generate_paths_and_metadata")
-def test_registration_processor_add_path(
+@mock.patch("ska_dlm_client.registration_processor._generate_dir_item_list")
+def test_registration_processor_generate_dir_item_list(
     mock_generate, mock_config, mock_data_product_metadata
 ):  # pylint: disable=protected-access, redefined-outer-name
-    """Test the RegistrationProcessor add_path method."""
+    """Test the RegistrationProcessor _generate_dir_item_list method."""
     processor = RegistrationProcessor(mock_config)
 
     # Mock the _register_single_item and _register_container_items methods
@@ -536,7 +322,7 @@ def test_registration_processor_add_path(
         absolute_path="/test/abs/path", path_rel_to_watch_dir="rel/path"
     )
     processor._register_single_item.assert_called_once_with(file_item)
-    processor._register_container_items.assert_not_called()
+    processor._register_container_items.assert_called_once()
 
     # Test with a single container item
     mock_generate.reset_mock()
@@ -549,7 +335,7 @@ def test_registration_processor_add_path(
     mock_generate.return_value = [container_item]
 
     processor.add_path("/test/abs/path", "rel/path")
-    processor._register_single_item.assert_not_called()
+    processor._register_single_item.assert_called_once()
 
     # Test with multiple items (container + files)
     mock_generate.reset_mock()

@@ -10,6 +10,7 @@ import athreading
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Flow
 
+from ska_dlm_client.config import DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
 from ska_dlm_client.configdb_watcher.configdb_utils import (
     create_sdp_migration_dependency,
     get_data_product_dir,
@@ -20,9 +21,7 @@ from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.register_storage_location.main import RCLONE_CONFIG_SOURCE, setup_volume
 from ska_dlm_client.registration_processor import (
     RegistrationProcessor,
-    _directory_contains_metadata_file,
-    _item_for_single_file_with_metadata,
-    _measurement_set_directory_in,
+    directory_contains_metadata_file,
 )
 
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
@@ -69,6 +68,60 @@ def process_args(args: argparse.Namespace) -> SDPIngestConfig:
     )
 
 
+def _register_and_migrate_path(
+    processor: RegistrationProcessor,
+    src_dir: str,
+    root_dir: str,
+    dataproduct_key: Flow.Key,
+    new_dep: str,
+) -> str | None:
+    """Register and migrate a whole path.
+
+    Args:
+        processor: The RegistrationProcessor instance to use.
+        src_dir: The source directory to register and migrate.
+        rooot_dir: The root directory of the source storage.
+        dataproduct_key: The Flow.Key of the data-product being processed.
+        new_dep: The dependency created for this data-product.
+
+    Returns:
+        The dependency status.
+    """
+    dlm_source_uuid = processor.add_path(
+        absolute_path=src_dir,
+        path_rel_to_watch_dir=os.path.relpath(src_dir, start=root_dir),
+    )
+    logger.debug("dlm_source_uuid: %s", dlm_source_uuid)
+
+    if dlm_source_uuid is None:  # Registration failed
+        logger.warning(
+            "DLM registration failed for %s; marking dependency %s as FAILED.",
+            dataproduct_key,
+            new_dep,
+        )
+        dep_status = "FAILED"
+    else:
+        migration_result = processor.last_migration_result  # Inspect migration outcome
+        logger.debug("migration_result: %s", migration_result)
+
+        if migration_result is None:
+            logger.warning(
+                "Migration failed or was skipped for %s; marking dependency %s as FAILED.",
+                dataproduct_key,
+                new_dep,
+            )
+            dep_status = "FAILED"
+        else:
+            logger.info(
+                "Registration and migration succeeded for %s; "
+                "marking dependency %s as FINISHED.",
+                dataproduct_key,
+                new_dep,
+            )
+            dep_status = "FINISHED"
+    return dep_status
+
+
 async def _process_completed_flow(  # noqa: C901
     configdb: Config,
     dataproduct_key: Flow.Key,
@@ -104,12 +157,18 @@ async def _process_completed_flow(  # noqa: C901
     if os.path.exists(src_dir) is False or not os.path.isdir(src_dir):
         logger.error("Data-product source directory does not exist or is not a directory.")
         return
-    # Identify the .ms file
-    ms_file_name = _measurement_set_directory_in(src_dir)
-    if ms_file_name is None:
+    # Is there any MS here?
+    ms_sets = 0
+    for entry in os.listdir(src_dir):
+        entry = os.path.join(src_dir, entry)
+        logger.info("Checking: %s", entry)
+        if os.path.isdir(entry) and entry.lower().endswith(DIRECTORY_IS_MEASUREMENT_SET_SUFFIX):
+            ms_sets += 1
+
+    if ms_sets == 0:
         logger.error("No Measurement Set found in directory %s", src_dir)
         return
-    logger.info("Found MS file: %s", ms_file_name)
+    logger.info("Found %s MS directories", ms_sets)
 
     # Create a DLM dependency (no state yet)
     new_dep = await create_sdp_migration_dependency(configdb, dataproduct_key)
@@ -122,58 +181,20 @@ async def _process_completed_flow(  # noqa: C901
         logger.info("New dependency created: %s", new_dep)
 
     # Look for the metadata file
-    if not _directory_contains_metadata_file(src_dir):
+    if not directory_contains_metadata_file(src_dir):
         logger.error("No metadata file found!")
     else:
-        logger.debug("Found the metadata file!")
-
-    # Build Item object
-    item = _item_for_single_file_with_metadata(
-        absolute_path=src_dir,
-        path_rel_to_watch_dir=ms_file_name,
-    )
-
-    processor = RegistrationProcessor(ingest_config)
-    processor.last_migration_result = None  # Clear any stale migration result
+        logger.info("Found the metadata file!")
 
     # If we have a dependency, mark it WORKING before we start register+migrate
     if new_dep:
         await _aupdate_dependency_state("WORKING")
-
-    # Register+migrate (blocking -> run in thread)
-    dlm_source_uuid = await asyncio.to_thread(
-        processor._register_single_item,  # pylint: disable=protected-access
-        item,
-    )
-    logger.debug("dlm_source_uuid: %s", dlm_source_uuid)
-
-    if dlm_source_uuid is None:  # Registration failed
-        logger.warning(
-            "DLM registration failed for %s; marking dependency %s as FAILED.",
-            dataproduct_key,
-            new_dep,
-        )
-        dep_status = "FAILED"
-    else:
-        migration_result = processor.last_migration_result  # Inspect migration outcome
-        logger.debug("migration_result: %s", migration_result)
-
-        if migration_result is None:
-            logger.warning(
-                "Migration failed or was skipped for %s; marking dependency %s as FAILED.",
-                dataproduct_key,
-                new_dep,
-            )
-            dep_status = "FAILED"
-        else:
-            logger.info(
-                "Registration and migration succeeded for %s; "
-                "marking dependency %s as FINISHED.",
-                dataproduct_key,
-                new_dep,
-            )
-            dep_status = "FINISHED"
-
+    # Handle each of the found MSs
+    processor = RegistrationProcessor(ingest_config)
+    processor.last_migration_result = None  # Clear any stale migration result
+    dep_status = _register_and_migrate_path(
+        processor, src_dir, ingest_config.storage_root_directory, dataproduct_key, new_dep
+    )  # register+migrate everything in src_dir
     # Update the dependency state to FAILED/FINISHED
     if new_dep and dep_status:
         await _aupdate_dependency_state(dep_status)
