@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ska-dlm-client"
-version = "1.2.0"
+version = "1.2.1"
 description = "Client(s) for the SKA Data Lifecycle Manager"
 authors = ["Mark Boulton <mark.boulton@uwa.edu.au>"]
 repository = "https://gitlab.com/ska-telescope/ska-dlm-client"

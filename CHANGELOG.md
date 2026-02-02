@@ -1,17 +1,25 @@
 # Version History
 
+## 1.2.1
+
+### Fixed
+
+* ConfigDB Watcher derives the data-product path from the sink’s PVCPath.pvc_subpath.
+
+### Updated
+
+* Extensive re-factoring of the scanning and registration logic, and the migration calls.
+
 ## 1.2.0
 
 ### Updated
 
 * Updated the readme file.
-* Extensive re-factoring of the scanning and registration logic, and the migration calls.
 
 ### Fixed
 
 * Directory Watcher now correctly accepts a configurable storage URL (via --storage-url).
 * Various small bug fixes.
-* ConfigDB Watcher derives the data-product path from the sink’s PVCPath.pvc_subpath.
 
 ### Added
 
