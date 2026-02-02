@@ -270,13 +270,13 @@ async def test_watcher_registers_and_migrates():
     # 1) Ensure watcher source dir exists
     cmd = f"docker exec {src_host} sh -lc 'mkdir -p {WATCHER_SOURCE_DIR}'"
     log.info("Ensure watcher source dir exists: %s", cmd)
-    p = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
     assert p.returncode == 0, p.stderr
 
     # 2) Copy MS_PATH contents into that directory
     cmd = f"docker container cp {MS_PATH}/. {src_host}:{WATCHER_SOURCE_DIR}/"
     log.info("Copy MS into watcher container: %s", cmd)
-    p = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
     assert p.returncode == 0, p.stderr
 
     # 3) Wait until the directory is visible (avoid race with watcher)
@@ -284,7 +284,7 @@ async def test_watcher_registers_and_migrates():
     while time.time() < deadline:
         check_dir = f"ls -la {WATCHER_SOURCE_DIR} | head"
         cmd = f"docker exec {src_host} sh -lc '{check_dir}'"
-        p = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
         if p.returncode == 0:
             log.info("dir check stdout: %s", p.stdout)
             break
@@ -298,7 +298,7 @@ async def test_watcher_registers_and_migrates():
     trigger_completed_flow("test-flow")
 
     # 5) Poll for FINISHED
-    deadline = time.time() + 30
+    deadline = time.time() + 20
     statuses = []
     while time.time() < deadline:
         statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow")
