@@ -1,7 +1,7 @@
 """Unit test module for configdb_utils."""
 
 import logging
-import pathlib
+from pathlib import Path
 
 import pytest
 from ska_sdp_config import ConfigCollision
@@ -11,7 +11,7 @@ from ska_sdp_config.entity.flow import DataProduct, Flow
 from ska_dlm_client.configdb_watcher.configdb_utils import (
     _initialise_dependency,
     create_sdp_migration_dependency,
-    get_data_product_dir,
+    get_pvc_subpath,
     log_flow_dependencies,
     update_dependency_state,
 )
@@ -20,6 +20,39 @@ PB_ID = "pb-madeup-00000000-a"
 EB_ID = "eb-00000000"
 NAME = "prod-a"
 FLOW_NAME = "vis-receive-mswriter-processor"
+
+
+# Note: This fixture mirrors the structure used in ska-sdp-config test_flow.py
+@pytest.fixture
+def dataproduct_flow(config):
+    """Persist a DataProduct Flow."""
+    key = Flow.Key(
+        pb_id=PB_ID,
+        kind="data-product",
+        name=FLOW_NAME,
+    )
+
+    pvc = PVCPath(
+        k8s_namespaces=[],
+        k8s_pvc_name="shared",
+        pvc_mount_path=Path("/data"),
+        pvc_subpath=Path(f"product/{EB_ID}/ska-sdp/{PB_ID}"),
+    )
+
+    flow = Flow(
+        key=key,
+        data_model="Visibility",
+        sink=DataProduct(
+            data_dir=pvc,
+            paths=[],
+        ),
+        sources=[],
+    )
+
+    for txn in config.txn():
+        txn.flow.create(flow)
+
+    return key
 
 
 @pytest.mark.asyncio
@@ -107,32 +140,33 @@ def test_log_flow_dependencies(config, caplog):
     assert "status=WORKING" in caplog.text
 
 
-def test_get_data_product_dir(config):
-    """Test get_data_product_dir resolves PVCPath to container path."""
-    key = Flow.Key(pb_id=PB_ID, name=FLOW_NAME)
+def test_get_pvc_subpath(config, dataproduct_flow):
+    """Test get_pvc_subpath extracts pvc_subpath from a DataProduct Flow."""
+    result = get_pvc_subpath(config, dataproduct_flow)
 
-    pvc = PVCPath(
-        k8s_namespaces=[],
-        k8s_pvc_name="pvc_name",
-        pvc_mount_path="/dlm",
-        pvc_subpath=pathlib.Path(f"product/{EB_ID}/ska-sdp/{PB_ID}"),
+    assert str(result) == f"product/{EB_ID}/ska-sdp/{PB_ID}"
+
+
+def test_get_pvc_subpath_failure_non_pvcpath(config):
+    """Test get_pvc_subpath raises if Flow.sink.data_dir is not a PVCPath."""
+    key = Flow.Key(
+        pb_id=PB_ID,
+        kind="data-product",
+        name=FLOW_NAME,
     )
 
     flow = Flow(
         key=key,
         data_model="Visibility",
         sink=DataProduct(
-            data_dir=pvc,
+            data_dir="not/a/pvcpath",
             paths=[],
         ),
         sources=[],
     )
 
-    # Persist the Flow in the config DB
     for txn in config.txn():
         txn.flow.create(flow)
 
-    # Exercise the helper
-    result = get_data_product_dir(config, key)
-
-    assert str(result) == f"/dlm/product/{EB_ID}/ska-sdp/{PB_ID}"
+    with pytest.raises(TypeError, match=r"only PVCPath supported for flow data_dir"):
+        get_pvc_subpath(config, key)
