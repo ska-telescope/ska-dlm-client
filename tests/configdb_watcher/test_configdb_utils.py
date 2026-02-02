@@ -146,6 +146,7 @@ def test_get_pvc_subpath(config, dataproduct_flow):
 
     assert str(result) == f"product/{EB_ID}/ska-sdp/{PB_ID}"
 
+
 def test_get_pvc_subpath_failure_non_pvcpath(config):
     """Test get_pvc_subpath raises if Flow.sink.data_dir is not a PVCPath."""
     key = Flow.Key(

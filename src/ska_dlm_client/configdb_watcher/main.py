@@ -102,7 +102,7 @@ def _register_and_migrate_path(
         )
         dep_status = "FAILED"
     else:
-        migration_result = processor.last_migration_result  # Inspect migration outcome
+        migration_result = processor.last_migration_result  # TODO: DMAN-213
         logger.debug("migration_result: %s", migration_result)
 
         if migration_result is None:
@@ -201,6 +201,7 @@ async def _process_completed_flow(  # noqa: C901
     # If we have a dependency, mark it WORKING before we start register+migrate
     if new_dep:
         await _aupdate_dependency_state("WORKING")
+        logger.info("Setting Dependency %s state as WORKING", new_dep)
 
     # Handle each of the found MSs
     processor = RegistrationProcessor(ingest_config)

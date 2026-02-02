@@ -279,10 +279,11 @@ async def test_watcher_registers_and_migrates():
     p = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     assert p.returncode == 0, p.stderr
 
-    # 3) NEW: Wait until the directory is visible (avoid race with watcher)
+    # 3) Wait until the directory is visible (avoid race with watcher)
     deadline = time.time() + 20
     while time.time() < deadline:
-        cmd = f"docker exec {src_host} sh -lc 'test -d {WATCHER_SOURCE_DIR} && ls -la {WATCHER_SOURCE_DIR} | head'"
+        check_dir = f"ls -la {WATCHER_SOURCE_DIR} | head"
+        cmd = f"docker exec {src_host} sh -lc '{check_dir}'"
         p = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         if p.returncode == 0:
             log.info("dir check stdout: %s", p.stdout)
@@ -293,10 +294,10 @@ async def test_watcher_registers_and_migrates():
         p.returncode == 0
     ), f"Source dir not visible in watcher container: {WATCHER_SOURCE_DIR}\n{p.stderr}"
 
-    # 4) Trigger a COMPLETED Flow (only after files are present)
+    # 4) Trigger a COMPLETED Flow
     trigger_completed_flow("test-flow")
 
-    # 5) Poll for FINISHED (instead of a single sleep)
+    # 5) Poll for FINISHED
     deadline = time.time() + 30
     statuses = []
     while time.time() < deadline:

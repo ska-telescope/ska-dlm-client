@@ -88,9 +88,9 @@ def get_pvc_subpath(config: Config, key: Flow.Key) -> RelativePurePath:
     data_dir = flow.sink.data_dir
     if not isinstance(data_dir, PVCPath):
         raise TypeError(
-        "only PVCPath supported for flow data_dir. "
-        f"Got: {type(data_dir).__module__}.{type(data_dir).__name__}"
-    )
+            "only PVCPath supported for flow data_dir. "
+            f"Got: {type(data_dir).__module__}.{type(data_dir).__name__}"
+        )
 
     return data_dir.pvc_subpath
 
