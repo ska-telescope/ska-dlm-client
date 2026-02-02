@@ -5,6 +5,7 @@ import asyncio
 import logging
 import os
 from dataclasses import dataclass
+from pathlib import Path
 
 import athreading
 from ska_sdp_config import Config
@@ -148,25 +149,36 @@ async def _process_completed_flow(  # noqa: C901
             logger.info("Dependency %s status set to %s.", new_dep, state.get("status"))
 
     # Resolve the source directory from the Flow sink
-    src_dir = get_pvc_subpath(configdb, dataproduct_key)
-    logger.info(  # TODO: check that it's actually looking in the specified sink
-        "New COMPLETED data-product identified: key=%s, src_path=%s",
+    source_path_full = get_pvc_subpath(configdb, dataproduct_key)
+    source_root = Path(ingest_config.storage_root_directory)
+    source_path_full = source_root / source_path_full
+
+    logger.info(
+        "New COMPLETED data-product identified: key=%s, source_root=%s, source_subpath=%s, "
+        "source_path_full=%s",
         dataproduct_key,
-        src_dir,
+        source_root,
+        source_path_full,
+        source_path_full,
     )
-    if os.path.exists(src_dir) is False or not os.path.isdir(src_dir):
-        logger.error("Data-product source directory does not exist or is not a directory.")
+
+    if not source_path_full.exists() or not source_path_full.is_dir():
+        logger.error(
+            "Data-product source directory does not exist or is not a directory: %s",
+            source_path_full,
+        )
         return
-    # Is there any MS here?
+
+    # Are there any MS here?
     ms_sets = 0
-    for entry in os.listdir(src_dir):
-        entry = os.path.join(src_dir, entry)
+    for entry in os.listdir(source_path_full):
+        entry = os.path.join(source_path_full, entry)
         logger.info("Checking: %s", entry)
         if os.path.isdir(entry) and entry.lower().endswith(DIRECTORY_IS_MEASUREMENT_SET_SUFFIX):
             ms_sets += 1
 
     if ms_sets == 0:
-        logger.error("No Measurement Set found in directory %s", src_dir)
+        logger.error("No Measurement Set found in directory %s", source_path_full)
         return
     logger.info("Found %s MS directories", ms_sets)
 
@@ -181,7 +193,7 @@ async def _process_completed_flow(  # noqa: C901
         logger.info("New dependency created: %s", new_dep)
 
     # Look for the metadata file
-    if not directory_contains_metadata_file(src_dir):
+    if not directory_contains_metadata_file(source_path_full):
         logger.error("No metadata file found!")
     else:
         logger.info("Found the metadata file!")
@@ -189,12 +201,14 @@ async def _process_completed_flow(  # noqa: C901
     # If we have a dependency, mark it WORKING before we start register+migrate
     if new_dep:
         await _aupdate_dependency_state("WORKING")
+
     # Handle each of the found MSs
     processor = RegistrationProcessor(ingest_config)
     processor.last_migration_result = None  # Clear any stale migration result
     dep_status = _register_and_migrate_path(
-        processor, src_dir, ingest_config.storage_root_directory, dataproduct_key, new_dep
+        processor, source_path_full, ingest_config.storage_root_directory, dataproduct_key, new_dep
     )  # register+migrate everything in src_dir
+
     # Update the dependency state to FAILED/FINISHED
     if new_dep and dep_status:
         await _aupdate_dependency_state(dep_status)
@@ -274,11 +288,8 @@ def main() -> None:
         "-r",
         "--source-root",
         type=str,
-        default="",
-        help=(
-            "The root directory of the source storage, used to match "
-            "relative path names. Default ''."
-        ),
+        default="/dlm/product_dir",
+        help=("Local mount directory of the shared PVC inside the configdb-watcher pod."),
     )
     parser.add_argument(
         "--target-name",

@@ -369,9 +369,7 @@ class IngestApi:
     @validate_call
     def register_data_item(
         self,
-        item_name: Annotated[
-            StrictStr, Field(description="item name to register with.")
-        ],
+        item_name: Annotated[StrictStr, Field(description="item name to register with.")],
         uri: Annotated[StrictStr, Field(description="the relative access path to the payload.")],
         item_type: Optional[StrictStr] = None,
         storage_name: Annotated[
@@ -481,9 +479,7 @@ class IngestApi:
     @validate_call
     def register_data_item_with_http_info(
         self,
-        item_name: Annotated[
-            StrictStr, Field(description="item name to register with.")
-        ],
+        item_name: Annotated[StrictStr, Field(description="item name to register with.")],
         uri: Annotated[StrictStr, Field(description="the relative access path to the payload.")],
         item_type: Optional[StrictStr] = None,
         storage_name: Annotated[
@@ -593,9 +589,7 @@ class IngestApi:
     @validate_call
     def register_data_item_without_preload_content(
         self,
-        item_name: Annotated[
-            StrictStr, Field(description="item name to register with.")
-        ],
+        item_name: Annotated[StrictStr, Field(description="item name to register with.")],
         uri: Annotated[StrictStr, Field(description="the relative access path to the payload.")],
         item_type: Optional[StrictStr] = None,
         storage_name: Annotated[

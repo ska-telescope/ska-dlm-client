@@ -50,7 +50,7 @@ STORAGE = {
         "ROOT_DIRECTORY": "/dlm-archive",
         "STORAGE_CONFIG": {
             "name": "dlm-archive",
-            "type": "alias", # type 'alias' or 'local'?
+            "type": "alias",  # type 'alias' or 'local'?
             "parameters": {"remote": "/dlm-archive"},
         },
     },
@@ -108,7 +108,7 @@ def _create_completed_flow(subpath: str, flow_name_arg: str) -> None:
             data_dir=PVCPath(
                 k8s_namespaces=["dp-shared", "dp-shared-p"],
                 k8s_pvc_name="shared-storage",
-                pvc_mount_path=Path("/data"),  # maybe this should be /dlm or /dlm/product_dir?
+                pvc_mount_path=Path("/dlm/product_dir"),
                 pvc_subpath=Path(subpath),
             ),
             paths=[],

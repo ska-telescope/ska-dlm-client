@@ -27,6 +27,7 @@ LOCATION_FACILITY = "local"
 RCLONE_CONFIG_TARGET = {
     "name": "dlm-archive",
     "type": "alias",
+    "root_path": "/",
     "parameters": {"remote": "/dlm-archive"},
 }
 RCLONE_CONFIG_SOURCE = {
@@ -146,7 +147,6 @@ def get_or_init_storage(
         if len(response) == 1:
             the_storage_id = response[0]["storage_id"]
             logger.info("storage %s already exists in DLM", storage_name)
-            storage_config_id = api_storage.get_storage_config(the_storage_id)
         else:
             response = api_storage.init_storage(
                 storage_name=storage_name,

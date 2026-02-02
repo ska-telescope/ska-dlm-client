@@ -35,7 +35,7 @@ def dataproduct_flow(config):
     pvc = PVCPath(
         k8s_namespaces=[],
         k8s_pvc_name="shared",
-        pvc_mount_path=Path("/data"), # maybe this should be /dlm or /dlm/product_dir?
+        pvc_mount_path=Path("/data"),
         pvc_subpath=Path(f"product/{EB_ID}/ska-sdp/{PB_ID}"),
     )
 
