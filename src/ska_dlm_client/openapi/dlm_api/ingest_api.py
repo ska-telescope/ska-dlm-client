@@ -370,7 +370,7 @@ class IngestApi:
     def register_data_item(
         self,
         item_name: Annotated[
-            StrictStr, Field(description="item name to register with. Does not need to be unique.")
+            StrictStr, Field(description="item name to register with.")
         ],
         uri: Annotated[StrictStr, Field(description="the relative access path to the payload.")],
         item_type: Optional[StrictStr] = None,
@@ -407,7 +407,7 @@ class IngestApi:
         Parameters
         ----------
         item_name : str
-            item name to register with. Does not need to be unique.
+            item name to register with.
             (required)
         uri : str
             the relative access path to the payload. (required)
@@ -482,7 +482,7 @@ class IngestApi:
     def register_data_item_with_http_info(
         self,
         item_name: Annotated[
-            StrictStr, Field(description="item name to register with. Does not need to be unique.")
+            StrictStr, Field(description="item name to register with.")
         ],
         uri: Annotated[StrictStr, Field(description="the relative access path to the payload.")],
         item_type: Optional[StrictStr] = None,
@@ -519,7 +519,7 @@ class IngestApi:
         Parameters
         ----------
         item_name : str
-            item name to register with. Does not need to be unique.
+            item name to register with.
             (required)
         uri : str
             the relative access path to the payload. (required)
@@ -594,7 +594,7 @@ class IngestApi:
     def register_data_item_without_preload_content(
         self,
         item_name: Annotated[
-            StrictStr, Field(description="item name to register with. Does not need to be unique.")
+            StrictStr, Field(description="item name to register with.")
         ],
         uri: Annotated[StrictStr, Field(description="the relative access path to the payload.")],
         item_type: Optional[StrictStr] = None,
@@ -631,7 +631,7 @@ class IngestApi:
         Parameters
         ----------
         item_name : str
-            item name to register with. Does not need to be unique.
+            item name to register with.
             (required)
         uri : str
             the relative access path to the payload. (required)

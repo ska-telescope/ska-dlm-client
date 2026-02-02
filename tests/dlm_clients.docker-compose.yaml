@@ -40,7 +40,7 @@ services:
       - etcd
   setup_storage_location:
     platform: linux/amd64
-    image: dlm_directory_watcher
+    image: dlm_setup_storage_location
     container_name: dlm_setup_storage_location
     build:
       context: ..

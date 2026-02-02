@@ -11,6 +11,7 @@
 
 * Directory Watcher now correctly accepts a configurable storage URL (via --storage-url).
 * Various small bug fixes.
+* ConfigDB Watcher derives the data-product path from the sink’s PVCPath.pvc_subpath.
 
 ### Added
 

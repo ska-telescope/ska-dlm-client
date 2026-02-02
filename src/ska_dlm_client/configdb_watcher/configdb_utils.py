@@ -5,11 +5,12 @@ from __future__ import annotations
 
 import logging
 import os
-from pathlib import Path
 from typing import Optional
 
 from ska_sdp_config import Config, ConfigCollision
 from ska_sdp_config.backend.etcd3 import Etcd3Backend
+from ska_sdp_config.entity.common import PVCPath
+from ska_sdp_config.entity.common.path import RelativePurePath
 from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
 
 logging.basicConfig(level=logging.INFO)
@@ -65,12 +66,14 @@ async def create_sdp_migration_dependency(config, dataproduct_key: Flow.Key):
     return dep
 
 
-def get_data_product_dir(config: Config, key: Flow.Key) -> Path:
+def get_pvc_subpath(config: Config, key: Flow.Key) -> RelativePurePath:
     """
-    Get the directory path to a data product in the SDP configuration database.
+    Get the PVC-internal subpath for a data product from the SDP ConfigDB.
+
+    Expects Flow.sink.data_dir to be a mapping containing a 'pvc_subpath' key.
 
     Returns:
-        absolute path on the local filesystem.
+        Path relative to the root of the PVC.
     """
     flow: Flow | None
     for txn in config.txn():
@@ -80,9 +83,16 @@ def get_data_product_dir(config: Config, key: Flow.Key) -> Path:
         raise KeyError(f"Flow key not found: {key}")
 
     if not isinstance(flow.sink, DataProduct):
-        raise TypeError(f"Expected data product key: {key}")
+        raise TypeError(f"Expected DataProduct sink for Flow key: {key}")
 
-    return Path(str(flow.sink.data_dir))
+    data_dir = flow.sink.data_dir
+    if not isinstance(data_dir, PVCPath):
+        raise TypeError(
+        "only PVCPath supported for flow data_dir. "
+        f"Got: {type(data_dir).__module__}.{type(data_dir).__name__}"
+    )
+
+    return data_dir.pvc_subpath
 
 
 def log_flow_dependencies(txn, product_key: Flow.Key) -> None:

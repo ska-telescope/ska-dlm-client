@@ -13,7 +13,7 @@ from ska_sdp_config.entity.flow import Flow
 from ska_dlm_client.config import DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
 from ska_dlm_client.configdb_watcher.configdb_utils import (
     create_sdp_migration_dependency,
-    get_data_product_dir,
+    get_pvc_subpath,
     update_dependency_state,
 )
 from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
@@ -148,7 +148,7 @@ async def _process_completed_flow(  # noqa: C901
             logger.info("Dependency %s status set to %s.", new_dep, state.get("status"))
 
     # Resolve the source directory from the Flow sink
-    src_dir = get_data_product_dir(configdb, dataproduct_key)
+    src_dir = get_pvc_subpath(configdb, dataproduct_key)
     logger.info(  # TODO: check that it's actually looking in the specified sink
         "New COMPLETED data-product identified: key=%s, src_path=%s",
         dataproduct_key,
