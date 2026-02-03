@@ -94,10 +94,11 @@ spec:
 
         volumeMounts:
           - name: data-product-storage
-            mountPath: /dlm-archive
+            mountPath: /dlm/watch_dir
             {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
             readOnly: true
             {{- end }}
+            subPath: dlmw
       dnsPolicy: ClusterFirstWithHostNet
       volumes:
       - name: data-product-storage
