@@ -24,8 +24,8 @@ ska_dlm:
   fullname: "ska-dlm"
 
 ska_dlm_client:
-  image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client #artefact.skao.int/ska-dlm-client
-  version: "1.2.0-dev.cded6f683" #"1.2.0"
+  image: artefact.skao.int/ska-dlm-client
+  version: "1.2.1"
   imagePullPolicy: Always
   storage_name: dlm
   storage_root_directory: /dlm
