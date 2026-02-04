@@ -80,6 +80,8 @@ spec:
           - name: REGISTER_CONTENTS_OF_WATCH_DIRECTORY
             value: "true"
           {{- end }}
+          - name: RCLONE_HOSTNAME
+            value: {{ include "ska-dlm-client.fullname" . }}-directory-watcher.{{ .Release.Namespace }}
 
         command:
           - /entrypoint.sh
