@@ -127,6 +127,10 @@ class INotifyDirectoryWatcher(DirectoryWatcher):
             "NOTE: watchfiles.awatch has recursive=False, in case this matters in the future."
         )
         # Last opportunity to call post startup func before we wait.
+        logger.info(
+            "Starting to scan %s. Watcher is only operational after initial scan is complete.",
+            self._config.directory_to_watch,
+        )
         if self._cmd_line_parameters:
             self._cmd_line_parameters.set_application_ready()
         async for changes in awatch(
