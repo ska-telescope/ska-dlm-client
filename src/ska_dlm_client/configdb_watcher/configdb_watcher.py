@@ -92,6 +92,7 @@ class DataProductStatusWatcher(
         - The generator doesn't return a final value -> RETURN is None
         """
         ignored_keys = [] if self._include_existing else self._get_existing_data_products()
+        # TODO: look into using a set instead of a list
 
         for watcher in self.__config.watcher():
             # must break synchronous iterator on context exit

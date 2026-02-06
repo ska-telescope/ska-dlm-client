@@ -1,5 +1,15 @@
 # Version History
 
+## Development
+
+### Updated
+
+* Improved the Directory Watcher readiness behaviour.
+
+### Fixed
+
+* Added support for overriding the rclone remote hostname via an env variable to ensure correct resolution when running in Kubernetes.
+
 ## 1.2.1
 
 ### Fixed

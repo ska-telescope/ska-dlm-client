@@ -77,16 +77,22 @@ class PollingDirectoryWatcher(DirectoryWatcher):
         logger.info(
             "NOTE: MyPollingObserver has recursive=False, in case this matters in the future."
         )
+        # We need to signal POD readiness before we start scanning the watch_dir,
+        # else there might be a long delay before the POD is signalling a healthy state.
+        if self._cmd_line_parameters:
+            self._cmd_line_parameters.set_application_ready()
         observer = BaseObserver(LStatPollingEmitter)
         observer.schedule(
             event_handler=self._event_handler,
             path=self._config.directory_to_watch,
             recursive=False,
         )
+        logger.info(
+            "Starting to scan %s. Watcher is only operational after initial scan is complete.",
+            self._config.directory_to_watch,
+        )
         observer.start()
-        # Last opportunity to call post startup func before we sleep.
-        if self._cmd_line_parameters:
-            self._cmd_line_parameters.set_application_ready()
+        logger.info("Initial scan complete, now watching for changes.")
         try:
             await self._stop_event.wait()
         finally:
@@ -121,6 +127,10 @@ class INotifyDirectoryWatcher(DirectoryWatcher):
             "NOTE: watchfiles.awatch has recursive=False, in case this matters in the future."
         )
         # Last opportunity to call post startup func before we wait.
+        logger.info(
+            "Starting to scan %s. Watcher is only operational after initial scan is complete.",
+            self._config.directory_to_watch,
+        )
         if self._cmd_line_parameters:
             self._cmd_line_parameters.set_application_ready()
         async for changes in awatch(

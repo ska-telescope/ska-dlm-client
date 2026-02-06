@@ -80,6 +80,8 @@ spec:
           - name: REGISTER_CONTENTS_OF_WATCH_DIRECTORY
             value: "true"
           {{- end }}
+          - name: RCLONE_HOSTNAME
+            value: {{ include "ska-dlm-client.fullname" . }}-directory-watcher.{{ .Release.Namespace }}
 
         command:
           - /entrypoint.sh
@@ -94,10 +96,11 @@ spec:
 
         volumeMounts:
           - name: data-product-storage
-            mountPath: /dlm-archive
+            mountPath: /dlm/watch_dir
             {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
             readOnly: true
             {{- end }}
+            subPath: dlmw
       dnsPolicy: ClusterFirstWithHostNet
       volumes:
       - name: data-product-storage

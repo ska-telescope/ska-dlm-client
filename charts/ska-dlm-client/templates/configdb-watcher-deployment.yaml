@@ -12,6 +12,24 @@
 {{- fail "Invalid config: configdb_watcher.enabled=true but no etcd configured. Either set configdb_watcher.sdp_config.host (external etcd) OR set configdb_watcher.sdp_config.etcd.enabled=true (deploy local etcd)." -}}
 {{- end -}}
 
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ska-dlm-client.fullname" . }}-configdb-watcher
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ska-dlm-client.configdb-watcher.labels" . | indent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: ssh
+      port: 22
+      targetPort: 22
+      protocol: TCP
+  selector:
+    component: {{ .Values.configdb_watcher.component }}
+    subsystem: {{ .Values.configdb_watcher.subsystem }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -87,6 +105,9 @@ spec:
           - name: INCLUDE_EXISTING
             value: "true"
           {{- end }}
+
+          - name: RCLONE_HOSTNAME
+            value: {{ include "ska-dlm-client.fullname" . }}-configdb-watcher.{{ .Release.Namespace }}
 
         command:
           - /entrypoint.sh

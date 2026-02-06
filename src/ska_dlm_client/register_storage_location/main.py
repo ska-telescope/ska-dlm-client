@@ -34,7 +34,7 @@ RCLONE_CONFIG_SOURCE = {
     "name": f"{os.getenv('SOURCE_NAME', 'dir-watcher')}",
     "type": "sftp",
     "parameters": {
-        "host": f"{socket.gethostname()}",
+        "host": f"{os.getenv('RCLONE_HOSTNAME', socket.gethostname())}",
         "key_file": "/root/.ssh/id_rsa",
         "shell_type": "unix",
         "type": "sftp",
