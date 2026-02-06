@@ -1,6 +1,6 @@
 # Version History
 
-## Development
+## 1.2.2
 
 ### Updated
 
