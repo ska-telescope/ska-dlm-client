@@ -149,16 +149,16 @@ async def _process_completed_flow(  # noqa: C901
             logger.info("Dependency %s status set to %s.", new_dep, state.get("status"))
 
     # Resolve the source directory from the Flow sink
-    source_path_full = get_pvc_subpath(configdb, dataproduct_key)
+    source_subpath = get_pvc_subpath(configdb, dataproduct_key)
     source_root = Path(ingest_config.storage_root_directory)
-    source_path_full = source_root / source_path_full
+    source_path_full = source_root / source_subpath
 
     logger.info(
         "New COMPLETED data-product identified: key=%s, source_root=%s, source_subpath=%s, "
         "source_path_full=%s",
         dataproduct_key,
         source_root,
-        source_path_full,
+        source_subpath,
         source_path_full,
     )
 
