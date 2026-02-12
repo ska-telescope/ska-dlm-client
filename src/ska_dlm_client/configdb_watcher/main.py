@@ -220,7 +220,7 @@ async def _process_completed_flow(  # noqa: C901
     # ---- Process each work directory ----
     any_failed = False
 
-    for work_dir in work_dirs: # Could add parallelism in the future
+    for work_dir in work_dirs:  # Could add parallelism in the future
         if not directory_contains_metadata_file(work_dir):
             logger.warning("No metadata file found in %s — proceeding anyway.", work_dir)
         else:

@@ -311,7 +311,7 @@ async def test_configdb_watcher():
     flow_name = "test-flow"
     trigger_completed_flow(flow_name, subpath=PVC_SUBPATH1)
 
-    # Poll for FINISHED
+    # Poll for FINISHED dependency status
     deadline = time.time() + 10
     statuses = []
     while time.time() < deadline:
@@ -350,7 +350,7 @@ async def test_configdb_watcher_higher_dir():
     flow_name = "test-flow-higher-dir"
     trigger_completed_flow(flow_name, subpath=PVC_SUBPATH2)
 
-    # Poll for FINISHED
+    # Poll for FINISHED dependency status
     deadline = time.time() + 10
     statuses = []
     while time.time() < deadline:
@@ -370,18 +370,27 @@ async def test_configdb_watcher_higher_dir():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-@pytest.mark.skip(reason="We need to trigger a failed registration on the container")
-# The current implementation runs a new configdb_watcher locally.
 async def test_watcher_logs_failed_registration():
-    """Run the watcher, trigger a Flow, and check failed registration is logged."""
-    # We can now use the env-variables to start a new client with a
-    # deliberately bad source_name to trigger DLM registration failure
+    """Flow points to a data item that is already registered on the storage."""
+    host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    api_configuration = Configuration(host=host)
+    setup_testing(api_configuration)
+    sleep(2)  # TODO: DMAN-193
 
-    # 1) Trigger a COMPLETED Flow
-    trigger_completed_flow("test-flow-failure", subpath=PVC_SUBPATH1)
+    # Copy fixture into watcher root
+    source_path = f"{WATCHER_SOURCE_DIR_ROOT}/{PVC_SUBPATH2}"
+    _copy_fixture_into_container(SRC_HOST, source_path)
 
-    # 2) Wait for the registration failure log
-    sleep(1)
-    statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow-failure")
-    if "FAILED" not in statuses:
-        pytest.fail("Watcher did not log failed registration within timeout")
+    # Trigger a COMPLETED Flow with same subpath as previous test
+    trigger_completed_flow("test-flow-failure", subpath=PVC_SUBPATH2)
+
+    # Poll for FAILED dependency status
+    deadline = time.time() + 10
+    statuses = []
+    while time.time() < deadline:
+        statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow-failure")
+        if "FAILED" in statuses:
+            break
+        sleep(1)
+
+    assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"
