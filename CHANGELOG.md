@@ -1,5 +1,11 @@
 # Version History
 
+## Development
+
+### Updated
+
+* The ConfigDB Watcher now searches recursively (one level deeper) than the given pvc_subpath.
+
 ## 1.2.2
 
 ### Updated

@@ -124,6 +124,7 @@ def _register_and_migrate_path(
 
 
 async def _process_completed_flow(  # noqa: C901
+    # pylint: disable=too-many-locals
     configdb: Config,
     dataproduct_key: Flow.Key,
     ingest_config: SDPIngestConfig,
