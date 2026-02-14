@@ -166,7 +166,7 @@ class RegistrationProcessor:
                     uid=uid,
                     destination_name=destination_storage_name,
                 )
-                logger.info("Migration response: %s", response)
+                logger.debug("Migration response: %s", response)
                 result = str(response)
             except OpenApiException as err:
                 logger.error("OpenApiException caught during copy_data_item")
@@ -362,11 +362,13 @@ class RegistrationProcessor:
         """Add the given path to the DLM.
 
         The logic is as follows:
-        1) If absolute_path is a file, it will be registered with the DLM without metadata
-        2) If absolute_path is a MS directory it will be registered without metadata (TBC).
-        3) If absolute_path is a directory it will be registered as a container with metadata if
-        found. All files within it will be registered as children. Any subdirectory
-        will be treated recursively using the same logic.
+        1) If absolute_path is a file, it will be registered as a single item.
+        2) If absolute_path is a MS (.ms) directory, it will be registered
+        as an opaque container (its contents are not traversed). Metadata is assumed
+        to reside in the parent directory.
+        3) If absolute_path is a directory, it will be registered as a container with
+        metadata (if present). All files within the container will be registered as children.
+        Any subdirectory will be treated recursively using the same logic.
 
         Args:
             absolute_path: The absolute path to the file or directory to register.
@@ -379,7 +381,7 @@ class RegistrationProcessor:
         if item_list is None or len(item_list) == 0:
             logger.error("No data items found in %s, NOT added to DLM!", absolute_path)
             return None
-        logger.info("Items identified in %s: %s", absolute_path, item_list)
+        logger.debug("Items identified in %s: %s", absolute_path, item_list)
         # Register the container directory first so that its uuid can be used for the files.
         parent_item = item_list[0]
         parent_uuid = self._register_single_item(parent_item)
@@ -387,7 +389,14 @@ class RegistrationProcessor:
         time.sleep(1)
         item_list.remove(parent_item)
         self._register_container_items(item_list=item_list)
-        logger.info("Finished adding %s data items for %s", len(item_list), parent_item)
+        logger.info(
+            "Finished adding %s",
+            (
+                f"item {parent_item.path_rel_to_watch_dir} ({parent_item.item_type})"
+                if not item_list
+                else f"{len(item_list) + 1} item(s) under {parent_item.path_rel_to_watch_dir}"
+            ),
+        )
         return parent_uuid
 
     def register_data_products_from_watch_directory(self):
@@ -437,6 +446,23 @@ def _generate_dir_item_list(absolute_path: str, path_rel_to_watch_dir: str) -> l
         )
         item_list.append(item)
         return item_list
+
+    # Special-case: Measurement Set directory
+    # - Treat MS as an opaque container (do NOT recurse into its contents)
+    # - Assuming metadata is stored next to the MS
+    if absolute_path.lower().endswith(ska_dlm_client.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX):
+        ms_parent = str(Path(absolute_path).parent)
+        metadata = (
+            DataProductMetadata(ms_parent) if directory_contains_metadata_file(ms_parent) else None
+        )
+        item = Item(
+            path_rel_to_watch_dir=path_rel_to_watch_dir,
+            item_type=ItemType.CONTAINER,  # are we defining .ms files as containers or files?
+            metadata=metadata,
+        )
+        item_list.append(item)
+        return item_list
+
     # Get metadata from directory
     metadata = DataProductMetadata(absolute_path)
     container_item = Item(

@@ -11,7 +11,7 @@ import athreading
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Flow
 
-from ska_dlm_client.config import DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
+from ska_dlm_client.config import DIRECTORY_IS_MEASUREMENT_SET_SUFFIX, METADATA_FILENAME
 from ska_dlm_client.configdb_watcher.configdb_utils import (
     create_sdp_migration_dependency,
     get_pvc_subpath,
@@ -197,15 +197,16 @@ async def _process_completed_flow(  # noqa: C901
                 ms_dirs.extend(list(iter_ms_dirs_one_level(subdir_full)))
 
     if not ms_dirs:
-        logger.error("No Measurement Sets found.")
+        logger.error("No Measurement Set(s) found.")
         return
 
-    logger.info("Found %s Measurement Sets", len(ms_dirs))
+    logger.info("Found %s Measurement Set(s)", len(ms_dirs))
 
-    # Convert MS dirs to "work dirs" (which hopefully includes the ska-data-product.yaml).
-    # Deduplicate in case multiple MS directories live in the same folder.
+    # Derive parent work directories from MS paths (grouping MS files with any siblings).
+    # Deduplicate to avoid processing the same directory multiple times.
     work_dirs = sorted({ms_dir.parent for ms_dir in ms_dirs})
-    logger.info("Found %s work directories to process", len(work_dirs))
+    logger.info("### Work dir(s) to process: %s", work_dirs)
+    logger.info("Found %s work dir(s) to process", len(work_dirs))
 
     # ---- Create a DLM dependency + set state to WORKING once ----
     new_dep = await create_sdp_migration_dependency(configdb, dataproduct_key)
@@ -218,25 +219,40 @@ async def _process_completed_flow(  # noqa: C901
     await _aupdate_dependency_state("WORKING")
     logger.info("Setting Dependency %s state as WORKING", new_dep)
 
+    def iter_immediate_children(work_dir: Path):
+        """Yield immediate children of work_dir (files + dirs), skipping metadata file."""
+        for child_path in work_dir.iterdir():
+            if child_path.name == METADATA_FILENAME:
+                continue
+            yield child_path
+
     # ---- Process each work directory ----
     any_failed = False
-
     for work_dir in work_dirs:  # Could add parallelism in the future
         if not directory_contains_metadata_file(work_dir):
             logger.warning("No metadata file found in %s — proceeding anyway.", work_dir)
         else:
             logger.info("Found the metadata file in %s!", work_dir)
 
-        dep_status = _register_and_migrate_path(
-            processor,
-            str(work_dir),
-            ingest_config.storage_root_directory,
-            dataproduct_key,
-            new_dep,
+        directories = list(iter_immediate_children(work_dir))
+
+        logger.info(
+            "Processing %d items under %s: %s",
+            len(directories),
+            work_dir,
+            [str(child_path) for child_path in directories],
         )
 
-        if dep_status == "FAILED":
-            any_failed = True
+        for child_path in directories:
+            dep_status = _register_and_migrate_path(
+                processor,
+                str(child_path),
+                ingest_config.storage_root_directory,
+                dataproduct_key,
+                new_dep,
+            )
+            if dep_status == "FAILED":
+                any_failed = True
 
     # ---- Set final dependency state once all MS in the Flow have been attempted ----
     final_status = "FAILED" if any_failed else "FINISHED"
