@@ -74,7 +74,7 @@ def get_or_init_location(
                 location_facility=LOCATION_FACILITY,
             )
             the_location_id = response
-            logger.info("location created in DLM")
+            logger.info("Location created in DLM")
         logger.info("location_id: %s", the_location_id)
     return the_location_id
 
@@ -146,7 +146,7 @@ def get_or_init_storage(
         install_ssh_key(api_storage)
         if len(response) == 1:
             the_storage_id = response[0]["storage_id"]
-            logger.info("storage %s already exists in DLM", storage_name)
+            logger.info("Storage %s already exists in DLM", storage_name)
         else:
             response = api_storage.init_storage(
                 storage_name=storage_name,
@@ -157,7 +157,7 @@ def get_or_init_storage(
                 location_name=LOCATION_NAME,
             )
             the_storage_id = response
-            logger.info("Storage created in DLM")
+            logger.info("Storage %s created in DLM", storage_name)
 
             if rclone_config is not None:
                 # Setup the storage config.

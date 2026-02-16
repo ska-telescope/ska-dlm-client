@@ -113,7 +113,7 @@ def _register_and_migrate_path(
             )
             dep_status = "FAILED"
         else:
-            logger.info(
+            logger.debug(
                 "Registration and migration succeeded for %s; "
                 "marking dependency %s as FINISHED.",
                 dataproduct_key,
@@ -151,7 +151,7 @@ async def _process_completed_flow(  # noqa: C901
         for txn in configdb.txn():
             update_dependency_state(txn, new_dep, status=status)
             state = txn.dependency.state(new_dep).get()
-            logger.info("Dependency %s status set to %s.", new_dep, state.get("status"))
+            logger.info("Dependency status set to %s.", state.get("status"))
 
     # Resolve the source directory from the Flow sink
     source_subpath = get_pvc_subpath(configdb, dataproduct_key)
@@ -205,19 +205,16 @@ async def _process_completed_flow(  # noqa: C901
     # Derive parent work directories from MS paths (grouping MS files with any siblings).
     # Deduplicate to avoid processing the same directory multiple times.
     work_dirs = sorted({ms_dir.parent for ms_dir in ms_dirs})
-    logger.info("### Work dir(s) to process: %s", work_dirs)
-    logger.info("Found %s work dir(s) to process", len(work_dirs))
+    logger.info("Found %s work dir(s) to process: %s", len(work_dirs), work_dirs)
 
     # ---- Create a DLM dependency + set state to WORKING once ----
     new_dep = await create_sdp_migration_dependency(configdb, dataproduct_key)
     if not new_dep:
         logger.error("Failed to create dependency for data-product %s", dataproduct_key)
         return
-
-    logger.info("New dependency created: %s", new_dep)
+    logger.debug("New dependency created: %s", new_dep)
 
     await _aupdate_dependency_state("WORKING")
-    logger.info("Setting Dependency %s state as WORKING", new_dep)
 
     def iter_immediate_children(work_dir: Path):
         """Yield immediate children of work_dir (files + dirs), skipping metadata file."""
@@ -237,7 +234,7 @@ async def _process_completed_flow(  # noqa: C901
         directories = list(iter_immediate_children(work_dir))
 
         logger.info(
-            "Processing %d items under %s: %s",
+            "Processing %d item(s) under %s: %s",
             len(directories),
             work_dir,
             [str(child_path) for child_path in directories],
@@ -293,10 +290,8 @@ async def sdp_to_dlm_ingest_and_migrate(
                     dataproduct_key,
                     ingest_config,
                 )
-                logger.info(
-                    "Done processing %s; continuing to watch for COMPLETED data-product Flows.",
-                    dataproduct_key,
-                )
+                logger.info("Done processing %s", dataproduct_key)
+                logger.info("Continuing to watch for COMPLETED data-product Flows")
             except Exception:  # pylint: disable=broad-exception-caught  # pragma: no cover
                 logger.exception("Failed to process Flow %s", dataproduct_key)
                 logger.info("Continuing to watch for COMPLETED data-product Flows.")

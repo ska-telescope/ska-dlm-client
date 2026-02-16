@@ -203,9 +203,8 @@ class RegistrationProcessor:
         else:
             # ConfigDB watcher path – no directory_watcher_entries
             logger.info(
-                "Registered and migrated item %s (%s); migration_result=%s",
+                "Migration result for %s: %s",
                 item.path_rel_to_watch_dir,
-                item.item_type,
                 migration_result,
             )
 
@@ -301,7 +300,7 @@ class RegistrationProcessor:
             dlm_registration_uuid = None
             try:
                 if perform_actual_ingest_and_migration:
-                    logger.info(
+                    logger.debug(
                         "Using URI: %s for data_item registration",
                         item.path_rel_to_watch_dir,
                     )
@@ -374,7 +373,6 @@ class RegistrationProcessor:
             absolute_path: The absolute path to the file or directory to register.
             path_rel_to_watch_dir: The path relative to the watch directory.
         """
-        logger.info("add_path %s from %s", absolute_path, path_rel_to_watch_dir)
         item_list = _generate_dir_item_list(
             absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
         )
@@ -389,7 +387,7 @@ class RegistrationProcessor:
         time.sleep(1)
         item_list.remove(parent_item)
         self._register_container_items(item_list=item_list)
-        logger.info(
+        logger.debug(
             "Finished adding %s",
             (
                 f"item {parent_item.path_rel_to_watch_dir} ({parent_item.item_type})"
