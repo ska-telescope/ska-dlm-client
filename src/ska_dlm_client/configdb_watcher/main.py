@@ -11,7 +11,7 @@ import athreading
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Flow
 
-from ska_dlm_client.config import DIRECTORY_IS_MEASUREMENT_SET_SUFFIX, METADATA_FILENAME
+from ska_dlm_client.config import DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
 from ska_dlm_client.configdb_watcher.configdb_utils import (
     create_sdp_migration_dependency,
     get_pvc_subpath,
@@ -26,6 +26,7 @@ from ska_dlm_client.registration_processor import (
 )
 
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
+# TODO: add a proper option for LOG_LEVEL=DEBUG
 
 
 # pylint: disable=too-many-instance-attributes
