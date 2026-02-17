@@ -26,6 +26,7 @@ from ska_dlm_client.registration_processor import (
 )
 
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
+# TODO: add a proper option for LOG_LEVEL=DEBUG
 
 
 # pylint: disable=too-many-instance-attributes
@@ -113,7 +114,7 @@ def _register_and_migrate_path(
             )
             dep_status = "FAILED"
         else:
-            logger.info(
+            logger.debug(
                 "Registration and migration succeeded for %s; "
                 "marking dependency %s as FINISHED.",
                 dataproduct_key,
@@ -124,6 +125,7 @@ def _register_and_migrate_path(
 
 
 async def _process_completed_flow(  # noqa: C901
+    # pylint: disable=too-many-locals
     configdb: Config,
     dataproduct_key: Flow.Key,
     ingest_config: SDPIngestConfig,
@@ -131,14 +133,17 @@ async def _process_completed_flow(  # noqa: C901
     """Process a single COMPLETED data-product Flow.
 
     - Resolve the data-product directory from Flow.sink.data_dir.
-    - Identify the .ms file in that directory.
+    - Identify the .ms file(s) in that directory (or one level deeper).
     - Create a DLM migration dependency
-    - Register data-product in DLM
-    - Migrate the data-product (if configured)
+    - Register data-product(s) in DLM
+    - Migrate the data-product(s) (if configured)
     - Set dependency state to WORKING/FINISHED/FAILED depending on outcome.
+
+    Notes:
+        This implementation processes each derived work directory sequentially.
+        If later we want faster throughput, could add bounded concurrency (e.g. 2–4 in-flight).
     """
     new_dep: str | None = None
-    dep_status: str | None = None
 
     @athreading.call
     def _aupdate_dependency_state(status: str) -> None:
@@ -146,19 +151,19 @@ async def _process_completed_flow(  # noqa: C901
         for txn in configdb.txn():
             update_dependency_state(txn, new_dep, status=status)
             state = txn.dependency.state(new_dep).get()
-            logger.info("Dependency %s status set to %s.", new_dep, state.get("status"))
+            logger.info("Dependency status set to %s.", state.get("status"))
 
     # Resolve the source directory from the Flow sink
-    source_path_full = get_pvc_subpath(configdb, dataproduct_key)
+    source_subpath = get_pvc_subpath(configdb, dataproduct_key)
     source_root = Path(ingest_config.storage_root_directory)
-    source_path_full = source_root / source_path_full
+    source_path_full = source_root / source_subpath
 
     logger.info(
         "New COMPLETED data-product identified: key=%s, source_root=%s, source_subpath=%s, "
         "source_path_full=%s",
         dataproduct_key,
         source_root,
-        source_path_full,
+        source_subpath,
         source_path_full,
     )
 
@@ -169,50 +174,69 @@ async def _process_completed_flow(  # noqa: C901
         )
         return
 
-    # Are there any MS here?
-    ms_sets = 0
-    for entry in os.listdir(source_path_full):
-        entry = os.path.join(source_path_full, entry)
-        logger.info("Checking: %s", entry)
-        if os.path.isdir(entry) and entry.lower().endswith(DIRECTORY_IS_MEASUREMENT_SET_SUFFIX):
-            ms_sets += 1
-
-    if ms_sets == 0:
-        logger.error("No Measurement Set found in directory %s", source_path_full)
-        return
-    logger.info("Found %s MS directories", ms_sets)
-
-    # Create a DLM dependency (no state yet)
-    new_dep = await create_sdp_migration_dependency(configdb, dataproduct_key)
-    if not new_dep:
-        logger.error(
-            "Failed to create dependency for data-product %s ",
-            dataproduct_key,
-        )
-    else:
-        logger.info("New dependency created: %s", new_dep)
-
-    # Look for the metadata file
-    if not directory_contains_metadata_file(source_path_full):
-        logger.error("No metadata file found!")
-    else:
-        logger.info("Found the metadata file!")
-
-    # If we have a dependency, mark it WORKING before we start register+migrate
-    if new_dep:
-        await _aupdate_dependency_state("WORKING")
-        logger.info("Setting Dependency %s state as WORKING", new_dep)
-
-    # Handle each of the found MSs
     processor = RegistrationProcessor(ingest_config)
     processor.last_migration_result = None  # Clear any stale migration result
-    dep_status = _register_and_migrate_path(
-        processor, source_path_full, ingest_config.storage_root_directory, dataproduct_key, new_dep
-    )  # register+migrate everything in src_dir
 
-    # Update the dependency state to FAILED/FINISHED
-    if new_dep and dep_status:
-        await _aupdate_dependency_state(dep_status)
+    # ---- Find MS directories (directly or one level deeper) ----
+    def iter_ms_dirs_one_level(path: Path):
+        for entry in os.listdir(path):
+            full_entry = path / entry
+            logger.info("Checking: %s", full_entry)
+            if full_entry.is_dir() and full_entry.name.lower().endswith(
+                DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
+            ):
+                yield full_entry
+
+    ms_dirs = list(iter_ms_dirs_one_level(source_path_full))
+
+    if not ms_dirs:
+        logger.info("No MS found in %s — searching one level deeper.", source_path_full)
+        for subdir in os.listdir(source_path_full):
+            subdir_full = source_path_full / subdir
+            if subdir_full.is_dir():
+                ms_dirs.extend(list(iter_ms_dirs_one_level(subdir_full)))
+
+    if not ms_dirs:
+        logger.error("No Measurement Set(s) found.")
+        return
+
+    logger.info("Found %s Measurement Set(s)", len(ms_dirs))
+
+    # Derive parent work directories from MS paths.
+    # Deduplicate to avoid processing the same directory multiple times.
+    work_dirs = sorted({ms_dir.parent for ms_dir in ms_dirs})
+    logger.info("Found %s work dir(s) to process: %s", len(work_dirs), work_dirs)
+
+    # ---- Create a DLM dependency + set state to WORKING once ----
+    new_dep = await create_sdp_migration_dependency(configdb, dataproduct_key)
+    if not new_dep:
+        logger.error("Failed to create dependency for data-product %s", dataproduct_key)
+        return
+    logger.debug("New dependency created: %s", new_dep)
+
+    await _aupdate_dependency_state("WORKING")
+
+    # ---- Process each work directory ----
+    any_failed = False
+    for work_dir in work_dirs:  # Could add parallelism in the future
+        if not directory_contains_metadata_file(work_dir):
+            logger.warning("No metadata file found in %s — proceeding anyway.", work_dir)
+        else:
+            logger.info("Found the metadata file in %s!", work_dir)
+
+        dep_status = _register_and_migrate_path(
+            processor,
+            str(work_dir),
+            ingest_config.storage_root_directory,
+            dataproduct_key,
+            new_dep,
+        )
+        if dep_status == "FAILED":
+            any_failed = True
+
+    # ---- Set final dependency state once all MS in the Flow have been attempted ----
+    final_status = "FAILED" if any_failed else "FINISHED"
+    await _aupdate_dependency_state(final_status)
 
 
 async def sdp_to_dlm_ingest_and_migrate(
@@ -249,10 +273,8 @@ async def sdp_to_dlm_ingest_and_migrate(
                     dataproduct_key,
                     ingest_config,
                 )
-                logger.info(
-                    "Done processing %s; continuing to watch for COMPLETED data-product Flows.",
-                    dataproduct_key,
-                )
+                logger.info("Done processing %s", dataproduct_key)
+                logger.info("Continuing to watch for COMPLETED data-product Flows")
             except Exception:  # pylint: disable=broad-exception-caught  # pragma: no cover
                 logger.exception("Failed to process Flow %s", dataproduct_key)
                 logger.info("Continuing to watch for COMPLETED data-product Flows.")

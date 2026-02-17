@@ -30,7 +30,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 EB_ID = "eb-00000000"
 PB_ID = "pb-test-00000000-a"
-MS_PATH = f"{dir_path}/../directory_watcher/test_registration_processor/product_dir"
+MS_PATH_LOCAL = f"{dir_path}/../directory_watcher/test_registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
@@ -73,8 +73,10 @@ STORAGE = {
     },
 }
 
-PVC_SUBPATH = f"product/{EB_ID}/ska-sdp/{PB_ID}"
-WATCHER_SOURCE_DIR = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}/{PVC_SUBPATH}"
+SRC_HOST = STORAGE["SRC"]["STORAGE_CONFIG"]["parameters"]["host"]
+WATCHER_SOURCE_DIR_ROOT = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}"
+PVC_SUBPATH1 = f"product/{EB_ID}/ska-sdp/{PB_ID}/beam-vis0/scan-0"
+PVC_SUBPATH2 = f"product/{EB_ID}/ska-sdp/{PB_ID}/beam-vis0"
 
 
 def _get_cfg() -> Config:
@@ -123,14 +125,14 @@ def _create_completed_flow(subpath: str, flow_name_arg: str) -> None:
         ops.create({"status": "COMPLETED"})
 
 
-def trigger_completed_flow(flow_name) -> None:
+def trigger_completed_flow(flow_name, subpath) -> None:
     """Ensure PB + Flow exist and mark Flow as COMPLETED."""
     _ensure_processing_block()
     # IMPORTANT: this must match what the watcher expects:
     #   - same `storage_root_directory`
     #   - points at a directory that actually contains the .ms + metadata
     _create_completed_flow(
-        subpath=PVC_SUBPATH,
+        subpath=subpath,
         flow_name_arg=flow_name,
     )
 
@@ -252,82 +254,143 @@ def test_storage_initialisation(storage_configuration: Configuration):
         assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
 
 
+def _copy_fixture_into_container(src_host: str, watcher_src_subpath: str) -> None:
+    """Copy the MS fixture into watcher_src_subpath and wait until the path becomes visible."""
+    # 1) Ensure watcher source dir exists
+    cmd = f"docker exec {src_host} sh -lc 'mkdir -p {watcher_src_subpath}'"
+    log.info("Ensure watcher source dir exists: %s", cmd)
+    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
+    assert p.returncode == 0, p.stderr
+
+    # 2) Copy the contents of MS_PATH_LOCAL into <container>:<dest>
+    cmd = f"docker container cp {MS_PATH_LOCAL}/. {src_host}:{watcher_src_subpath}/"
+    log.info("Copy MS fixture into watcher container: %s", cmd)
+    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
+    assert p.returncode == 0, p.stderr
+
+    # 3) Wait until expected path is visible (avoid race with watcher)
+    deadline = time.time() + 10
+    while time.time() < deadline:
+        cmd = f"docker exec {src_host} sh -lc 'ls -la {watcher_src_subpath} | head'"
+        p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
+        if p.returncode == 0:
+            log.info("Expected path visible: %s", watcher_src_subpath)
+            log.info("dir check stdout: %s", p.stdout)
+            return
+        sleep(1)
+
+    assert (
+        p.returncode == 0
+    ), f"Expected path not visible in watcher container: {watcher_src_subpath}\n{p.stderr}"
+
+
+def _cleanup_destination_storage(src_host: str) -> None:
+    """For consecutive tests, the destination copy must not already exist."""
+    cmd = (
+        f"docker exec {src_host} sh -lc "
+        "'rm -rf /dlm-archive/* /dlm-archive/.[!.]* /dlm-archive/..?* 2>/dev/null || true'"
+    )
+    log.info("Cleaning destination storage: %s", cmd)
+    subprocess.run(cmd, shell=True, check=False)
+
+
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_watcher_registers_and_migrates():
-    """
-    Run the real watcher, wait for success logs, then cancel it cleanly.
-
-    Test auto migration using configdb watcher.
-    """
+async def test_configdb_watcher():
+    """Flow points directly at scan-0 (contains demo.ms)."""
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
 
-    src_host = STORAGE["SRC"]["STORAGE_CONFIG"]["parameters"]["host"]
+    # Copy fixture into chosen watcher source path
+    source_path = f"{WATCHER_SOURCE_DIR_ROOT}/{PVC_SUBPATH1}"
+    _copy_fixture_into_container(SRC_HOST, source_path)
 
-    # 1) Ensure watcher source dir exists
-    cmd = f"docker exec {src_host} sh -lc 'mkdir -p {WATCHER_SOURCE_DIR}'"
-    log.info("Ensure watcher source dir exists: %s", cmd)
-    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
-    assert p.returncode == 0, p.stderr
+    # Trigger COMPLETED Flow pointing directly at scan-0
+    flow_name = "test-flow"
+    trigger_completed_flow(flow_name, subpath=PVC_SUBPATH1)
 
-    # 2) Copy MS_PATH contents into that directory
-    cmd = f"docker container cp {MS_PATH}/. {src_host}:{WATCHER_SOURCE_DIR}/"
-    log.info("Copy MS into watcher container: %s", cmd)
-    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
-    assert p.returncode == 0, p.stderr
-
-    # 3) Wait until the directory is visible (avoid race with watcher)
-    deadline = time.time() + 20
-    while time.time() < deadline:
-        check_dir = f"ls -la {WATCHER_SOURCE_DIR} | head"
-        cmd = f"docker exec {src_host} sh -lc '{check_dir}'"
-        p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
-        if p.returncode == 0:
-            log.info("dir check stdout: %s", p.stdout)
-            break
-        sleep(1)
-
-    assert (
-        p.returncode == 0
-    ), f"Source dir not visible in watcher container: {WATCHER_SOURCE_DIR}\n{p.stderr}"
-
-    # 4) Trigger a COMPLETED Flow
-    trigger_completed_flow("test-flow")
-
-    # 5) Poll for FINISHED
-    deadline = time.time() + 20
+    # Poll for FINISHED dependency status
+    deadline = time.time() + 10
     statuses = []
     while time.time() < deadline:
-        statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow")
+        statuses = _get_dependency_statuses_for_product(PB_ID, flow_name)
         if "FINISHED" in statuses:
             break
         sleep(1)
 
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
 
+    # Cleanup
     log.info("Cleaning up copied MS file(s) from watcher container.")
-    cmd = f"docker exec {src_host} sh -lc 'rm -rf {WATCHER_SOURCE_DIR}'"
-    log.info("Cleanup cmd: %s", cmd)
+    cmd = f"docker exec {SRC_HOST} sh -lc 'rm -rf {WATCHER_SOURCE_DIR_ROOT}/*'"
     subprocess.run(cmd, shell=True, check=False)
+    _cleanup_destination_storage(src_host=SRC_HOST)
 
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-@pytest.mark.skip(reason="We need to trigger a failed registration on the container")
-# The current implementation runs a new configdb_watcher locally.
+async def test_configdb_watcher_higher_dir():
+    """
+    Flow points at beam-vis0 (one level above scan-0).
+
+    Watcher must search one level deeper to find demo.ms.
+    """
+    host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    api_configuration = Configuration(host=host)
+    setup_testing(api_configuration)
+    sleep(2)  # TODO: DMAN-193
+
+    # Copy fixture into watcher root
+    source_path = f"{WATCHER_SOURCE_DIR_ROOT}/{PVC_SUBPATH2}"
+    _copy_fixture_into_container(SRC_HOST, source_path)
+
+    # Trigger COMPLETED Flow pointing at beam-vis0
+    flow_name = "test-flow-higher-dir"
+    trigger_completed_flow(flow_name, subpath=PVC_SUBPATH2)
+
+    # Poll for FINISHED dependency status
+    deadline = time.time() + 10
+    statuses = []
+    while time.time() < deadline:
+        statuses = _get_dependency_statuses_for_product(PB_ID, flow_name)
+        if "FINISHED" in statuses:
+            break
+        sleep(1)
+
+    assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
+
+    # Cleanup
+    log.info("Cleaning up copied MS file(s) from watcher container.")
+    cmd = f"docker exec {SRC_HOST} sh -lc 'rm -rf {WATCHER_SOURCE_DIR_ROOT}/*'"
+    subprocess.run(cmd, shell=True, check=False)
+    _cleanup_destination_storage(src_host=SRC_HOST)
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
 async def test_watcher_logs_failed_registration():
-    """Run the watcher, trigger a Flow, and check failed registration is logged."""
-    # We can now use the env-variables to start a new client with a
-    # deliberately bad source_name to trigger DLM registration failure
+    """Flow points to a data item that is already registered on the storage."""
+    host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    api_configuration = Configuration(host=host)
+    setup_testing(api_configuration)
+    sleep(2)  # TODO: DMAN-193
 
-    # 1) Trigger a COMPLETED Flow
-    trigger_completed_flow("test-flow-failure")
+    # Copy fixture into watcher root
+    source_path = f"{WATCHER_SOURCE_DIR_ROOT}/{PVC_SUBPATH2}"
+    _copy_fixture_into_container(SRC_HOST, source_path)
 
-    # 2) Wait for the registration failure log
-    sleep(1)
-    statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow-failure")
-    if "FAILED" not in statuses:
-        pytest.fail("Watcher did not log failed registration within timeout")
+    # Trigger a COMPLETED Flow with same subpath as previous test
+    trigger_completed_flow("test-flow-failure", subpath=PVC_SUBPATH2)
+
+    # Poll for FAILED dependency status
+    deadline = time.time() + 10
+    statuses = []
+    while time.time() < deadline:
+        statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow-failure")
+        if "FAILED" in statuses:
+            break
+        sleep(1)
+
+    assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"

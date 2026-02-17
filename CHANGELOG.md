@@ -1,5 +1,12 @@
 # Version History
 
+## Development
+
+### Updated
+
+* The ConfigDB Watcher now searches recursively (one level deeper) than the given pvc_subpath.
+* Measurement Set paths are always treated as opaque containers.
+
 ## 1.2.2
 
 ### Updated
