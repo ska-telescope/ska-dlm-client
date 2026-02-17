@@ -139,9 +139,8 @@ async def _process_completed_flow(  # noqa: C901
     - Set dependency state to WORKING/FINISHED/FAILED depending on outcome.
 
     Notes:
-        This implementation processes each discovered MS sequentially.
-        If later we want faster throughput, could add bounded concurrency (e.g. 2–4 in-flight)
-        using an asyncio.Semaphore and running each register+migrate in athreading.
+        This implementation processes each derived work directory sequentially.
+        If later we want faster throughput, could add bounded concurrency (e.g. 2–4 in-flight).
     """
     new_dep: str | None = None
 
@@ -202,7 +201,7 @@ async def _process_completed_flow(  # noqa: C901
 
     logger.info("Found %s Measurement Set(s)", len(ms_dirs))
 
-    # Derive parent work directories from MS paths (grouping MS files with any siblings).
+    # Derive parent work directories from MS paths.
     # Deduplicate to avoid processing the same directory multiple times.
     work_dirs = sorted({ms_dir.parent for ms_dir in ms_dirs})
     logger.info("Found %s work dir(s) to process: %s", len(work_dirs), work_dirs)
@@ -216,13 +215,6 @@ async def _process_completed_flow(  # noqa: C901
 
     await _aupdate_dependency_state("WORKING")
 
-    def iter_immediate_children(work_dir: Path):
-        """Yield immediate children of work_dir (files + dirs), skipping metadata file."""
-        for child_path in work_dir.iterdir():
-            if child_path.name == METADATA_FILENAME:
-                continue
-            yield child_path
-
     # ---- Process each work directory ----
     any_failed = False
     for work_dir in work_dirs:  # Could add parallelism in the future
@@ -231,25 +223,15 @@ async def _process_completed_flow(  # noqa: C901
         else:
             logger.info("Found the metadata file in %s!", work_dir)
 
-        directories = list(iter_immediate_children(work_dir))
-
-        logger.info(
-            "Processing %d item(s) under %s: %s",
-            len(directories),
-            work_dir,
-            [str(child_path) for child_path in directories],
+        dep_status = _register_and_migrate_path(
+            processor,
+            str(work_dir),
+            ingest_config.storage_root_directory,
+            dataproduct_key,
+            new_dep,
         )
-
-        for child_path in directories:
-            dep_status = _register_and_migrate_path(
-                processor,
-                str(child_path),
-                ingest_config.storage_root_directory,
-                dataproduct_key,
-                new_dep,
-            )
-            if dep_status == "FAILED":
-                any_failed = True
+        if dep_status == "FAILED":
+            any_failed = True
 
     # ---- Set final dependency state once all MS in the Flow have been attempted ----
     final_status = "FAILED" if any_failed else "FINISHED"
