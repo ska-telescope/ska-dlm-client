@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath("../../src"))
 project = "ska-dlm-client"
 copyright = "2024, ICRAR"
 author = "Mark Boulton <mark.boulton@uwa.edu.au>"
-release = "1.2.2"
+release = "1.2.3"
 
 extensions = [
     "sphinx.ext.autodoc",
