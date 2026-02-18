@@ -1,6 +1,8 @@
 Deployment
 ==========
 
+*WIP*
+
 The standard deployment of the ska-dlm-client within the SKA Kubernetes environment uses a set of Helm charts and an associated configuration file. A `sample Deployment <https://gitlab.com/ska-telescope/ska-dlm-client/-/blob/main/resources/sample-deployment.yaml>`_ is provided in the resources directory of the repository. A full guide is also given below.
 
 
@@ -66,7 +68,7 @@ directory_watcher
 configdb_watcher
 -----------------
 
-- TODO
+*TODO*
 
 kafka_watcher
 ---------------

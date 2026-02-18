@@ -1,6 +1,7 @@
 Directory Watcher
 -------------------
 
+.. Move this section somewhere else
 The directory_watcher will watch a given directory and add any files or directories that are created after startup to the DLM.
 
 CLI call example::
@@ -36,17 +37,17 @@ Module documentation
 .. automodule:: ska_dlm_client.directory_watcher.main
     :members:
 
-.. automodule:: ska_dlm_client.directory_watcher.data_product_metadata
+.. automodule:: ska_dlm_client.directory_watcher.directory_watcher
+    :members:
+
+.. automodule:: ska_dlm_client.directory_watcher.directory_utils
     :members:
 
 .. automodule:: ska_dlm_client.directory_watcher.directory_watcher_entries
     :members:
 
-.. automodule:: ska_dlm_client.directory_watcher.minimal_metadata_generator
-    :members:
-
-.. automodule:: ska_dlm_client.directory_watcher.registration_processor
-    :members:
-
 .. automodule:: ska_dlm_client.directory_watcher.watcher_event_handler
+    :members:
+
+.. automodule:: ska_dlm_client.directory_watcher.config
     :members:
