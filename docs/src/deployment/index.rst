@@ -3,49 +3,81 @@ Deployment
 
 *WIP*
 
-The standard deployment of the ska-dlm-client within the SKA Kubernetes environment uses a set of Helm charts and an associated configuration file. A `sample Deployment <https://gitlab.com/ska-telescope/ska-dlm-client/-/blob/main/resources/sample-deployment.yaml>`_ is provided in the resources directory of the repository. A full guide is also given below.
+The standard deployment of the ska-dlm-client within the SKA Kubernetes environment uses a set of Helm charts and an associated configuration file (`values.yaml <https://gitlab.com/ska-telescope/ska-dlm-client/-/blob/main/charts/ska-dlm-client/values.yaml>`_). A full guide is given below.
 
 
-Clone the repository
-------------------
+Clone the ska-dlm-client repository
+---------------------------------------
+
+Begin by cloning the GitLab repository:
 
 .. code-block:: bash
 
-    git clone --recurse-submodules https://gitlab.com/ska-dlm-client/ska-data-lifecycle.git
+  git clone --recurse-submodules https://gitlab.com/ska-telescope/ska-dlm-client.git
 
 Retrieve the available release tags and check out the desired release:
 
 .. code-block:: bash
 
-    cd ska-dlm-client
-    git fetch --tags
-    git tag --list
-    git checkout <release-tag>
+  cd ska-dlm-client
+  git fetch --tags
+  git tag --list
+  git checkout <release-tag>
 
 
-Example Deployment
-------------------
+.. Configuration file
+.. ------------------
 
-An example deployment of the ska-dlm-client:
+.. Use the ``src/ska_dlm_client/config.yaml`` file to specify the configuration of the ska-dlm-client. For example:
 
-.. code-block:: shell
+.. - The URLs of the DLM (Data Lifecycle Management) service and DPD (Data Product Dashboard) service.
+.. - The Authentication Token used to access the DLM and DPD services.
+.. - The name (and additional details) of the location and storage on which the ska-dlm-client will be run.
 
-   helm install -f resources/dp-proj-user.yaml [-n <namespace>] ska-dlm-client charts/ska-dlm-client
+.. Here is an example of the config YAML (refer to the repository for the latest format):
 
-This will deploy to the currently configured cluster and namespace.
+.. .. code-block:: yaml
+
+..    auth_token: "Replace this with the authorization token"
+
+..    location:
+..      name: "MyLocationName"
+..      type: "MyLocationType"
+..      country: "MyLocationCountry"
+..      city: "MyLocationCity"
+..      facility: "MyLocationFacility"
+
+..    storage:
+..      name: "MyStorageName"
+..      type: "disk"
+..      interface: "posix"
+..      capacity: 100000000
+..      phase_level: "GAS"
+
+..    DLM:
+..      url: "http://dlm/api"
 
 
-Values
--------
 
-- ``global.dataProduct.pvc.name``: Name of the location of the data products or the directory to be watched.
-- ``global.dataProduct.pvc.read_only``: Should be set to ``true`` for now. This limits the scope of what directory_watcher can do.
-- ``setupStorageLocation``: Set to ``true`` if a test location/storage is needed.
+Before deploying, modify the ``values.yaml`` file to suit your needs. The configuration options that are most likely to require modification in typical deployments are described below. The values not mentioned below should generally be left at their default values, unless you have a specific reason to modify them.
 
-**Note:** There is currently overlap between ``ska_dlm_client``, ``directory_watcher``, and ``kafka_watcher``. Values like ``storage_name`` and ``storage_root_directory`` appear in multiple sections because different components may reference different storage locations.
+Global values
+-------------
 
-ska_dlm_client
---------------
+The global section contains cluster- and deployment-wide settings shared by all components deployed by this chart.
+
+- ``global.dataProduct.pvc.name``: Name of the volume to mount into watcher pods
+- ``global.dataProduct.pvc.read_only``: Should be set to ``true`` for now. This limits the scope of what the watchers can do.
+
+
+Chart feature flags
+-------------------
+
+- ``setupStorageLocation``: Set to ``true`` to trigger the setup of a storage end-point in the DLM, using the values: ska_dlm_client.storage_url, ska_dlm_client.storage_name and ska_dlm_client.storage_root_directory.
+
+
+Shared ska-dlm-client values
+----------------------------
 
 - ``image``: Container image to use for all watcher components (e.g., ``artefact.skao.int/ska-dlm-client``).
 - ``version``: Image tag or version (e.g., ``"1.0.0"``).
@@ -54,9 +86,9 @@ ska_dlm_client
 - ``securityContext``: Kubernetes context updated during deployment.
 - ``ingest_url``: Full HTTP URL of the ingest server.
 - ``storage_url``: Full HTTP URL of the storage server.
-- ``request_url``: Full HTTP URL of the request server.
+- ``request_server_url``: Full HTTP URL of the request server.
 
-directory_watcher
+Director Watcher
 -----------------
 
 - ``enabled``: Whether to deploy the ``directory-watcher`` component.
@@ -65,15 +97,15 @@ directory_watcher
 - ``skip_rclone_access_check_on_register``: If ``true``, skips verifying rclone access before attempting to register the file.
 - ``register_contents_of_watch_directory``: If ``true``, registers all contents of the watch directory at startup, not just newly detected files.
 
-configdb_watcher
+ConfigDB Watcher
 -----------------
 
 *TODO*
 
-kafka_watcher
----------------
+Kafka Watcher
+--------------
 
-The Kafka watcher is now deprecated. If you are working on an older release of the dlm-client, please set ``enabled: false``.
+The Kafka watcher is now deprecated (superseded by the ConfigDB Watcher). If you are working on an older release of the dlm-client, please set ``enabled: false``.
 
 ssh-storage-access Related Values
 ----------------------------------
@@ -100,56 +132,6 @@ startup-verification Related Values
   - ``enabled``: Enable startup verification.
 - ``kubectl``: Values related to the kubectl image used for k8s readiness testing.
 
-Testing
--------
-
-A Helm chart has been created for testing: ``tests/charts/test-ska-dlm-client``.
-
-The test chart is used to configure an existing DLM instance running in the same cluster namespace.
-
-Usage:
-
-.. code-block:: shell
-
-   helm install -f resources/dp-proj-user.yaml test-ska-dlm-client tests/charts/test-ska-dlm-client/
-   helm test test-ska-dlm-client
-   helm uninstall test-ska-dlm-client
-
-.. note::
-
-   It is expected that the same values file can be used between this test and the ska-dlm-client.
-
-Configuration
---------------
-
-Use the ``src/ska_dlm_client/config.yaml`` file to specify the configuration of the ska-dlm-client. For example:
-
-- The URLs of the DLM (Data Lifecycle Management) service and DPD (Data Product Dashboard) service.
-- The Authentication Token used to access the DLM and DPD services.
-- The name (and additional details) of the location and storage on which the ska-dlm-client will be run.
-
-Here is an example of the config YAML (refer to the repository for the latest format):
-
-.. code-block:: yaml
-
-   auth_token: "Replace this with the authorization token"
-
-   location:
-     name: "MyLocationName"
-     type: "MyLocationType"
-     country: "MyLocationCountry"
-     city: "MyLocationCity"
-     facility: "MyLocationFacility"
-
-   storage:
-     name: "MyStorageName"
-     type: "disk"
-     interface: "posix"
-     capacity: 100000000
-     phase_level: "GAS"
-
-   DLM:
-     url: "http://dlm/api"
 
 Startup Verification
 ---------------------
@@ -176,3 +158,17 @@ Sample output:
    PASSED startup tests
 
    2025-04-21 13:08:33,187 - INFO - Startup verification completed.
+
+
+Example Deployment
+------------------
+
+A `sample deployment configuration <https://gitlab.com/ska-telescope/ska-dlm-client/-/blob/main/resources/sample-deployment.yaml>`_ is provided in the resources directory of the repository.
+.. for this section, choose either sample-deployment or dp-proj-user. If any.
+An example deployment of the ska-dlm-client:
+
+.. code-block:: shell
+
+  helm install -f resources/dp-proj-user.yaml [-n <namespace>] ska-dlm-client charts/ska-dlm-client
+
+This will deploy to the currently configured cluster and namespace.

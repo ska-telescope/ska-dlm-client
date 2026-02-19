@@ -4,25 +4,30 @@
 # Production users must override the appropriate service endpoints and URLs.
 # ----------------------------------------------------------------------------------
 
-system: dlm
-subsystem: client
 
-# Global parameters
+# --- Global configuration (shared across components / subcharts) ---
 global:
   storageClass: nfss1
-  development: true
   dataProduct:
-    pvc:  # NOTE: This is globally shared all data products volume
+    pvc:
       name: shared
       read_only: true
 
+# --- Chart metadata / naming ---
+system: dlm
+subsystem: client
 nameOverride: ""
 fullnameOverride: ""
+
+# --- Chart feature flags ---
 setupStorageLocation: true
 
+# --- External chart/service references ---
 ska_dlm:
   fullname: "ska-dlm"
 
+
+# --- Shared client configuration ---
 ska_dlm_client:
   image: artefact.skao.int/ska-dlm-client
   version: "1.2.3"
@@ -35,6 +40,9 @@ ska_dlm_client:
   ingest_url: "http://ska-dlm-ingest.dp-dm"          # override for production
   storage_url: "http://ska-dlm-storage.dp-dm"        # override for production
   request_server_url: "http://ska-dlm-request.dp-dm" # override for production
+
+
+# --- Component configurations ---
 
 directory_watcher:
   enabled: true
@@ -50,6 +58,11 @@ directory_watcher:
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false
   migration_url: "http://ska-dlm-migration.dp-dm"  # override for production
+
+startup_verification: # Test directory_watcher at startup
+  enabled: false # Keep false for now because this code hasn't been maintained recently
+  component: startup-verification
+  subsystem: data-lifecycle-management
 
 configdb_watcher:
   enabled: true
@@ -72,8 +85,8 @@ configdb_watcher:
       image: "artefact.skao.int/ska-sdp-etcd"
       tag: "3.5.9"
 
-kafka_watcher:
-  enabled: false  # kafka-watcher OFF by default
+kafka_watcher: # Deprecated (will be removed in DMAN-168)
+  enabled: false # must be false
   component: kafka-watcher
   subsystem: data-lifecycle-management
   replicas: 1
@@ -85,13 +98,8 @@ kafka_watcher:
   check_rclone_access: false
   kafka_base_dir: "" # Base directory string removed from path to generate item_name
 
-kafka:
+kafka: # Deprecated
   enabled: false
-
-startup_verification:
-  enabled: false
-  component: startup-verification
-  subsystem: data-lifecycle-management
 
 ssh_storage_access:
   component: ssh-storage-access
@@ -131,6 +139,7 @@ ssh_storage_access:
     secret:
       pub_name: "sdp-pub"
 
+# --- Auxiliary utility images ---
 kubectl:
   image: artefact.skao.int/ska-ser-utils
   version: 0.1.0
