@@ -73,7 +73,9 @@ The global section contains cluster- and deployment-wide settings shared by all 
 Chart feature flags
 -------------------
 
-- ``setupStorageLocation``: Set to ``true`` to trigger the setup of a storage end-point in the DLM, using the values: ska_dlm_client.storage_url, ska_dlm_client.storage_name and ska_dlm_client.storage_root_directory.
+- ``setupStorageLocation``: When set to ``true``, automatically creates a storage endpoint in the DLM using the values defined in ``ska_dlm_client.storage_url``, ``ska_dlm_client.storage_name``, and ``ska_dlm_client.storage_root_directory``.
+
+.. Is this even working because charts/ska-dlm-client/templates/register-storage-location-job.yaml is not using env variables (like the  directory watcher / configdb watcher templates)
 
 
 Shared ska-dlm-client values
@@ -81,60 +83,35 @@ Shared ska-dlm-client values
 
 - ``image``: Container image to use for all watcher components (e.g., ``artefact.skao.int/ska-dlm-client``).
 - ``version``: Image tag or version (e.g., ``"1.0.0"``).
-- ``storage_name``: The DLM storage location name used during data registration.
-- ``storage_root_directory``: Used as the root directory when generating URIs for DLM DB.
+- ``storage_name``: The DLM storage name used during data registration.
+- ``storage_root_directory``: Used as the root directory by the startup_verification component.
 - ``securityContext``: Kubernetes context updated during deployment.
 - ``ingest_url``: Full HTTP URL of the ingest server.
 - ``storage_url``: Full HTTP URL of the storage server.
 - ``request_server_url``: Full HTTP URL of the request server.
 
-Director Watcher
------------------
+
+Director Watcher component
+--------------------------
 
 - ``enabled``: Whether to deploy the ``directory-watcher`` component.
 - ``directory_to_watch``: Filesystem path to monitor for new data products. Must exist within the mounted storage (e.g., ``/dlm/watch_dir``).
-- ``storage_root_directory``: Root directory used to generate URIs for the DLM database. Should match ``ska_dlm_client.storage_root_directory``.
+- ``source_storage``: Storage to monitor for new data.
+- ``storage_root_directory``: Root directory used to generate URIs for the DLM database.
+- ``directory_to_watch``: Directory to monitor for new data.
+- ``target_name``: Target storage (where new data will be migrated to)
+- ``target_root``: Target storage rot directory.
 - ``skip_rclone_access_check_on_register``: If ``true``, skips verifying rclone access before attempting to register the file.
 - ``register_contents_of_watch_directory``: If ``true``, registers all contents of the watch directory at startup, not just newly detected files.
-
-ConfigDB Watcher
------------------
-
-*TODO*
-
-Kafka Watcher
---------------
-
-The Kafka watcher is now deprecated (superseded by the ConfigDB Watcher). If you are working on an older release of the dlm-client, please set ``enabled: false``.
-
-ssh-storage-access Related Values
-----------------------------------
-
-- ``ssh_storage_access``:
-  - ``ssh_user_name``: Username to be used for remote SSH connections.
-  - ``ssh_uid``: User ID for remote SSH connection.
-  - ``ssh_gid``: Group ID for remote SSH connection.
-  - ``xxx``: This needs to be one of ``daq``, ``pst`` or ``sdp``. All three can exist.
-    - ``enabled``: Value is either ``true`` or ``false``.
-    - ``deployment_name``: Name to be used for the Kubernetes deployment.
-    - ``service_name``: Name to be used for the Kubernetes service.
-    - ``pvc``:
-      - ``name``: Name of the PVC to mount.
-      - ``mount_path``: Path to mount PVC inside the pod.
-      - ``read_only``: Should it be mounted read only.
-    - ``secret``:
-      - ``pub_name``: Name of the "ssh public key" Kubernetes secret.
-
-startup-verification Related Values
------------------------------------
-
-- ``startup_verification``:
-  - ``enabled``: Enable startup verification.
-- ``kubectl``: Values related to the kubectl image used for k8s readiness testing.
+- ``migration_url``: Full HTTP URL of the migration server.
 
 
 Startup Verification
 ---------------------
+
+(*this code is currently out of date*)
+
+- ``startup_verification``: Whether to enable startup verification.
 
 A ``startup verification`` can be enabled during the deployment of the watcher Helm chart. This will exercise the ``directory watcher`` by:
 
@@ -154,21 +131,68 @@ Sample output:
 .. code-block:: none
 
    2025-04-21 13:08:33,187 - INFO -
-
    PASSED startup tests
-
    2025-04-21 13:08:33,187 - INFO - Startup verification completed.
+
+
+ConfigDB Watcher component
+--------------------------
+
+- ``enabled``: Whether to deploy the ``configdb-watcher`` component.
+- ``ingest_server_url``: Full HTTP URL of the ingest server.
+- ``storage_server_url``: Full HTTP URL of the storage server.
+- ``source_storage``: Storage where the new data appears.
+- ``storage_root_directory``: Root directory used to generate URIs for the DLM database.
+- ``migration_destination_storage_name``: Target storage (where new data will be migrated to).
+- ``migration_url``: Full HTTP URL of the migration server.
+- ``sdp_config.host``: Kubernetes DNS hostname of the external ConfigDB (etcd) service. Leave empty to deploy a local etcd instance.
+- ``sdp_config.etcd.enabled``: Optionally enable a local etcd instance (for testing purposes).
+
+
+Kafka Watcher component
+-----------------------
+
+The Kafka watcher is now **deprecated** (superseded by the ConfigDB Watcher). If you are working on an older release of the dlm-client, please set ``enabled: false``.
+
+
+ssh-storage-access
+-------------------
+
+- ``ssh_user_name``: Username to be used for remote SSH connections.
+- ``ssh_uid``: User ID for remote SSH connection.
+- ``ssh_gid``: Group ID for remote SSH connection.
+- ``xxx``: This needs to be one of ``daq``, ``pst`` or ``sdp``. All three can exist.
+- ``xxx.enabled``: Value is either ``true`` or ``false``.
+- ``xxx.deployment_name``: Name to be used for the Kubernetes deployment.
+- ``xxx.service_name``: Name to be used for the Kubernetes service.
+- ``xxx.pvc.name``: Name of the PVC to mount.
+- ``xxx.pvc.mount_path``: Path to mount PVC inside the pod.
+- ``xxx.pvc.read_only``: Should it be mounted read only.
+- ``xxx.secret.pub_name``: Name of the "ssh public key" Kubernetes secret.
+
+
+Deploy dlm-client
+------------------
+
+Once you have customised your ``values.yaml`` file, deploy dlm-client to a Kubernetes cluster (or a local Kubernetes environment) using:
+
+.. code-block:: shell
+
+  helm upgrade --install ska-dlm-client charts/ska-dlm-client
 
 
 Example Deployment
 ------------------
 
-A `sample deployment configuration <https://gitlab.com/ska-telescope/ska-dlm-client/-/blob/main/resources/sample-deployment.yaml>`_ is provided in the resources directory of the repository.
-.. for this section, choose either sample-deployment or dp-proj-user. If any.
-An example deployment of the ska-dlm-client:
+A `sample deployment configuration <https://gitlab.com/ska-telescope/ska-dlm-client/-/blob/main/resources/dp-proj-user.yaml>`_
+is provided in the ``resources`` directory of the repository. This example is configured for deployment to the DP cluster.
+
+To deploy using this configuration:
 
 .. code-block:: shell
 
-  helm install -f resources/dp-proj-user.yaml [-n <namespace>] ska-dlm-client charts/ska-dlm-client
+   helm install -f resources/dp-proj-user.yaml [-n <namespace>] ska-dlm-client charts/ska-dlm-client
 
-This will deploy to the currently configured cluster and namespace.
+
+.. Errors you could come across:
+.. Error: INSTALLATION FAILED: An error occurred while checking for chart dependencies. You may need to run `helm dependency build` to fetch missing dependencies...

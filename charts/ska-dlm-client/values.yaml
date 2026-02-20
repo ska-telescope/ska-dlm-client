@@ -19,13 +19,12 @@ subsystem: client
 nameOverride: ""
 fullnameOverride: ""
 
-# --- Chart feature flags ---
-setupStorageLocation: true
-
 # --- External chart/service references ---
 ska_dlm:
   fullname: "ska-dlm"
 
+# --- Chart feature flags ---
+setupStorageLocation: true # creates a storage endpoint in the DLM using the values defined in `ska_dlm_client`
 
 # --- Shared client configuration ---
 ska_dlm_client:
@@ -140,6 +139,6 @@ ssh_storage_access:
       pub_name: "sdp-pub"
 
 # --- Auxiliary utility images ---
-kubectl:
+kubectl: # the kubectl image used for k8s readiness testing
   image: artefact.skao.int/ska-ser-utils
   version: 0.1.0
