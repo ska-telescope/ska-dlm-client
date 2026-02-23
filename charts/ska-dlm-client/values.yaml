@@ -24,7 +24,7 @@ ska_dlm:
   fullname: "ska-dlm"
 
 # --- Chart feature flags ---
-setupStorageLocation: true # creates a storage endpoint in the DLM using the values defined in `ska_dlm_client`
+setupStorageLocation: false # keep false. To be removed (DMAN-222).
 
 # --- Shared client configuration ---
 ska_dlm_client:
@@ -73,8 +73,8 @@ configdb_watcher:
   storage_server_url: http://ska-dlm-storage.dp-dm # override for production
   source_storage: SDPBuffer
   source_root_directory: /dlm/product_dir
-  migration_destination_storage_name: dlm-archive # If omitted, migration will be skipped
-  migration_url: http://ska-dlm-migration.dp-dm   # If omitted, migration will be skipped
+  migration_destination_storage_name: dlm-archive
+  migration_url: http://ska-dlm-migration.dp-dm
   sdp_config:
     host: ska-sdp-etcd.dp-shared.svc.cluster.local   # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
     port: 2379    # default etcd client port
