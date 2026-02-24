@@ -40,6 +40,26 @@ services:
     networks:
       - dlm_network
 
+  dlm_heuristics:
+    platform: linux/amd64
+    image: ${SERVER_IMAGE}
+    container_name: dlm_heuristics
+    user: root
+    environment:
+      SSH_PUBLIC_KEY_PATH: "/dlm/.ssh/id_rsa.pub"
+    entrypoint: uvicorn ska_dlm.dlm_storage.main:main
+    ports:
+      - 8005:8003
+    volumes:
+      - shared-tmpfs:/dlm
+      - $PWD/tests/integration/ska-dlm-home/.dlm:/root/.dlm
+      - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
+    depends_on:
+      - dlm_postgrest
+      - dlm_rclone
+    networks:
+      - dlm_network
+
   dlm_request:
     image: ${SERVER_IMAGE}
     container_name: dlm_request

@@ -62,7 +62,7 @@ integration-tests:
   services:
     - docker:27.0.2-dind
   before_script:
-    - export SERVER_IMAGE=artefact.skao.int/ska-data-lifecycle:1.3.0 && docker compose --file tests/integration/dlm_servers.docker-compose.yaml up -d --wait
+    - export SERVER_IMAGE=artefact.skao.int/ska-data-lifecycle:1.3.2 && docker compose --file tests/integration/dlm_servers.docker-compose.yaml up -d --wait
     - docker compose --file tests/test_services.docker-compose.yaml up -d --remove-orphans
     - docker compose --file tests/dlm_clients.docker-compose.yaml build
     - docker compose --file tests/dlm_clients.docker-compose.yaml up -d --remove-orphans
