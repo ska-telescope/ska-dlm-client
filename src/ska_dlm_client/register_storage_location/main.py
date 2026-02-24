@@ -136,19 +136,14 @@ def get_or_init_storage(
         api_storage = storage_api.StorageApi(the_api_client)
         # Ensure storage API calls go to the storage service, not ingest
         api_storage.api_client.configuration.host = storage_url
-        # Get the storage_id
-        response = api_storage.query_storage(storage_name=storage_name)
-        logger.info("query_storage response: %s", response)
-        if not isinstance(response, list):
-            logger.error("Unexpected response from query_storage_storage")
-            sys.exit(1)
-        # we always install the SSH key to allow for re-starts of the container
+
+        # Always install the ssh public key
         install_ssh_key(api_storage)
-        if len(response) == 1:
-            the_storage_id = response[0]["storage_id"]
-            logger.info("Storage %s already exists in DLM", storage_name)
-        else:
-            response = api_storage.init_storage(
+
+        store = api_storage.query_storage(storage_name=storage_name)
+        logger.info("query_storage response: %s", store)
+        if not store:
+            storage_id = api_storage.init_storage(
                 storage_name=storage_name,
                 storage_type=STORAGE_TYPE,
                 storage_interface=STORAGE_INTERFACE,
@@ -156,21 +151,28 @@ def get_or_init_storage(
                 location_id=the_location_id,
                 location_name=LOCATION_NAME,
             )
-            the_storage_id = response
             logger.info("Storage %s created in DLM", storage_name)
+        else:
+            storage_id = store[0]["storage_id"]
 
-            if rclone_config is not None:
+        if rclone_config is not None:
+            store_config = api_storage.get_storage_config(storage_id=storage_id)
+            if not store_config:
                 # Setup the storage config.
-                response = api_storage.create_storage_config(
+                storage_config_id = api_storage.create_storage_config(
                     request_body=rclone_config,
-                    storage_id=the_storage_id,
+                    storage_id=storage_id,
                     storage_name=storage_name,
                     config_type="rclone",
                 )
-                storage_config_id = response
                 logger.info("Storage config created with id: %s", storage_config_id)
+            else:
+                # Refresh the rclone config even if the endpoint exists
+                api_storage.create_rclone_config(request_body=rclone_config)
+        else:
+            logger.warning("No rclone configuration specified")
 
-    return the_storage_id
+    return storage_id
 
 
 def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arguments
