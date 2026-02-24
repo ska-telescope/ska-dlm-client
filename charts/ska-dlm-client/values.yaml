@@ -11,7 +11,7 @@ global:
   dataProduct:
     pvc:
       name: shared
-      read_only: true
+      read_only: false
 
 # --- Chart metadata / naming ---
 system: dlm
@@ -90,43 +90,6 @@ kafka_watcher: # Deprecated (will be removed in DMAN-168)
 kafka: # Deprecated
   enabled: false
 
-ssh_storage_access:
-  component: ssh-storage-access
-  subsystem: data-lifecycle-management
-  replicas: 1
-  ssh_user_name: "dlm"
-  ssh_uid: "1000"
-  ssh_gid: "1000"
-  daq:
-    enabled: false
-    deployment_name: "ssh-sa-daq"
-    service_name: "ssh-sa-daq"
-    pvc:
-      name: daq-pvc
-      mount_path: /dlm-archive
-      read_only: true
-    secret:
-      pub_name: "daq-pub"
-  pst:
-    enabled: false
-    deployment_name: "ssh-sa-pst"
-    service_name: "ssh-sa-pst"
-    pvc:
-      name: pst-pvc
-      mount_path: /dlm
-      read_only: true
-    secret:
-      pub_name: "pst-pub"
-  sdp:
-    enabled: false
-    deployment_name: "ssh-sa-sdp"
-    service_name: "ssh-sa-sdp"
-    pvc:
-      name: sdp-pvc
-      mount_path: /dlm
-      read_only: true
-    secret:
-      pub_name: "sdp-pub"
 
 # --- Auxiliary utility images ---
 kubectl: # the kubectl image used for k8s readiness testing

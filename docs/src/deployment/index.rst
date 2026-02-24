@@ -125,21 +125,6 @@ Kafka Watcher component
 The Kafka watcher is now **deprecated** (superseded by the ConfigDB Watcher). If you are working on an older release of the dlm-client, please set ``enabled: false``.
 
 
-ssh-storage-access
--------------------
-
-- ``ssh_user_name``: Username to be used for remote SSH connections.
-- ``ssh_uid``: User ID for remote SSH connection.
-- ``ssh_gid``: Group ID for remote SSH connection.
-- ``xxx``: This needs to be one of ``daq``, ``pst`` or ``sdp``. If more than one is required, make multiple sections.
-- ``xxx.enabled``: Either ``true`` or ``false``.
-- ``xxx.deployment_name``: Name to be used for the Kubernetes deployment.
-- ``xxx.service_name``: Name to be used for the Kubernetes service.
-- ``xxx.pvc.name``: Name of the PVC to mount.
-- ``xxx.pvc.mount_path``: Path to mount PVC inside the pod.
-- ``xxx.pvc.read_only``: Either ``true`` or ``false``.
-- ``xxx.secret.pub_name``: Name of the "ssh public key" Kubernetes secret.
-
 .. _deploy-dlm-client:
 
 Deploy dlm-client
