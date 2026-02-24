@@ -1,5 +1,16 @@
 # Version History
 
+## Development
+
+### Updated
+
+* Updated ReadTheDocs documentation.
+* Reorganized the values.yaml file.
+
+### Removed
+
+* Unused config files.
+
 ## 1.2.3
 
 ### Updated
