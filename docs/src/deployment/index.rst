@@ -1,8 +1,6 @@
 Deployment
 ==========
 
-*WIP*
-
 The standard deployment of the ska-dlm-client within the SKA Kubernetes environment uses a set of Helm charts and an associated configuration file (`values.yaml <https://gitlab.com/ska-telescope/ska-dlm-client/-/blob/main/charts/ska-dlm-client/values.yaml>`_). A full guide is given below.
 
 
@@ -27,11 +25,14 @@ Retrieve the available release tags and check out the desired release:
 
 .. note::
 
-  Before continuing, ensure that the DLM **server** service pods are up and running.
-  See the `installation guide for DLM server <https://developer.skao.int/projects/ska-data-lifecycle/en/latest/guides/installation/helm_install.html>`_ (*WIP*)
+   Before continuing, confirm that the DLM **server** service pods are running.
+   See the `installation guide for DLM server <https://developer.skao.int/projects/ska-data-lifecycle/en/latest/guides/installation/helm_install.html>`_ (*WIP*).
 
 
-Before deploying, modify the ``values.yaml`` file to suit your needs. The configuration options that are most likely to require modification in typical deployments are described below. The values not mentioned below should generally be left at their default values, unless you have a specific reason to modify them.
+Before deploying, verify that the running DLM server version is compatible with the dlm-client release you intend to deploy.
+
+Next, modify the ``values.yaml`` file as required. The sections below describe the configuration options most likely to require adjustment in typical deployments. Other values should generally be left at their defaults unless you have a specific reason to change them.
+
 
 Global values
 -------------
@@ -46,7 +47,7 @@ The global section contains cluster- and deployment-wide settings shared by all 
 Chart feature flags
 -------------------
 
-- ``setupStorageLocation``: # keep ``false``. Will be removed (DMAN-222), because this functionality is now inside the watcher components themselves.
+- ``setupStorageLocation``: keep ``false``. Will be removed (DMAN-222), because this functionality is now inside the watcher components themselves.
 
 
 Shared ska-dlm-client values
@@ -139,38 +140,59 @@ ssh-storage-access
 - ``xxx.pvc.read_only``: Either ``true`` or ``false``.
 - ``xxx.secret.pub_name``: Name of the "ssh public key" Kubernetes secret.
 
+.. _deploy-dlm-client:
 
 Deploy dlm-client
-------------------
+-----------------
 
 Once you have customised your ``values.yaml`` file, deploy dlm-client to a Kubernetes cluster (or a local Kubernetes environment) using:
 
 .. code-block:: shell
 
-  helm upgrade --install ska-dlm-client [-n <namespace>] charts/ska-dlm-client
+   helm upgrade --install ska-dlm-client [-n <namespace>] charts/ska-dlm-client
 
 If no namespace is specified, the default namespace associated with your current Kubernetes context will be used.
 
 Example Deployment
 ------------------
 
-A `sample deployment configuration <https://gitlab.com/ska-telescope/ska-dlm-client/-/blob/main/resources/dp-proj-user.yaml>`_
-is provided in the ``resources`` directory of the repository. This example is configured for deployment to the DP cluster.
+A `sample deployment configuration <https://gitlab.com/ska-telescope/ska-dlm-client/-/blob/main/resources/dp-proj-user.yaml>`_ is provided in the ``resources`` directory of the repository. This example is configured for deployment to the DP cluster.
 
 To deploy using this configuration:
 
 .. code-block:: shell
 
-  helm install -f resources/dp-proj-user.yaml [-n <namespace>] ska-dlm-client charts/ska-dlm-client
+   helm install -f resources/dp-proj-user.yaml [-n <namespace>] ska-dlm-client charts/ska-dlm-client
 
+
+.. _uninstall-dlm-client:
 
 Uninstall the chart
 -------------------
 
+To remove the dlm-client chart from the cluster:
+
 .. code-block:: shell
 
-  helm uninstall [-n <namespace>] ska-dlm-client
+   helm uninstall [-n <namespace>] ska-dlm-client
 
 
-.. Errors you could come across:
-.. Error: INSTALLATION FAILED: An error occurred while checking for chart dependencies. You may need to run `helm dependency build` to fetch missing dependencies...
+Troubleshooting (*WIP*)
+-----------------------
+
+The following are common issues encountered during deployment and suggested resolutions.
+
+**Pods not starting or not syncing after configuration changes**
+
+If pods are not behaving as expected after modifying configuration values, it can help to uninstall and redeploy the chart to ensure all resources are recreated cleanly (see :ref:`uninstall-dlm-client`). After uninstalling, redeploy as described in :ref:`deploy-dlm-client`.
+
+**Helm dependency errors**
+
+If you see an error such as:
+
+::
+
+  Error: INSTALLATION FAILED: An error occurred while checking for chart dependencies.
+  You may need to run `helm dependency build` to fetch missing dependencies.
+
+From the chart directory, run ``helm dependency build charts/ska-dlm-client``.
