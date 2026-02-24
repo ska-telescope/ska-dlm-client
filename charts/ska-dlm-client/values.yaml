@@ -4,25 +4,29 @@
 # Production users must override the appropriate service endpoints and URLs.
 # ----------------------------------------------------------------------------------
 
-system: dlm
-subsystem: client
 
-# Global parameters
+# --- Global configuration (shared across components / subcharts) ---
 global:
   storageClass: nfss1
-  development: true
   dataProduct:
-    pvc:  # NOTE: This is globally shared all data products volume
+    pvc:
       name: shared
-      read_only: true
+      read_only: false
 
+# --- Chart metadata / naming ---
+system: dlm
+subsystem: client
 nameOverride: ""
 fullnameOverride: ""
-setupStorageLocation: true
 
+# --- External chart/service references ---
 ska_dlm:
   fullname: "ska-dlm"
 
+# --- Chart feature flags ---
+setupStorageLocation: false # keep false. To be removed (DMAN-222).
+
+# --- Shared client configuration ---
 ska_dlm_client:
   image: artefact.skao.int/ska-dlm-client
   version: "1.2.3"
@@ -35,6 +39,9 @@ ska_dlm_client:
   ingest_url: "http://ska-dlm-ingest.dp-dm"          # override for production
   storage_url: "http://ska-dlm-storage.dp-dm"        # override for production
   request_server_url: "http://ska-dlm-request.dp-dm" # override for production
+
+
+# --- Component configurations ---
 
 directory_watcher:
   enabled: true
@@ -51,6 +58,11 @@ directory_watcher:
   register_contents_of_watch_directory: false
   migration_url: "http://ska-dlm-migration.dp-dm"  # override for production
 
+startup_verification: # Test directory_watcher at startup
+  enabled: false # Keep false for now because this code hasn't been maintained recently
+  component: startup-verification
+  subsystem: data-lifecycle-management
+
 configdb_watcher:
   enabled: true
   component: configdb-watcher
@@ -61,8 +73,8 @@ configdb_watcher:
   storage_server_url: http://ska-dlm-storage.dp-dm # override for production
   source_storage: SDPBuffer
   source_root_directory: /dlm/product_dir
-  migration_destination_storage_name: dlm-archive # If omitted, migration will be skipped
-  migration_url: http://ska-dlm-migration.dp-dm   # If omitted, migration will be skipped
+  migration_destination_storage_name: dlm-archive
+  migration_url: http://ska-dlm-migration.dp-dm
   sdp_config:
     host: ska-sdp-etcd.dp-shared.svc.cluster.local   # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
     port: 2379    # default etcd client port
@@ -72,65 +84,14 @@ configdb_watcher:
       image: "artefact.skao.int/ska-sdp-etcd"
       tag: "3.5.9"
 
-kafka_watcher:
-  enabled: false  # kafka-watcher OFF by default
-  component: kafka-watcher
-  subsystem: data-lifecycle-management
-  replicas: 1
-  kafka_server_local: false
-  kafka_server_local_port: 9092
-  kafka_broker_url: "ska-dlm-kafka:9092" # production to override with the full service DNS, e.g., ska-sdp-kafka.dp-shared:9092
-  kafka_topic: "ska-sdp-dataproduct-ingest"
-  storage_name: dlm
-  check_rclone_access: false
-  kafka_base_dir: "" # Base directory string removed from path to generate item_name
+kafka_watcher: # Deprecated (will be removed in DMAN-168)
+  enabled: false # must be false
 
-kafka:
+kafka: # Deprecated
   enabled: false
 
-startup_verification:
-  enabled: false
-  component: startup-verification
-  subsystem: data-lifecycle-management
 
-ssh_storage_access:
-  component: ssh-storage-access
-  subsystem: data-lifecycle-management
-  replicas: 1
-  ssh_user_name: "dlm"
-  ssh_uid: "1000"
-  ssh_gid: "1000"
-  daq:
-    enabled: false
-    deployment_name: "ssh-sa-daq"
-    service_name: "ssh-sa-daq"
-    pvc:
-      name: daq-pvc
-      mount_path: /dlm-archive
-      read_only: true
-    secret:
-      pub_name: "daq-pub"
-  pst:
-    enabled: false
-    deployment_name: "ssh-sa-pst"
-    service_name: "ssh-sa-pst"
-    pvc:
-      name: pst-pvc
-      mount_path: /dlm
-      read_only: true
-    secret:
-      pub_name: "pst-pub"
-  sdp:
-    enabled: false
-    deployment_name: "ssh-sa-sdp"
-    service_name: "ssh-sa-sdp"
-    pvc:
-      name: sdp-pvc
-      mount_path: /dlm
-      read_only: true
-    secret:
-      pub_name: "sdp-pub"
-
-kubectl:
+# --- Auxiliary utility images ---
+kubectl: # the kubectl image used for k8s readiness testing
   image: artefact.skao.int/ska-ser-utils
   version: 0.1.0

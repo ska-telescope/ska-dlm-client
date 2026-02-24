@@ -35,7 +35,7 @@ The standard deployment of the ska-dlm-client within the SKA Kubernetes environm
 helm upgrade --install ska-dlm-client charts/ska-dlm-client
 ```
 
-For a detailed guide please see [ReadTheDocs](https://developer.skao.int/projects/ska-dlm-client/en/latest/) (WIP).
+For a detailed guide please see [ReadTheDocs](https://developer.skao.int/projects/ska-dlm-client/en/latest/deployment/index.html) (WIP).
 
 ## Testing
 

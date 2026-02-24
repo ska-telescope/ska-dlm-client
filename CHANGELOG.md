@@ -4,7 +4,13 @@
 
 ### Updated
 
+* Updated ReadTheDocs documentation.
+* Reorganized the values.yaml file.
 * Rework setup of storage and rclone config to ensure that the rclone ssh keys are always installed on the client and the rclone config is always refreshed.
+
+### Removed
+
+* Unused config files.
 
 ## 1.2.3
 

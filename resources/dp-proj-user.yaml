@@ -16,18 +16,46 @@ ska_dlm_client:
   request_server_url: "http://ska-dlm-dev-request:80"
 
 startup_verification:
-  enabled: true
+  enabled: false
 
 ska_dlm:
   fullname: "ska-dlm-dev"
 
 directory_watcher:
   enabled: true
-  directory_to_watch: "/dlm/watch_dir"
-  storage_root_directory: "/dlm/watch_dir"
-  use_polling_watcher: true
-  skip_rclone_access_check_on_register: true
-  register_contents_of_watch_directory: true
+  component: directory-watcher
+  subsystem: data-lifecycle-management
+  replicas: 1
+  source_storage: watch_dir
+  storage_root_directory: /dlm/watch_dir
+  directory_to_watch: /dlm/watch_dir
+  target_name: dlm-archive
+  target_root:
+  use_polling_watcher: false
+  skip_rclone_access_check_on_register: false
+  register_contents_of_watch_directory: false
+  migration_url: "http://ska-dlm-migration.dp-dm"
+
+configdb_watcher:
+  enabled: true
+  component: configdb-watcher
+  subsystem: data-lifecycle-management
+  replicas: 1
+  include_existing: false
+  ingest_server_url: http://ska-dlm-ingest.dp-dm   # override for production
+  storage_server_url: http://ska-dlm-storage.dp-dm # override for production
+  source_storage: SDPBuffer
+  source_root_directory: /dlm/product_dir
+  migration_destination_storage_name: dlm-archive # If omitted, migration will be skipped
+  migration_url: http://ska-dlm-migration.dp-dm   # If omitted, migration will be skipped
+  sdp_config:
+    host: ska-sdp-etcd.dp-shared.svc.cluster.local   # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
+    port: 2379    # default etcd client port
+    path: ""      # optional
+    etcd:
+      enabled: false # deploy a local etcd service
+      image: "artefact.skao.int/ska-sdp-etcd"
+      tag: "3.5.9"
 
 kafka_watcher:
   enabled: false
