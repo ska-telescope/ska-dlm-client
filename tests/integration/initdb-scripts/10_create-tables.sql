@@ -185,6 +185,7 @@ CREATE TABLE IF NOT EXISTS migration (
     complete                boolean DEFAULT FALSE,
     "date"                  timestamp without time zone DEFAULT now(),
     completion_date         timestamp without time zone DEFAULT NULL,
+    command                 varchar,
     CONSTRAINT fk_source_storage
       FOREIGN KEY (source_storage_id)
       REFERENCES storage(storage_id)
@@ -195,3 +196,4 @@ CREATE TABLE IF NOT EXISTS migration (
       ON DELETE SET NULL
 );
 
+ALTER TABLE migration ADD COLUMN IF NOT EXISTS command varchar;
