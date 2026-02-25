@@ -84,12 +84,6 @@ configdb_watcher:
       image: "artefact.skao.int/ska-sdp-etcd"
       tag: "3.5.9"
 
-kafka_watcher: # Deprecated (will be removed in DMAN-168)
-  enabled: false # must be false
-
-kafka: # Deprecated
-  enabled: false
-
 
 # --- Auxiliary utility images ---
 kubectl: # the kubectl image used for k8s readiness testing

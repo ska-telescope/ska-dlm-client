@@ -103,16 +103,6 @@ intent: production
 {{- end -}}
 
 {{/*
-Kafka watcher labels
-*/}}
-{{- define "ska-dlm-client.kafka-watcher.labels" }}
-{{- include "ska-dlm-client.labels" . }}
-component: {{ .Values.kafka_watcher.component }}
-subsystem: {{ .Values.kafka_watcher.subsystem }}
-intent: production
-{{- end }}
-
-{{/*
 Startup verification labels
 */}}
 {{- define "ska-dlm-client.startup-verification.labels" }}

@@ -119,8 +119,8 @@ ConfigDB Watcher component
 - ``sdp_config.etcd.enabled``: Optionally enable a local etcd instance (for testing purposes).
 
 
-Kafka Watcher component
------------------------
+Kafka Watcher component (deprecated)
+------------------------------------
 
 The Kafka watcher is now **deprecated** (superseded by the ConfigDB Watcher). If you are working on an older release of the dlm-client, please set ``enabled: false``.
 
