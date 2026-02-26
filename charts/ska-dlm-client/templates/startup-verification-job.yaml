@@ -49,7 +49,7 @@ spec:
       volumes:
       - name: data-product-storage
         persistentVolumeClaim:
-          claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
+          claimName: "{{ $.Values.directory_watcher.pvc.name }}"
 ---
 apiVersion: v1
 kind: ServiceAccount
