@@ -117,13 +117,13 @@ spec:
         volumeMounts:
           - name: data-product-storage
             mountPath: /dlm/product_dir
-            {{- if $.Values.global.dataProduct.pvc.read_only }}
+            {{- if $.Values.configdb_watcher.pvc.read_only }}
             readOnly: true
             {{- end }}
 
       volumes:
         - name: data-product-storage
           persistentVolumeClaim:
-            claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
+            claimName: "{{ $.Values.configdb_watcher.pvc.name }}"
 
 {{- end }}

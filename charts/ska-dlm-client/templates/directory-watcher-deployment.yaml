@@ -97,7 +97,7 @@ spec:
         volumeMounts:
           - name: data-product-storage
             mountPath: /dlm/watch_dir
-            {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
+            {{- if eq $.Values.directory_watcher.pvc.read_only true }}
             readOnly: true
             {{- end }}
             subPath: dlmw
@@ -105,5 +105,5 @@ spec:
       volumes:
       - name: data-product-storage
         persistentVolumeClaim:
-          claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
+          claimName: "{{ $.Values.directory_watcher.pvc.name }}"
 {{- end }}

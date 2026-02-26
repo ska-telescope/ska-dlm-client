@@ -34,14 +34,6 @@ Before deploying, verify that the running DLM server version is compatible with 
 Next, modify the ``values.yaml`` file as required. The sections below describe the configuration options most likely to require adjustment in typical deployments. Other values should generally be left at their defaults unless you have a specific reason to change them.
 
 
-Global values
--------------
-
-The global section contains cluster- and deployment-wide settings shared by all components deployed by this chart.
-
-- ``global.dataProduct.pvc.name``: Name of the volume to mount into watcher pods
-- ``global.dataProduct.pvc.read_only``: Should be set to ``true`` for now. This limits the scope of what the watchers can do.
-
 .. Mention enums somewhere
 
 Chart feature flags
@@ -76,6 +68,8 @@ Directory Watcher component
 - ``skip_rclone_access_check_on_register``: If ``true``, skips verifying rclone access before attempting to register the file.
 - ``register_contents_of_watch_directory``: If ``true``, registers all contents of the watch directory at startup, not just newly detected files.
 - ``migration_url``: Full HTTP URL of the migration server.
+- ``pvc.name``: Name of the volume to mount into the directory-watcher pod.
+- ``pvc.read_only``: Set to ``true`` to limit the scope of what the directory-watcher can do. Needs to be ``false`` to allow for data deletion.
 
 
 Startup Verification
@@ -117,6 +111,8 @@ ConfigDB Watcher component
 - ``migration_url``: Full HTTP URL of the migration server.
 - ``sdp_config.host``: Kubernetes DNS hostname of the external ConfigDB (etcd) service. Leave empty to deploy a local etcd instance.
 - ``sdp_config.etcd.enabled``: Optionally enable a local etcd instance (for testing purposes).
+- ``pvc.name``: Name of the volume to mount into the configdb-watcher pod.
+- ``pvc.read_only``: Set to ``true`` to limit the scope of what the configdb-watcher can do. Needs to be ``false`` to allow for data deletion.
 
 
 Kafka Watcher component
