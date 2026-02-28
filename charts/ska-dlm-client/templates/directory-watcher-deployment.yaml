@@ -100,7 +100,6 @@ spec:
             {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
             readOnly: true
             {{- end }}
-            subPath: dlmw
       dnsPolicy: ClusterFirstWithHostNet
       volumes:
       - name: data-product-storage
