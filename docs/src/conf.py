@@ -8,7 +8,7 @@ project = "ska-dlm-client"
 html_title = "SKA DLM Client"
 copyright = "2024, ICRAR"
 author = "Mark Boulton <mark.boulton@uwa.edu.au>"
-release = "1.2.3"
+release = "1.2.4"
 
 extensions = [
     "sphinx.ext.autodoc",
