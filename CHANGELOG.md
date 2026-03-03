@@ -11,6 +11,7 @@
 
 ### Removed
 
+* Kafka watcher and related dependencies.
 * Unused config files.
 
 ## 1.2.3

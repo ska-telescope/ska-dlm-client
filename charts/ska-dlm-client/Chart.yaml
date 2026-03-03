@@ -20,9 +20,3 @@ maintainers:
   email: james.strauss@icrar.org
 - name: Andreas Wicenec
   email: andreas.wicenec@icrar.org
-dependencies:
-- name: kafka
-  version: 32.4.3
-  repository: https://charts.bitnami.com/bitnami
-  condition: kafka.enabled
-

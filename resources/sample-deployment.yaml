@@ -49,14 +49,6 @@ directory_watcher:
   # watch directory.
   register_contents_of_watch_directory: False
 
-kafka_watcher:
-  # Enabling this will allow the kafka watcher to be activated.
-  # Leave false if the SDP receivers and kafka have not been deployed to this cluster.
-  enabled: False
-  # These values set the kafka URL service endpoint along with the kafka topic.
-  kafka_broker_url: "ska-sdp-kafka.dp-shared:9092"
-  kafka_topic: "ska-sdp-dataproduct-ingest"
-
 ska_dlm:
   # The helm deployment name of the DLM environment
   fullname: "ska-dlm-dev"

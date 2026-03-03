@@ -56,12 +56,3 @@ configdb_watcher:
       enabled: false # deploy a local etcd service
       image: "artefact.skao.int/ska-sdp-etcd"
       tag: "3.5.9"
-
-kafka_watcher:
-  enabled: false
-  kafka_broker_url: "ska-sdp-kafka.dp-shared:9092"
-  kafka_topic: "ska-sdp-dataproduct-ingest"
-
-kafka:
-  enabled: false # Kafka service OFF for production. Only for local developement.
-  fullnameOverride: ska-dlm-kafka

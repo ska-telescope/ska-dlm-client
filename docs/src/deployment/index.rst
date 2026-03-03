@@ -115,8 +115,8 @@ ConfigDB Watcher component
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the configdb-watcher can do. Needs to be ``false`` to allow for data deletion.
 
 
-Kafka Watcher component
------------------------
+Kafka Watcher component (deprecated)
+------------------------------------
 
 The Kafka watcher is now **deprecated** (superseded by the ConfigDB Watcher). If you are working on an older release of the dlm-client, please set ``enabled: false``.
 
