@@ -146,7 +146,7 @@ def process_args(
     """
     if args.source_name:
         RCLONE_CONFIG_SOURCE["name"] = args.source_name
-
+    # TODO: not all command line args are being processed below
     config = WatcherConfig(
         directory_to_watch=args.directory_to_watch,
         ingest_url=args.ingest_url,

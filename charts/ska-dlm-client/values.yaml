@@ -19,8 +19,6 @@ fullnameOverride: ""
 ska_dlm:
   fullname: "ska-dlm"
 
-# --- Chart feature flags ---
-setupStorageLocation: false # keep false. To be removed (DMAN-222).
 
 # --- Shared client configuration ---
 ska_dlm_client:
