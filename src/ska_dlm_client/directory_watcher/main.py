@@ -26,7 +26,7 @@ def create_parser() -> argparse.ArgumentParser:
     """Define a parser for all the command line parameters.
 
     Creates and configures an ArgumentParser with all the command line options
-    needed for the ska-dlm-clinet's various components.
+    needed for the ska-dlm-client's various components.
 
     Returns:
         An ArgumentParser instance configured with all required and optional arguments.
