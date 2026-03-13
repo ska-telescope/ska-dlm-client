@@ -34,7 +34,7 @@ ska_dlm_client:
   # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace:port
   ingest_url: "http://ska-dlm-ingest.dp-dm"          # override for production
   storage_url: "http://ska-dlm-storage.dp-dm"        # override for production
-  request_server_url: "http://ska-dlm-request.dp-dm" # override for production
+  request_url: "http://ska-dlm-request.dp-dm" # override for production
 
 
 # --- Component configurations ---
@@ -68,8 +68,8 @@ configdb_watcher:
   subsystem: data-lifecycle-management
   replicas: 1
   include_existing: false
-  ingest_server_url: http://ska-dlm-ingest.dp-dm   # override for production
-  storage_server_url: http://ska-dlm-storage.dp-dm # override for production
+  ingest_url: http://ska-dlm-ingest.dp-dm   # override for production
+  storage_url: http://ska-dlm-storage.dp-dm # override for production
   source_storage: SDPBuffer
   source_root_directory: /dlm/product_dir
   migration_destination_storage_name: dlm-archive

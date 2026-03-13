@@ -52,7 +52,7 @@ Shared ska-dlm-client values
 - ``securityContext``: Kubernetes context updated during deployment.
 - ``ingest_url``: Full HTTP URL of the ingest server.
 - ``storage_url``: Full HTTP URL of the storage server.
-- ``request_server_url``: Full HTTP URL of the request server.
+- ``request_url``: Full HTTP URL of the request server.
 
 
 Directory Watcher component
@@ -103,8 +103,8 @@ ConfigDB Watcher component
 --------------------------
 
 - ``enabled``: Whether to deploy the ``configdb-watcher`` component.
-- ``ingest_server_url``: Full HTTP URL of the ingest server.
-- ``storage_server_url``: Full HTTP URL of the storage server.
+- ``ingest_url``: Full HTTP URL of the ingest server.
+- ``storage_url``: Full HTTP URL of the storage server.
 - ``source_storage``: Storage where the new data appears.
 - ``storage_root_directory``: Root directory used to generate URIs for the DLM database.
 - ``migration_destination_storage_name``: Target storage (where new data will be migrated to).

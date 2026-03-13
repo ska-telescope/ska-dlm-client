@@ -11,9 +11,9 @@ ska_dlm_client:
   image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
   version: "1.2.4"
   storage_root_directory: "/dlm/watch_dir"
-  ingest_server_url: "http://ska-dlm-dev-ingest:80"
-  storage_server_url: "http://ska-dlm-dev-storage:80"
-  request_server_url: "http://ska-dlm-dev-request:80"
+  ingest_url: "http://ska-dlm-dev-ingest:80"
+  storage_url: "http://ska-dlm-dev-storage:80"
+  request_url: "http://ska-dlm-dev-request:80"
 
 startup_verification:
   enabled: false
@@ -42,8 +42,8 @@ configdb_watcher:
   subsystem: data-lifecycle-management
   replicas: 1
   include_existing: false
-  ingest_server_url: http://ska-dlm-ingest.dp-dm   # override for production
-  storage_server_url: http://ska-dlm-storage.dp-dm # override for production
+  ingest_url: http://ska-dlm-ingest.dp-dm   # override for production
+  storage_url: http://ska-dlm-storage.dp-dm # override for production
   source_storage: SDPBuffer
   source_root_directory: /dlm/product_dir
   migration_destination_storage_name: dlm-archive # If omitted, migration will be skipped

@@ -29,8 +29,8 @@ spec:
         - {{ .Values.directory_watcher.directory_to_watch }}
         - "--storage-name"
         - {{ .Values.directory_watcher.storage_name }}
-        - "--request-server-url"
-        - {{ .Values.ska_dlm_client.request_server_url }}
+        - "--request-url"
+        - {{ .Values.ska_dlm_client.request_url }}
         volumeMounts:
         - name: data-product-storage
           mountPath: /dlm-archive
