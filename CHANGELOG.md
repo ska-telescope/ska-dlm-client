@@ -11,6 +11,7 @@
 
 ### Removed
 
+* Chart feature setupStorageLocation
 * Kafka watcher and related dependencies.
 * Unused config files.
 
