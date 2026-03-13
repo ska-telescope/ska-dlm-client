@@ -26,7 +26,7 @@ def create_parser() -> argparse.ArgumentParser:
     """Define a parser for all the command line parameters.
 
     Creates and configures an ArgumentParser with all the command line options
-    needed for the ska-dlm-clinet's various components.
+    needed for the ska-dlm-client's various components.
 
     Returns:
         An ArgumentParser instance configured with all required and optional arguments.
@@ -146,7 +146,7 @@ def process_args(
     """
     if args.source_name:
         RCLONE_CONFIG_SOURCE["name"] = args.source_name
-
+    # TODO: not all command line args are being processed below
     config = WatcherConfig(
         directory_to_watch=args.directory_to_watch,
         ingest_url=args.ingest_url,

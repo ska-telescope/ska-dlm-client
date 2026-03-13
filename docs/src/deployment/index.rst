@@ -36,11 +36,6 @@ Next, modify the ``values.yaml`` file as required. The sections below describe t
 
 .. Mention enums somewhere
 
-Chart feature flags
--------------------
-
-- ``setupStorageLocation``: keep ``false``. Will be removed (DMAN-222), because this functionality is now inside the watcher components themselves.
-
 
 Shared ska-dlm-client values
 ----------------------------
@@ -64,7 +59,7 @@ Directory Watcher component
 - ``storage_root_directory``: Root directory used to generate URIs for the DLM database.
 - ``directory_to_watch``: Directory to monitor for new data.
 - ``target_name``: Target storage (where new data will be migrated to)
-- ``target_root``: Target storage rot directory.
+- ``target_root``: Target storage root directory.
 - ``skip_rclone_access_check_on_register``: If ``true``, skips verifying rclone access before attempting to register the file.
 - ``register_contents_of_watch_directory``: If ``true``, registers all contents of the watch directory at startup, not just newly detected files.
 - ``migration_url``: Full HTTP URL of the migration server.
