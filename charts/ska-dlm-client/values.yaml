@@ -29,10 +29,7 @@ ska_dlm_client:
   storage_root_directory: /dlm
   securityContext: {}
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
-  # If these services run in another namespace, use e.g. ska-dlm-dev-ingest.other-namespace:port
-  ingest_url: "http://ska-dlm-ingest.dp-dm"          # override for production
-  storage_url: "http://ska-dlm-storage.dp-dm"        # override for production
-  request_url: "http://ska-dlm-request.dp-dm" # override for production
+  # If these services run in another namespace, use e.g. ska-dlm-ingest.other-namespace:port
 
 
 # --- Component configurations ---
@@ -50,15 +47,18 @@ directory_watcher:
   use_polling_watcher: false
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false
+  ingest_url: "http://ska-dlm-ingest.dp-dm"        # override for production
+  storage_url: "http://ska-dlm-storage.dp-dm"      # override for production
   migration_url: "http://ska-dlm-migration.dp-dm"  # override for production
   pvc:
     name: shared
     read_only: false
 
 startup_verification: # Test directory_watcher at startup
-  enabled: false # Keep false for now because this code hasn't been maintained recently
+  enabled: false      # Keep false for now because this code hasn't been maintained recently
   component: startup-verification
   subsystem: data-lifecycle-management
+  request_url: "http://ska-dlm-request.dp-dm" # override for production
 
 configdb_watcher:
   enabled: true
@@ -66,12 +66,12 @@ configdb_watcher:
   subsystem: data-lifecycle-management
   replicas: 1
   include_existing: false
-  ingest_url: http://ska-dlm-ingest.dp-dm   # override for production
-  storage_url: http://ska-dlm-storage.dp-dm # override for production
   source_storage: SDPBuffer
   source_root_directory: /dlm/product_dir
   migration_destination_storage_name: dlm-archive  # default target storage 'dlm-archive' is defined in the DLM Server and always available.
-  migration_url: http://ska-dlm-migration.dp-dm
+  ingest_url: "http://ska-dlm-ingest.dp-dm"        # override for production
+  storage_url: "http://ska-dlm-storage.dp-dm"      # override for production
+  migration_url: "http://ska-dlm-migration.dp-dm"  # override for production
   pvc:
     name: shared
     read_only: false

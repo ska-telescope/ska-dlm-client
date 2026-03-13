@@ -30,7 +30,7 @@ spec:
         - "--storage-name"
         - {{ .Values.directory_watcher.storage_name }}
         - "--request-url"
-        - {{ .Values.ska_dlm_client.request_url }}
+        - {{ .Values.startup_verification.request_url }}
         volumeMounts:
         - name: data-product-storage
           mountPath: /dlm-archive
