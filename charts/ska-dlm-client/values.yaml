@@ -39,7 +39,7 @@ directory_watcher:
   directory_to_watch: /dlm/watch_dir
   target_name: dlm-archive # default target storage 'dlm-archive' is defined in the DLM Server and always available.
   target_root:
-  use_polling_watcher: false
+  use_polling_watcher: false # Mark: true unless the watch directory is not a networked drive, as the alternative iNotify-based watcher does not work with networked filesystems.
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
