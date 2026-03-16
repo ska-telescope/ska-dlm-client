@@ -253,7 +253,7 @@ async def sdp_to_dlm_ingest_and_migrate(
             storage_url=ingest_config.storage_url,
         )
     logger.info(
-        "Starting SDP ConfigDB watcher (include_existing=%s, source storage=%s, target storage=%s)",
+        "Starting ConfigDB watcher (include_existing=%s, source storage=%s, target storage=%s)",
         ingest_config.include_existing,
         ingest_config.storage_name,
         ingest_config.migration_destination_storage_name,
