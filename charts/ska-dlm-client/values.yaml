@@ -39,14 +39,14 @@ directory_watcher:
   directory_to_watch: /dlm/watch_dir
   target_name: dlm-archive # default target storage 'dlm-archive' is defined in the DLM Server and always available.
   target_root:
-  use_polling_watcher: false # Mark: true unless the watch directory is not a networked drive, as the alternative iNotify-based watcher does not work with networked filesystems.
+  use_polling_watcher: false # false means using the iNotify-based watcher, which might not work with networked filesystems.
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-ingest.other-namespace:port
-  ingest_url: "http://ska-dlm-ingest.dp-dm"        # override for production
-  storage_url: "http://ska-dlm-storage.dp-dm"      # override for production
-  migration_url: "http://ska-dlm-migration.dp-dm"  # override for production
+  ingest_url: "http://ska-dlm-ingest"
+  storage_url: "http://ska-dlm-storage"
+  migration_url: "http://ska-dlm-migration"
   pvc:
     name: shared
     read_only: false
@@ -55,7 +55,7 @@ startup_verification: # Test directory_watcher at startup
   enabled: false # Keep false for now because this code hasn't been maintained recently
   component: startup-verification
   subsystem: data-lifecycle-management
-  request_url: "http://ska-dlm-request.dp-dm" # override for production
+  request_url: "http://ska-dlm-request"
 
 configdb_watcher:
   enabled: true
@@ -68,18 +68,18 @@ configdb_watcher:
   migration_destination_storage_name: dlm-archive  # default target storage 'dlm-archive' is defined in the DLM Server and always available.
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-ingest.other-namespace:port
-  ingest_url: "http://ska-dlm-ingest.dp-dm"        # override for production
-  storage_url: "http://ska-dlm-storage.dp-dm"      # override for production
-  migration_url: "http://ska-dlm-migration.dp-dm"  # override for production
+  ingest_url: "http://ska-dlm-ingest"
+  storage_url: "http://ska-dlm-storage"
+  migration_url: "http://ska-dlm-migration"
   pvc:
     name: shared
     read_only: false
   sdp_config:
-    host: ska-sdp-etcd.dp-shared.svc.cluster.local   # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
+    host:    # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
     port: 2379    # default etcd client port
     path: ""      # optional
     etcd:
-      enabled: false # deploy a local etcd service
+      enabled: true # deploy a local etcd service
       image: "artefact.skao.int/ska-sdp-etcd"
       tag: "3.5.9"
 

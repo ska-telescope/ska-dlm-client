@@ -58,12 +58,12 @@ Directory Watcher component
 - ``directory_to_watch``: Directory to monitor for new data.
 - ``target_name``: Target storage (where new data will be migrated to)
 - ``target_root``: Target storage root directory.
-- ``use_polling_watcher``: true unless the watch directory is not a networked drive, as the alternative iNotify-based watcher does not work with networked filesystems.
+- ``use_polling_watcher``: false means using the iNotify-based watcher, which might not work with networked filesystems.
 - ``skip_rclone_access_check_on_register``: If ``true``, skips verifying rclone access before attempting to register the file.
 - ``register_contents_of_watch_directory``: If ``true``, registers & migrates all contents of the watch directory at startup, not just newly detected files.
-- ``ingest_url``: Full HTTP URL of the ingest server. ``<service.namespace:port>``
-- ``storage_url``: Full HTTP URL of the storage server. ``<service.namespace:port>``
-- ``migration_url``: Full HTTP URL of the migration server. ``<service.namespace:port>``
+- ``ingest_url``: Full HTTP URL of the ingest server. E.g., ``<http://service.namespace:port>``
+- ``storage_url``: Full HTTP URL of the storage server. E.g., ``<http://service.namespace:port>``
+- ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``pvc.name``: Name of the volume to mount into the directory-watcher pod.
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the directory-watcher can do. Needs to be ``false`` to allow for data deletion.
 
@@ -94,7 +94,7 @@ Sample output:
    PASSED startup tests
    2025-04-21 13:08:33,187 - INFO - Startup verification completed.
 
-If ``enabled.true``, need to specify the full HTTP URL of the request server, ``request_url`` (format: ``<service.namespace:port>``).
+If ``enabled.true``, need to specify the full HTTP URL of the request server, ``request_url`` (E.g., ``<http://service.namespace:port>``).
 
 ConfigDB Watcher component
 --------------------------
@@ -104,12 +104,12 @@ ConfigDB Watcher component
 - ``source_storage``: Storage where the new data appears.
 - ``source_root_directory``: Root directory used to generate URIs for the DLM database.
 - ``migration_destination_storage_name``: Target storage (where new data will be migrated to). Default is ``dlm-archive``.
-- ``ingest_url``: Full HTTP URL of the ingest server. ``<service.namespace:port>``
-- ``storage_url``: Full HTTP URL of the storage server. ``<service.namespace:port>``
-- ``migration_url``: Full HTTP URL of the migration server. ``<service.namespace:port>``
+- ``ingest_url``: Full HTTP URL of the ingest server. E.g., ``<http://service.namespace:port>``
+- ``storage_url``: Full HTTP URL of the storage server. E.g., ``<http://service.namespace:port>``
+- ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``pvc.name``: Name of the volume to mount into the configdb-watcher pod.
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the configdb-watcher can do. Needs to be ``false`` to allow for data deletion.
-- ``sdp_config.host``: Kubernetes DNS hostname of the external ConfigDB (etcd) service. Leave empty to deploy a local etcd instance.
+- ``sdp_config.host``: Kubernetes DNS hostname of the external ConfigDB (etcd) service. To deploy a local etcd instance instead, leave this empty and set ``sdp_config.etcd.enabled``:``true``.
 - ``sdp_config.etcd.enabled``: Optionally enable a local etcd instance (for testing purposes). ``<service.namespace.svc.cluster.local>``
 
 
