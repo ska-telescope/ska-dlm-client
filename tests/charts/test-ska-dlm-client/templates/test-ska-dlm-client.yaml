@@ -21,7 +21,7 @@ spec:
     - /dlm/setup_dlm.py
     - "--storage-name"
     - "dir-watcher"
-    - "--storage-server-url"
+    - "--storage-url"
     - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}:80"
     - "--storage-root-directory"
     - "/dlm"

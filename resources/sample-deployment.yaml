@@ -21,9 +21,9 @@ ska_dlm_client:
   storage_root_directory: "/dlm/watch_dir"
   # The URLS of the various DLM services. The "ska-dlm-dev" is the helm deployment name assigned
   # to DLM when it was deployed.
-  ingest_server_url: "http://ska-dlm-dev-ingest:80"
-  storage_server_url: "http://ska-dlm-dev-storage:80"
-  request_server_url: "http://ska-dlm-dev-request:80"
+  ingest_url: "http://ska-dlm-dev-ingest:80"
+  storage_url: "http://ska-dlm-dev-storage:80"
+  request_url: "http://ska-dlm-dev-request:80"
 
 startup_verification:
   # Enabling this will force a startup verification to be performed. This is recommended to catch

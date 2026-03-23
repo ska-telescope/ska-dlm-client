@@ -13,6 +13,8 @@ Begin by cloning the GitLab repository:
 
   git clone --recurse-submodules https://gitlab.com/ska-telescope/ska-dlm-client.git
 
+.. _checkout_release:
+
 Retrieve the available release tags and check out the desired release:
 
 .. code-block:: bash
@@ -42,12 +44,8 @@ Shared ska-dlm-client values
 
 - ``image``: Container image to use for all watcher components (e.g., ``artefact.skao.int/ska-dlm-client``).
 - ``version``: Image tag or version (e.g., ``"1.0.0"``).
-- ``storage_name``: The DLM storage name used during data registration.
-- ``storage_root_directory``: Used as the root directory by the startup_verification component.
+- ``imagePullPolicy``: Kubernetes image pull policy (e.g., ``Always``, ``IfNotPresent``)
 - ``securityContext``: Kubernetes context updated during deployment.
-- ``ingest_url``: Full HTTP URL of the ingest server.
-- ``storage_url``: Full HTTP URL of the storage server.
-- ``request_server_url``: Full HTTP URL of the request server.
 
 
 Directory Watcher component
@@ -60,9 +58,12 @@ Directory Watcher component
 - ``directory_to_watch``: Directory to monitor for new data.
 - ``target_name``: Target storage (where new data will be migrated to)
 - ``target_root``: Target storage root directory.
+- ``use_polling_watcher``: false means using the iNotify-based watcher, which might not work with networked filesystems.
 - ``skip_rclone_access_check_on_register``: If ``true``, skips verifying rclone access before attempting to register the file.
-- ``register_contents_of_watch_directory``: If ``true``, registers all contents of the watch directory at startup, not just newly detected files.
-- ``migration_url``: Full HTTP URL of the migration server.
+- ``register_contents_of_watch_directory``: If ``true``, registers & migrates all contents of the watch directory at startup, not just newly detected files.
+- ``ingest_url``: Full HTTP URL of the ingest server. E.g., ``<http://service.namespace:port>``
+- ``storage_url``: Full HTTP URL of the storage server. E.g., ``<http://service.namespace:port>``
+- ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``pvc.name``: Name of the volume to mount into the directory-watcher pod.
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the directory-watcher can do. Needs to be ``false`` to allow for data deletion.
 
@@ -93,21 +94,23 @@ Sample output:
    PASSED startup tests
    2025-04-21 13:08:33,187 - INFO - Startup verification completed.
 
+If ``enabled.true``, need to specify the full HTTP URL of the request server, ``request_url`` (E.g., ``<http://service.namespace:port>``).
 
 ConfigDB Watcher component
 --------------------------
 
 - ``enabled``: Whether to deploy the ``configdb-watcher`` component.
-- ``ingest_server_url``: Full HTTP URL of the ingest server.
-- ``storage_server_url``: Full HTTP URL of the storage server.
+- ``include_existing``: If true, registers & migrates all existing COMPLETED data-products found in the etcd DB at startup.
 - ``source_storage``: Storage where the new data appears.
-- ``storage_root_directory``: Root directory used to generate URIs for the DLM database.
-- ``migration_destination_storage_name``: Target storage (where new data will be migrated to).
-- ``migration_url``: Full HTTP URL of the migration server.
-- ``sdp_config.host``: Kubernetes DNS hostname of the external ConfigDB (etcd) service. Leave empty to deploy a local etcd instance.
-- ``sdp_config.etcd.enabled``: Optionally enable a local etcd instance (for testing purposes).
+- ``source_root_directory``: Root directory used to generate URIs for the DLM database.
+- ``migration_destination_storage_name``: Target storage (where new data will be migrated to). Default is ``dlm-archive``.
+- ``ingest_url``: Full HTTP URL of the ingest server. E.g., ``<http://service.namespace:port>``
+- ``storage_url``: Full HTTP URL of the storage server. E.g., ``<http://service.namespace:port>``
+- ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``pvc.name``: Name of the volume to mount into the configdb-watcher pod.
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the configdb-watcher can do. Needs to be ``false`` to allow for data deletion.
+- ``sdp_config.host``: Kubernetes DNS hostname of the external ConfigDB (etcd) service. To deploy a local etcd instance instead, leave this empty and set ``sdp_config.etcd.enabled``:``true``.
+- ``sdp_config.etcd.enabled``: Optionally enable a local etcd instance (for testing purposes). ``<service.namespace.svc.cluster.local>``
 
 
 Kafka Watcher component (deprecated)
@@ -162,6 +165,8 @@ The following are common issues encountered during deployment and suggested reso
 
 If pods are not behaving as expected after modifying configuration values, it can help to uninstall and redeploy the chart to ensure all resources are recreated cleanly (see :ref:`uninstall-dlm-client`). After uninstalling, redeploy as described in :ref:`deploy-dlm-client`.
 
+Also ensure you are deploying the latest release. See :ref:`these instructions <checkout_release>` on retrieving the available release tags.
+
 **Helm dependency errors**
 
 If you see an error such as:
@@ -171,4 +176,4 @@ If you see an error such as:
   Error: INSTALLATION FAILED: An error occurred while checking for chart dependencies.
   You may need to run `helm dependency build` to fetch missing dependencies.
 
-From the chart directory, run ``helm dependency build charts/ska-dlm-client``.
+Try running ``helm dependency build charts/ska-dlm-client``.

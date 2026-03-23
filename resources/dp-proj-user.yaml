@@ -1,23 +1,29 @@
-# values required when testing in private namespace on DP cluster
+# --------------------------------------------------
+# --- Example values for deploying on DP cluster ---
+# --------------------------------------------------
+
+# --- Global configuration (shared across components / subcharts) ---
 global:
-  dataProduct:
-    pvc:
-      name: shared
-      read_only: true
+  storageClass: nfss1
 
-ska_dlm_client:
-  image: "registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client"
-  version: "1.2.4"
-  storage_root_directory: "/dlm/watch_dir"
-  ingest_server_url: "http://ska-dlm-dev-ingest:80"
-  storage_server_url: "http://ska-dlm-dev-storage:80"
-  request_server_url: "http://ska-dlm-dev-request:80"
+# --- Chart metadata / naming ---
+system: dlm
+subsystem: client
+nameOverride: ""
+fullnameOverride: ""
 
-startup_verification:
-  enabled: false
-
+# --- External chart/service references ---
 ska_dlm:
   fullname: "ska-dlm-dev"
+
+# --- Shared client configuration ---
+ska_dlm_client:
+  image: artefact.skao.int/ska-dlm-client
+  version: "1.2.4"
+  imagePullPolicy: Always
+  securityContext: {}
+
+# --- Component configurations ---
 
 directory_watcher:
   enabled: true
@@ -32,7 +38,15 @@ directory_watcher:
   use_polling_watcher: false
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false
+  ingest_url: "http://ska-dlm-ingest.dp-dm"
+  storage_url: "http://ska-dlm-storage.dp-dm"
   migration_url: "http://ska-dlm-migration.dp-dm"
+  pvc:
+    name: shared
+    read_only: false
+
+startup_verification:
+  enabled: false
 
 configdb_watcher:
   enabled: true
@@ -40,17 +54,20 @@ configdb_watcher:
   subsystem: data-lifecycle-management
   replicas: 1
   include_existing: false
-  ingest_server_url: http://ska-dlm-ingest.dp-dm   # override for production
-  storage_server_url: http://ska-dlm-storage.dp-dm # override for production
   source_storage: SDPBuffer
   source_root_directory: /dlm/product_dir
-  migration_destination_storage_name: dlm-archive # If omitted, migration will be skipped
-  migration_url: http://ska-dlm-migration.dp-dm   # If omitted, migration will be skipped
+  migration_destination_storage_name: dlm-archive
+  ingest_url: "http://ska-dlm-ingest.dp-dm"
+  storage_url: "http://ska-dlm-storage.dp-dm"
+  migration_url: "http://ska-dlm-migration.dp-dm"
+  pvc:
+    name: shared
+    read_only: false
   sdp_config:
-    host: ska-sdp-etcd.dp-shared.svc.cluster.local   # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
+    host:   # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
     port: 2379    # default etcd client port
     path: ""      # optional
     etcd:
-      enabled: false # deploy a local etcd service
+      enabled: true # deploy a local etcd service
       image: "artefact.skao.int/ska-sdp-etcd"
       tag: "3.5.9"
