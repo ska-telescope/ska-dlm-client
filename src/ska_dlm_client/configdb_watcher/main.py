@@ -82,7 +82,7 @@ def _register_and_migrate_path(
     Args:
         processor: The RegistrationProcessor instance to use.
         src_dir: The source directory to register and migrate.
-        rooot_dir: The root directory of the source storage.
+        root_dir: The root directory of the source storage.
         dataproduct_key: The Flow.Key of the data-product being processed.
         new_dep: The dependency created for this data-product.
 

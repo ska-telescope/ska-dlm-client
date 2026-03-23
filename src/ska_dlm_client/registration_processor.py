@@ -259,10 +259,12 @@ class RegistrationProcessor:
         and optionally migrates the registered item to a new storage location.
 
         Args:
-            item: The data item to register with the DLM.
-            migrate: Whether to migrate the item. This is being used to make sure that
-            the top-level container item is synced including the whole sub-tree,
-            but not each item individually in addition.
+            item:
+                The data item to register with the DLM.
+            migrate:
+                Whether to migrate the item. This is being used to make sure that the
+                top-level container item is synced including the whole sub-tree,
+                but not each item individually in addition.
 
         Returns:
             The UUID of the registered data item, or None if registration failed.
@@ -501,6 +503,7 @@ def directory_contains_metadata_file(absolute_path: str) -> bool:
 
     Args:
         absolute_path: The absolute path to the directory.
+
     Returns:
         True if the metadata file exists in the directory, False otherwise.
     """
