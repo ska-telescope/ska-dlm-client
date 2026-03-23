@@ -15,7 +15,6 @@ services:
       context: ..
       dockerfile: Dockerfile
     volumes:
-      - shared-tmpfs:/dlm
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - dlm_network
@@ -32,7 +31,6 @@ services:
       context: ..
       dockerfile: Dockerfile
     volumes:
-      - shared-tmpfs:/dlm
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - dlm_network
