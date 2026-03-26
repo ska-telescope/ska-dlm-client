@@ -96,6 +96,7 @@ def mock_config():
     config = mock.MagicMock(spec=WatcherConfig)
     config.directory_to_watch = "/test/watch/dir"
     config.source_storage = "test-storage"
+    config.storage_name = None  # TODO: fix source_storage/storage_name discrepency
     config.ingest_register_path_to_add = ""
     config.perform_actual_ingest_and_migration = True
     config.rclone_access_check_on_register = False
@@ -103,6 +104,8 @@ def mock_config():
     config.directory_watcher_entries = mock.MagicMock(spec=DirectoryWatcherEntries)
     config.ingest_url = "http://test-ingest:8000"
     config.storage_url = "http://test-storage:8000"
+    config.uid_expiration_days = None
+    config.oid_expiration_days = None
 
     # Use real Configuration instances instead of MagicMocks
     config.ingest_configuration = Configuration(host="http://test-ingest:8000")
