@@ -1,5 +1,7 @@
 """API Gateway."""
 
+# flake8: noqa: D107
+
 import asyncio
 import json
 import logging
