@@ -67,4 +67,6 @@ oci-build-dlm_configdb_watcher:
 
 openapi-code-from-local-dlm: ## Use the connection to DLM services to retrieve and generate OpenAPI code
 	@echo "Using the connection to DLM services to retrieve and generate OpenAPI code"
-	cd openapi_client_dlm_specs && sh generate_code.sh
+	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml up -d --wait
+	cd openapi_client_dlm_specs && /bin/bash generate_code.sh
+	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml down
