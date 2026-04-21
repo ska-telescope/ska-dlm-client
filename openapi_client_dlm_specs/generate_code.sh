@@ -22,6 +22,9 @@ echo "\nfixing package location of dlm_api"
 mv openapi_client_dlm_project/ska_dlm_client/openapi/ska_dlm_client/openapi/dlm_api openapi_client_dlm_project/ska_dlm_client/openapi/
 rm -rf openapi_client_dlm_project/ska_dlm_client/openapi/ska_dlm_client
 
+echo "\nfixing missing type support for [Optional in api_client.py"
+git apply --reject --whitespace=fix < api_client.patch
+
 echo "\nfixing docstrings"
 docconvert --in-place -i rest -o numpy openapi_client_dlm_project/ska_dlm_client/openapi/
 docconvert --in-place -i rest -o numpy openapi_client_dlm_project/test/

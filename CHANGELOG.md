@@ -1,5 +1,13 @@
 # Version History
 
+## Planned 1.2.5
+
+### Updated
+
+ * Re-generated OpenAPI docs and code for DLM 1.3.2.
+ * Updated Makefile to allow for re-generation of OpenAPI docs and code.
+ * Added Keykloak and Gateway to build to enable OpenAPI generation from Makefile.
+
 ## 1.2.4
 
 ### Updated

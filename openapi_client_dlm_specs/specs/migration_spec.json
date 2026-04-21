@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "1.2.0"
+        "version": "1.3.2"
     },
     "paths": {
         "/migration/query_migrations": {
@@ -170,7 +170,7 @@
                 "tags": [
                     "migration"
                 ],
-                "description": "Copy a data_item from source to destination.\n\nSteps\n(1) get the current storage_id(s) of the item\n(2) convert one (first) storage_id to a configured rclone backend\n(3) initialise the new item with the same OID on the new storage\n(4) use the rclone copy command to copy it to the new location\n(5) set the access path to the payload\n(6) set state to READY\n(7) save metadata in the data_item table",
+                "description": "Copy a data_item from source to destination.\n\nSteps\n(1) get the current storage_id(s) of the item\n(2) convert one (first) storage_id to a configured rclone backend\n(3) initialise the new item with the same OID on the new storage\n(4) use the rclone copy command to copy it to the new location",
                 "operationId": "copy_data_item",
                 "parameters": [
                     {
