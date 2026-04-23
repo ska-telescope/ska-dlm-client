@@ -5,6 +5,7 @@ import asyncio
 import logging
 import os
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 
 import athreading
@@ -40,6 +41,8 @@ class SDPIngestConfig:
     storage_url: str
     storage_name: str
     storage_root_directory: str
+    uid_expiration_days: datetime | None = None
+    oid_expiration_days: datetime | None = None
     migration_destination_storage_name: str | None = None
     migration_configuration: Configuration | None = None
 
@@ -64,6 +67,8 @@ def process_args(args: argparse.Namespace) -> SDPIngestConfig:
         ingest_configuration=ingest_configuration,
         storage_url=args.storage_url,
         storage_name=args.source_name,
+        uid_expiration_days=args.uid_expiration_days,
+        oid_expiration_days=args.oid_expiration_days,
         storage_root_directory=args.source_root,
         migration_destination_storage_name=args.target_name,
         migration_configuration=migration_configuration,
@@ -336,6 +341,18 @@ def main() -> None:
             "Migration server URL including the service port. "
             "If omitted, migration will be skipped."
         ),
+    )
+    parser.add_argument(
+        "--uid-expiration-days",
+        type=int,
+        default=os.getenv("UID_EXPIRATION_DAYS"),
+        help="UID expiration in days.",
+    )
+    parser.add_argument(
+        "--oid-expiration-days",
+        type=int,
+        default=os.getenv("OID_EXPIRATION_DAYS"),
+        help="OID expiration in days.",
     )
     args = parser.parse_args()
     ingest_config = process_args(args)

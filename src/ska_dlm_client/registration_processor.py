@@ -4,6 +4,7 @@ import logging
 import os
 import time
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from os.path import isfile
 from pathlib import Path
 from typing import Any
@@ -28,16 +29,16 @@ class Item:
 
     path_rel_to_watch_dir: str
     item_type: ItemType
-    metadata: DataProductMetadata
-    parent: Self
-    uuid: str = None
+    metadata: DataProductMetadata | None
+    parent: Self | None
+    uuid: str | None = None
 
     def __init__(
         self,
         path_rel_to_watch_dir: str,
         item_type: ItemType,
         metadata: DataProductMetadata | None,
-        parent: Self = None,
+        parent: Self | None = None,
     ):
         """Initialise the Item with required values.
 
@@ -134,6 +135,36 @@ class RegistrationProcessor:
 
         return True
 
+    def _build_register_kwargs(
+        self,
+        item: Item,
+        storage_name: str,
+        do_storage_access_check: bool,
+    ) -> dict[str, Any]:
+        """Build kwargs for register_data_item()."""
+        register_kwargs: dict[str, Any] = {
+            "item_name": str(item.path_rel_to_watch_dir),
+            "uri": str(item.path_rel_to_watch_dir),
+            "item_type": item.item_type,
+            "storage_name": storage_name,
+            "do_storage_access_check": do_storage_access_check,
+            "request_body": (None if item.metadata is None else item.metadata.as_dict()),
+        }
+
+        uid_expiration_days = getattr(self._config, "uid_expiration_days", None)
+        if uid_expiration_days is not None:
+            register_kwargs["uid_expiration"] = datetime.now() + timedelta(
+                days=uid_expiration_days
+            )
+
+        oid_expiration_days = getattr(self._config, "oid_expiration_days", None)
+        if oid_expiration_days is not None:
+            register_kwargs["oid_expiration"] = datetime.now() + timedelta(
+                days=oid_expiration_days
+            )
+
+        return register_kwargs
+
     def _initiate_migration(self, uid: str, item_name: str = "") -> str | None:
         """Send migration request to DLM.
 
@@ -210,7 +241,9 @@ class RegistrationProcessor:
 
     def _migrate_item(self, migrate, item, uuid, api_ingest) -> None:
         """Migrate the last registered item."""
-        source_storage = getattr(self._config, "storage_name", None)
+        source_storage = getattr(self._config, "storage_name", None) or getattr(
+            self._config, "source_storage", None
+        )  # TODO: rename storage_name to source_storage in Dir Watcher
         if migrate:
             # We are only migrating the top-level containers, since rclone is
             # performing a sync including all children.
@@ -232,15 +265,13 @@ class RegistrationProcessor:
                 "migration_destination_storage_name",
                 None,
             )
+            register_kwargs = self._build_register_kwargs(
+                item=item,
+                storage_name=target_storage,
+                do_storage_access_check=False,
+            )
             try:
-                response = api_ingest.register_data_item(
-                    item_name=str(item.path_rel_to_watch_dir),
-                    uri=str(item.path_rel_to_watch_dir),
-                    item_type=item.item_type,
-                    storage_name=target_storage,
-                    do_storage_access_check=False,
-                    request_body=(None if item.metadata is None else item.metadata.as_dict()),
-                )
+                response = api_ingest.register_data_item(**register_kwargs)
                 logger.debug("register_data_item response: %s", response)
             except OpenApiException as err:
                 logger.error(
@@ -296,6 +327,12 @@ class RegistrationProcessor:
             )
             return None
 
+        register_kwargs = self._build_register_kwargs(
+            item=item,
+            storage_name=source_storage,
+            do_storage_access_check=rclone_access_check_on_register,
+        )
+
         with api_client.ApiClient(ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
             api_ingest.api_client.configuration.host = ingest_url
@@ -307,14 +344,7 @@ class RegistrationProcessor:
                         item.path_rel_to_watch_dir,
                     )
                     response = None
-                    response = api_ingest.register_data_item(
-                        item_name=str(item.path_rel_to_watch_dir),
-                        uri=str(item.path_rel_to_watch_dir),
-                        item_type=item.item_type,
-                        storage_name=source_storage,
-                        do_storage_access_check=rclone_access_check_on_register,
-                        request_body=(None if item.metadata is None else item.metadata.as_dict()),
-                    )
+                    response = api_ingest.register_data_item(**register_kwargs)
                     logger.debug("register_data_item response: %s", response)
                     dlm_registration_uuid = str(response) if response is not None else None
                 else:

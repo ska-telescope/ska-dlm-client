@@ -1,6 +1,7 @@
 """Registration processor related tests."""
 
 import os
+from datetime import datetime, timedelta
 from unittest import mock
 
 import pytest
@@ -96,6 +97,7 @@ def mock_config():
     config = mock.MagicMock(spec=WatcherConfig)
     config.directory_to_watch = "/test/watch/dir"
     config.source_storage = "test-storage"
+    config.storage_name = None  # TODO: fix source_storage/storage_name discrepency
     config.ingest_register_path_to_add = ""
     config.perform_actual_ingest_and_migration = True
     config.rclone_access_check_on_register = False
@@ -103,6 +105,8 @@ def mock_config():
     config.directory_watcher_entries = mock.MagicMock(spec=DirectoryWatcherEntries)
     config.ingest_url = "http://test-ingest:8000"
     config.storage_url = "http://test-storage:8000"
+    config.uid_expiration_days = None
+    config.oid_expiration_days = None
 
     # Use real Configuration instances instead of MagicMocks
     config.ingest_configuration = Configuration(host="http://test-ingest:8000")
@@ -217,6 +221,9 @@ def test_registration_processor_register_single_item(
     mock_config, mock_ingest_api, mock_migration_api, mock_data_product_metadata
 ):  # pylint: disable=protected-access, redefined-outer-name, unused-argument
     """Test the RegistrationProcessor _register_single_item method."""
+    mock_config.uid_expiration_days = 7
+    mock_config.oid_expiration_days = 1
+
     processor = RegistrationProcessor(mock_config)
 
     # Create a test item
@@ -229,14 +236,22 @@ def test_registration_processor_register_single_item(
     # Test with registration enabled
     result = processor._register_single_item(item)
     assert result == "test-uuid"
-    mock_ingest_api.return_value.register_data_item.assert_called_once_with(
-        item_name="test-item",
-        uri="test-item",
-        item_type=ItemType.FILE,
-        storage_name=mock_config.source_storage,
-        do_storage_access_check=mock_config.rclone_access_check_on_register,
-        request_body=item.metadata.as_dict(),
-    )
+    mock_ingest_api.return_value.register_data_item.assert_called_once()
+    _, kwargs = mock_ingest_api.return_value.register_data_item.call_args
+
+    assert kwargs["item_name"] == "test-item"
+    assert kwargs["uri"] == "test-item"
+    assert kwargs["item_type"] == ItemType.FILE
+    assert kwargs["storage_name"] == mock_config.source_storage
+    assert kwargs["do_storage_access_check"] == mock_config.rclone_access_check_on_register
+    assert kwargs["request_body"] == item.metadata.as_dict()
+
+    now = datetime.now()
+    delta_uid = kwargs["uid_expiration"] - now
+    assert timedelta(days=6) < delta_uid < timedelta(days=8), delta_uid
+
+    delta_oid = kwargs["oid_expiration"] - now
+    assert timedelta(days=0) < delta_oid < timedelta(days=2), delta_oid
 
     # Test with registration disabled
     mock_config.perform_actual_ingest_and_migration = False

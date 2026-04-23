@@ -82,6 +82,15 @@ spec:
           {{- end }}
           - name: RCLONE_HOSTNAME
             value: {{ include "ska-dlm-client.fullname" . }}-directory-watcher.{{ .Release.Namespace }}
+          {{- if .Values.directory_watcher.uid_expiration_days }}
+          - name: UID_EXPIRATION_DAYS
+            value: {{ .Values.directory_watcher.uid_expiration_days | quote }}
+          {{- end }}
+
+          {{- if .Values.directory_watcher.oid_expiration_days }}
+          - name: OID_EXPIRATION_DAYS
+            value: {{ .Values.directory_watcher.oid_expiration_days | quote }}
+          {{- end }}
 
         command:
           - /entrypoint.sh

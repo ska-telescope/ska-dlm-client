@@ -12,6 +12,7 @@
 
 ### Updated
 
+* Made the oid/uid expiration times configurable on values.yaml.
 * In the helm chart, the directory watcher and configdb watcher can each define their own pvc.
 * Updated ReadTheDocs documentation.
 * Reorganized the values.yaml file.

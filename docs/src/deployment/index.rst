@@ -52,18 +52,19 @@ Directory Watcher component
 ---------------------------
 
 - ``enabled``: Whether to deploy the ``directory-watcher`` component.
-- ``directory_to_watch``: Filesystem path to monitor for new data products. Must exist within the mounted storage (e.g., ``/dlm/watch_dir``).
+- ``ingest_url``: Full HTTP URL of the ingest server. E.g., ``<http://service.namespace:port>``
+- ``storage_url``: Full HTTP URL of the storage server. E.g., ``<http://service.namespace:port>``
+- ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``source_storage``: Storage to monitor for new data.
 - ``storage_root_directory``: Root directory used to generate URIs for the DLM database.
 - ``directory_to_watch``: Directory to monitor for new data.
 - ``target_name``: Target storage (where new data will be migrated to)
 - ``target_root``: Target storage root directory.
+- ``uid_expiration_days``: Number of days from now until this UID expires. 0 = expire immediately. Leave empty to use DB default: now() + 24:00.
+- ``oid_expiration_days``: Number of days from now until this OID expires. Leave empty to use DB default: 2099-12-31T23:59:59.
 - ``use_polling_watcher``: false means using the iNotify-based watcher, which might not work with networked filesystems.
 - ``skip_rclone_access_check_on_register``: If ``true``, skips verifying rclone access before attempting to register the file.
 - ``register_contents_of_watch_directory``: If ``true``, registers & migrates all contents of the watch directory at startup, not just newly detected files.
-- ``ingest_url``: Full HTTP URL of the ingest server. E.g., ``<http://service.namespace:port>``
-- ``storage_url``: Full HTTP URL of the storage server. E.g., ``<http://service.namespace:port>``
-- ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``pvc.name``: Name of the volume to mount into the directory-watcher pod.
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the directory-watcher can do. Needs to be ``false`` to allow for data deletion.
 
@@ -100,17 +101,19 @@ ConfigDB Watcher component
 --------------------------
 
 - ``enabled``: Whether to deploy the ``configdb-watcher`` component.
+- ``ingest_url``: Full HTTP URL of the ingest server. E.g., ``<http://service.namespace:port>``
+- ``storage_url``: Full HTTP URL of the storage server. E.g., ``<http://service.namespace:port>``
+- ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``include_existing``: If true, registers & migrates all existing COMPLETED data-products found in the etcd DB at startup.
 - ``source_storage``: Storage where the new data appears.
 - ``source_root_directory``: Root directory used to generate URIs for the DLM database.
 - ``migration_destination_storage_name``: Target storage (where new data will be migrated to). Default is ``dlm-archive``.
-- ``ingest_url``: Full HTTP URL of the ingest server. E.g., ``<http://service.namespace:port>``
-- ``storage_url``: Full HTTP URL of the storage server. E.g., ``<http://service.namespace:port>``
-- ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
+- ``uid_expiration_days``: Number of days from now until this UID expires. 0 = expire immediately. Leave empty to use DB default: now() + 24:00.
+- ``oid_expiration_days``: Number of days from now until this OID expires. Leave empty to use DB default: 2099-12-31T23:59:59.
 - ``pvc.name``: Name of the volume to mount into the configdb-watcher pod.
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the configdb-watcher can do. Needs to be ``false`` to allow for data deletion.
-- ``sdp_config.host``: Kubernetes DNS hostname of the external ConfigDB (etcd) service. To deploy a local etcd instance instead, leave this empty and set ``sdp_config.etcd.enabled``:``true``.
-- ``sdp_config.etcd.enabled``: Optionally enable a local etcd instance (for testing purposes). ``<service.namespace.svc.cluster.local>``
+- ``sdp_config.host``: Kubernetes DNS hostname of the external ConfigDB (etcd) service, in the format ``<service.namespace.svc.cluster.local>``. To deploy a local etcd instance instead, leave this empty and set ``sdp_config.etcd.enabled``:``true``.
+- ``sdp_config.etcd.enabled``: Optionally enable a local etcd instance (for testing purposes).
 
 
 Kafka Watcher component (deprecated)

@@ -34,19 +34,21 @@ directory_watcher:
   component: directory-watcher
   subsystem: data-lifecycle-management
   replicas: 1
+  ingest_url: "http://ska-dlm-ingest"
+  storage_url: "http://ska-dlm-storage"
+  migration_url: "http://ska-dlm-migration"
   source_storage: watch_dir
   storage_root_directory: /dlm/watch_dir
   directory_to_watch: /dlm/watch_dir
   target_name: dlm-archive # default target storage 'dlm-archive' is defined in the DLM Server and always available.
   target_root:
+  uid_expiration_days: # leave empty to use DB default, now() + 24:00
+  oid_expiration_days: # leave empty to use DB default, 2099-12-31T23:59:59
   use_polling_watcher: false # false means using the iNotify-based watcher, which might not work with networked filesystems.
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-ingest.other-namespace:port
-  ingest_url: "http://ska-dlm-ingest"
-  storage_url: "http://ska-dlm-storage"
-  migration_url: "http://ska-dlm-migration"
   pvc:
     name: shared
     read_only: false
@@ -62,15 +64,17 @@ configdb_watcher:
   component: configdb-watcher
   subsystem: data-lifecycle-management
   replicas: 1
+  ingest_url: "http://ska-dlm-ingest"
+  storage_url: "http://ska-dlm-storage"
+  migration_url: "http://ska-dlm-migration"
   include_existing: false
   source_storage: SDPBuffer
   source_root_directory: /dlm/product_dir
   migration_destination_storage_name: dlm-archive  # default target storage 'dlm-archive' is defined in the DLM Server and always available.
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-ingest.other-namespace:port
-  ingest_url: "http://ska-dlm-ingest"
-  storage_url: "http://ska-dlm-storage"
-  migration_url: "http://ska-dlm-migration"
+  uid_expiration_days: # leave empty to use DB default, now() + 24:00
+  oid_expiration_days: # leave empty to use DB default, 2099-12-31T23:59:59
   pvc:
     name: shared
     read_only: false
