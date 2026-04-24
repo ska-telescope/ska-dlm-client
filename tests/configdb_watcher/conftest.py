@@ -2,7 +2,6 @@
 
 import logging
 import os
-from pathlib import Path
 
 import pytest
 from ska_sdp_config import Config
