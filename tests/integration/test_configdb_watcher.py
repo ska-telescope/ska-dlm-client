@@ -297,7 +297,7 @@ def _cleanup_destination_storage(src_host: str) -> None:
 @pytest.mark.asyncio
 @pytest.mark.integration
 async def test_configdb_watcher():
-    """Flow points directly at scan-0 (contains demo.ms)."""
+    """Flow points directly at scan-0 (contains .ms file)."""
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
@@ -335,7 +335,7 @@ async def test_configdb_watcher_higher_dir():
     """
     Flow points at beam-vis0 (one level above scan-0).
 
-    Watcher must search one level deeper to find demo.ms.
+    Watcher must search one level deeper to find .ms file.
     """
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     api_configuration = Configuration(host=host)

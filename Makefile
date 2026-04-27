@@ -9,6 +9,8 @@ DOCKER_COMPOSE = docker compose
 DOCS_SPHINXOPTS = -n --keep-going
 PYTHON_LINE_LENGTH = 99
 PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
+CASACORE_MEASURES_DIR ?= /usr/share/casacore/data
+MEASUREMENT_SETS_FOR_TESTS = AA05LOW.ms.tar.gz
 
 # The DLM server image to use in integration tests:
 DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:1.3.2
@@ -16,6 +18,7 @@ DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:1.3.2
 python-test: python-pre-test python-do-test python-post-test
 
 python-pre-test:
+	./extract_data.sh $(MEASUREMENT_SETS_FOR_TESTS)
 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml build
 	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml up -d --remove-orphans
 
