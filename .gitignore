@@ -50,7 +50,7 @@ tests/integration/certs
 **/.cache
 **/.pytest_cache/
 
-# Test data:
+# Expanded Measurement Set
 tests/directory_watcher/test_registration_processor/product_dir/AA05*
 
 # Translations

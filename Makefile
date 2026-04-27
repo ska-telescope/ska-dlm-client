@@ -17,8 +17,7 @@ DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:1.3.2
 
 python-test: python-pre-test python-do-test python-post-test
 
-python-pre-test:
-	./extract_data.sh $(MEASUREMENT_SETS_FOR_TESTS)
+python-pre-test: extract-test-data
 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml build
 	$(DOCKER_COMPOSE) --file tests/test_services.docker-compose.yaml up -d --remove-orphans
 
@@ -36,7 +35,10 @@ run-integration-test:
 	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml logs --no-color dlm_storage
 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest -m integration" dlm_client_testrunner
 
-all-tests: docker-compose-up run-all-tests docker-compose-down
+all-tests: extract-test-data docker-compose-up run-all-tests docker-compose-down
+
+extract-test-data:
+	./extract_data.sh $(MEASUREMENT_SETS_FOR_TESTS)
 
 run-all-tests:
 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml up dlm_client_testrunner
