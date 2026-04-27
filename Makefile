@@ -9,7 +9,6 @@ DOCKER_COMPOSE = docker compose
 DOCS_SPHINXOPTS = -n --keep-going
 PYTHON_LINE_LENGTH = 99
 PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
-CASACORE_MEASURES_DIR ?= /usr/share/casacore/data
 MEASUREMENT_SETS_FOR_TESTS = AA05LOW.ms.tar.gz
 
 # The DLM server image to use in integration tests:
@@ -36,7 +35,7 @@ integration-test-keep: extract-test-data docker-compose-up run-integration-test
 run-integration-test:
 	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml ps -a
 	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml logs --no-color dlm_storage
-	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="sh -lc './extract_data.sh $(MEASUREMENT_SETS_FOR_TESTS) && pytest -m integration'" dlm_client_testrunner
+	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest -m integration" dlm_client_testrunner
 
 all-tests: extract-test-data docker-compose-up run-all-tests docker-compose-down
 
