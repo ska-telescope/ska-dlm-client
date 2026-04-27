@@ -34,10 +34,9 @@ integration-test: extract-test-data docker-compose-up run-integration-test docke
 integration-test-keep: extract-test-data docker-compose-up run-integration-test
 
 run-integration-test:
-	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml build
 	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml ps -a
 	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml logs --no-color dlm_storage
-	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest -m integration" dlm_client_testrunner
+	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="sh -lc './extract_data.sh $(MEASUREMENT_SETS_FOR_TESTS) && pytest -m integration'" dlm_client_testrunner
 
 all-tests: extract-test-data docker-compose-up run-all-tests docker-compose-down
 
