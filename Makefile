@@ -9,7 +9,7 @@ DOCKER_COMPOSE = docker compose
 DOCS_SPHINXOPTS = -n --keep-going
 PYTHON_LINE_LENGTH = 99
 PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
-MEASUREMENT_SETS_FOR_TESTS = AA05LOW.ms.tar.gz
+MEASUREMENT_SETS_FOR_TESTS = output.scan-1.beam-vis0.ms.tar.gz
 
 # The DLM server image to use in integration tests:
 DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:1.3.2
