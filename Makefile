@@ -9,11 +9,12 @@ DOCKER_COMPOSE = docker compose
 DOCS_SPHINXOPTS = -n --keep-going
 PYTHON_LINE_LENGTH = 99
 PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
+MEASUREMENT_SETS_FOR_TESTS = output.scan-1.beam-vis0.ms.tar.gz
 
 # The DLM server image to use in integration tests:
-DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:1.3.0
+DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:1.3.2
 
-python-test: python-pre-test python-do-test python-post-test
+python-test: extract-test-data python-pre-test python-do-test python-post-test
 
 python-pre-test:
 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml build
@@ -24,16 +25,19 @@ python-do-test:
 
 python-post-test: docker-compose-down
 
-integration-test: docker-compose-up run-integration-test docker-compose-down
+extract-test-data:
+	./extract_data.sh $(MEASUREMENT_SETS_FOR_TESTS)
 
-integration-test-keep: docker-compose-up run-integration-test
+integration-test: extract-test-data docker-compose-up run-integration-test docker-compose-down
+
+integration-test-keep: extract-test-data docker-compose-up run-integration-test
 
 run-integration-test:
 	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml ps -a
 	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml logs --no-color dlm_storage
 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest -m integration" dlm_client_testrunner
 
-all-tests: docker-compose-up run-all-tests docker-compose-down
+all-tests: extract-test-data docker-compose-up run-all-tests docker-compose-down
 
 run-all-tests:
 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml up dlm_client_testrunner
@@ -67,4 +71,6 @@ oci-build-dlm_configdb_watcher:
 
 openapi-code-from-local-dlm: ## Use the connection to DLM services to retrieve and generate OpenAPI code
 	@echo "Using the connection to DLM services to retrieve and generate OpenAPI code"
-	cd openapi_client_dlm_specs && sh generate_code.sh
+	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml up -d --wait
+	cd openapi_client_dlm_specs && /bin/bash generate_code.sh
+	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml down

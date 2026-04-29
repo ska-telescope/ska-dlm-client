@@ -1,10 +1,29 @@
 # Version History
 
-## Development
+## Planned 1.2.5
 
 ### Updated
 
+ * Use real MeasurementSet structure for testing.
+ * Re-generated OpenAPI docs and code for DLM 1.3.2.
+ * Updated Makefile to allow for re-generation of OpenAPI docs and code.
+ * Added Keykloak and Gateway to build to enable OpenAPI generation from Makefile.
+
+## 1.2.4
+
+### Updated
+
+* Made the oid/uid expiration times configurable on values.yaml.
+* In the helm chart, the directory watcher and configdb watcher can each define their own pvc.
+* Updated ReadTheDocs documentation.
+* Reorganized the values.yaml file.
 * Rework setup of storage and rclone config to ensure that the rclone ssh keys are always installed on the client and the rclone config is always refreshed.
+
+### Removed
+
+* Chart feature setupStorageLocation
+* Kafka watcher and related dependencies.
+* Unused config files.
 
 ## 1.2.3
 

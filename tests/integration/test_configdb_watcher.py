@@ -30,6 +30,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 EB_ID = "eb-00000000"
 PB_ID = "pb-test-00000000-a"
+MS_NAME = "output.scan-1.beam-vis0.ms"
 MS_PATH_LOCAL = f"{dir_path}/../directory_watcher/test_registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
@@ -261,6 +262,10 @@ def _copy_fixture_into_container(src_host: str, watcher_src_subpath: str) -> Non
     log.info("Ensure watcher source dir exists: %s", cmd)
     p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
     assert p.returncode == 0, p.stderr
+    cmd = f"ls -la {MS_PATH_LOCAL}"
+    log.info("Local fixture contents: %s", cmd)
+    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
+    log.info("Local fixture contents rc=%s stdout=%s stderr=%s", p.returncode, p.stdout, p.stderr)
 
     # 2) Copy the contents of MS_PATH_LOCAL into <container>:<dest>
     cmd = f"docker container cp {MS_PATH_LOCAL}/. {src_host}:{watcher_src_subpath}/"
@@ -271,7 +276,8 @@ def _copy_fixture_into_container(src_host: str, watcher_src_subpath: str) -> Non
     # 3) Wait until expected path is visible (avoid race with watcher)
     deadline = time.time() + 10
     while time.time() < deadline:
-        cmd = f"docker exec {src_host} sh -lc 'ls -la {watcher_src_subpath} | head'"
+        expected_ms_path = f"{watcher_src_subpath}/{MS_NAME}"
+        cmd = f"docker exec {src_host} sh -lc 'test -d {expected_ms_path}'"
         p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
         if p.returncode == 0:
             log.info("Expected path visible: %s", watcher_src_subpath)
@@ -297,7 +303,7 @@ def _cleanup_destination_storage(src_host: str) -> None:
 @pytest.mark.asyncio
 @pytest.mark.integration
 async def test_configdb_watcher():
-    """Flow points directly at scan-0 (contains demo.ms)."""
+    """Flow points directly at scan-0 (contains .ms file)."""
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
@@ -335,7 +341,7 @@ async def test_configdb_watcher_higher_dir():
     """
     Flow points at beam-vis0 (one level above scan-0).
 
-    Watcher must search one level deeper to find demo.ms.
+    Watcher must search one level deeper to find .ms file.
     """
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     api_configuration = Configuration(host=host)

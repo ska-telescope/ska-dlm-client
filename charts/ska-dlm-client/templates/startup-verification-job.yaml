@@ -28,9 +28,9 @@ spec:
         - "--directory-to-watch"
         - {{ .Values.directory_watcher.directory_to_watch }}
         - "--storage-name"
-        - {{ .Values.directory_watcher.storage_name }}
-        - "--request-server-url"
-        - {{ .Values.ska_dlm_client.request_server_url }}
+        - {{ .Values.directory_watcher.source_storage }}
+        - "--request-url"
+        - {{ .Values.startup_verification.request_url }}
         volumeMounts:
         - name: data-product-storage
           mountPath: /dlm-archive
@@ -49,7 +49,7 @@ spec:
       volumes:
       - name: data-product-storage
         persistentVolumeClaim:
-          claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
+          claimName: "{{ $.Values.directory_watcher.pvc.name }}"
 ---
 apiVersion: v1
 kind: ServiceAccount

@@ -80,10 +80,10 @@ spec:
           {{- include "ska-dlm-client.configdb-watcher.sdp-config-env" . | nindent 10 }}
 
           - name: INGEST_URL
-            value: {{ .Values.configdb_watcher.ingest_server_url | quote }}
+            value: {{ .Values.configdb_watcher.ingest_url | quote }}
 
           - name: STORAGE_URL
-            value: {{ .Values.configdb_watcher.storage_server_url | quote }}
+            value: {{ .Values.configdb_watcher.storage_url | quote }}
 
           - name: SOURCE_NAME
             value: {{ .Values.configdb_watcher.source_storage | quote }}
@@ -109,6 +109,16 @@ spec:
           - name: RCLONE_HOSTNAME
             value: {{ include "ska-dlm-client.fullname" . }}-configdb-watcher.{{ .Release.Namespace }}
 
+          {{- if .Values.configdb_watcher.uid_expiration_days }}
+          - name: UID_EXPIRATION_DAYS
+            value: {{ .Values.configdb_watcher.uid_expiration_days | quote }}
+          {{- end }}
+
+          {{- if .Values.configdb_watcher.oid_expiration_days }}
+          - name: OID_EXPIRATION_DAYS
+            value: {{ .Values.configdb_watcher.oid_expiration_days | quote }}
+          {{- end }}
+
         command:
           - /entrypoint.sh
         args:
@@ -117,13 +127,13 @@ spec:
         volumeMounts:
           - name: data-product-storage
             mountPath: /dlm/product_dir
-            {{- if $.Values.global.dataProduct.pvc.read_only }}
+            {{- if $.Values.configdb_watcher.pvc.read_only }}
             readOnly: true
             {{- end }}
 
       volumes:
         - name: data-product-storage
           persistentVolumeClaim:
-            claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
+            claimName: "{{ $.Values.configdb_watcher.pvc.name }}"
 
 {{- end }}

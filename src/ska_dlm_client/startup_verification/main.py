@@ -1,5 +1,5 @@
 """
-Application to verify the state of the DLM client, intended for startup.
+Application to verify the state of the DLM Directory Watcher, intended for startup.
 
 This application will generate a directory with a single file in it. This directory will
 be placed in the directory watchers "watch" directory.

@@ -1,4 +1,4 @@
-"""Configuration Database watcher client."""
+"""Application to watch the configuration database for Flows and call DLM."""
 
 from __future__ import annotations
 

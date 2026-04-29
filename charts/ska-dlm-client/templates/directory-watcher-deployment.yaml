@@ -47,7 +47,7 @@ spec:
 
         env:
           - name: STORAGE_URL
-            value: {{ .Values.ska_dlm_client.storage_url | quote }}
+            value: {{ .Values.directory_watcher.storage_url | quote }}
           - name: SOURCE_ROOT
             value: {{ .Values.directory_watcher.directory_to_watch | quote }}
           - name: SOURCE_NAME
@@ -65,7 +65,7 @@ spec:
             value: {{ .Values.directory_watcher.migration_url | quote }}
           {{- end }}
           - name: INGEST_URL
-            value: {{ .Values.ska_dlm_client.ingest_url | quote }}
+            value: {{ .Values.directory_watcher.ingest_url | quote }}
           - name: READINESS_PROBE_FILE
             value: {{ $readiness_file | quote }}
           {{- if eq $.Values.directory_watcher.skip_rclone_access_check_on_register true }}
@@ -82,6 +82,15 @@ spec:
           {{- end }}
           - name: RCLONE_HOSTNAME
             value: {{ include "ska-dlm-client.fullname" . }}-directory-watcher.{{ .Release.Namespace }}
+          {{- if .Values.directory_watcher.uid_expiration_days }}
+          - name: UID_EXPIRATION_DAYS
+            value: {{ .Values.directory_watcher.uid_expiration_days | quote }}
+          {{- end }}
+
+          {{- if .Values.directory_watcher.oid_expiration_days }}
+          - name: OID_EXPIRATION_DAYS
+            value: {{ .Values.directory_watcher.oid_expiration_days | quote }}
+          {{- end }}
 
         command:
           - /entrypoint.sh
@@ -97,13 +106,12 @@ spec:
         volumeMounts:
           - name: data-product-storage
             mountPath: /dlm/watch_dir
-            {{- if eq $.Values.global.dataProduct.pvc.read_only true }}
+            {{- if eq $.Values.directory_watcher.pvc.read_only true }}
             readOnly: true
             {{- end }}
-            subPath: dlmw
       dnsPolicy: ClusterFirstWithHostNet
       volumes:
       - name: data-product-storage
         persistentVolumeClaim:
-          claimName: "{{ $.Values.global.dataProduct.pvc.name }}"
+          claimName: "{{ $.Values.directory_watcher.pvc.name }}"
 {{- end }}
