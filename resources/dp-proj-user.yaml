@@ -19,7 +19,7 @@ ska_dlm:
 # --- Shared client configuration ---
 ska_dlm_client:
   image: artefact.skao.int/ska-dlm-client
-  version: "1.2.4"
+  version: "2.0.0"
   imagePullPolicy: Always
   securityContext: {}
 
@@ -30,17 +30,20 @@ directory_watcher:
   component: directory-watcher
   subsystem: data-lifecycle-management
   replicas: 1
+  ingest_url: "http://ska-dlm-ingest.dp-dm"
+  storage_url: "http://ska-dlm-storage.dp-dm"
+  migration_url: "http://ska-dlm-migration.dp-dm"
   source_storage: watch_dir
   storage_root_directory: /dlm/watch_dir
   directory_to_watch: /dlm/watch_dir
   target_name: dlm-archive
   target_root:
+  uid_expiration_days: # leave empty to use DB default, now() + 24:00
+  oid_expiration_days: # leave empty to use DB default, 2099-12-31T23:59:59
   use_polling_watcher: false
   skip_rclone_access_check_on_register: false
   register_contents_of_watch_directory: false
-  ingest_url: "http://ska-dlm-ingest.dp-dm"
-  storage_url: "http://ska-dlm-storage.dp-dm"
-  migration_url: "http://ska-dlm-migration.dp-dm"
+
   pvc:
     name: shared
     read_only: false
@@ -53,13 +56,15 @@ configdb_watcher:
   component: configdb-watcher
   subsystem: data-lifecycle-management
   replicas: 1
+  ingest_url: "http://ska-dlm-ingest.dp-dm"
+  storage_url: "http://ska-dlm-storage.dp-dm"
+  migration_url: "http://ska-dlm-migration.dp-dm"
   include_existing: false
   source_storage: SDPBuffer
   source_root_directory: /dlm/product_dir
   migration_destination_storage_name: dlm-archive
-  ingest_url: "http://ska-dlm-ingest.dp-dm"
-  storage_url: "http://ska-dlm-storage.dp-dm"
-  migration_url: "http://ska-dlm-migration.dp-dm"
+  uid_expiration_days: # leave empty to use DB default, now() + 24:00
+  oid_expiration_days: # leave empty to use DB default, 2099-12-31T23:59:59
   pvc:
     name: shared
     read_only: false
@@ -71,3 +76,8 @@ configdb_watcher:
       enabled: true # deploy a local etcd service
       image: "artefact.skao.int/ska-sdp-etcd"
       tag: "3.5.9"
+
+  # --- Auxiliary utility images ---
+kubectl: # the kubectl image used for k8s readiness testing
+  image: artefact.skao.int/ska-ser-utils
+  version: 0.1.0
