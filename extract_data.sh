@@ -12,5 +12,5 @@ for file in "$@"; do
     fi
 
     echo "Extracting $SOURCE_DIR/$file into $TARGET_DIR"
-    tar xf "$SOURCE_DIR/$file" -C "$TARGET_DIR"
+    tar xjf "$SOURCE_DIR/$file" -C "$TARGET_DIR"
 done
