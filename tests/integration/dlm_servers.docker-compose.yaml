@@ -1,3 +1,4 @@
+# wrapper/top-level integration stack
 include:
 - path: ../services.docker-compose.yaml
 - path: dlm_services.docker-compose.yaml
@@ -15,8 +16,12 @@ services:
       - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
       - $PWD/tests/integration/ska-dlm-home/.dlm:/root/.dlm
     depends_on:
-      - dlm_postgrest
-      - dlm_rclone
+      dlm_migrations:
+        condition: service_completed_successfully
+      dlm_postgrest:
+        condition: service_started
+      dlm_rclone:
+        condition: service_started
     networks:
       - dlm_network
 
@@ -35,8 +40,12 @@ services:
       - $PWD/tests/integration/ska-dlm-home/.dlm:/root/.dlm
       - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
     depends_on:
-      - dlm_postgrest
-      - dlm_rclone
+      dlm_migrations:
+        condition: service_completed_successfully
+      dlm_postgrest:
+        condition: service_started
+      dlm_rclone:
+        condition: service_started
     networks:
       - dlm_network
 
@@ -52,8 +61,12 @@ services:
       - $PWD/tests/integration/ska-dlm-home/.dlm:/root/.dlm
       - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
     depends_on:
-      - dlm_postgrest
-      - dlm_rclone
+      dlm_migrations:
+        condition: service_completed_successfully
+      dlm_postgrest:
+        condition: service_started
+      dlm_rclone:
+        condition: service_started
     networks:
       - dlm_network
 
@@ -69,7 +82,32 @@ services:
       - $PWD/tests/integration/ska-dlm-home/.dlm:/root/.dlm
       - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
     depends_on:
-      - dlm_postgrest
-      - dlm_rclone
+      dlm_migrations:
+        condition: service_completed_successfully
+      dlm_postgrest:
+        condition: service_started
+      dlm_rclone:
+        condition: service_started
+    networks:
+      - dlm_network
+
+  dlm_migrations:
+    build:
+      context: ${DLM_SERVER_REPO_PATH}
+      dockerfile: tests/Dockerfile-migrations
+    image: dlm_migrations
+    container_name: dlm_migrations
+    command: >
+      --url="jdbc:postgresql://dlm_db:5432/ska_dlm"
+      --username="ska_dlm_admin"
+      --password="password"
+      --driver=org.postgresql.Driver
+      --search-path=/changelog
+      --changelog-file=changelog.yaml
+      update
+      --context-filter="create-schema,unprivileged"
+    depends_on:
+      dlm_db:
+        condition: service_healthy
     networks:
       - dlm_network

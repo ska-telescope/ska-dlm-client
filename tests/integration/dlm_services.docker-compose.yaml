@@ -1,3 +1,4 @@
+# lower-level shared infrastructure/services
 include:
   - path: ../services.docker-compose.yaml
 services:
@@ -126,6 +127,8 @@ services:
     depends_on:
       dlm_db:
         condition: service_healthy
+      dlm_migrations:
+        condition: service_completed_successfully
     networks:
       - dlm_network
 
