@@ -92,10 +92,7 @@ services:
       - dlm_network
 
   dlm_migrations:
-    build:
-      context: ${DLM_SERVER_REPO_PATH}
-      dockerfile: tests/Dockerfile-migrations
-    image: dlm_migrations
+    image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:2.0.0-dev.c2f37650e
     container_name: dlm_migrations
     command: >
       --url="jdbc:postgresql://dlm_db:5432/ska_dlm"

@@ -36,52 +36,52 @@ services:
     networks:
       - dlm_network
   keycloak:
-      build:
-          context: .
-          dockerfile: Dockerfile-keycloak
-      image: keycloak
-      command: start-dev --import-realm
-      container_name: keycloak
-      ports:
-        - 8443:8443
-      environment:
-          KC_DB: "postgres"
-          KC_DB_URL: "jdbc:postgresql://keycloak_db:5432/keycloak"
-          KC_DB_USERNAME: "admin"
-          KC_DB_PASSWORD: "maximum-finishing-punk"
-          KC_HOSTNAME: "localhost"
-          KEYCLOAK_ADMIN: "admin"
-          KEYCLOAK_ADMIN_PASSWORD: "affirm-monoxide-earthling"
-      healthcheck:
-          test:
-            [
-              "CMD-SHELL",
-              'exec 3<>/dev/tcp/localhost/9000; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:9000\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
-            ]
-          interval: 5s
-          timeout: 5s
-          retries: 10
-      depends_on:
-        keycloak_db:
-          condition: service_healthy
-      networks:
-        - dlm_network
-  keycloak_db:
-      image: library/postgres
-      container_name: keycloak_db
-      ports:
-        - 5400:5432
-      environment:
-          POSTGRES_DB: "keycloak"
-          POSTGRES_USER: "admin"
-          POSTGRES_PASSWORD: "maximum-finishing-punk"
-      networks:
-        - dlm_network
-      healthcheck:
-        test: ["CMD", "pg_isready", "-U", "admin", "-d", "keycloak"]
+    build:
+        context: .
+        dockerfile: Dockerfile-keycloak
+    image: keycloak
+    command: start-dev --import-realm
+    container_name: keycloak
+    ports:
+      - 8443:8443
+    environment:
+        KC_DB: "postgres"
+        KC_DB_URL: "jdbc:postgresql://keycloak_db:5432/keycloak"
+        KC_DB_USERNAME: "admin"
+        KC_DB_PASSWORD: "maximum-finishing-punk"
+        KC_HOSTNAME: "localhost"
+        KEYCLOAK_ADMIN: "admin"
+        KEYCLOAK_ADMIN_PASSWORD: "affirm-monoxide-earthling"
+    healthcheck:
+        test:
+          [
+            "CMD-SHELL",
+            'exec 3<>/dev/tcp/localhost/9000; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:9000\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
+          ]
         interval: 5s
         timeout: 5s
-        retries: 5
+        retries: 10
+    depends_on:
+      keycloak_db:
+        condition: service_healthy
+    networks:
+      - dlm_network
+  keycloak_db:
+    image: library/postgres
+    container_name: keycloak_db
+    ports:
+      - 5400:5432
+    environment:
+        POSTGRES_DB: "keycloak"
+        POSTGRES_USER: "admin"
+        POSTGRES_PASSWORD: "maximum-finishing-punk"
+    networks:
+      - dlm_network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "admin", "-d", "keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   dlm_rclone:
     image: dlm_rclone
