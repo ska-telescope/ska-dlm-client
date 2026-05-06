@@ -1,19 +1,16 @@
 """
 Integration test harness for ska_dlm_client.
 
-Brings up a minimal DLM stack via Docker Compose using the server repo’s compose files
-plus a local override. The server repo is assumed to be a sibling directory; override with
-DLM_DIR.
+Brings up a minimal DLM stack via Docker Compose using the server stack definitions
+and locally defined overrides. Server components are pulled from published images.
 
 Run with: `pytest -m integration`
 """
 
 import logging
 import os
-import subprocess
-import time
-import urllib
 from pathlib import Path
+from urllib.parse import urlparse
 
 import pytest
 import requests
@@ -23,8 +20,6 @@ from ska_dlm_client.openapi.configuration import Configuration
 
 logging.basicConfig(level=os.getenv("PYTEST_LOGLEVEL", "INFO"))
 log = logging.getLogger(__name__)
-
-PROJECT_NAME = os.environ.get("COMPOSE_PROJECT_NAME", "tests")
 
 # --- OpenAPI client deserialization patch (handles Optional[Dict[str, object]]) ---
 # Original private method
@@ -55,25 +50,7 @@ setattr(_dlm_api_client.ApiClient, "_ApiClient__deserialize", __lenient_deserial
 # returns raw JSON for 'object' types; remove this test-time patch after regen.
 # --- end patch ---
 
-# Figure out repo roots in both local and CI layouts.
-# For local, default to sibling: x/ska-dlm-client -> x/ska-data-lifecycle
 CLIENT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_BASE = Path(os.getenv("CI_PROJECT_DIR", str(CLIENT_ROOT))).parent
-
-SERVER_COMPOSE = f"{CLIENT_ROOT}/tests/integration/dlm_servers.docker-compose.yaml"
-
-HELPERS = CLIENT_ROOT / "tests/test-services.docker-compose.yml"
-CLIENTS = CLIENT_ROOT / "tests/dlm_clients.docker-compose.yaml"
-OVERRIDE = Path(__file__).with_name("docker-compose.override.yaml")
-
-COMPOSE_FILES = [
-    # SERVER_TESTS / "services.docker-compose.yaml",
-    # SERVER_TESTS / "dlm.docker-compose.yaml",
-    SERVER_COMPOSE,
-    HELPERS,
-    CLIENTS,
-    OVERRIDE,
-]
 
 # URLs can be overridden in CI to hit the DinD host
 REQUEST_URL = "http://dlm_request:8002"
@@ -81,14 +58,8 @@ INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 POSTGREST_URL = os.getenv("POSTGREST_URL", "http://dlm_postgrest:3000")
-RCLONE_BASE = os.getenv("RCLONE_BASE", "https://dlm_rclone:5572")
 SDP_CONFIG_HOST = "etcd"
-ETCD_URL = f"http://{SDP_CONFIG_HOST}:2379"
 os.environ["SDP_CONFIG_HOST"] = SDP_CONFIG_HOST
-
-# CERT_DIR = SERVER_TESTS / "integration" / "certs"
-# KEY_PATH = CERT_DIR / "selfsigned.key"
-# CRT_PATH = CERT_DIR / "selfsigned.cert"
 
 
 def pytest_configure(config):
@@ -96,60 +67,21 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "integration: marks integration tests")
 
 
-def _wait_for_rclone(base=RCLONE_BASE, timeout_s: int = 60):
-    """Wait until rclone's Remote Control API responds (TLS + routing ready)."""
-    end = time.time() + timeout_s
-    while time.time() < end:
-        try:
-            r = requests.post(f"{base}/rc/noop", json={}, verify=False, timeout=2)
-            if r.status_code == 200:
-                return
-        except requests.RequestException:
-            pass
-        time.sleep(0.5)
-    raise TimeoutError(f"Timeout waiting for rclone RC at {base}")
-
-
-def _override_hosts(hostname: str):
-    """Override the hostnames in the environment variables for reaching services."""
-    os.environ["REQUEST_URL"] = f"http://{hostname}:8002"
-    os.environ["INGEST_URL"] = f"http://{hostname}:8001"
-    os.environ["MIGRATION_URL"] = f"http://{hostname}:8004"
-    os.environ["STORAGE_URL"] = f"http://{hostname}:8003"
-    os.environ["POSTGREST_URL"] = f"http://{hostname}:3000"
-    os.environ["RCLONE_BASE"] = f"https://{hostname}:5572"
-    os.environ["SDP_CONFIG_HOST"] = "etcd"
-
-
-def _get_container_list() -> list[str]:
-    """Get the list of running Docker containers for the current compose project."""
-    cmd = ["docker", "compose", "-p", "integration", "-f", SERVER_COMPOSE]
-    cmd += ["ps", "-a"]
-    log.info("Trying to get container list: %s", " ".join(cmd))
-    p = subprocess.run(cmd, capture_output=True, text=True, check=True)
-    if p.returncode != 0:
-        log.error("Failed to get container list: %s", p.stderr)
-        return ""
-    container_list = p.stdout
-    return container_list
-
-
 def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 204, 301, 302)):
     """Check HTTP endpoints for server services and replace hostname if required."""
-    url_parts = urllib.parse.urlparse(url)
+    url_parts = urlparse(url)
     orig_hostname = url_parts.hostname
     host_options = [orig_hostname] + ["localhost", "docker"]
     for host in host_options:
         check_url = f"{url_parts.scheme}://{host}:{url_parts.port}{url_parts.path}"
         try:
             log.info(">>>> Checking HTTP endpoint: %s for %s", check_url, orig_hostname)
-            r = requests.get(check_url, timeout=2, verify=verify, allow_redirects=True)
+            r = requests.get(check_url, timeout=timeout_s, verify=verify, allow_redirects=True)
             if r.status_code in ok:
                 log.info("OK!")
                 return
         except requests.RequestException:
             pass
-        time.sleep(timeout_s)
     raise ValueError(f"None of the standard hosts reachable for {orig_hostname}")
 
 
@@ -159,16 +91,12 @@ def dlm_stack():
 
     Wait for the services to start and check hostname options
     """
-    try:
-        _check_service(POSTGREST_URL, timeout_s=2)
-        _check_service(f"{INGEST_URL}/openapi.json", timeout_s=2)
-        _check_service(f"{REQUEST_URL}/openapi.json", timeout_s=2)
-        _check_service(f"{MIGRATION_URL}/openapi.json", timeout_s=2)
-        _check_service(f"{STORAGE_URL}/openapi.json", timeout_s=2)
-        # _check_service(f"{RCLONE_BASE}/", timeout_s=2)
-        yield
-    finally:
-        pass
+    _check_service(POSTGREST_URL, timeout_s=2)
+    _check_service(f"{INGEST_URL}/openapi.json", timeout_s=2)
+    _check_service(f"{REQUEST_URL}/openapi.json", timeout_s=2)
+    _check_service(f"{MIGRATION_URL}/openapi.json", timeout_s=2)
+    _check_service(f"{STORAGE_URL}/openapi.json", timeout_s=2)
+    yield
 
 
 @pytest.fixture(scope="session")
@@ -181,5 +109,4 @@ def storage_configuration(request) -> Configuration:
 @pytest.fixture(scope="session")
 def request_configuration() -> Configuration:
     """Storage API client config."""
-    # request.getfixturevalue("dlm_stack")  # triggers setup
     return Configuration(host=REQUEST_URL)
