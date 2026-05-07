@@ -274,9 +274,7 @@ class RegistrationProcessor:
                 response = api_ingest.register_data_item(**register_kwargs)
                 logger.debug("register_data_item response: %s", response)
             except OpenApiException as err:
-                logger.error(
-                    "OpenApiException caught during register_container_parent_item",
-                )
+                logger.error("OpenApiException caught during child item registration")
                 if isinstance(err, ApiException):
                     logger.error("ApiException: %s", err.body)
                 logger.error("%s", err)
@@ -350,9 +348,7 @@ class RegistrationProcessor:
                 else:
                     logger.warning("Skipping registration of data_item due to config")
             except OpenApiException as err:
-                logger.error(
-                    "OpenApiException caught during register_container_parent_item",
-                )
+                logger.error("OpenApiException caught during data item registration")
                 if isinstance(err, ApiException):
                     logger.error("ApiException: %s", err.body)
                 logger.error("%s", err)
