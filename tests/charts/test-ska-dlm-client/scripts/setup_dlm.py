@@ -3,7 +3,7 @@
 This code will create a basic configuration within DLM that can be used for further client
 testing across various k8s clusters or configurations.
 
-The usage expected is
+The usage expected is (WIP. DMAN-228)
 helm install -f resources/dp-proj-user.yaml test-ska-dlm-client tests/charts/test-ska-dlm-client/
 helm test test-ska-dlm-client
 helm uninstall test-ska-dlm-client
