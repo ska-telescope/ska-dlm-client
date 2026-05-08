@@ -88,8 +88,8 @@ def _register_and_migrate_path(
         processor: The RegistrationProcessor instance to use.
         src_dir: The source directory to register and migrate.
         root_dir: The root directory of the source storage.
-        dataproduct_key: The Flow.Key of the data-product being processed.
-        new_dep: The dependency created for this data-product.
+        dataproduct_key: The Flow.Key of the data product being processed.
+        new_dep: The dependency created for this data product.
 
     Returns:
         The dependency status.
@@ -135,13 +135,13 @@ async def _process_completed_flow(  # noqa: C901
     dataproduct_key: Flow.Key,
     ingest_config: SDPIngestConfig,
 ) -> None:
-    """Process a single COMPLETED data-product Flow.
+    """Process a single COMPLETED data-product-persist Flow.
 
-    - Resolve the data-product directory from Flow.sink.data_dir.
+    - Resolve the directory from Flow.sink.data_dir.
     - Identify the .ms file(s) in that directory (or one level deeper).
     - Create a DLM migration dependency
-    - Register data-product(s) in DLM
-    - Migrate the data-product(s) (if configured)
+    - Register data product(s) in DLM
+    - Migrate the data product(s) (if configured)
     - Set dependency state to WORKING/FINISHED/FAILED depending on outcome.
 
     Notes:
@@ -164,7 +164,7 @@ async def _process_completed_flow(  # noqa: C901
     source_path_full = source_root / source_subpath
 
     logger.info(
-        "New COMPLETED data-product identified: key=%s, source_root=%s, source_subpath=%s, "
+        "New COMPLETED data-product-persist identified: key=%s, source_root=%s, source_subpath=%s, "
         "source_path_full=%s",
         dataproduct_key,
         source_root,
@@ -174,7 +174,7 @@ async def _process_completed_flow(  # noqa: C901
 
     if not source_path_full.exists() or not source_path_full.is_dir():
         logger.error(
-            "Data-product source directory does not exist or is not a directory: %s",
+            "Data product source directory does not exist or is not a directory: %s",
             source_path_full,
         )
         return
@@ -215,7 +215,7 @@ async def _process_completed_flow(  # noqa: C901
     # ---- Create a DLM dependency + set state to WORKING once ----
     new_dep = await create_sdp_migration_dependency(configdb, dataproduct_key)
     if not new_dep:
-        logger.error("Failed to create dependency for data-product %s", dataproduct_key)
+        logger.error("Failed to create dependency for data product %s", dataproduct_key)
         return
     logger.debug("New dependency created: %s", new_dep)
 
@@ -279,10 +279,10 @@ async def sdp_to_dlm_ingest_and_migrate(
                     ingest_config,
                 )
                 logger.info("Done processing %s", dataproduct_key)
-                logger.info("Continuing to watch for COMPLETED data-product Flows")
+                logger.info("Continuing to watch for COMPLETED data-product-persist Flows")
             except Exception:  # pylint: disable=broad-exception-caught  # pragma: no cover
                 logger.exception("Failed to process Flow %s", dataproduct_key)
-                logger.info("Continuing to watch for COMPLETED data-product Flows.")
+                logger.info("Continuing to watch for COMPLETED data-product-persist Flows.")
 
 
 def main() -> None:

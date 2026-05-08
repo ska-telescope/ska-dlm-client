@@ -7,7 +7,7 @@ from typing import Any, Final
 import async_timeout
 import pytest
 from ska_sdp_config.entity import ProcessingBlock, Script
-from ska_sdp_config.entity.flow import DataProduct, Flow
+from ska_sdp_config.entity.flow import DataProduct, DataProductPersist, Flow, FlowSource
 
 from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
 
@@ -44,11 +44,22 @@ async def test_dataproduct_status_watcher(  # noqa: C901
         if txn.processing_block.get(pb_id) is None:
             txn.processing_block.create(ProcessingBlock(key=pb_id, eb_id=None, script=SCRIPT))
 
-    # Our data-product flow
-    test_dataproduct: Final = Flow(
+    dataproduct_flow = Flow(
         key=Flow.Key(pb_id=pb_id, kind="data-product", name=flow_name),
         sink=DataProduct(data_dir="/dlm-archive", paths=[]),
         sources=[],
+        data_model="Visibility",
+    )
+
+    persist_flow = Flow(
+        key=Flow.Key(pb_id=pb_id, kind="data-product-persist", name="dlm-persist"),
+        sink=DataProductPersist(phase="SOLID", expires_at=None),
+        sources=[
+            FlowSource(
+                uri=dataproduct_flow.key,
+                function="ska-data-lifecycle:ingest",
+            )
+        ],
         data_model="Visibility",
     )
 
@@ -58,6 +69,7 @@ async def test_dataproduct_status_watcher(  # noqa: C901
     # Sanity check: no products yet
     for txn in config.txn():
         assert txn.flow.list_keys(kind="data-product") == []
+        assert txn.flow.list_keys(kind="data-product-persist") == []
 
     async def aput_flow():
         """Create the flow, then flip its state a few times. A little 'traffic generator'."""
@@ -65,20 +77,21 @@ async def test_dataproduct_status_watcher(  # noqa: C901
             await asyncio.sleep(timeout_s)
 
         for txn in config.txn():
-            txn.flow.create(test_dataproduct)
-            txn.flow.state(test_dataproduct.key).create({"status": "WAITING"})
-            txn.flow.state(test_dataproduct.key).update({"status": "COMPLETED"})
-            txn.flow.state(test_dataproduct.key).update({})
-            txn.flow.state(test_dataproduct.key).update({"status": "WAITING"})
-            txn.flow.state(test_dataproduct.key).update({"status": "COMPLETED"})
+            txn.flow.create(dataproduct_flow)
+            txn.flow.create(persist_flow)
+            txn.flow.state(dataproduct_flow.key).create({"status": "WAITING"})
+            txn.flow.state(dataproduct_flow.key).update({"status": "COMPLETED"})
+            txn.flow.state(dataproduct_flow.key).update({})
+            txn.flow.state(dataproduct_flow.key).update({"status": "WAITING"})
+            txn.flow.state(dataproduct_flow.key).update({"status": "COMPLETED"})
 
     async def aget_single_state():
         """Consume the watcher and collect COMPLETED events.
 
         If ``create_first`` is True, waits briefly before starting to simulate a pre-existing
-        flow. Runs the data-product status watcher with the shared ``config`` and appends any
-        ``(Flow.Key, "COMPLETED")`` tuples to ``values`` until the timeout elapses. Timeouts are
-        suppressed because some parameterizations may legitimately produce no events.
+        flow. Runs the Watcher with the shared ``config`` and appends any
+        ``(Flow.Key, "COMPLETED")`` tuples to ``values`` until the timeout elapses. Timeouts
+        are suppressed because some parameterizations may legitimately produce no events.
         """
         if create_first:
             await asyncio.sleep(timeout_s)
@@ -98,6 +111,6 @@ async def test_dataproduct_status_watcher(  # noqa: C901
     assert len(values) == expected_count
     if expected_count:
         assert any(
-            key == test_dataproduct.key and state.get("status") == "COMPLETED"
+            key == dataproduct_flow.key and state.get("status") == "COMPLETED"
             for key, state in values
         )

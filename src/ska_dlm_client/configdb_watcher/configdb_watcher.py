@@ -7,7 +7,7 @@ import threading
 from abc import ABCMeta
 from collections.abc import AsyncIterator, Generator
 from contextlib import AbstractAsyncContextManager
-from typing import Any, TypeAlias
+from typing import Any, TypeAlias, cast
 
 import athreading
 from overrides import override
@@ -70,26 +70,40 @@ class DataProductStatusWatcher(
         return await self.__aiter.__anext__()  # pylint: disable=no-member
 
     def _get_existing_data_products(self):
+        """Return data-product Flow.Keys referenced by existing data-product-persist flows."""
         keys = []
         for txn in self.__config.txn():
-            keys = txn.flow.list_keys(kind="data-product")
+            for _persist_flow_key, persist_flow in txn.flow.list_values(
+                kind="data-product-persist"
+            ):
+                persist_flow = cast(Flow, persist_flow)
+
+                for source in persist_flow.sources:
+                    if source.function != "ska-data-lifecycle:ingest":
+                        continue
+
+                    if not isinstance(source.uri, Flow.Key):
+                        continue
+
+                    keys.append(source.uri)
+
         return keys
 
     # pylint: disable=too-many-nested-blocks
     @athreading.iterate
-    def __awatch(self) -> Generator[DataProductKeyState, None, None]:  # noqa: C901
-        """Watcher loop that yields matching data-product Flow status events.
+    def __awatch(self) -> Generator[tuple[Flow.Key, dict], None, None]:  # noqa: C901
+        """Watcher loop that yields matching data-product Flow status events via persist flows.
 
         - Runs synchronously (wrapped by athreading.iterate).
-        - Scans ConfigDB for 'data-product' Flow keys and reads their state.
-        - Yields (Flow.Key, status) when status == self._status.
+        - Scans ConfigDB for 'data-product-persist' flows.
+        - Extracts related 'data-product' Flow.Keys from persist_flow.sources.
+        - Yields (Flow.Key, state) when state["status"] == self._status.
         - Honours include_existing by skipping pre-existing keys via ignored_keys.
-        - For each match, logs PB dependencies and creates a DLM dependency (empty state).
 
         typing.Generator[YIELD, SEND, RETURN]
-        - We yield DataProductKeyState (tuple[Flow.Key, dict[...]])
-        - We never .send() into this generator -> SEND is None
-        - The generator doesn't return a final value -> RETURN is None
+        - YIELD: tuple[Flow.Key, dict]
+        - SEND: None
+        - RETURN: None
         """
         ignored_keys = [] if self._include_existing else self._get_existing_data_products()
         # TODO: look into using a set instead of a list
@@ -105,13 +119,27 @@ class DataProductStatusWatcher(
                 try:
                     # NOTE: with include_existing, this will be very slow if
                     # dependencies are not removed from the database
-                    for key in txn.flow.list_keys(kind="data-product"):
-                        if key not in ignored_keys:
-                            if state := txn.flow.state(key).get():
-                                if state.get("status") == self._status:
-                                    states.append((key, state))
-                                    ignored_keys.append(key)
+                    for _persist_flow_key, persist_flow in txn.flow.list_values(
+                        kind="data-product-persist"
+                    ):
+                        persist_flow = cast(Flow, persist_flow)
+                        # without the cast, persist_flow is inferred as dict[Unknown, Unknown]
+                        for source in persist_flow.sources:
+                            if source.function != "ska-data-lifecycle:ingest":
+                                continue
+
+                            if not isinstance(source.uri, Flow.Key):  # is uri of type Flow.Key?
+                                continue
+
+                            key = source.uri
+                            if key not in ignored_keys:
+                                if state := txn.flow.state(key).get():
+                                    if state.get("status") == self._status:
+                                        states.append((key, state))
+                                        ignored_keys.append(key)
+
                 except Exception:
                     logger.exception("Unexpected watcher exception")
                     raise
-            yield from states
+
+            yield from states  # (key, state)

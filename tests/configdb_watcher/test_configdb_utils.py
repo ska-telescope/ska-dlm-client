@@ -1,12 +1,13 @@
 """Unit test module for configdb_utils."""
 
 import logging
+from datetime import datetime
 from pathlib import Path
 
 import pytest
 from ska_sdp_config import ConfigCollision
 from ska_sdp_config.entity.common import PVCPath
-from ska_sdp_config.entity.flow import DataProduct, Flow
+from ska_sdp_config.entity.flow import DataProduct, DataProductPersist, Flow, FlowSource
 
 from ska_dlm_client.configdb_watcher.configdb_utils import (
     _initialise_dependency,
@@ -18,20 +19,16 @@ from ska_dlm_client.configdb_watcher.configdb_utils import (
 
 PB_ID = "pb-madeup-00000000-a"
 EB_ID = "eb-00000000"
-NAME = "prod-a"
+KIND = "data-product"
+DP_FLOW_NAME = "prod-a"
 FLOW_NAME = "vis-receive-mswriter-processor"
+FUNCTION = "ska-data-lifecycle:ingest"
 
 
 # Note: This fixture mirrors the structure used in ska-sdp-config test_flow.py
 @pytest.fixture
 def dataproduct_flow(config):
-    """Persist a DataProduct Flow."""
-    key = Flow.Key(
-        pb_id=PB_ID,
-        kind="data-product",
-        name=FLOW_NAME,
-    )
-
+    """Create a DataProduct Flow."""
     pvc = PVCPath(
         k8s_namespaces=[],
         k8s_pvc_name="shared",
@@ -39,33 +36,72 @@ def dataproduct_flow(config):
         pvc_subpath=Path(f"product/{EB_ID}/ska-sdp/{PB_ID}"),
     )
 
-    flow = Flow(
-        key=key,
-        data_model="Visibility",
-        sink=DataProduct(
-            data_dir=pvc,
-            paths=[],
-        ),
-        sources=[],
-    )
-
     for txn in config.txn():
+        flow = Flow(
+            key=Flow.Key(
+                pb_id=PB_ID,
+                kind="data-product",
+                name=DP_FLOW_NAME,
+            ),
+            sink=DataProduct(
+                data_dir=pvc,
+                paths=[Path("out-scan_id-id.ms")],
+            ),
+            sources=[
+                FlowSource(
+                    uri=Flow.Key(pb_id=PB_ID, kind="plasma", name="visibilities"),
+                    function="ska-sdp-realtime-receive-processors:mswriter",
+                )
+            ],
+            data_model="Visibility",
+        )
+
         txn.flow.create(flow)
 
-    return key
+    return flow.key
+
+
+@pytest.fixture
+def dataproductpersist_flow(config):
+    """Create a DataProductPersist Flow linked to a DataProduct Flow."""
+    for txn in config.txn():
+        flow = Flow(
+            key=Flow.Key(
+                pb_id=PB_ID,
+                kind="data-product-persist",
+                name="dlm-persist",
+            ),
+            sink=DataProductPersist(
+                expires_at=datetime.now().astimezone(),
+                phase="SOLID",
+            ),
+            sources=[
+                FlowSource(
+                    uri=Flow.Key(
+                        pb_id=PB_ID,
+                        kind=KIND,
+                        name="visibilities",
+                    ),
+                    function=FUNCTION,
+                )
+            ],
+            data_model="Visibility",
+        )
+
+        txn.flow.create(flow)
+
+    return flow.key
 
 
 @pytest.mark.asyncio
-async def test_create_sdp_migration_dependency(config):
+async def test_create_sdp_migration_dependency(config, dataproduct_flow):
     """Test create_sdp_migration_dependency persists dep and empty state."""
-    key = Flow.Key(pb_id=PB_ID, name=NAME)
-
-    dep = await create_sdp_migration_dependency(config, key)
+    dep = await create_sdp_migration_dependency(config, dataproduct_flow)
 
     # Returned dependency has expected key + metadata
     assert dep is not None
     assert dep.key.pb_id == PB_ID
-    assert dep.key.name == NAME
+    assert dep.key.name == DP_FLOW_NAME
     assert dep.key.kind == "dlm-copy"
     assert dep.key.origin == "ska-data-lifecycle-management"
     assert dep.expiry_time == -1
@@ -84,7 +120,7 @@ async def test_create_sdp_migration_dependency(config):
 
 def test_update_dependency_state(config):
     """Test update_dependency_state creates then updates (covers ConfigCollision path)."""
-    key = Flow.Key(pb_id=PB_ID, name=NAME)
+    key = Flow.Key(pb_id=PB_ID, name=DP_FLOW_NAME)
     dep = _initialise_dependency(
         key, dep_kind="dlm-copy", origin="dlmtest", expiry_time=-1, description="unit"
     )
@@ -110,7 +146,7 @@ def test_update_dependency_state(config):
 def test_log_flow_dependencies(config, caplog):
     """Test log_flow_dependencies for none and one."""
     caplog.set_level(logging.INFO, logger="ska_dlm_client.configdb_watcher")
-    key = Flow.Key(pb_id=PB_ID, name=NAME)
+    key = Flow.Key(pb_id=PB_ID, name=DP_FLOW_NAME)
     dep = _initialise_dependency(
         key, dep_kind="dlm-copy", origin="dlmtest", expiry_time=-1, description="unit"
     )
@@ -118,7 +154,7 @@ def test_log_flow_dependencies(config, caplog):
     # No dependencies yet
     for txn in config.txn():
         log_flow_dependencies(txn, dep.key)
-    assert f"No flow dependencies for {PB_ID}/{NAME}" in caplog.text
+    assert f"No flow dependencies for {PB_ID}/{DP_FLOW_NAME}" in caplog.text
 
     # Create one dependency + state and log again
     for txn in config.txn():
@@ -136,7 +172,7 @@ def test_log_flow_dependencies(config, caplog):
         log_flow_dependencies(txn, dep.key)
 
     # Positive log line containing status
-    assert f"Flow dependencies for {PB_ID}/{NAME}:" in caplog.text
+    assert f"Flow dependencies for {PB_ID}/{DP_FLOW_NAME}:" in caplog.text
     assert "status=WORKING" in caplog.text
 
 
@@ -155,18 +191,18 @@ def test_get_pvc_subpath_failure_non_pvcpath(config):
         name=FLOW_NAME,
     )
 
-    flow = Flow(
+    bad_flow = Flow(
         key=key,
         data_model="Visibility",
         sink=DataProduct(
-            data_dir="not/a/pvcpath",
+            data_dir=Path("not/a/pvcpath"),
             paths=[],
         ),
         sources=[],
     )
 
     for txn in config.txn():
-        txn.flow.create(flow)
+        txn.flow.create(bad_flow)
 
     with pytest.raises(TypeError, match=r"only PVCPath supported for flow data_dir"):
         get_pvc_subpath(config, key)
