@@ -10,7 +10,7 @@ from pathlib import Path
 
 import athreading
 from ska_sdp_config import Config
-from ska_sdp_config.entity.flow import Flow
+from ska_sdp_config.entity.flow import Dependency, Flow
 
 from ska_dlm_client.config import DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
 from ska_dlm_client.configdb_watcher.configdb_utils import (
@@ -132,23 +132,23 @@ def _register_and_migrate_path(
 async def _process_completed_flow(  # noqa: C901
     # pylint: disable=too-many-locals
     configdb: Config,
-    dataproduct_key: Flow.Key,
+    dataproduct_key: Flow.Key,  # from DataProduct flow
     ingest_config: SDPIngestConfig,
 ) -> None:
-    """Process a single COMPLETED data-product-persist Flow.
+    """Process a single COMPLETED data product.
 
-    - Resolve the directory from Flow.sink.data_dir.
+    - Resolve the directory from DataProduct Flow.sink.data_dir.
     - Identify the .ms file(s) in that directory (or one level deeper).
-    - Create a DLM migration dependency
-    - Register data product(s) in DLM
-    - Migrate the data product(s) (if configured)
-    - Set dependency state to WORKING/FINISHED/FAILED depending on outcome.
+    - Create a DLM migration Dependency.
+    - Register data product(s) in DLM.
+    - Migrate the data product(s) to the configured destination storage.
+    - Set Dependency state to WORKING/FINISHED/FAILED depending on outcome.
 
     Notes:
         This implementation processes each derived work directory sequentially.
         If later we want faster throughput, could add bounded concurrency (e.g. 2–4 in-flight).
     """
-    new_dep: str | None = None
+    new_dep: Dependency | None = None
 
     @athreading.call
     def _aupdate_dependency_state(status: str) -> None:
@@ -164,8 +164,8 @@ async def _process_completed_flow(  # noqa: C901
     source_path_full = source_root / source_subpath
 
     logger.info(
-        "New COMPLETED data-product-persist identified: key=%s, source_root=%s, "
-        "source_subpath=%s, source_path_full=%s",
+        "New COMPLETED data-product identified via data-product-persist: DataProduct uri=%s, "
+        "source_root=%s, source_subpath=%s, source_path_full=%s",
         dataproduct_key,
         source_root,
         source_subpath,
@@ -279,10 +279,16 @@ async def sdp_to_dlm_ingest_and_migrate(
                     ingest_config,
                 )
                 logger.info("Done processing %s", dataproduct_key)
-                logger.info("Continuing to watch for COMPLETED data-product-persist Flows")
+                logger.info(
+                    "Continuing to watch for data products referenced by "
+                    "data-product-persist Flows."
+                )
             except Exception:  # pylint: disable=broad-exception-caught  # pragma: no cover
                 logger.exception("Failed to process Flow %s", dataproduct_key)
-                logger.info("Continuing to watch for COMPLETED data-product-persist Flows.")
+                logger.info(
+                    "Continuing to watch for data products referenced by "
+                    "data-product-persist Flows."
+                )
 
 
 def main() -> None:

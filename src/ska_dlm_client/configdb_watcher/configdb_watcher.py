@@ -95,10 +95,10 @@ class DataProductStatusWatcher(
         """Watcher loop that yields matching data-product Flow status events via persist flows.
 
         - Runs synchronously (wrapped by athreading.iterate).
-        - Scans ConfigDB for 'data-product-persist' flows.
+        - Scans ConfigDB for 'data-product-persist' flows and follows ingest sources.
         - Extracts related 'data-product' Flow.Keys from persist_flow.sources.
         - Yields (Flow.Key, state) when state["status"] == self._status.
-        - Honours include_existing by skipping pre-existing keys via ignored_keys.
+        - include_existing=True: also process existing matching flows.
 
         typing.Generator[YIELD, SEND, RETURN]
         - YIELD: tuple[Flow.Key, dict]
@@ -123,7 +123,6 @@ class DataProductStatusWatcher(
                         kind="data-product-persist"
                     ):
                         persist_flow = cast(Flow, persist_flow)
-                        # without the cast, persist_flow is inferred as dict[Unknown, Unknown]
                         for source in persist_flow.sources:
                             if source.function != "ska-data-lifecycle:ingest":
                                 continue
@@ -131,7 +130,7 @@ class DataProductStatusWatcher(
                             if not isinstance(source.uri, Flow.Key):  # is uri of type Flow.Key?
                                 continue
 
-                            key = source.uri
+                            key = source.uri  # related to the DataProduct
                             if key not in ignored_keys:
                                 if state := txn.flow.state(key).get():
                                     if state.get("status") == self._status:
