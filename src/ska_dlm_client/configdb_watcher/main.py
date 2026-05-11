@@ -164,8 +164,8 @@ async def _process_completed_flow(  # noqa: C901
     source_path_full = source_root / source_subpath
 
     logger.info(
-        "New COMPLETED data-product-persist identified: key=%s, source_root=%s, source_subpath=%s, "
-        "source_path_full=%s",
+        "New COMPLETED data-product-persist identified: key=%s, source_root=%s, "
+        "source_subpath=%s, source_path_full=%s",
         dataproduct_key,
         source_root,
         source_subpath,

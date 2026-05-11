@@ -11,7 +11,13 @@ import pytest
 from ska_sdp_config import Config
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.common import PVCPath
-from ska_sdp_config.entity.flow import DataProductPersist, Dependency, Flow
+from ska_sdp_config.entity.flow import (
+    DataProduct,
+    DataProductPersist,
+    Dependency,
+    Flow,
+    FlowSource,
+)
 
 from ska_dlm_client.common_types import (
     LocationCountry,
@@ -94,6 +100,8 @@ def _ensure_processing_block() -> None:
                     key=PB_ID,
                     eb_id=None,
                     script=SCRIPT,
+                    parameters={"test": "test"},
+                    dependencies=[],
                 )
             )
             print(f"Created ProcessingBlock {PB_ID}")
@@ -101,14 +109,12 @@ def _ensure_processing_block() -> None:
             print(f"ProcessingBlock {PB_ID} already exists")
 
 
-def _create_completed_flow(subpath: str, flow_name_arg: str) -> None:
-    """Create a Flow and set its state to COMPLETED."""
+def _create_completed_flows(subpath: str, flow_name_arg: str, persist_flow_name_arg: str) -> None:
+    """Create a DataProduct Flow and a DataProductPersist Flow. Set their states to COMPLETED."""
     cfg = _get_cfg()
-    test_dataproduct = Flow(
-        key=Flow.Key(pb_id=PB_ID, kind="data-product-persist", name=flow_name_arg),
-        sink=DataProductPersist(
-            phase="SOLID",
-            expires_at=None,
+    dataproduct_flow = Flow(
+        key=Flow.Key(pb_id=PB_ID, kind="data-product", name=flow_name_arg),
+        sink=DataProduct(
             data_dir=PVCPath(
                 k8s_namespaces=["dp-shared", "dp-shared-p"],
                 k8s_pvc_name="shared-storage",
@@ -122,19 +128,32 @@ def _create_completed_flow(subpath: str, flow_name_arg: str) -> None:
     )
 
     for txn in cfg.txn():
-        txn.flow.create(test_dataproduct)
-        ops = txn.flow.state(test_dataproduct.key)
+        txn.flow.create(dataproduct_flow)
+        ops = txn.flow.state(dataproduct_flow.key)
+        ops.create({"status": "COMPLETED"})
+
+    dataproductpersist_flow = Flow(
+        key=Flow.Key(pb_id=PB_ID, kind="data-product-persist", name=persist_flow_name_arg),
+        sink=DataProductPersist(phase="SOLID", expires_at=None),
+        sources=[FlowSource(uri=dataproduct_flow.key, function="ska-data-lifecycle:ingest")],
+        data_model="Visibility",
+    )
+
+    for txn in cfg.txn():
+        txn.flow.create(dataproductpersist_flow)
+        ops = txn.flow.state(dataproductpersist_flow.key)
         ops.create({"status": "COMPLETED"})
 
 
-def trigger_completed_flow(flow_name, subpath) -> None:
+def trigger_completed_flows(flow_name, persist_flow_name, subpath) -> None:
     """Ensure PB + Flow exist and mark Flow as COMPLETED."""
     _ensure_processing_block()
     # IMPORTANT: this must match what the watcher expects:
     #   - same `storage_root_directory`
     #   - points at a directory that actually contains the .ms + metadata
-    _create_completed_flow(
+    _create_completed_flows(
         subpath=subpath,
+        persist_flow_name_arg=persist_flow_name,
         flow_name_arg=flow_name,
     )
 
@@ -298,7 +317,6 @@ def _cleanup_destination_storage(src_host: str) -> None:
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-@pytest.mark.skip(reason="WIP")
 async def test_configdb_watcher():
     """Flow points directly at scan-0 (contains demo.ms)."""
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
@@ -312,7 +330,8 @@ async def test_configdb_watcher():
 
     # Trigger COMPLETED Flow pointing directly at scan-0
     flow_name = "test-flow"
-    trigger_completed_flow(flow_name, subpath=PVC_SUBPATH1)
+    persist_flow_name = "persist-flow"
+    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH1)
 
     # Poll for FINISHED dependency status
     deadline = time.time() + 10
@@ -334,7 +353,6 @@ async def test_configdb_watcher():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-@pytest.mark.skip(reason="WIP")
 async def test_configdb_watcher_higher_dir():
     """
     Flow points at beam-vis0 (one level above scan-0).
@@ -352,7 +370,8 @@ async def test_configdb_watcher_higher_dir():
 
     # Trigger COMPLETED Flow pointing at beam-vis0
     flow_name = "test-flow-higher-dir"
-    trigger_completed_flow(flow_name, subpath=PVC_SUBPATH2)
+    persist_flow_name = "persist-flow2"
+    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH2)
 
     # Poll for FINISHED dependency status
     deadline = time.time() + 10
@@ -374,7 +393,6 @@ async def test_configdb_watcher_higher_dir():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-@pytest.mark.skip(reason="WIP")
 async def test_watcher_logs_failed_registration():
     """Flow points to a data item that is already registered on the storage."""
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
@@ -387,7 +405,7 @@ async def test_watcher_logs_failed_registration():
     _copy_fixture_into_container(SRC_HOST, source_path)
 
     # Trigger a COMPLETED Flow with same subpath as previous test
-    trigger_completed_flow("test-flow-failure", subpath=PVC_SUBPATH2)
+    trigger_completed_flows("test-flow-failure", "persist-flow3", subpath=PVC_SUBPATH2)
 
     # Poll for FAILED dependency status
     deadline = time.time() + 10
