@@ -4,6 +4,8 @@
 
 * The ConfigDB watcher now watches DataProductPersist Flows and checks the status of the related DataProduct Flow.
 
+## 2.0.0
+
 ### Updated
 
  * Re-generated OpenAPI docs and code for DLM 1.3.2.
