@@ -18,18 +18,15 @@ def _get_id(item, key: str):
     return item[key] if isinstance(item, dict) else getattr(item, key)
 
 
-@pytest.mark.integration
-def test_auto_migration(request_configuration: Configuration):
-    """Test auto migration using directory watcher."""
+def _trigger_migration(watcher_name, request_configuration):
     host = "http://dlm_storage:8003"
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
-
     testfilename = f"group.{str(time())}"
     dst = f"/dlm/watch_dir/{testfilename}"
 
-    cmd = f"docker exec dlm_directory_watcher cp /etc/group {dst}"
+    cmd = f"docker exec {watcher_name} cp /etc/group {dst}"
     log.info("Migration initialization copy command: %s", cmd)
 
     p = subprocess.run(cmd, capture_output=True, shell=True, check=True, text=True)
@@ -37,7 +34,6 @@ def test_auto_migration(request_configuration: Configuration):
         log.info("[copy file STDOUT]: %s\n", p.stdout)
         log.error("[copy file STDERR]: %s\n", p.stderr)
     assert p.returncode == 0
-
     with api_client.ApiClient(request_configuration) as the_api_client:
         api_request = request_api.RequestApi(the_api_client)
         sleep(2)  # TODO: DMAN-193
@@ -57,3 +53,14 @@ def test_auto_migration(request_configuration: Configuration):
     if cleanup.returncode != 0:
         log.info("[cleanup STDOUT]: %s\n", cleanup.stdout)
         log.error("[cleanup STDERR]: %s\n", cleanup.stderr)
+
+@pytest.mark.integration
+def test_auto_migration(request_configuration: Configuration):
+    """Test auto migration using directory watcher."""
+    _trigger_migration("dlm_directory_watcher", request_configuration)
+
+@pytest.mark.integration
+def test_concurrent_migration(request_configuration: Configuration):
+    """Test auto migration using directory watcher."""
+    _trigger_migration("dlm_directory_watcher", request_configuration)
+    _trigger_migration("dlm_directory_watcher2", request_configuration)
