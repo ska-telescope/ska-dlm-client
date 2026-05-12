@@ -279,12 +279,9 @@ async def sdp_to_dlm_ingest_and_migrate(
                     ingest_config,
                 )
                 logger.info("Done processing %s", dataproduct_key)
-                logger.info(
-                    "Continuing to watch for data products referenced by "
-                    "data-product-persist Flows."
-                )
             except Exception:  # pylint: disable=broad-exception-caught  # pragma: no cover
                 logger.exception("Failed to process Flow %s", dataproduct_key)
+            finally:
                 logger.info(
                     "Continuing to watch for data products referenced by "
                     "data-product-persist Flows."

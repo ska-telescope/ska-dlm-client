@@ -69,23 +69,37 @@ class DataProductStatusWatcher(
     async def __anext__(self) -> DataProductKeyState:
         return await self.__aiter.__anext__()  # pylint: disable=no-member
 
-    def _get_existing_data_products(self):
-        """Return data-product Flow.Keys referenced by existing data-product-persist flows."""
+    def _get_data_products_from_persist_flows(self, txn) -> list[Flow.Key]:
+        """Return data-product Flow.Keys referenced by data-product-persist flows."""
         keys = []
-        for txn in self.__config.txn():
-            for _persist_flow_key, persist_flow in txn.flow.list_values(
-                kind="data-product-persist"
-            ):
-                persist_flow = cast(Flow, persist_flow)
+        for _persist_flow_key, persist_flow in txn.flow.list_values(kind="data-product-persist"):
+            persist_flow = cast(Flow, persist_flow)
 
-                for source in persist_flow.sources:
-                    if source.function != "ska-data-lifecycle:ingest":
-                        continue
+            for source in persist_flow.sources:
+                if source.function != "ska-data-lifecycle:ingest":
+                    logger.debug(
+                        "Skipping persist source: function is %s, "
+                        "expected 'ska-data-lifecycle:ingest'",
+                        source.function,
+                    )
+                    continue
 
-                    if not isinstance(source.uri, Flow.Key):
-                        continue
+                if not isinstance(source.uri, Flow.Key):
+                    logger.debug(
+                        "Skipping persist source: source.uri is %s, expected Flow.Key",
+                        source.uri,
+                    )
+                    continue
 
-                    keys.append(source.uri)
+                if source.uri.kind != "data-product":
+                    logger.debug(
+                        "Skipping persist source: source.uri kind is %s, "
+                        "expected 'data-product'",
+                        source.uri.kind,
+                    )
+                    continue
+
+                keys.append(source.uri)
 
         return keys
 
@@ -105,11 +119,12 @@ class DataProductStatusWatcher(
         - SEND: None
         - RETURN: None
         """
-        ignored_keys = [] if self._include_existing else self._get_existing_data_products()
-        # TODO: look into using a set instead of a list
+        ignored_keys = []  # TODO: look into using a set instead of a list
+        if not self._include_existing:
+            for txn in self.__config.txn():
+                ignored_keys.extend(self._get_data_products_from_persist_flows(txn))
 
         for watcher in self.__config.watcher():
-            # must break synchronous iterator on context exit
             if self.__stopped.is_set():
                 break
             self.__trigger = watcher.trigger
@@ -117,28 +132,15 @@ class DataProductStatusWatcher(
             states = []
             for txn in watcher.txn():
                 try:
-                    # NOTE: with include_existing, this will be very slow if
-                    # dependencies are not removed from the database
-                    for _persist_flow_key, persist_flow in txn.flow.list_values(
-                        kind="data-product-persist"
-                    ):
-                        persist_flow = cast(Flow, persist_flow)
-                        for source in persist_flow.sources:
-                            if source.function != "ska-data-lifecycle:ingest":
-                                continue
-
-                            if not isinstance(source.uri, Flow.Key):  # is uri of type Flow.Key?
-                                continue
-
-                            key = source.uri  # related to the DataProduct
-                            if key not in ignored_keys:
-                                if state := txn.flow.state(key).get():
-                                    if state.get("status") == self._status:
-                                        states.append((key, state))
-                                        ignored_keys.append(key)
+                    for key in self._get_data_products_from_persist_flows(txn):
+                        if key not in ignored_keys:
+                            if state := txn.flow.state(key).get():
+                                if state.get("status") == self._status:
+                                    states.append((key, state))
+                                    ignored_keys.append(key)
 
                 except Exception:
                     logger.exception("Unexpected watcher exception")
                     raise
 
-            yield from states  # (key, state)
+            yield from states
