@@ -18,6 +18,22 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - dlm_network
+  dlm_directory_watcher2:
+    platform: linux/amd64
+    image: dlm_directory_watcher
+    container_name: dlm_directory_watcher2
+    hostname: ska-dlm-directory-watcher2
+    env_file:
+      - directory_watcher2.env
+    entrypoint: /entrypoint.sh
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - dlm_network
+
   dlm_configdb_watcher:
     platform: linux/amd64
     image: dlm_configdb_watcher
