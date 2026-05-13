@@ -20,12 +20,13 @@ import tempfile
 import time
 from datetime import datetime
 
+import ska_ser_logging
+
 from ska_dlm_client.openapi import ApiException, api_client, configuration
 from ska_dlm_client.openapi.dlm_api import request_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
 from ska_dlm_client.utils import CmdLineParameters
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Used as a data item for testing directory_watcher
@@ -88,6 +89,7 @@ class StartupVerification:  # pylint: disable=too-few-public-methods
 
 def main():
     """Run main in its own function."""
+    ska_ser_logging.configure_logging(logging.INFO)
     verification_passed: bool = False
     try:
         parser = argparse.ArgumentParser(prog="dlm_startup_verification")

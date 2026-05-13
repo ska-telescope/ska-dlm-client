@@ -11,7 +11,13 @@ import pytest
 from ska_sdp_config import Config
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.common import PVCPath
-from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
+from ska_sdp_config.entity.flow import (
+    DataProduct,
+    DataProductPersist,
+    Dependency,
+    Flow,
+    FlowSource,
+)
 
 from ska_dlm_client.common_types import (
     LocationCountry,
@@ -94,6 +100,8 @@ def _ensure_processing_block() -> None:
                     key=PB_ID,
                     eb_id=None,
                     script=SCRIPT,
+                    parameters={"test": "test"},
+                    dependencies=[],
                 )
             )
             print(f"Created ProcessingBlock {PB_ID}")
@@ -101,10 +109,10 @@ def _ensure_processing_block() -> None:
             print(f"ProcessingBlock {PB_ID} already exists")
 
 
-def _create_completed_flow(subpath: str, flow_name_arg: str) -> None:
-    """Create a Flow and set its state to COMPLETED."""
+def _create_completed_flows(subpath: str, flow_name_arg: str, persist_flow_name_arg: str) -> None:
+    """Create a DataProduct Flow and a DataProductPersist Flow. Set their states to COMPLETED."""
     cfg = _get_cfg()
-    test_dataproduct = Flow(
+    dataproduct_flow = Flow(
         key=Flow.Key(pb_id=PB_ID, kind="data-product", name=flow_name_arg),
         sink=DataProduct(
             data_dir=PVCPath(
@@ -120,19 +128,32 @@ def _create_completed_flow(subpath: str, flow_name_arg: str) -> None:
     )
 
     for txn in cfg.txn():
-        txn.flow.create(test_dataproduct)
-        ops = txn.flow.state(test_dataproduct.key)
+        txn.flow.create(dataproduct_flow)
+        ops = txn.flow.state(dataproduct_flow.key)
+        ops.create({"status": "COMPLETED"})
+
+    dataproductpersist_flow = Flow(
+        key=Flow.Key(pb_id=PB_ID, kind="data-product-persist", name=persist_flow_name_arg),
+        sink=DataProductPersist(phase="SOLID", expires_at=None),
+        sources=[FlowSource(uri=dataproduct_flow.key, function="ska-dlm-client:ingest")],
+        data_model="Visibility",
+    )
+
+    for txn in cfg.txn():
+        txn.flow.create(dataproductpersist_flow)
+        ops = txn.flow.state(dataproductpersist_flow.key)
         ops.create({"status": "COMPLETED"})
 
 
-def trigger_completed_flow(flow_name, subpath) -> None:
+def trigger_completed_flows(flow_name, persist_flow_name, subpath) -> None:
     """Ensure PB + Flow exist and mark Flow as COMPLETED."""
     _ensure_processing_block()
     # IMPORTANT: this must match what the watcher expects:
     #   - same `storage_root_directory`
     #   - points at a directory that actually contains the .ms + metadata
-    _create_completed_flow(
+    _create_completed_flows(
         subpath=subpath,
+        persist_flow_name_arg=persist_flow_name,
         flow_name_arg=flow_name,
     )
 
@@ -142,7 +163,7 @@ def _get_id(item, key: str):
 
 
 def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
-    """Return all dependency statuses for a given data-product (by pb_id/name)."""
+    """Return all dependency statuses for a given pb_id/name."""
     cfg = _get_cfg()
     statuses: list[str] = []
     for txn in cfg.txn():
@@ -150,7 +171,7 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
         log.info("Found dependencies for %s/%s: %s", pb_id, name, dkeys)
         for dkey in dkeys:
             dep_obj = Dependency(
-                key=dkey, expiry_time=-1, description="DLM: lock data-product for copy"
+                key=dkey, expiry_time=-1, description="DLM: lock data product for copy"
             )
             state = txn.dependency.state(dep_obj).get() or {}
             log.info("Found state %s for dependency %s", state, dep_obj)
@@ -309,7 +330,8 @@ async def test_configdb_watcher():
 
     # Trigger COMPLETED Flow pointing directly at scan-0
     flow_name = "test-flow"
-    trigger_completed_flow(flow_name, subpath=PVC_SUBPATH1)
+    persist_flow_name = "persist-flow"
+    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH1)
 
     # Poll for FINISHED dependency status
     deadline = time.time() + 10
@@ -348,7 +370,8 @@ async def test_configdb_watcher_higher_dir():
 
     # Trigger COMPLETED Flow pointing at beam-vis0
     flow_name = "test-flow-higher-dir"
-    trigger_completed_flow(flow_name, subpath=PVC_SUBPATH2)
+    persist_flow_name = "persist-flow2"
+    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH2)
 
     # Poll for FINISHED dependency status
     deadline = time.time() + 10
@@ -382,7 +405,7 @@ async def test_watcher_logs_failed_registration():
     _copy_fixture_into_container(SRC_HOST, source_path)
 
     # Trigger a COMPLETED Flow with same subpath as previous test
-    trigger_completed_flow("test-flow-failure", subpath=PVC_SUBPATH2)
+    trigger_completed_flows("test-flow-failure", "persist-flow3", subpath=PVC_SUBPATH2)
 
     # Poll for FAILED dependency status
     deadline = time.time() + 10

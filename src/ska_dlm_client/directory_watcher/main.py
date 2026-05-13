@@ -6,6 +6,8 @@ import functools
 import logging
 import signal
 
+import ska_ser_logging
+
 import ska_dlm_client.config
 from ska_dlm_client.directory_watcher.directory_watcher import (
     DirectoryWatcher,
@@ -18,7 +20,6 @@ from ska_dlm_client.utils import CmdLineParameters
 
 from .config import WatcherConfig
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -239,6 +240,7 @@ def main():
     Creates a new asyncio event loop and runs the amain coroutine in it.
     This function is the entry point when the module is executed directly.
     """
+    ska_ser_logging.configure_logging(logging.INFO)
     asyncio.run(amain())
 
 

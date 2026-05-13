@@ -229,10 +229,6 @@ def log_changes_with_diff(  # noqa: C901
 
 
 if __name__ == "__main__":
-    # Configure logging when run as a main application
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
     result = monitor_directory_with_watchdog(
         directory="/tmp/test_dir", wait_time=15.0, recursive=True
     )

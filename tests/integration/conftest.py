@@ -18,7 +18,6 @@ import requests
 import ska_dlm_client.openapi.api_client as _dlm_api_client
 from ska_dlm_client.openapi.configuration import Configuration
 
-logging.basicConfig(level=os.getenv("PYTEST_LOGLEVEL", "INFO"))
 log = logging.getLogger(__name__)
 
 # --- OpenAPI client deserialization patch (handles Optional[Dict[str, object]]) ---
@@ -58,8 +57,13 @@ INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 POSTGREST_URL = os.getenv("POSTGREST_URL", "http://dlm_postgrest:3000")
-SDP_CONFIG_HOST = "etcd"
+RCLONE_BASE = os.getenv("RCLONE_BASE", "https://dlm_rclone:5572")
+SDP_CONFIG_HOST = os.environ.get("SDP_CONFIG_HOST", "etcd")
+SDP_CONFIG_PORT = os.environ.get("SDP_CONFIG_PORT", "2379")
+ETCD_URL = f"http://{SDP_CONFIG_HOST}:{SDP_CONFIG_PORT}"
+
 os.environ["SDP_CONFIG_HOST"] = SDP_CONFIG_HOST
+os.environ["SDP_CONFIG_PORT"] = SDP_CONFIG_PORT
 
 
 def pytest_configure(config):
