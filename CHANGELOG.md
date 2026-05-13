@@ -1,5 +1,9 @@
 # Version History
 
+## Development
+
+* The ConfigDB watcher now watches DataProductPersist Flows and checks the status of the related DataProduct Flow.
+
 ## 2.0.0
 
 ### Updated
