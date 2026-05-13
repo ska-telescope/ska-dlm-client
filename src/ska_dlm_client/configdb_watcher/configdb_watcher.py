@@ -69,11 +69,10 @@ class DataProductStatusWatcher(
     async def __anext__(self) -> DataProductKeyState:
         return await self.__aiter.__anext__()  # pylint: disable=no-member
 
-    def _get_data_products_from_persist_flows(self, txn) -> list[Flow.Key]:
+    def _get_data_products_from_persist_flows(self, txn: Transaction) -> list[Flow.Key]:
         """Return data-product Flow.Keys referenced by data-product-persist flows."""
         keys = []
-        for _persist_flow_key, persist_flow in txn.flow.list_values(kind="data-product-persist"):
-            persist_flow = cast(Flow, persist_flow)
+        for _persist_flow_key, persist_flow in txn.flow.query_values(kind="data-product-persist"):
 
             for source in persist_flow.sources:
                 if source.function != "ska-data-lifecycle:ingest":
@@ -114,10 +113,12 @@ class DataProductStatusWatcher(
         - Yields (Flow.Key, state) when state["status"] == self._status.
         - include_existing=True: also process existing matching flows.
 
-        typing.Generator[YIELD, SEND, RETURN]
-        - YIELD: tuple[Flow.Key, dict]
-        - SEND: None
-        - RETURN: None
+        Yields:
+            DataProductKeyState: tuple of Flow.Key and flow state
+
+        Returns:
+            AsyncIteratorContext[DataProductKeyState]: context manager to an async iterator.
+
         """
         ignored_keys = []  # TODO: look into using a set instead of a list
         if not self._include_existing:
@@ -133,11 +134,13 @@ class DataProductStatusWatcher(
             for txn in watcher.txn():
                 try:
                     for key in self._get_data_products_from_persist_flows(txn):
-                        if key not in ignored_keys:
-                            if state := txn.flow.state(key).get():
-                                if state.get("status") == self._status:
-                                    states.append((key, state))
-                                    ignored_keys.append(key)
+                        if (
+                            key not in ignored_keys
+                            and (state := txn.flow.state(key).get())
+                            and state.get("status") == self._status
+                        ):
+                            states.append((key, state))
+                            ignored_keys.append(key)
 
                 except Exception:
                     logger.exception("Unexpected watcher exception")
