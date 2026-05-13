@@ -7,11 +7,12 @@ import threading
 from abc import ABCMeta
 from collections.abc import AsyncIterator, Generator
 from contextlib import AbstractAsyncContextManager
-from typing import Any, TypeAlias, cast
+from typing import Any, TypeAlias
 
 import athreading
 from overrides import override
 from ska_sdp_config import Config
+from ska_sdp_config.config import Transaction
 from ska_sdp_config.entity.flow import Flow
 
 logging.basicConfig(level=logging.INFO)
@@ -102,7 +103,6 @@ class DataProductStatusWatcher(
 
         return keys
 
-    # pylint: disable=too-many-nested-blocks
     @athreading.iterate
     def __awatch(self) -> Generator[tuple[Flow.Key, dict], None, None]:  # noqa: C901
         """Watcher loop that yields matching data-product Flow status events via persist flows.

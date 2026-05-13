@@ -132,7 +132,7 @@ def _register_and_migrate_path(
 async def _process_completed_flow(  # noqa: C901
     # pylint: disable=too-many-locals
     configdb: Config,
-    dataproduct_key: Flow.Key,  # from DataProduct flow
+    dataproduct_key: Flow.Key,
     ingest_config: SDPIngestConfig,
 ) -> None:
     """Process a single COMPLETED data product.
@@ -143,6 +143,11 @@ async def _process_completed_flow(  # noqa: C901
     - Register data product(s) in DLM.
     - Migrate the data product(s) to the configured destination storage.
     - Set Dependency state to WORKING/FINISHED/FAILED depending on outcome.
+
+    Args:
+        configdb: Shared SDP ConfigDB client.
+        dataproduct_key: Flow.Key from the related DataProduct Flow.
+        ingest_config: Runtime ingest and migration configuration.
 
     Notes:
         This implementation processes each derived work directory sequentially.
