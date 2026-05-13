@@ -19,7 +19,6 @@ from ska_dlm_client.openapi import ApiException, api_client
 from ska_dlm_client.openapi.dlm_api import ingest_api, migration_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 

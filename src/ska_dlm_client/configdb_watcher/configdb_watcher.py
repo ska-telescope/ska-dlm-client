@@ -15,8 +15,6 @@ from ska_sdp_config import Config
 from ska_sdp_config.config import Transaction
 from ska_sdp_config.entity.flow import Flow
 
-logging.basicConfig(level=logging.INFO)
-
 logger = logging.getLogger(__name__)
 
 DataProductKeyState: TypeAlias = tuple[Flow.Key, dict[str, Any]]

@@ -9,13 +9,14 @@ import shutil
 import socket
 import sys
 
+import ska_ser_logging
+
 from ska_dlm_client.common_types import LocationCountry, LocationType
 from ska_dlm_client.config import Config
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Constants that can be used for testing.
@@ -265,6 +266,7 @@ def create_parser() -> argparse.ArgumentParser:
 
 def main():
     """If this is called as a CLI we just register the integration/developer setup volumes."""
+    ska_ser_logging.configure_logging(logging.INFO)
     parser = create_parser()
     args = parser.parse_args()
     api_configuration = Configuration(host=args.storage_url)

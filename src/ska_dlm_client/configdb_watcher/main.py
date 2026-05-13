@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 
 import athreading
+import ska_ser_logging
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Dependency, Flow
 
@@ -295,6 +296,8 @@ async def sdp_to_dlm_ingest_and_migrate(
 
 def main() -> None:
     """Control the main execution of the program."""
+    ska_ser_logging.configure_logging(logging.INFO)
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--include-existing",

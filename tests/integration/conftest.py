@@ -21,7 +21,6 @@ import requests
 import ska_dlm_client.openapi.api_client as _dlm_api_client
 from ska_dlm_client.openapi.configuration import Configuration
 
-logging.basicConfig(level=os.getenv("PYTEST_LOGLEVEL", "INFO"))
 log = logging.getLogger(__name__)
 
 PROJECT_NAME = os.environ.get("COMPOSE_PROJECT_NAME", "tests")
