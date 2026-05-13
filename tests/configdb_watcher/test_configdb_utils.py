@@ -22,7 +22,7 @@ EB_ID = "eb-00000000"
 KIND = "data-product"
 DP_FLOW_NAME = "prod-a"
 FLOW_NAME = "vis-receive-mswriter-processor"
-FUNCTION = "ska-data-lifecycle:ingest"
+FUNCTION = "ska-dlm-client:ingest"
 
 
 # Note: This fixture mirrors the structure used in ska-sdp-config test_flow.py

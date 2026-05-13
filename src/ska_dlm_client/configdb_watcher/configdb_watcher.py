@@ -76,10 +76,10 @@ class DataProductStatusWatcher(
         for _persist_flow_key, persist_flow in txn.flow.query_values(kind="data-product-persist"):
 
             for source in persist_flow.sources:
-                if source.function != "ska-data-lifecycle:ingest":
+                if source.function != "ska-dlm-client:ingest":
                     logger.debug(
                         "Skipping persist source: function is %s, "
-                        "expected 'ska-data-lifecycle:ingest'",
+                        "expected 'ska-dlm-client:ingest'",
                         source.function,
                     )
                     continue

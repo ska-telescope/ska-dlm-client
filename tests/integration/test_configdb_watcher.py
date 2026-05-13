@@ -135,7 +135,7 @@ def _create_completed_flows(subpath: str, flow_name_arg: str, persist_flow_name_
     dataproductpersist_flow = Flow(
         key=Flow.Key(pb_id=PB_ID, kind="data-product-persist", name=persist_flow_name_arg),
         sink=DataProductPersist(phase="SOLID", expires_at=None),
-        sources=[FlowSource(uri=dataproduct_flow.key, function="ska-data-lifecycle:ingest")],
+        sources=[FlowSource(uri=dataproduct_flow.key, function="ska-dlm-client:ingest")],
         data_model="Visibility",
     )
 

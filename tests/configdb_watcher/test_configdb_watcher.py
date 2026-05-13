@@ -57,7 +57,7 @@ async def test_dataproduct_status_watcher(  # noqa: C901
         sources=[
             FlowSource(
                 uri=dataproduct_flow.key,
-                function="ska-data-lifecycle:ingest",
+                function="ska-dlm-client:ingest",
             )
         ],
         data_model="Visibility",
