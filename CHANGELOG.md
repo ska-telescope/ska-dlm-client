@@ -10,6 +10,7 @@
 
 * Running tests with server image 2.0.0.
 * The ConfigDB watcher now watches DataProductPersist Flows and checks the status of the related DataProduct Flow.
+* OCI image build process is more selective when copying sources for package building.
 
 ## 2.0.0
 
