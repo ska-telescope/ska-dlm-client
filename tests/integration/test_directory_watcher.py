@@ -54,10 +54,12 @@ def _trigger_migration(watcher_name, request_configuration):
         log.info("[cleanup STDOUT]: %s\n", cleanup.stdout)
         log.error("[cleanup STDERR]: %s\n", cleanup.stderr)
 
+
 @pytest.mark.integration
 def test_auto_migration(request_configuration: Configuration):
     """Test auto migration using directory watcher."""
     _trigger_migration("dlm_directory_watcher", request_configuration)
+
 
 @pytest.mark.integration
 def test_concurrent_migration(request_configuration: Configuration):
