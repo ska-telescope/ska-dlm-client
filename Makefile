@@ -12,7 +12,7 @@ PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
 MEASUREMENT_SETS_FOR_TESTS = output.scan-1.beam-vis0.ms.tar.gz
 
 # The DLM server image to use in integration tests:
-DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:2.0.0
+DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:2.1.0
 
 python-test: extract-test-data python-pre-test python-do-test python-post-test
 
