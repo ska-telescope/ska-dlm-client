@@ -2,6 +2,10 @@
 
 ## Development
 
+### Updated
+
+* Running tests with server image 2.1.0.
+
 ### Changed
 
 * Use published migrations image for integration tests.

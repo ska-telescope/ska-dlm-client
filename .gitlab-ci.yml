@@ -73,3 +73,11 @@ integration-tests:
     - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services run -u root --entrypoint "pytest -m integration" dlm_client_testrunner
   after_script:
     - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services down dlm_client_testrunner
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - api_failure
+      - scheduler_failure
+      - unknown_failure
