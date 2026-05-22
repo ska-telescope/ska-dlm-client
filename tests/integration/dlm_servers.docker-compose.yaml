@@ -92,7 +92,7 @@ services:
       - dlm_network
 
   dlm_migrations:
-    image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:2.0.0-dev.c2f37650e
+    image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:2.1.0-dev.ca47045dc
     container_name: dlm_migrations
     command: >
       --url="jdbc:postgresql://dlm_db:5432/ska_dlm"

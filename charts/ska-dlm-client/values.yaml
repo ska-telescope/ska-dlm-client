@@ -22,7 +22,7 @@ ska_dlm:
 # --- Shared client configuration ---
 ska_dlm_client:
   image: artefact.skao.int/ska-dlm-client
-  version: "2.0.0"
+  version: "2.1.0"
   imagePullPolicy: Always
   securityContext: {}
 
