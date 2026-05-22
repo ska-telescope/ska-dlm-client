@@ -6,6 +6,8 @@ import functools
 import logging
 import signal
 
+import ska_ser_logging
+
 import ska_dlm_client.config
 from ska_dlm_client import CONFIG
 from ska_dlm_client.directory_watcher.directory_watcher import (
@@ -19,12 +21,17 @@ from ska_dlm_client.utils import CmdLineParameters
 
 from .config import WatcherConfig
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def add_arguments(cmd_line_parameters) -> CmdLineParameters:
-    """Add parser arguments for this application.
+def create_parser() -> argparse.ArgumentParser:
+    """Define a parser for all the command line parameters.
+
+    Creates and configures an ArgumentParser with all the command line options
+    needed for the ska-dlm-client's various components.
+
+    Returns:
+        An ArgumentParser instance configured with all required and optional arguments.
     """
     cmd_line_parameters.parser.add_argument(
         "-d",
@@ -98,7 +105,7 @@ def process_args(args: argparse.Namespace) -> WatcherConfig:
     """
     if args.source_name:
         RCLONE_CONFIG_SOURCE["name"] = args.source_name
-
+    # TODO: not all command line args are being processed below
     config = WatcherConfig(
         directory_to_watch=args.directory_to_watch,
         ingest_url=args.ingest_url,
@@ -188,8 +195,7 @@ def main():
     Creates a new asyncio event loop and runs the amain coroutine in it.
     This function is the entry point when the module is executed directly.
     """
-    print(f">>>>CONFIG: {CONFIG}")
-
+    ska_ser_logging.configure_logging(logging.INFO)
     asyncio.run(amain())
 
 

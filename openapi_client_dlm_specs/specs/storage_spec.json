@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "1.2.0"
+        "version": "1.3.2"
     },
     "paths": {
         "/storage/query_location_facility": {
@@ -240,8 +240,8 @@
                                         "type": "null"
                                     }
                                 ],
-                                "description": "extra rclone values such as secrets required for connection",
-                                "title": "Rclone Config"
+                                "description": "Alternative way to initialize a storage volume by providing JSON",
+                                "title": "Storage Config"
                             }
                         }
                     }

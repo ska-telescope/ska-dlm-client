@@ -3,12 +3,21 @@
 import logging
 import os
 import subprocess
+import time
+from pathlib import Path
 from time import sleep
 
 import pytest
 from ska_sdp_config import Config
 from ska_sdp_config.entity import ProcessingBlock, Script
-from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
+from ska_sdp_config.entity.common import PVCPath
+from ska_sdp_config.entity.flow import (
+    DataProduct,
+    DataProductPersist,
+    Dependency,
+    Flow,
+    FlowSource,
+)
 
 from ska_dlm_client.common_types import (
     LocationCountry,
@@ -25,8 +34,10 @@ from ska_dlm_client.register_storage_location.main import setup_testing
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+EB_ID = "eb-00000000"
 PB_ID = "pb-test-00000000-a"
-DEMO_MS_PATH = f"{dir_path}/../directory_watcher/test_registration_processor/product_dir"
+MS_NAME = "output.scan-1.beam-vis0.ms"
+MS_PATH_LOCAL = f"{dir_path}/../directory_watcher/test_registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
@@ -44,7 +55,11 @@ STORAGE = {
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
         "ROOT_DIRECTORY": "/dlm-archive",
-        "STORAGE_CONFIG": {"name": "dlm-archive", "type": "local", "parameters": {}},
+        "STORAGE_CONFIG": {
+            "name": "dlm-archive",
+            "type": "alias",  # type 'alias' or 'local'?
+            "parameters": {"remote": "/dlm-archive"},
+        },
     },
     "SRC": {
         "STORAGE_NAME": "sdp-watcher",
@@ -65,6 +80,11 @@ STORAGE = {
     },
 }
 
+SRC_HOST = STORAGE["SRC"]["STORAGE_CONFIG"]["parameters"]["host"]
+WATCHER_SOURCE_DIR_ROOT = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}"
+PVC_SUBPATH1 = f"product/{EB_ID}/ska-sdp/{PB_ID}/beam-vis0/scan-0"
+PVC_SUBPATH2 = f"product/{EB_ID}/ska-sdp/{PB_ID}/beam-vis0"
+
 
 def _get_cfg() -> Config:
     """Return a Config using the same env-based backend settings as the watcher."""
@@ -81,6 +101,8 @@ def _ensure_processing_block() -> None:
                     key=PB_ID,
                     eb_id=None,
                     script=SCRIPT,
+                    parameters={"test": "test"},
+                    dependencies=[],
                 )
             )
             print(f"Created ProcessingBlock {PB_ID}")
@@ -88,30 +110,51 @@ def _ensure_processing_block() -> None:
             print(f"ProcessingBlock {PB_ID} already exists")
 
 
-def _create_completed_flow(data_dir: str, flow_name_arg: str) -> None:
-    """Create a Flow and set its state to COMPLETED."""
+def _create_completed_flows(subpath: str, flow_name_arg: str, persist_flow_name_arg: str) -> None:
+    """Create a DataProduct Flow and a DataProductPersist Flow. Set their states to COMPLETED."""
     cfg = _get_cfg()
-    test_dataproduct = Flow(
+    dataproduct_flow = Flow(
         key=Flow.Key(pb_id=PB_ID, kind="data-product", name=flow_name_arg),
-        sink=DataProduct(data_dir=data_dir, paths=[]),
+        sink=DataProduct(
+            data_dir=PVCPath(
+                k8s_namespaces=["dp-shared", "dp-shared-p"],
+                k8s_pvc_name="shared-storage",
+                pvc_mount_path=Path("/dlm/product_dir"),
+                pvc_subpath=Path(subpath),
+            ),
+            paths=[],
+        ),
         sources=[],
         data_model="Visibility",
     )
 
     for txn in cfg.txn():
-        txn.flow.create(test_dataproduct)
-        ops = txn.flow.state(test_dataproduct.key)
+        txn.flow.create(dataproduct_flow)
+        ops = txn.flow.state(dataproduct_flow.key)
+        ops.create({"status": "COMPLETED"})
+
+    dataproductpersist_flow = Flow(
+        key=Flow.Key(pb_id=PB_ID, kind="data-product-persist", name=persist_flow_name_arg),
+        sink=DataProductPersist(phase="SOLID", expires_at=None),
+        sources=[FlowSource(uri=dataproduct_flow.key, function="ska-dlm-client:ingest")],
+        data_model="Visibility",
+    )
+
+    for txn in cfg.txn():
+        txn.flow.create(dataproductpersist_flow)
+        ops = txn.flow.state(dataproductpersist_flow.key)
         ops.create({"status": "COMPLETED"})
 
 
-def trigger_completed_flow(flow_name) -> None:
+def trigger_completed_flows(flow_name, persist_flow_name, subpath) -> None:
     """Ensure PB + Flow exist and mark Flow as COMPLETED."""
     _ensure_processing_block()
     # IMPORTANT: this must match what the watcher expects:
     #   - same `storage_root_directory`
     #   - points at a directory that actually contains the .ms + metadata
-    _create_completed_flow(
-        data_dir=STORAGE["SRC"]["ROOT_DIRECTORY"],
+    _create_completed_flows(
+        subpath=subpath,
+        persist_flow_name_arg=persist_flow_name,
         flow_name_arg=flow_name,
     )
 
@@ -121,7 +164,7 @@ def _get_id(item, key: str):
 
 
 def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
-    """Return all dependency statuses for a given data-product (by pb_id/name)."""
+    """Return all dependency statuses for a given pb_id/name."""
     cfg = _get_cfg()
     statuses: list[str] = []
     for txn in cfg.txn():
@@ -129,7 +172,7 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
         log.info("Found dependencies for %s/%s: %s", pb_id, name, dkeys)
         for dkey in dkeys:
             dep_obj = Dependency(
-                key=dkey, expiry_time=-1, description="DLM: lock data-product for copy"
+                key=dkey, expiry_time=-1, description="DLM: lock data product for copy"
             )
             state = txn.dependency.state(dep_obj).get() or {}
             log.info("Found state %s for dependency %s", state, dep_obj)
@@ -233,60 +276,150 @@ def test_storage_initialisation(storage_configuration: Configuration):
         assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
 
 
+def _copy_fixture_into_container(src_host: str, watcher_src_subpath: str) -> None:
+    """Copy the MS fixture into watcher_src_subpath and wait until the path becomes visible."""
+    # 1) Ensure watcher source dir exists
+    cmd = f"docker exec {src_host} sh -lc 'mkdir -p {watcher_src_subpath}'"
+    log.info("Ensure watcher source dir exists: %s", cmd)
+    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
+    assert p.returncode == 0, p.stderr
+    cmd = f"ls -la {MS_PATH_LOCAL}"
+    log.info("Local fixture contents: %s", cmd)
+    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
+    log.info("Local fixture contents rc=%s stdout=%s stderr=%s", p.returncode, p.stdout, p.stderr)
+
+    # 2) Copy the contents of MS_PATH_LOCAL into <container>:<dest>
+    cmd = f"docker container cp {MS_PATH_LOCAL}/. {src_host}:{watcher_src_subpath}/"
+    log.info("Copy MS fixture into watcher container: %s", cmd)
+    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
+    assert p.returncode == 0, p.stderr
+
+    # 3) Wait until expected path is visible (avoid race with watcher)
+    deadline = time.time() + 10
+    while time.time() < deadline:
+        expected_ms_path = f"{watcher_src_subpath}/{MS_NAME}"
+        cmd = f"docker exec {src_host} sh -lc 'test -d {expected_ms_path}'"
+        p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
+        if p.returncode == 0:
+            log.info("Expected path visible: %s", watcher_src_subpath)
+            log.info("dir check stdout: %s", p.stdout)
+            return
+        sleep(1)
+
+    assert (
+        p.returncode == 0
+    ), f"Expected path not visible in watcher container: {watcher_src_subpath}\n{p.stderr}"
+
+
+def _cleanup_destination_storage(src_host: str) -> None:
+    """For consecutive tests, the destination copy must not already exist."""
+    cmd = (
+        f"docker exec {src_host} sh -lc "
+        "'rm -rf /dlm-archive/* /dlm-archive/.[!.]* /dlm-archive/..?* 2>/dev/null || true'"
+    )
+    log.info("Cleaning destination storage: %s", cmd)
+    subprocess.run(cmd, shell=True, check=False)
+
+
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_watcher_registers_and_migrates():
-    """
-    Run the real watcher, wait for success logs, then cancel it cleanly.
+async def test_configdb_watcher():
+    """Flow points directly at scan-0 (contains .ms file)."""
+    host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    api_configuration = Configuration(host=host)
+    setup_testing(api_configuration)
+    sleep(2)  # TODO: DMAN-193
 
-    Test auto migration using configdb watcher.
+    # Copy fixture into chosen watcher source path
+    source_path = f"{WATCHER_SOURCE_DIR_ROOT}/{PVC_SUBPATH1}"
+    _copy_fixture_into_container(SRC_HOST, source_path)
+
+    # Trigger COMPLETED Flow pointing directly at scan-0
+    flow_name = "test-flow"
+    persist_flow_name = "persist-flow"
+    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH1)
+
+    # Poll for FINISHED dependency status
+    deadline = time.time() + 10
+    statuses = []
+    while time.time() < deadline:
+        statuses = _get_dependency_statuses_for_product(PB_ID, flow_name)
+        if "FINISHED" in statuses:
+            break
+        sleep(1)
+
+    assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
+
+    # Cleanup
+    log.info("Cleaning up copied MS file(s) from watcher container.")
+    cmd = f"docker exec {SRC_HOST} sh -lc 'rm -rf {WATCHER_SOURCE_DIR_ROOT}/*'"
+    subprocess.run(cmd, shell=True, check=False)
+    _cleanup_destination_storage(src_host=SRC_HOST)
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_configdb_watcher_higher_dir():
+    """
+    Flow points at beam-vis0 (one level above scan-0).
+
+    Watcher must search one level deeper to find .ms file.
     """
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
-    # --- copying demo.ps ---
-    cmd = (
-        f"docker container cp {DEMO_MS_PATH}/ "
-        + f"{STORAGE['SRC']['STORAGE_CONFIG']['parameters']['host']}:"
-        + f"{STORAGE['SRC']['ROOT_DIRECTORY']}/.."
-    )
-    log.info("Copy MS into container: %s", cmd)
-    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
-    if p.returncode != 0:
-        log.info("[copy file STDOUT]: %s\n", p.stdout)
-        log.error("[copy file STDERR]: %s\n", p.stderr)
-    assert p.returncode == 0
-    if p.returncode != 0:
-        log.error("Failed to copy MS to watcher container.")
-        return
 
-    trigger_completed_flow("test-flow")
-    sleep(1)
-    statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow")
-    assert "FINISHED" in statuses
-    log.info("Cleaning up copied MS file from watcher container.")
-    cmd = (
-        "docker exec dlm_configdb_watcher "
-        + f"rm -rf /dlm/product_dir/{os.path.basename(DEMO_MS_PATH)}"
-    )
+    # Copy fixture into watcher root
+    source_path = f"{WATCHER_SOURCE_DIR_ROOT}/{PVC_SUBPATH2}"
+    _copy_fixture_into_container(SRC_HOST, source_path)
+
+    # Trigger COMPLETED Flow pointing at beam-vis0
+    flow_name = "test-flow-higher-dir"
+    persist_flow_name = "persist-flow2"
+    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH2)
+
+    # Poll for FINISHED dependency status
+    deadline = time.time() + 10
+    statuses = []
+    while time.time() < deadline:
+        statuses = _get_dependency_statuses_for_product(PB_ID, flow_name)
+        if "FINISHED" in statuses:
+            break
+        sleep(1)
+
+    assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
+
+    # Cleanup
+    log.info("Cleaning up copied MS file(s) from watcher container.")
+    cmd = f"docker exec {SRC_HOST} sh -lc 'rm -rf {WATCHER_SOURCE_DIR_ROOT}/*'"
+    subprocess.run(cmd, shell=True, check=False)
+    _cleanup_destination_storage(src_host=SRC_HOST)
 
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-@pytest.mark.skip(reason="We need to trigger a failed registration on the container")
-# The current implementation runs a new configdb_watcher locally.
 async def test_watcher_logs_failed_registration():
-    """Run the watcher, trigger a Flow, and check failed registration is logged."""
-    # We can now use the env-variables to start a new client with a
-    # deliberately bad source_name to trigger DLM registration failure
+    """Flow points to a data item that is already registered on the storage."""
+    host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    api_configuration = Configuration(host=host)
+    setup_testing(api_configuration)
+    sleep(2)  # TODO: DMAN-193
 
-    # 1) Trigger a COMPLETED Flow
-    trigger_completed_flow("test-flow-failure")
+    # Copy fixture into watcher root
+    source_path = f"{WATCHER_SOURCE_DIR_ROOT}/{PVC_SUBPATH2}"
+    _copy_fixture_into_container(SRC_HOST, source_path)
 
-    # 2) Wait for the registration failure log
-    sleep(1)
-    statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow")
-    if "FAILED" in statuses:
-        pytest.fail("Watcher did not log failed registration within timeout")
-    assert "FAILED" in statuses
+    # Trigger a COMPLETED Flow with same subpath as previous test
+    trigger_completed_flows("test-flow-failure", "persist-flow3", subpath=PVC_SUBPATH2)
+
+    # Poll for FAILED dependency status
+    deadline = time.time() + 10
+    statuses = []
+    while time.time() < deadline:
+        statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow-failure")
+        if "FAILED" in statuses:
+            break
+        sleep(1)
+
+    assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"

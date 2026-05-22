@@ -2,7 +2,6 @@
 
 import logging
 import os
-from pathlib import Path
 
 import pytest
 from ska_sdp_config import Config
@@ -16,9 +15,10 @@ log = logging.getLogger(__name__)
 @pytest.fixture(name="config")
 def sdp_config_fixture():
     """Provide a clean SDP ConfigDB client for each test."""
-    os.environ["SDP_CONFIG_HOST"] = SDP_CONFIG_HOST
-    os.environ["SDP_CONFIG_PORT"] = SDP_CONFIG_PORT
-    with Config(backend="etcd3", host=SDP_CONFIG_HOST, port=SDP_CONFIG_PORT) as cfg:
+    host = os.environ.get("SDP_CONFIG_HOST", "etcd")
+    port = os.environ.get("SDP_CONFIG_PORT", "2379")
+
+    with Config(backend="etcd3", host=host, port=port) as cfg:
         # Clean before test
         cfg.backend.delete("/flow", recursive=True, must_exist=False)
         cfg.backend.delete("/eb", recursive=True, must_exist=False)

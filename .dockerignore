@@ -1,0 +1,8 @@
+.git/*
+.pytest_cache/
+tests/__pycache__/
+tests/directory_watcher/__pycache__
+tests/configdb_watcher/__pycache__
+build/
+dist/
+.venv/

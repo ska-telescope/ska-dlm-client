@@ -62,8 +62,9 @@ integration-tests:
   services:
     - docker:27.0.2-dind
   before_script:
-    # - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services build
-    - export SERVER_IMAGE=registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:1.2.0-dev.c0618a670 && docker compose --file tests/integration/dlm_servers.docker-compose.yaml up -d --wait
+    - export SERVER_IMAGE=artefact.skao.int/ska-data-lifecycle:2.0.0 && docker compose --file tests/integration/dlm_servers.docker-compose.yaml up -d --wait
+    - ./extract_data.sh output.scan-1.beam-vis0.ms.tar.gz
+    - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services build
     - docker compose --file tests/test_services.docker-compose.yaml up -d --remove-orphans
     - docker compose --file tests/dlm_clients.docker-compose.yaml build
     - docker compose --file tests/dlm_clients.docker-compose.yaml up -d --remove-orphans
@@ -72,3 +73,11 @@ integration-tests:
     - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services run -u root --entrypoint "pytest -m integration" dlm_client_testrunner
   after_script:
     - docker compose --file tests/testrunner.docker-compose.yaml -p dlm-test-services down dlm_client_testrunner
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - api_failure
+      - scheduler_failure
+      - unknown_failure

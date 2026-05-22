@@ -9,13 +9,14 @@ import shutil
 import socket
 import sys
 
+import ska_ser_logging
+
 from ska_dlm_client.common_types import LocationCountry, LocationType
 from ska_dlm_client.config import Config
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Constants that can be used for testing.
@@ -27,13 +28,14 @@ LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")
 RCLONE_CONFIG_TARGET = {
     "name": "dlm-archive",
     "type": "alias",
+    "root_path": "/",
     "parameters": {"remote": "/dlm-archive"},
 }
 RCLONE_CONFIG_SOURCE = {
     "name": f"{os.getenv('SOURCE_NAME', 'dir-watcher')}",
     "type": "sftp",
     "parameters": {
-        "host": f"{socket.gethostname()}",
+        "host": f"{os.getenv('RCLONE_HOSTNAME', socket.gethostname())}",
         "key_file": "/root/.ssh/id_rsa",
         "shell_type": "unix",
         "type": "sftp",
@@ -73,7 +75,7 @@ def get_or_init_location(
                 location_facility=LOCATION_FACILITY,
             )
             the_location_id = response
-            logger.info("location created in DLM")
+            logger.info("Location created in DLM")
         logger.info("location_id: %s", the_location_id)
     return the_location_id
 
@@ -135,20 +137,14 @@ def get_or_init_storage(
         api_storage = storage_api.StorageApi(the_api_client)
         # Ensure storage API calls go to the storage service, not ingest
         api_storage.api_client.configuration.host = storage_url
-        # Get the storage_id
-        response = api_storage.query_storage(storage_name=storage_name)
-        logger.info("query_storage response: %s", response)
-        if not isinstance(response, list):
-            logger.error("Unexpected response from query_storage_storage")
-            sys.exit(1)
-        # we always install the SSH key to allow for re-starts of the container
+
+        # Always install the ssh public key
         install_ssh_key(api_storage)
-        if len(response) == 1:
-            the_storage_id = response[0]["storage_id"]
-            logger.info("storage %s already exists in DLM", storage_name)
-            storage_config_id = api_storage.get_storage_config(the_storage_id)
-        else:
-            response = api_storage.init_storage(
+
+        store = api_storage.query_storage(storage_name=storage_name)
+        logger.info("query_storage response: %s", store)
+        if not store:
+            storage_id = api_storage.init_storage(
                 storage_name=storage_name,
                 storage_type=STORAGE_TYPE,
                 storage_interface=STORAGE_INTERFACE,
@@ -156,21 +152,28 @@ def get_or_init_storage(
                 location_id=the_location_id,
                 location_name=LOCATION_NAME,
             )
-            the_storage_id = response
-            logger.info("Storage created in DLM")
+            logger.info("Storage %s created in DLM", storage_name)
+        else:
+            storage_id = store[0]["storage_id"]
 
-            if rclone_config is not None:
+        if rclone_config is not None:
+            store_config = api_storage.get_storage_config(storage_id=storage_id)
+            if not store_config:
                 # Setup the storage config.
-                response = api_storage.create_storage_config(
+                storage_config_id = api_storage.create_storage_config(
                     request_body=rclone_config,
-                    storage_id=the_storage_id,
+                    storage_id=storage_id,
                     storage_name=storage_name,
                     config_type="rclone",
                 )
-                storage_config_id = response
                 logger.info("Storage config created with id: %s", storage_config_id)
+            else:
+                # Refresh the rclone config even if the endpoint exists
+                api_storage.create_rclone_config(request_body=rclone_config)
+        else:
+            logger.warning("No rclone configuration specified")
 
-    return the_storage_id
+    return storage_id
 
 
 def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arguments
@@ -182,7 +185,6 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     setup_target: bool = False,
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
-    logger.info("Using storage URL: %s", storage_url)
     if location_id is None:
         location_id = get_or_init_location(
             api_configuration, storage_url=storage_url, location=LOCATION_NAME
@@ -264,6 +266,7 @@ def create_parser() -> argparse.ArgumentParser:
 
 def main():
     """If this is called as a CLI we just register the integration/developer setup volumes."""
+    ska_ser_logging.configure_logging(logging.INFO)
     parser = create_parser()
     args = parser.parse_args()
     api_configuration = Configuration(host=args.storage_url)

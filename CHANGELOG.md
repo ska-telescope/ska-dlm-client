@@ -2,23 +2,109 @@
 
 ## Development
 
+### Updated
+
+* Running tests with server image 2.1.0.
+
+### Changed
+
+* Use published migrations image for integration tests.
+
+### Updated
+
+* Running tests with server image 2.0.0.
+* Use real MeasurementSet structure for testing.
+* The ConfigDB watcher now watches DataProductPersist Flows and checks the status of the related DataProduct Flow.
+* OCI image build process is more selective when copying sources for package building.
+
+## 2.0.0
+
+### Updated
+
+* Re-generated OpenAPI docs and code for DLM 1.3.2.
+* Updated Makefile to allow for re-generation of OpenAPI docs and code.
+* Added Keykloak and Gateway to build to enable OpenAPI generation from Makefile.
+
+## 1.2.4
+
+### Updated
+
+* Made the oid/uid expiration times configurable on values.yaml.
+* In the helm chart, the directory watcher and configdb watcher can each define their own pvc.
+* Updated ReadTheDocs documentation.
+* Reorganized the values.yaml file.
+* Rework setup of storage and rclone config to ensure that the rclone ssh keys are always installed on the client and the rclone config is always refreshed.
+
+### Removed
+
+* Chart feature setupStorageLocation
+* Kafka watcher and related dependencies.
+* Unused config files.
+
+## 1.2.3
+
+### Updated
+
+* The ConfigDB Watcher now searches recursively (one level deeper) than the given pvc_subpath.
+* Measurement Set paths are always treated as opaque containers.
+
+## 1.2.2
+
+### Updated
+
+* Improved the Directory Watcher readiness behaviour.
+
+### Fixed
+
+* Added support for overriding the rclone remote hostname via an env variable to ensure correct resolution when running in Kubernetes.
+
+## 1.2.1
+
+### Fixed
+
+* ConfigDB Watcher derives the data-product path from the sink’s PVCPath.pvc_subpath.
+
+### Updated
+
+* Extensive re-factoring of the scanning and registration logic, and the migration calls.
+
+## 1.2.0
+
+### Updated
+
+* Updated the readme file.
+
+### Fixed
+
+* Directory Watcher now correctly accepts a configurable storage URL (via --storage-url).
+* Various small bug fixes.
+
 ### Added
 
-* Config DB watcher calls the DLM server to register data-products at the source destination and creates a DLM Dependency.
+* When deploying a local etcd service, the ConfigDB Watcher pod waits for the etcd pod.
+* ConfigDB watcher calls the DLM server to register data-products at the source destination and creates a DLM Dependency.
 * Added Helm chart configuration for the ConfigDB Watcher.
-* Config DB watcher calls the DLM server to register and migrate data-products, and creates a DLM Dependency.
-* ska-sdp-config DB watcher that yields matching data-product Flow status events.
+* ConfigDB watcher calls the DLM server to register and migrate data-products, and creates a DLM Dependency.
+* ska-sdp-configDB watcher that yields matching data-product Flow status events.
 * Integration test harness to start DLM services (via Docker Compose).
 * Start of integration tests for directory-watcher and kafka-watcher.
 
 ### Changed
 
+* DLM Client tests now run against OCI images of DLM server (instead of building the DLM server).
+* Refactored the directory-watcher and configdb-watcher helm templates to set arguments using environment variables (instead of CLI args).
+* Docker tests now also use environment variables.
+* Moved the etcd configuration from a top-level values.yaml section to configdb_watcher.sdp_config.etcd.
+* The SSH key is always installed, to allow for re-starts of the container.
+* Testing against the new server image (1.3.0).
+* Various changes to variable names, e.g. storage_name --> source_storage.
 * Kafka Docker image switched from bitnami/kafka to apache/kafka
 * kubectl image switched from bitnami/kubectl to artefact.skao.int/ska-ser-utils
 * Renamed client CLI arguments and aligned the corresponding Helm values.
 * Changed the tests to use a 'testrunner' container, rather than directly running pytest on the host machine.
 * Tests now run against OCI images of DLM server, instead of building the DLM server from the GitLab repo.
 * Client and server containers in the tests now consistently use the same network.
+
 ## 1.1.0
 
 ### Added

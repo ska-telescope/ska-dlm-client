@@ -5,14 +5,18 @@ import asyncio
 import logging
 import os
 from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
 
 import athreading
+import ska_ser_logging
 from ska_sdp_config import Config
-from ska_sdp_config.entity.flow import Flow
+from ska_sdp_config.entity.flow import Dependency, Flow
 
+from ska_dlm_client.config import DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
 from ska_dlm_client.configdb_watcher.configdb_utils import (
     create_sdp_migration_dependency,
-    get_data_product_dir,
+    get_pvc_subpath,
     update_dependency_state,
 )
 from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
@@ -20,13 +24,13 @@ from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.register_storage_location.main import RCLONE_CONFIG_SOURCE, setup_volume
 from ska_dlm_client.registration_processor import (
     RegistrationProcessor,
-    _directory_contains_metadata_file,
-    _item_for_single_file_with_metadata,
-    _measurement_set_directory_in,
+    directory_contains_metadata_file,
 )
 from ska_dlm_client.utils import CmdLineParameters
 
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
+# TODO: add a proper option for LOG_LEVEL=DEBUG
+
 
 # pylint: disable=too-many-instance-attributes
 @dataclass
@@ -39,6 +43,8 @@ class SDPIngestConfig:
     storage_url: str
     storage_name: str
     storage_root_directory: str
+    uid_expiration_days: datetime | None = None
+    oid_expiration_days: datetime | None = None
     migration_destination_storage_name: str | None = None
     migration_configuration: Configuration | None = None
 
@@ -63,87 +69,36 @@ def process_args(args: argparse.Namespace) -> SDPIngestConfig:
         ingest_configuration=ingest_configuration,
         storage_url=args.storage_url,
         storage_name=args.source_name,
+        uid_expiration_days=args.uid_expiration_days,
+        oid_expiration_days=args.oid_expiration_days,
         storage_root_directory=args.source_root,
         migration_destination_storage_name=args.target_name,
         migration_configuration=migration_configuration,
     )
 
 
-async def _process_completed_flow(  # noqa: C901
-    configdb: Config,
+def _register_and_migrate_path(
+    processor: RegistrationProcessor,
+    src_dir: str,
+    root_dir: str,
     dataproduct_key: Flow.Key,
-    ingest_config: SDPIngestConfig,
-) -> None:
-    """Process a single COMPLETED data-product Flow.
+    new_dep: str,
+) -> str | None:
+    """Register and migrate a whole path.
 
-    - Resolve the data-product directory from Flow.sink.data_dir.
-    - Identify the .ms file in that directory.
-    - Create a DLM migration dependency
-    - Register data-product in DLM
-    - Migrate the data-product (if configured)
-    - Set dependency state to WORKING/FINISHED/FAILED depending on outcome.
+    Args:
+        processor: The RegistrationProcessor instance to use.
+        src_dir: The source directory to register and migrate.
+        root_dir: The root directory of the source storage.
+        dataproduct_key: The Flow.Key of the data product being processed.
+        new_dep: The dependency created for this data product.
+
+    Returns:
+        The dependency status.
     """
-    new_dep: str | None = None
-    dep_status: str | None = None
-
-    @athreading.call
-    def _aupdate_dependency_state(status: str) -> None:
-        """Async wrapper for updating Dependency state."""
-        for txn in configdb.txn():
-            update_dependency_state(txn, new_dep, status=status)
-            state = txn.dependency.state(new_dep).get()
-            logger.info("Dependency %s status set to %s.", new_dep, state.get("status"))
-
-    # Resolve the source directory from the Flow sink
-    src_dir = get_data_product_dir(configdb, dataproduct_key)
-    logger.info(
-        "New COMPLETED data-product identified: key=%s, src_path=%s",
-        dataproduct_key,
-        src_dir,
-    )
-    if os.path.exists(src_dir) is False or not os.path.isdir(src_dir):
-        logger.error("Data-product source directory does not exist or is not a directory.")
-        return
-    # Identify the .ms file
-    ms_file_name = _measurement_set_directory_in(src_dir)
-    if ms_file_name is None:
-        logger.error("No Measurement Set found in directory %s", src_dir)
-        return
-    logger.info("Found MS file: %s", ms_file_name)
-
-    # Create a DLM dependency (no state yet)
-    new_dep = await create_sdp_migration_dependency(configdb, dataproduct_key)
-    if not new_dep:
-        logger.error(
-            "Failed to create dependency for data-product %s ",
-            dataproduct_key,
-        )
-    else:
-        logger.info("New dependency created: %s", new_dep)
-
-    # Look for the metadata file
-    if not _directory_contains_metadata_file(src_dir):
-        logger.error("No metadata file found!")
-    else:
-        logger.debug("Found the metadata file!")
-
-    # Build Item object
-    item = _item_for_single_file_with_metadata(
+    dlm_source_uuid = processor.add_path(
         absolute_path=src_dir,
-        path_rel_to_watch_dir=ms_file_name,
-    )
-
-    processor = RegistrationProcessor(ingest_config)
-    processor.last_migration_result = None  # Clear any stale migration result
-
-    # If we have a dependency, mark it WORKING before we start register+migrate
-    if new_dep:
-        await _aupdate_dependency_state("WORKING")
-
-    # Register+migrate (blocking -> run in thread)
-    dlm_source_uuid = await asyncio.to_thread(
-        processor._register_single_item,  # pylint: disable=protected-access
-        item,
+        path_rel_to_watch_dir=os.path.relpath(src_dir, start=root_dir),
     )
     logger.debug("dlm_source_uuid: %s", dlm_source_uuid)
 
@@ -155,7 +110,7 @@ async def _process_completed_flow(  # noqa: C901
         )
         dep_status = "FAILED"
     else:
-        migration_result = processor.last_migration_result  # Inspect migration outcome
+        migration_result = processor.last_migration_result  # TODO: DMAN-213
         logger.debug("migration_result: %s", migration_result)
 
         if migration_result is None:
@@ -166,17 +121,134 @@ async def _process_completed_flow(  # noqa: C901
             )
             dep_status = "FAILED"
         else:
-            logger.info(
+            logger.debug(
                 "Registration and migration succeeded for %s; "
                 "marking dependency %s as FINISHED.",
                 dataproduct_key,
                 new_dep,
             )
             dep_status = "FINISHED"
+    return dep_status
 
-    # Update the dependency state to FAILED/FINISHED
-    if new_dep and dep_status:
-        await _aupdate_dependency_state(dep_status)
+
+async def _process_completed_flow(  # noqa: C901
+    # pylint: disable=too-many-locals
+    configdb: Config,
+    dataproduct_key: Flow.Key,
+    ingest_config: SDPIngestConfig,
+) -> None:
+    """Process a single COMPLETED data product.
+
+    - Resolve the directory from DataProduct Flow.sink.data_dir.
+    - Identify the .ms file(s) in that directory (or one level deeper).
+    - Create a DLM migration Dependency.
+    - Register data product(s) in DLM.
+    - Migrate the data product(s) to the configured destination storage.
+    - Set Dependency state to WORKING/FINISHED/FAILED depending on outcome.
+
+    Args:
+        configdb: Shared SDP ConfigDB client.
+        dataproduct_key: Flow.Key from the related DataProduct Flow.
+        ingest_config: Runtime ingest and migration configuration.
+
+    Notes:
+        This implementation processes each derived work directory sequentially.
+        If later we want faster throughput, could add bounded concurrency (e.g. 2–4 in-flight).
+    """
+    new_dep: Dependency | None = None
+
+    @athreading.call
+    def _aupdate_dependency_state(status: str) -> None:
+        """Async wrapper for updating Dependency state."""
+        for txn in configdb.txn():
+            update_dependency_state(txn, new_dep, status=status)
+            state = txn.dependency.state(new_dep).get()
+            logger.info("Dependency status set to %s.", state.get("status"))
+
+    # Resolve the source directory from the Flow sink
+    source_subpath = get_pvc_subpath(configdb, dataproduct_key)
+    source_root = Path(ingest_config.storage_root_directory)
+    source_path_full = source_root / source_subpath
+
+    logger.info(
+        "New COMPLETED data-product identified via data-product-persist: DataProduct uri=%s, "
+        "source_root=%s, source_subpath=%s, source_path_full=%s",
+        dataproduct_key,
+        source_root,
+        source_subpath,
+        source_path_full,
+    )
+
+    if not source_path_full.exists() or not source_path_full.is_dir():
+        logger.error(
+            "Data product source directory does not exist or is not a directory: %s",
+            source_path_full,
+        )
+        return
+
+    processor = RegistrationProcessor(ingest_config)
+    processor.last_migration_result = None  # Clear any stale migration result
+
+    # ---- Find MS directories (directly or one level deeper) ----
+    def iter_ms_dirs_one_level(path: Path):
+        for entry in os.listdir(path):
+            full_entry = path / entry
+            logger.info("Checking: %s", full_entry)
+            if full_entry.is_dir() and full_entry.name.lower().endswith(
+                DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
+            ):
+                yield full_entry
+
+    ms_dirs = list(iter_ms_dirs_one_level(source_path_full))
+
+    if not ms_dirs:
+        logger.info("No MS found in %s — searching one level deeper.", source_path_full)
+        for subdir in os.listdir(source_path_full):
+            subdir_full = source_path_full / subdir
+            if subdir_full.is_dir():
+                ms_dirs.extend(list(iter_ms_dirs_one_level(subdir_full)))
+
+    if not ms_dirs:
+        logger.error("No Measurement Set(s) found.")
+        return
+
+    logger.info("Found %s Measurement Set(s)", len(ms_dirs))
+
+    # Derive parent work directories from MS paths.
+    # Deduplicate to avoid processing the same directory multiple times.
+    work_dirs = sorted({ms_dir.parent for ms_dir in ms_dirs})
+    logger.info("Found %s work dir(s) to process: %s", len(work_dirs), work_dirs)
+
+    # ---- Create a DLM dependency + set state to WORKING once ----
+    new_dep = await create_sdp_migration_dependency(configdb, dataproduct_key)
+    if not new_dep:
+        logger.error("Failed to create dependency for data product %s", dataproduct_key)
+        return
+    logger.debug("New dependency created: %s", new_dep)
+
+    await _aupdate_dependency_state("WORKING")
+
+    # ---- Process each work directory ----
+    any_failed = False
+    for work_dir in work_dirs:  # Could add parallelism in the future
+        if not directory_contains_metadata_file(work_dir):
+            logger.warning("No metadata file found in %s — proceeding anyway.", work_dir)
+        else:
+            logger.info("Found the metadata file in %s!", work_dir)
+
+        dep_status = _register_and_migrate_path(
+            processor,
+            str(work_dir),
+            ingest_config.storage_root_directory,
+            dataproduct_key,
+            new_dep,
+        )
+        if dep_status == "FAILED":
+            any_failed = True
+
+    # ---- Set final dependency state once all MS in the Flow have been attempted ----
+    final_status = "FAILED" if any_failed else "FINISHED"
+    await _aupdate_dependency_state(final_status)
 
 
 async def sdp_to_dlm_ingest_and_migrate(
@@ -193,9 +265,10 @@ async def sdp_to_dlm_ingest_and_migrate(
             storage_url=ingest_config.storage_url,
         )
     logger.info(
-        "Starting SDP Config watcher (include_existing=%s, storage_name=%s)...",
+        "Starting ConfigDB watcher (include_existing=%s, source storage=%s, target storage=%s)",
         ingest_config.include_existing,
         ingest_config.storage_name,
+        ingest_config.migration_destination_storage_name,
     )
 
     async with watch_dataproduct_status(
@@ -212,42 +285,87 @@ async def sdp_to_dlm_ingest_and_migrate(
                     dataproduct_key,
                     ingest_config,
                 )
+                logger.info("Done processing %s", dataproduct_key)
             except Exception:  # pylint: disable=broad-exception-caught  # pragma: no cover
                 logger.exception("Failed to process Flow %s", dataproduct_key)
-                logger.info("Continuing to look for new Flows")
+            finally:
+                logger.info(
+                    "Continuing to watch for data products referenced by "
+                    "data-product-persist Flows."
+                )
 
-def add_arguments(cmd_line_parameters):
-    """
-    Add the arguments specific to the configdb_watcher
-    """
-    cmd_line_parameters.parser.add_argument(
-        "-c",
-        "--sdp-config-url",
-        type=str,
-        required=True,
-        help="The URL to access the SDP ConfigDB.",
-    )
-    cmd_line_parameters.parser.add_argument(
+
+def main() -> None:
+    """Control the main execution of the program."""
+    ska_ser_logging.configure_logging(logging.INFO)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
         "--include-existing",
         action="store_true",
         help="If set, first yield existing dataproduct keys with matching status.",
     )
-    return cmd_line_parameters
-
-def main() -> None:
-    """Control the main execution of the program."""
-    cmd_line_parameters = CmdLineParameters(add_readiness_probe_file=False)
-    cmd_line_parameters = add_arguments(cmd_line_parameters)
-    args = cmd_line_parameters.parser.parse_args()
-    cmd_line_parameters.parse_arguments(args)
-    config = process_args(args=args)
-
-    parser = cmd_line_parameters.parser
-    add_arguments(parser)
-    
-    args = parser.parse_args()
-
-    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-i",
+        "--ingest-url",
+        type=str,
+        default="http://dlm_ingest:8001",
+        help=(
+            "Ingest server URL including the service port. " "Default 'http://dlm_ingest:8001'."
+        ),
+    )
+    parser.add_argument(
+        "--source-name",
+        type=str,
+        required=True,
+        help="Source storage name (e.g., 'SDPBuffer').",
+    )
+    parser.add_argument(
+        "--storage-url",
+        type=str,
+        default="http://dlm_storage:8003",
+        help=(
+            "Storage server URL including the service port. " "Default 'http://dlm_storage:8003'."
+        ),
+    )
+    parser.add_argument(
+        "-r",
+        "--source-root",
+        type=str,
+        default="/dlm/product_dir",
+        help=("Local mount directory of the shared PVC inside the configdb-watcher pod."),
+    )
+    parser.add_argument(
+        "--target-name",
+        type=str,
+        default=None,
+        help=(
+            "Destination storage name used for migration. "
+            "If omitted, migration will be skipped."
+        ),
+    )
+    parser.add_argument(
+        "-m",
+        "--migration-url",
+        type=str,
+        default=None,
+        help=(
+            "Migration server URL including the service port. "
+            "If omitted, migration will be skipped."
+        ),
+    )
+    parser.add_argument(
+        "--uid-expiration-days",
+        type=int,
+        default=os.getenv("UID_EXPIRATION_DAYS"),
+        help="UID expiration in days.",
+    )
+    parser.add_argument(
+        "--oid-expiration-days",
+        type=int,
+        default=os.getenv("OID_EXPIRATION_DAYS"),
+        help="OID expiration in days.",
+    )
     args = parser.parse_args()
     cmd_line_parameters.parse_arguments(args)
     ingest_config = process_args(args)
