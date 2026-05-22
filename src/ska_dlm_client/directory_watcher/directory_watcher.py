@@ -117,7 +117,8 @@ class INotifyDirectoryWatcher(DirectoryWatcher):
             else:
                 event = FileCreatedEvent(src_path=change_path)
             self._event_handler.on_created(event)
-        logger.info("Ignoring %s ", change_type)
+        else:
+            logger.info("Ignoring non-added change type: %s", change_type)
 
     async def watch(self):
         """Watch for changes in the defined directory and process each change found."""
