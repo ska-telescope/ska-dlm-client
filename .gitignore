@@ -52,6 +52,7 @@ tests/integration/certs
 
 # Expanded Measurement Sets
 tests/test_registration_processor/product_dir/output.*
+tests/test_registration_processor/product_dir/pb-test*
 
 # Translations
 *.mo

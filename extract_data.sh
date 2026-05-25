@@ -3,7 +3,8 @@
 SOURCE_DIR="data"
 TARGET_DIR="tests/test_registration_processor/product_dir"
 
-for file in "$@"; do
+for filepath in "$SOURCE_DIR"/*.tar.*; do
+    file=$(basename "$filepath")
     extracted_name=${file%.tar.*}
 
     if [ -e "$TARGET_DIR/$extracted_name" ]; then # Check if the extracted directory already exists in TARGET_DIR
@@ -11,6 +12,6 @@ for file in "$@"; do
         continue
     fi
 
-    echo "Extracting $SOURCE_DIR/$file into $TARGET_DIR"
-    tar xf "$SOURCE_DIR/$file" -C "$TARGET_DIR"
+    echo "Extracting $file into $TARGET_DIR"
+    tar xf "$filepath" -C "$TARGET_DIR"
 done
