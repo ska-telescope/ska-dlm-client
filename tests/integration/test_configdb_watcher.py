@@ -37,7 +37,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 EB_ID = "eb-00000000"
 PB_ID = "pb-test-00000000-a"
 MS_NAME = "output.scan-1.beam-vis0.ms"
-MS_PATH_LOCAL = f"{dir_path}/../directory_watcher/test_registration_processor/product_dir"
+MS_PATH_LOCAL = f"{dir_path}/../test_registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")

@@ -1,10 +1,10 @@
 #!/bin/sh
 
 SOURCE_DIR="data"
-TARGET_DIR="tests/directory_watcher/test_registration_processor/product_dir"
+TARGET_DIR="tests/test_registration_processor/product_dir"
 
 for file in "$@"; do
-    extracted_name=${file%%.tar.gz}
+    extracted_name=${file%.tar.*}
 
     if [ -e "$TARGET_DIR/$extracted_name" ]; then # Check if the extracted directory already exists in TARGET_DIR
         echo "Skipping extraction of $file since $extracted_name exists" # If it exists, skip extraction
