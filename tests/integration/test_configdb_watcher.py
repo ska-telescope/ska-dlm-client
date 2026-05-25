@@ -423,3 +423,13 @@ async def test_watcher_logs_failed_registration():
         sleep(1)
 
     assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"
+
+
+@pytest.mark.integration
+def test_pb_test_data_stub():
+    """PLACEHOLDER for new integration test. Check that pb-test integration data was extracted."""
+    test_data = Path(
+        "tests/test_registration_processor/product_dir/"
+        "pb-test-20260126-24294/output.scan-1.beam-vis0.ms"
+    )
+    assert test_data.exists()
