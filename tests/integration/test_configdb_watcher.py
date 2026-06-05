@@ -37,7 +37,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 EB_ID = "eb-00000000"
 PB_ID = "pb-test-00000000-a"
 MS_NAME = "output.scan-1.beam-vis0.ms"
-MS_PATH_LOCAL = f"{dir_path}/../directory_watcher/test_registration_processor/product_dir"
+MS_PATH_LOCAL = f"{dir_path}/../test_registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
@@ -423,3 +423,13 @@ async def test_watcher_logs_failed_registration():
         sleep(1)
 
     assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"
+
+
+@pytest.mark.integration
+def test_pb_test_data_stub():
+    """PLACEHOLDER for new integration test. Check that pb-test integration data was extracted."""
+    test_data = Path(
+        "tests/test_registration_processor/product_dir/"
+        "pb-test-20260126-24294/output.scan-1.beam-vis0.ms"
+    )
+    assert test_data.exists()

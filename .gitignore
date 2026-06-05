@@ -51,7 +51,8 @@ tests/integration/certs
 **/.pytest_cache/
 
 # Expanded Measurement Sets
-tests/directory_watcher/test_registration_processor/product_dir/output.*
+tests/test_registration_processor/product_dir/output.*
+tests/test_registration_processor/product_dir/pb-test*
 
 # Translations
 *.mo

@@ -38,7 +38,7 @@ def test_registration_processor(request):
     """Test the registration_processor module."""
     # Determine path where test files are stored.
     filename = request.module.__file__
-    test_dir, _ = os.path.splitext(filename)
+    test_dir = os.path.dirname(filename)
 
     # Setup what would be the directory to watch.
     watch_dir = os.path.join(test_dir, "watch_dir")
@@ -68,7 +68,7 @@ def test_generate_dir_item_list(request):
     """Test the _generate_item_list_for_data_product function."""
     # Determine path where test files are stored.
     filename = request.module.__file__
-    test_dir, _ = os.path.splitext(filename)
+    test_dir = os.path.dirname(filename)
 
     # Setup what would be the directory to watch.
     watch_dir = os.path.join(test_dir, "watch_dir")
