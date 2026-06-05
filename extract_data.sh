@@ -1,7 +1,7 @@
 #!/bin/sh
 
 SOURCE_DIR="data"
-TARGET_DIR="tests/test_registration_processor/product_dir"
+TARGET_DIR="tests/registration_processor/product_dir"
 
 for filepath in "$SOURCE_DIR"/*.tar.*; do
     file=$(basename "$filepath")
