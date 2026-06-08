@@ -265,7 +265,10 @@ def create_parser() -> argparse.ArgumentParser:
 
 
 def main():
-    """If this is called as a CLI we just register the integration/developer setup volumes."""
+    """If this is called as a CLI we register the requested volumes.
+
+    The CLI is now used also to start the client in operations.
+    """
     ska_ser_logging.configure_logging(logging.INFO)
     parser = create_parser()
     args = parser.parse_args()

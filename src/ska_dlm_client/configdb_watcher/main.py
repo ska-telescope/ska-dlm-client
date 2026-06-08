@@ -367,6 +367,7 @@ def main() -> None:
         help="OID expiration in days.",
     )
     args = parser.parse_args()
+    cmd_line_parameters = CmdLineParameters(parser)
     cmd_line_parameters.parse_arguments(args)
     ingest_config = process_args(args)
 

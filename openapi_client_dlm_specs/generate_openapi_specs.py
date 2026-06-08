@@ -60,7 +60,9 @@ def add_field_to_openapi_spec(service_name, url_stream, output_directory, new_fi
         file.write('\n')
 
 def main():
-    # Create the parser
+    """
+    Create the parser
+    """
     parser = argparse.ArgumentParser(description="Generate OpenAPI tagged spec files from DLM openapi URL call.")
 
     # Add an argument for the file name

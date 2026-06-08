@@ -1,5 +1,6 @@
 """Tests for directory watcher."""
 
+import argparse
 import asyncio
 import os
 import tempfile
@@ -13,9 +14,79 @@ from ska_dlm_client.directory_watcher.directory_watcher import (
     PollingDirectoryWatcher,
 )
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntries
-from ska_dlm_client.directory_watcher.main import create_parser, process_args
+from ska_dlm_client.directory_watcher.main import process_args
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.registration_processor import RegistrationProcessor
+from ska_dlm_client.utils import CmdLineParameters
+
+def create_parser() -> argparse.ArgumentParser:
+    """Define a parser for all the command line parameters.
+
+    Creates and configures an ArgumentParser with all the command line options
+    needed for the ska-dlm-client's various components.
+
+    Returns:
+        An ArgumentParser instance configured with all required and optional arguments.
+    """
+    cmd_line_parameters = CmdLineParameters(add_readiness_probe_file=True)
+    cmd_line_parameters.parser.add_argument(
+        "-d",
+        "--directory-to-watch",
+        type=str,
+        required=True,
+        help="Full path to directory to watch.",
+    )
+    cmd_line_parameters.directory_to_watch = ""
+    cmd_line_parameters.parser.add_argument(
+        "--use-polling-watcher",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="When defined using the polling watcher rather than iNotify event driven watcher.",
+    )
+    cmd_line_parameters.parser.add_argument(
+        "--dir-updates-wait-time",
+        default=1,
+        help="If set, a directory will only be added once its contents has been static "
+            + "for at least the given number of seconds.",
+    )
+    cmd_line_parameters.dir_updates_wait_time = True
+    cmd_line_parameters.parser.add_argument(
+        "--use-status-file",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Use the status file, default is NOT to use, this may change in a future release.",
+    )
+    cmd_line_parameters.use_status_file = False
+    cmd_line_parameters.parser.add_argument(
+        "--reload-status-file",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Reload the status file that already exists in the watch directory.",
+    )
+    cmd_line_parameters.reload_status_file = True
+    cmd_line_parameters.parser.add_argument(
+        "--status-file-filename",
+        type=str,
+        required=False,
+        default=ska_dlm_client.config.STATUS_FILE_FILENAME,
+        help="",
+    )
+    cmd_line_parameters.status_file_filename = ska_dlm_client.config.STATUS_FILE_FILENAME
+    cmd_line_parameters.parser.add_argument(
+        "--skip-rclone-access-check-on-register",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Skip performing the rclone access check when registering a data item with DLM.",
+    )
+    cmd_line_parameters.skip_rclone_access_check_on_register = False
+    cmd_line_parameters.parser.add_argument(
+        "--register-contents-of-watch-directory",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="First register each file/directory in the watch directory as a data product.",
+    )
+    cmd_line_parameters.register_contents_of_watch_directory = False
+    return cmd_line_parameters
 
 
 class MockCmdLineParameters:
