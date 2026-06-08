@@ -2,6 +2,7 @@
 
 SOURCE_DIR="data"
 TARGET_DIR="tests/registration_processor/product_dir"
+mkdir -p "$TARGET_DIR"
 
 for filepath in "$SOURCE_DIR"/*.tar.*; do
     file=$(basename "$filepath")
