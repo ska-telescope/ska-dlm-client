@@ -35,9 +35,11 @@ log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 EB_ID = "eb-00000000"
-PB_ID = "pb-test-00000000-a"
-MS_NAME = "output.scan-1.beam-vis0.ms"
-MS_PATH_LOCAL = f"{dir_path}/../registration_processor/product_dir"
+PB_ID = "pb-test-20260126-24294"
+ARB_MS = "scan90-99/output.scan-99.beam-vis0.ms"  # random MS file in pb-test-20260126-24294
+PVC_SUBPATH = f"product/{EB_ID}/ska-sdp/{PB_ID}"
+PVC_SUBPATH_DIRECT = f"product/{EB_ID}/ska-sdp/{PB_ID}/scan90-99"
+DATA_PATH_LOCAL = f"{dir_path}/../registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
@@ -82,8 +84,6 @@ STORAGE = {
 
 SRC_HOST = STORAGE["SRC"]["STORAGE_CONFIG"]["parameters"]["host"]
 WATCHER_SOURCE_DIR_ROOT = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}"
-PVC_SUBPATH1 = f"product/{EB_ID}/ska-sdp/{PB_ID}/beam-vis0/scan-0"
-PVC_SUBPATH2 = f"product/{EB_ID}/ska-sdp/{PB_ID}/beam-vis0"
 
 
 def _get_cfg() -> Config:
@@ -276,68 +276,64 @@ def test_storage_initialisation(storage_configuration: Configuration):
         assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
 
 
-def _copy_fixture_into_container(src_host: str, watcher_src_subpath: str) -> None:
-    """Copy the MS fixture into watcher_src_subpath and wait until the path becomes visible."""
-    # 1) Ensure watcher source dir exists
-    cmd = f"docker exec {src_host} sh -lc 'mkdir -p {watcher_src_subpath}'"
-    log.info("Ensure watcher source dir exists: %s", cmd)
-    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
-    assert p.returncode == 0, p.stderr
-    cmd = f"ls -la {MS_PATH_LOCAL}"
-    log.info("Local fixture contents: %s", cmd)
-    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
-    log.info("Local fixture contents rc=%s stdout=%s stderr=%s", p.returncode, p.stdout, p.stderr)
+@pytest.fixture(scope="module", autouse=True)
+def copy_test_data_into_watcher():
+    """
+    Copy all local test data into the watcher container once, and clean up once at the end.
 
-    # 2) Copy the contents of MS_PATH_LOCAL into <container>:<dest>
-    cmd = f"docker container cp {MS_PATH_LOCAL}/. {src_host}:{watcher_src_subpath}/"
-    log.info("Copy MS fixture into watcher container: %s", cmd)
-    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
-    assert p.returncode == 0, p.stderr
+    Everything before yield is the setup phase.
+    Everything after yield is the teardown phase.
+    """
+    destination_parent = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp"
 
-    # 3) Wait until expected path is visible (avoid race with watcher)
-    deadline = time.time() + 10
-    while time.time() < deadline:
-        expected_ms_path = f"{watcher_src_subpath}/{MS_NAME}"
-        cmd = f"docker exec {src_host} sh -lc 'test -d {expected_ms_path}'"
-        p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
-        if p.returncode == 0:
-            log.info("Expected path visible: %s", watcher_src_subpath)
-            log.info("dir check stdout: %s", p.stdout)
-            return
-        sleep(1)
-
-    assert (
-        p.returncode == 0
-    ), f"Expected path not visible in watcher container: {watcher_src_subpath}\n{p.stderr}"
-
-
-def _cleanup_destination_storage(src_host: str) -> None:
-    """For consecutive tests, the destination copy must not already exist."""
-    cmd = (
-        f"docker exec {src_host} sh -lc "
-        "'rm -rf /dlm-archive/* /dlm-archive/.[!.]* /dlm-archive/..?* 2>/dev/null || true'"
+    # setup
+    subprocess.run(
+        f"docker exec {SRC_HOST} sh -lc 'mkdir -p {destination_parent}'", shell=True, check=True
     )
-    log.info("Cleaning destination storage: %s", cmd)
-    subprocess.run(cmd, shell=True, check=False)
+
+    subprocess.run(
+        (
+            f"docker container cp "
+            f"{DATA_PATH_LOCAL}/{PB_ID} "
+            f"{SRC_HOST}:{destination_parent}/"
+        ),
+        shell=True,
+        check=True,
+    )
+
+    yield  # run tests
+
+    # tear down
+    subprocess.run(
+        f"docker exec {SRC_HOST} sh -lc 'rm -rf {WATCHER_SOURCE_DIR_ROOT}/*'",
+        shell=True,
+        check=False,
+    )
+
+
+@pytest.mark.integration
+def test_data_was_copied_correctly():
+    """Verify that the test data was transferred correctly to the watcher container."""
+    expected_path = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}/scan90-99"
+
+    subprocess.run(
+        f"docker exec {SRC_HOST} sh -lc 'test -d {expected_path}'", shell=True, check=True
+    )
 
 
 @pytest.mark.asyncio
 @pytest.mark.integration
 async def test_configdb_watcher():
-    """Flow points directly at scan-0 (contains .ms file)."""
+    """Flow points to subfolder scan90-99, containing 10 MS files."""
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
 
-    # Copy fixture into chosen watcher source path
-    source_path = f"{WATCHER_SOURCE_DIR_ROOT}/{PVC_SUBPATH1}"
-    _copy_fixture_into_container(SRC_HOST, source_path)
-
-    # Trigger COMPLETED Flow pointing directly at scan-0
+    # Trigger COMPLETED Flow pointing directly at scan90-99
     flow_name = "test-flow"
     persist_flow_name = "persist-flow"
-    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH1)
+    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH_DIRECT)
 
     # Poll for FINISHED dependency status
     deadline = time.time() + 10
@@ -349,12 +345,6 @@ async def test_configdb_watcher():
         sleep(1)
 
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
-
-    # Cleanup
-    log.info("Cleaning up copied MS file(s) from watcher container.")
-    cmd = f"docker exec {SRC_HOST} sh -lc 'rm -rf {WATCHER_SOURCE_DIR_ROOT}/*'"
-    subprocess.run(cmd, shell=True, check=False)
-    _cleanup_destination_storage(src_host=SRC_HOST)
 
 
 @pytest.mark.asyncio
@@ -370,14 +360,10 @@ async def test_configdb_watcher_higher_dir():
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
 
-    # Copy fixture into watcher root
-    source_path = f"{WATCHER_SOURCE_DIR_ROOT}/{PVC_SUBPATH2}"
-    _copy_fixture_into_container(SRC_HOST, source_path)
-
-    # Trigger COMPLETED Flow pointing at beam-vis0
+    # Trigger COMPLETED Flow pointing at pb-test-20260126-24294 directory
     flow_name = "test-flow-higher-dir"
     persist_flow_name = "persist-flow2"
-    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH2)
+    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH)
 
     # Poll for FINISHED dependency status
     deadline = time.time() + 10
@@ -390,12 +376,6 @@ async def test_configdb_watcher_higher_dir():
 
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
 
-    # Cleanup
-    log.info("Cleaning up copied MS file(s) from watcher container.")
-    cmd = f"docker exec {SRC_HOST} sh -lc 'rm -rf {WATCHER_SOURCE_DIR_ROOT}/*'"
-    subprocess.run(cmd, shell=True, check=False)
-    _cleanup_destination_storage(src_host=SRC_HOST)
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -406,12 +386,8 @@ async def test_watcher_logs_failed_registration():
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
 
-    # Copy fixture into watcher root
-    source_path = f"{WATCHER_SOURCE_DIR_ROOT}/{PVC_SUBPATH2}"
-    _copy_fixture_into_container(SRC_HOST, source_path)
-
     # Trigger a COMPLETED Flow with same subpath as previous test
-    trigger_completed_flows("test-flow-failure", "persist-flow3", subpath=PVC_SUBPATH2)
+    trigger_completed_flows("test-flow-failure", "persist-flow3", subpath=PVC_SUBPATH_DIRECT)
 
     # Poll for FAILED dependency status
     deadline = time.time() + 10
@@ -423,13 +399,3 @@ async def test_watcher_logs_failed_registration():
         sleep(1)
 
     assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"
-
-
-@pytest.mark.integration
-def test_pb_test_data_stub():
-    """PLACEHOLDER for new integration test. Check that pb-test integration data was extracted."""
-    test_data = Path(
-        "tests/registration_processor/product_dir/"
-        "pb-test-20260126-24294/output.scan-1.beam-vis0.ms"
-    )
-    assert test_data.exists()
