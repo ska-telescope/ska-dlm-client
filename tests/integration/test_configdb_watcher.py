@@ -28,7 +28,7 @@ from ska_dlm_client.common_types import (
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.api_client import ApiException
 from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.dlm_api import storage_api
+from ska_dlm_client.openapi.dlm_api import request_api, storage_api
 from ska_dlm_client.register_storage_location.main import setup_testing
 
 log = logging.getLogger(__name__)
@@ -292,11 +292,7 @@ def copy_test_data_into_watcher():
     )
 
     subprocess.run(
-        (
-            f"docker container cp "
-            f"{DATA_PATH_LOCAL}/{PB_ID} "
-            f"{SRC_HOST}:{destination_parent}/"
-        ),
+        (f"docker container cp {DATA_PATH_LOCAL}/{PB_ID} {SRC_HOST}:{destination_parent}/"),
         shell=True,
         check=True,
     )
@@ -314,7 +310,7 @@ def copy_test_data_into_watcher():
 @pytest.mark.integration
 def test_data_was_copied_correctly():
     """Verify that the test data was transferred correctly to the watcher container."""
-    expected_path = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}/scan90-99"
+    expected_path = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}/{ARB_MS}"
 
     subprocess.run(
         f"docker exec {SRC_HOST} sh -lc 'test -d {expected_path}'", shell=True, check=True
@@ -323,7 +319,7 @@ def test_data_was_copied_correctly():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_configdb_watcher():
+async def test_configdb_watcher(request_configuration: Configuration):
     """Flow points to subfolder scan90-99, containing 10 MS files."""
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     api_configuration = Configuration(host=host)
@@ -346,14 +342,27 @@ async def test_configdb_watcher():
 
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
 
+    expected_items = [
+        f"product/{EB_ID}/ska-sdp/{PB_ID}/scan90-99/output.scan-{i}.beam-vis0.ms"
+        for i in range(90, 100)
+    ]
+
+    with api_client.ApiClient(request_configuration) as the_api_client:
+        api_request = request_api.RequestApi(the_api_client)
+
+        for item_name in expected_items:
+            resp = api_request.query_data_item(item_name=item_name)
+            # assert each data_item is in source and destination:
+            assert len(resp) == 2, f"Expected 2 entries for {item_name}, got {len(resp)}"
+
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_configdb_watcher_higher_dir():
+async def test_configdb_watcher_higher_dir(request_configuration: Configuration):
     """
-    Flow points at beam-vis0 (one level above scan-0).
+    Flow points at pb-test-20260126-24294 (one level higher).
 
-    Watcher must search one level deeper to find .ms file.
+    Watcher must search one level deeper to find all ms files.
     """
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     api_configuration = Configuration(host=host)
@@ -365,16 +374,51 @@ async def test_configdb_watcher_higher_dir():
     persist_flow_name = "persist-flow2"
     trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH)
 
-    # Poll for FINISHED dependency status
-    deadline = time.time() + 10
-    statuses = []
-    while time.time() < deadline:
-        statuses = _get_dependency_statuses_for_product(PB_ID, flow_name)
-        if "FINISHED" in statuses:
-            break
-        sleep(1)
+    def _wait_for_dependency_status(
+        pb_id: str,
+        flow_name: str,
+        expected_status: str = "FINISHED",
+        timeout_s: int = 60,
+        poll_interval_s: int = 2,
+    ) -> list[str]:
+        """Poll dependency statuses until expected_status appears, or time out."""
+        deadline = time.time() + timeout_s
+        statuses: list[str] = []
 
+        while time.time() < deadline:
+            statuses = _get_dependency_statuses_for_product(pb_id, flow_name)
+            if expected_status in statuses:
+                return statuses
+
+            sleep(poll_interval_s)
+
+        return statuses
+
+    statuses = _wait_for_dependency_status(PB_ID, flow_name, timeout_s=60)
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
+
+    representative_items = [
+        f"product/{EB_ID}/ska-sdp/{PB_ID}/ancillary/file2.png",
+        f"product/{EB_ID}/ska-sdp/{PB_ID}/broken.ms",
+        f"product/{EB_ID}/ska-sdp/{PB_ID}/output.scan-5.beam-vis0.ms",
+        f"product/{EB_ID}/ska-sdp/{PB_ID}/scan10-19/output.scan-15.beam-vis0.ms",
+        f"product/{EB_ID}/ska-sdp/{PB_ID}/scan40-49/output.scan-45.beam-vis0.ms",
+        f"product/{EB_ID}/ska-sdp/{PB_ID}/scan80-89/output.scan-85.beam-vis0.ms",
+    ]
+
+    with api_client.ApiClient(request_configuration) as the_api_client:
+        api_request = request_api.RequestApi(the_api_client)
+        # assert each data_item is in source and destination:
+        for item_name in representative_items:
+            resp = api_request.query_data_item(item_name=item_name)
+            assert len(resp) == 2, f"Expected 2 entries for {item_name}, got {len(resp)}"
+
+    # By now there should be >200 entries in data_item:
+    resp = api_request.query_data_item(item_name="")
+    assert len(resp) > 200, f"Expected more than 200 data_items, got {len(resp)}"
+
+
+# TODO: write logic for metadata files found without data.
 
 
 @pytest.mark.asyncio
@@ -387,7 +431,7 @@ async def test_watcher_logs_failed_registration():
     sleep(2)  # TODO: DMAN-193
 
     # Trigger a COMPLETED Flow with same subpath as previous test
-    trigger_completed_flows("test-flow-failure", "persist-flow3", subpath=PVC_SUBPATH_DIRECT)
+    trigger_completed_flows("test-flow-failure", "persist-flow3", subpath=PVC_SUBPATH)
 
     # Poll for FAILED dependency status
     deadline = time.time() + 10
