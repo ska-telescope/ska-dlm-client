@@ -117,8 +117,8 @@ def get_or_init_storage(
     # pylint: disable=too-many-arguments, disable=too-many-positional-arguments
     storage_name: str,
     storage_url: str,
-    api_configuration: Configuration,
     storage_root_directory: str,
+    api_configuration: Configuration,
     the_location_id: str,
     rclone_config: str,
 ) -> str:

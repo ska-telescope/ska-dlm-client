@@ -6,7 +6,7 @@ from pathlib import Path
 
 from ska_dlm_client.config import STATUS_FILE_FILENAME
 from ska_dlm_client.directory_watcher.config import WatcherConfig
-from ska_dlm_client.directory_watcher.main import create_parser, process_args
+from ska_dlm_client.directory_watcher.main import process_args
 from ska_dlm_client.registration_processor import Item, RegistrationProcessor
 from ska_dlm_client.utils import CmdLineParameters
 
@@ -48,7 +48,6 @@ class TestSourceRootDirectory:
         cmd_line_parameters = CmdLineParameters(
             parser=self.parser,
             add_readiness_probe_file=True,
-            add_do_not_perform_actual_ingest_and_migration=True,
             add_dir_updates_wait_time=True,
         )
 
@@ -94,9 +93,6 @@ class TestSourceRootDirectory:
         )
         cmd_line_parameters = CmdLineParameters(
             parser=self.parser,
-            # add_readiness_probe_file=True,
-            # add_do_not_perform_actual_ingest_and_migration=True,
-            # add_dir_updates_wait_time=True,
         )
 
         config = process_args(args=parsed, cmd_line_parameters=cmd_line_parameters)

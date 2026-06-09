@@ -41,15 +41,11 @@ def process_args(args: argparse.Namespace) -> WatcherConfig:
         storage_url=args.storage_url,
         storage_name=args.source_name,
         status_file_absolute_path=f"{args.directory_to_watch}/{args.status_file_filename}",
-        storage_root_directory=args.source_root,
         migration_destination_storage_name=args.target_name,
         migration_url=args.migration_url,
         reload_status_file=args.reload_status_file,
         use_status_file=args.use_status_file,
         rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,
-        perform_actual_ingest_and_migration=(
-            args.perform_actual_ingest_and_migration
-        ),
     )
     return config
 
@@ -66,8 +62,8 @@ def create_directory_watcher() -> DirectoryWatcher:
     """
     # parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
     # This is only enabling the additional parameters required only for the directory watcher.
+    # We want the watcher to set readiness probe file when ready so pass class during creation
     cmd_line_parameters = CmdLineParameters(add_readiness_probe_file=True)
-    # cmd_line_parameters = add_arguments(cmd_line_parameters)
     args = cmd_line_parameters.parser.parse_args()
     cmd_line_parameters.parse_arguments(args)
     config = process_args(args=args)
@@ -75,17 +71,15 @@ def create_directory_watcher() -> DirectoryWatcher:
     # For the directory_watcher we need to register the volume where the watch
     # directory is located, if not registered already, but only in non-dev-test-mode.
     # logger.info("Watcher Config: %s", config)
-    if not cmd_line_parameters.dev_test_mode:
-        _ = setup_volume(
-            watcher_config=config,
-            api_configuration=config.ingest_configuration,
-            rclone_config=RCLONE_CONFIG_SOURCE,
-            storage_url=config.storage_url,
-        )
+    _ = setup_volume(
+        watcher_config=config,
+        api_configuration=config.ingest_configuration,
+        rclone_config=RCLONE_CONFIG_SOURCE,
+        storage_url=config.storage_url,
+    )
     registration_processor = RegistrationProcessor(config)
     if args.register_contents_of_watch_directory:
         registration_processor.register_data_products_from_watch_directory()
-    # We want the watcher to set readiness probe file when ready so pass class during creation
     if args.use_polling_watcher:  # pylint: disable=no-else-return"
         return PollingDirectoryWatcher(
             config=config,

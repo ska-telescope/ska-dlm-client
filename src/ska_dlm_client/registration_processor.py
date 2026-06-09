@@ -100,9 +100,6 @@ class RegistrationProcessor:
 
     def _execute_migration_checks(self, uid: str) -> bool:
         """Determine if migration should/can be performed based on the configuration."""
-        if not getattr(self._config, "perform_actual_ingest_and_migration", True):
-            logger.warning("Migration is disabled in configuration!")
-            return False
 
         # Require an explicit migration_configuration with a host
         migration_configuration = getattr(self._config, "migration_configuration", None)
@@ -299,10 +296,6 @@ class RegistrationProcessor:
         """
         cfg = self._config
 
-        # These are Directory-Watcher-specific; provide safe defaults if absent
-        perform_actual_ingest_and_migration = getattr(
-            cfg, "perform_actual_ingest_and_migration", True
-        )
         rclone_access_check_on_register = getattr(cfg, "rclone_access_check_on_register", False)
 
         # --- Common config needed by BOTH Directory Watcher and ConfigDB Watcher
@@ -335,17 +328,14 @@ class RegistrationProcessor:
             api_ingest.api_client.configuration.host = ingest_url
             dlm_registration_uuid = None
             try:
-                if perform_actual_ingest_and_migration:
-                    logger.debug(
-                        "Using URI: %s for data_item registration",
-                        item.path_rel_to_watch_dir,
-                    )
-                    response = None
-                    response = api_ingest.register_data_item(**register_kwargs)
-                    logger.debug("register_data_item response: %s", response)
-                    dlm_registration_uuid = str(response) if response is not None else None
-                else:
-                    logger.warning("Skipping registration of data_item due to config")
+                logger.debug(
+                    "Using URI: %s for data_item registration",
+                    item.path_rel_to_watch_dir,
+                )
+                response = None
+                response = api_ingest.register_data_item(**register_kwargs)
+                logger.debug("register_data_item response: %s", response)
+                dlm_registration_uuid = str(response) if response is not None else None
             except OpenApiException as err:
                 logger.error("OpenApiException caught during data item registration")
                 if isinstance(err, ApiException):
@@ -356,7 +346,7 @@ class RegistrationProcessor:
 
         # This should be refactored out and made an async transaction.
         self._migrate_item(
-            migrate=(migrate and perform_actual_ingest_and_migration),
+            migrate=migrate,
             item=item,
             uuid=dlm_registration_uuid,
             api_ingest=api_ingest,
@@ -373,16 +363,10 @@ class RegistrationProcessor:
             item_list: A list of data items to register with the DLM.
         """
         migrate = True
-        perform_actual_ingest_and_migration = getattr(
-            self._config, "perform_actual_ingest_and_migration", True
-        )
-        if perform_actual_ingest_and_migration:
-            for item in item_list:
-                _ = self._register_single_item(item=item, migrate=migrate)
-                migrate = False  # Only the top-level container item triggers migration
-                time.sleep(0.01)
-        else:
-            logger.info("Ingest and migration is disabled in the configuration!")
+        for item in item_list:
+            _ = self._register_single_item(item=item, migrate=migrate)
+            migrate = False  # Only the top-level container item triggers migration
+            time.sleep(0.01)
 
     def add_path(self, absolute_path: str, path_rel_to_watch_dir: str) -> str | None:
         """Add the given path to the DLM.

@@ -96,7 +96,6 @@ class MockCmdLineParameters:
         """Initialize with default values."""
         self.migration_url = None
         self.migration_destination_storage_name = None
-        self.perform_actual_ingest_and_migration = True
 
     def parse_arguments(self, args):
         """Mock method that does nothing."""
@@ -167,7 +166,6 @@ class TestDirectoryWatcher:
         # Test migration-related attributes
         assert self.config.migration_url is None
         assert self.config.migration_destination_storage_name is None
-        assert self.config.perform_actual_ingest_and_migration is True
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("test_polling", [True, False])

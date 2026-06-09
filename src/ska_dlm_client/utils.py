@@ -24,8 +24,6 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
     request_url: str = ""
     migration_url: str = ""
     readiness_probe_file: str = ""
-    do_not_perform_actual_ingest_and_migration: bool=False
-    dev_test_mode: bool=False
     add_source_name: bool = True
     add_source_root: bool = True
     add_target_name: bool = True
@@ -34,8 +32,6 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
     add_request_url: bool = True
     add_migration_url: bool = True
     add_readiness_probe_file: bool = False
-    add_do_not_perform_actual_ingest_and_migration: bool = False
-    add_dev_test_mode: bool = False
     parser: argparse.ArgumentParser = argparse.ArgumentParser()
 
     def __post_init__(  # noqa: C901
@@ -44,9 +40,6 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
     ):
         """Initiale with which parameters to include on the command line."""
         self.parser = argparse.ArgumentParser()
-        self.add_dev_test_mode = False
-        self.add_do_not_perform_actual_ingest_and_migration = False
-        self.perform_actual_ingest_and_migration = True
         if self.add_source_name:
             self.add_source_name_arguments()
             self.add_source_name = True
@@ -71,14 +64,6 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         if self.add_readiness_probe_file:
             self.add_readiness_probe_file_arguments()
             self.add_readiness_probe_file = False
-        if self.add_dev_test_mode:
-            self.add_dev_test_mode = self.add_dev_test_mode
-        if self.add_do_not_perform_actual_ingest_and_migration:
-            if not self.add_dev_test_mode:
-                self.add_dev_test_mode_arguments()
-                self.add_dev_test_mode = True
-            self.add_do_not_perform_actual_ingest_and_migration_arguments()
-            self.add_do_not_perform_actual_ingest_and_migration = True
 
     def parse_arguments(self, args: argparse.Namespace = None):
         """Parse command line arguments and assign to class parameters."""
@@ -94,28 +79,6 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         self.readiness_probe_file = (
             args.readiness_probe_file if self.add_readiness_probe_file else None
         )
-        self.dev_test_mode = args.dev_test_mode if self.add_dev_test_mode else False
-
-        self.do_not_perform_actual_ingest_and_migration = (
-            args.do_not_perform_actual_ingest_and_migration
-            if self.add_do_not_perform_actual_ingest_and_migration
-            else False
-        )
-        if self.do_not_perform_actual_ingest_and_migration and not self.dev_test_mode:
-            error_msg = (
-                "do_not_perform_actual_ingest_and_migration can only be used when "
-                "dev_test_mode is True"
-            )
-            logger.error(error_msg)
-            raise ValueError(error_msg)
-
-        # Set perform_actual_ingest_and_migration based on
-        # do_not_perform_actual_ingest_and_migration
-        if self.do_not_perform_actual_ingest_and_migration:
-            self.perform_actual_ingest_and_migration = False
-        else:
-            self.perform_actual_ingest_and_migration = True
-            args.perform_actual_ingest_and_migration = True
 
 
     def add_directory_to_watch_arguments(self) -> None:
@@ -206,26 +169,6 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             type=str,
             required=True,
             help="The path to the readiness probe file.",
-        )
-
-    def add_dev_test_mode_arguments(self) -> None:
-        """Update a parser to add a dev test mode argument."""
-        self.parser.add_argument(
-            "--dev-test-mode",
-            required=False,
-            action="store_true",
-            help="Optionally, add a dev test mode argument.",
-        )
-
-    def add_do_not_perform_actual_ingest_and_migration_arguments(
-        self
-    ) -> None:
-        """Update a parser to add a flag to disable actual ingest and migration."""
-        self.parser.add_argument(
-            "--do-not-perform-actual-ingest-and-migration",
-            required=False,
-            action="store_true",
-            help="If set, do not perform actual ingest and migration operations.",
         )
 
     def set_application_ready(self):

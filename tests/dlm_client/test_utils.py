@@ -34,7 +34,6 @@ def test_cmdline_parameters_initialization(parser: argparse.ArgumentParser) -> N
         add_ingest_url=True,
         add_request_url=True,
         add_readiness_probe_file=True,
-        add_do_not_perform_actual_ingest_and_migration=True,
         add_dir_updates_wait_time=True,
     )
 
@@ -44,8 +43,6 @@ def test_cmdline_parameters_initialization(parser: argparse.ArgumentParser) -> N
     assert cmd_params.add_ingest_url is True
     assert cmd_params.add_request_url is True
     assert cmd_params.add_readiness_probe_file is True
-    assert cmd_params.add_dev_test_mode is True
-    assert cmd_params.add_do_not_perform_actual_ingest_and_migration is True
     assert cmd_params.add_dir_updates_wait_time is True
 
 
@@ -70,8 +67,6 @@ def test_cmdline_parameters_default_values(parser: argparse.ArgumentParser) -> N
 
     # Check if attributes exist, if not, they're expected to be False by default
     # when initialized with their respective parameters set to False
-    assert getattr(cmd_params, "add_dev_test_mode", False) is False
-    assert getattr(cmd_params, "add_do_not_perform_actual_ingest_and_migration", False) is False
 
 
 @pytest.fixture(name="cmd_params_all_enabled")
@@ -88,7 +83,6 @@ def cmd_params_all_enabled_fixture(parser: argparse.ArgumentParser) -> CmdLinePa
         add_ingest_url=True,
         add_request_url=True,
         add_readiness_probe_file=True,
-        add_do_not_perform_actual_ingest_and_migration=True,
         add_dir_updates_wait_time=True,
     )
 
@@ -107,8 +101,6 @@ def test_args_fixture() -> argparse.Namespace:
         request_url="http://request-server:8080",
         readiness_probe_file="/tmp/ready",
         migration_destination_storage_name="dest-storage",
-        dev_test_mode=True,
-        do_not_perform_actual_ingest_and_migration=True,
         dir_updates_wait_time=30,
     )
 
@@ -134,87 +126,6 @@ def test_parse_arguments(
     assert cmd_params_all_enabled.ingest_url == "http://ingest-server:8080"
     assert cmd_params_all_enabled.request_url == "http://request-server:8080"
     assert cmd_params_all_enabled.readiness_probe_file == "/tmp/ready"
-    assert cmd_params_all_enabled.dev_test_mode is True
-    assert cmd_params_all_enabled.do_not_perform_actual_ingest_and_migration is True
     assert cmd_params_all_enabled.dir_updates_wait_time == 30
-    # Verify that perform_actual_ingest_and_migration is set correctly
-    assert cmd_params_all_enabled.perform_actual_ingest_and_migration is False
 
 
-def test_do_not_perform_requires_dev_test_mode(cmd_params_all_enabled: CmdLineParameters) -> None:
-    """Test that do_not_perform_actual_ingest_and_migration requires dev_test_mode to be True.
-
-    This test verifies that a ValueError is raised when do_not_perform_actual_ingest_and_migration
-    is True and dev_test_mode is False.
-
-    :param cmd_params_all_enabled: CmdLineParameters fixture with all parameters enabled
-    """
-    # Create args with dev_test_mode=False and do_not_perform_actual_ingest_and_migration=True
-    args = argparse.Namespace(
-        directory_to_watch="/test/dir",
-        storage_name="test-storage",
-        ingest_url="http://ingest-server:8080",
-        migration_url="http://migration-server:8080",
-        request_url="http://request-server:8080",
-        readiness_probe_file="/tmp/ready",
-        migration_destination_storage_name="dest-storage",
-        dev_test_mode=False,
-        do_not_perform_actual_ingest_and_migration=True,
-        dir_updates_wait_time=30,
-    )
-
-    # Verify that a ValueError is raised
-    with pytest.raises(
-        ValueError,
-        match=(
-            "do_not_perform_actual_ingest_and_migration can only be used when "
-            "dev_test_mode is True"
-        ),
-    ):
-        cmd_params_all_enabled.parse_arguments(args)
-
-
-def test_perform_actual_ingest_and_migration_setting(
-    cmd_params_all_enabled: CmdLineParameters,
-) -> None:
-    """Test that perform_actual_ingest_and_migration is set correctly.
-
-    This test verifies that perform_actual_ingest_and_migration is set to False when
-    do_not_perform_actual_ingest_and_migration is True, and set to True when
-    do_not_perform_actual_ingest_and_migration is False.
-
-    :param cmd_params_all_enabled: CmdLineParameters fixture with all parameters enabled
-    """
-    # Test when do_not_perform_actual_ingest_and_migration is True
-    args_true = argparse.Namespace(
-        directory_to_watch="/test/dir",
-        storage_name="test-storage",
-        ingest_url="http://ingest-server:8080",
-        request_url="http://request-server:8080",
-        readiness_probe_file="/tmp/ready",
-        migration_destination_storage_name="dest-storage",
-        migration_url="http://migration-server:8080",
-        dev_test_mode=True,
-        do_not_perform_actual_ingest_and_migration=True,
-        dir_updates_wait_time=30,
-    )
-    cmd_params_all_enabled.parse_arguments(args_true)
-    assert cmd_params_all_enabled.do_not_perform_actual_ingest_and_migration is True
-    assert cmd_params_all_enabled.perform_actual_ingest_and_migration is False
-
-    # Test when do_not_perform_actual_ingest_and_migration is False
-    args_false = argparse.Namespace(
-        directory_to_watch="/test/dir",
-        storage_name="test-storage",
-        ingest_url="http://ingest-server:8080",
-        request_url="http://request-server:8080",
-        readiness_probe_file="/tmp/ready",
-        migration_destination_storage_name="dest-storage",
-        migration_url="http://migration-server:8080",
-        dev_test_mode=True,
-        do_not_perform_actual_ingest_and_migration=False,
-        dir_updates_wait_time=30,
-    )
-    cmd_params_all_enabled.parse_arguments(args_false)
-    assert cmd_params_all_enabled.do_not_perform_actual_ingest_and_migration is False
-    assert cmd_params_all_enabled.perform_actual_ingest_and_migration is True

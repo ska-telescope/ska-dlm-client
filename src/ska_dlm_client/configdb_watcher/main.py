@@ -42,7 +42,6 @@ class SDPIngestConfig:
     ingest_configuration: Configuration
     storage_url: str
     storage_name: str
-    storage_root_directory: str
     uid_expiration_days: datetime | None = None
     oid_expiration_days: datetime | None = None
     migration_destination_storage_name: str | None = None
@@ -71,7 +70,6 @@ def process_args(args: argparse.Namespace) -> SDPIngestConfig:
         storage_name=args.source_name,
         uid_expiration_days=args.uid_expiration_days,
         oid_expiration_days=args.oid_expiration_days,
-        storage_root_directory=args.source_root,
         migration_destination_storage_name=args.target_name,
         migration_configuration=migration_configuration,
     )
@@ -167,7 +165,6 @@ async def _process_completed_flow(  # noqa: C901
 
     # Resolve the source directory from the Flow sink
     source_subpath = get_pvc_subpath(configdb, dataproduct_key)
-    source_root = Path(ingest_config.storage_root_directory)
     source_path_full = source_root / source_subpath
 
     logger.info(
@@ -239,7 +236,6 @@ async def _process_completed_flow(  # noqa: C901
         dep_status = _register_and_migrate_path(
             processor,
             str(work_dir),
-            ingest_config.storage_root_directory,
             dataproduct_key,
             new_dep,
         )
@@ -252,18 +248,16 @@ async def _process_completed_flow(  # noqa: C901
 
 
 async def sdp_to_dlm_ingest_and_migrate(
-    ingest_config: SDPIngestConfig, dev_test_mode=False
+    ingest_config: SDPIngestConfig
 ) -> None:
     """Ingest and migrate SDP data-products using DLM."""
     configdb = Config()  # Share one handle between writer & watcher
-    if not dev_test_mode:
-        # setup the source volume
-        _ = setup_volume(
-            watcher_config=ingest_config,
-            api_configuration=ingest_config.ingest_configuration,
-            rclone_config=RCLONE_CONFIG_SOURCE,
-            storage_url=ingest_config.storage_url,
-        )
+    _ = setup_volume(
+        watcher_config=ingest_config,
+        api_configuration=ingest_config.ingest_configuration,
+        rclone_config=RCLONE_CONFIG_SOURCE,
+        storage_url=ingest_config.storage_url,
+    )
     logger.info(
         "Starting ConfigDB watcher (include_existing=%s, source storage=%s, target storage=%s)",
         ingest_config.include_existing,

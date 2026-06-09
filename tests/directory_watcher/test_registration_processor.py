@@ -99,7 +99,6 @@ def mock_config():
     config.source_storage = "test-storage"
     config.storage_name = None  # TODO: fix source_storage/storage_name discrepency
     config.ingest_register_path_to_add = ""
-    config.perform_actual_ingest_and_migration = True
     config.rclone_access_check_on_register = False
     config.migration_destination_storage_name = "test-destination-storage"
     config.directory_watcher_entries = mock.MagicMock(spec=DirectoryWatcherEntries)
@@ -200,12 +199,10 @@ def test_registration_processor_copy_data_item_to_new_storage(
     )
 
     # Test with migration disabled
-    mock_config.perform_actual_ingest_and_migration = False
     result = processor._initiate_migration("test-uuid")
     assert result is None
 
     # Test with missing destination storage name
-    mock_config.perform_actual_ingest_and_migration = True
     mock_config.migration_destination_storage_name = None
     result = processor._initiate_migration("test-uuid")
     assert result is None
@@ -254,13 +251,10 @@ def test_registration_processor_register_single_item(
     assert timedelta(days=0) < delta_oid < timedelta(days=2), delta_oid
 
     # Test with registration disabled
-    mock_config.perform_actual_ingest_and_migration = False
     result = processor._register_single_item(item)
-    # When perform_actual_ingest_and_migration is False, response is None
     assert result is None
 
     # Test with API exception
-    mock_config.perform_actual_ingest_and_migration = True
     mock_ingest_api.return_value.register_data_item.side_effect = OpenApiException("Test error")
     result = processor._register_single_item(item)
     assert result is None
@@ -301,13 +295,11 @@ def test_registration_processor_register_container_items(
 
     # Test with registration disabled
     mock_ingest_api.reset_mock()
-    mock_config.perform_actual_ingest_and_migration = False
     processor._register_container_items([child_item1, child_item2])
     mock_ingest_api.return_value.register_data_item.assert_not_called()
 
     # Test with API exception
     mock_ingest_api.reset_mock()
-    mock_config.perform_actual_ingest_and_migration = True
     mock_ingest_api.return_value.register_data_item.side_effect = OpenApiException("Test error")
     processor._register_container_items([child_item1, child_item2])
     assert mock_ingest_api.return_value.register_data_item.call_count == 2

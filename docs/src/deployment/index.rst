@@ -56,7 +56,6 @@ Directory Watcher component
 - ``storage_url``: Full HTTP URL of the storage server. E.g., ``<http://service.namespace:port>``
 - ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``source_storage``: Storage to monitor for new data.
-- ``storage_root_directory``: Root directory used to generate URIs for the DLM database.
 - ``directory_to_watch``: Directory to monitor for new data.
 - ``target_name``: Target storage (where new data will be migrated to)
 - ``target_root``: Target storage root directory.
