@@ -32,6 +32,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./registration_processor/product_dir/pb-test-20260126-24294:/dlm/product_dir/product/eb-00000000/ska-sdp/pb-test-20260126-24294:ro
     networks:
       - dlm_network
     depends_on:

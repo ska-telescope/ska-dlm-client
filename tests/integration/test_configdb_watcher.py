@@ -276,45 +276,29 @@ def test_storage_initialisation(storage_configuration: Configuration):
         assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
 
 
-@pytest.fixture(scope="module", autouse=True)
-def copy_test_data_into_watcher():
-    """
-    Copy all local test data into the watcher container once, and clean up once at the end.
-
-    Everything before yield is the setup phase.
-    Everything after yield is the teardown phase.
-    """
-    destination_parent = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp"
-
-    # setup
+def _cleanup_destination_storage() -> None:
+    """Remove migrated test data from the rclone destination."""
+    destination_file = f"/dlm-archive/dlm-archive/product/{EB_ID}"
+    log.info("Cleaning up %s, destination_file")
     subprocess.run(
-        f"docker exec {SRC_HOST} sh -lc 'mkdir -p {destination_parent}'", shell=True, check=True
-    )
-
-    subprocess.run(
-        (f"docker container cp {DATA_PATH_LOCAL}/{PB_ID} {SRC_HOST}:{destination_parent}/"),
-        shell=True,
-        check=True,
-    )
-
-    yield  # run tests
-
-    # tear down
-    subprocess.run(
-        f"docker exec {SRC_HOST} sh -lc 'rm -rf {WATCHER_SOURCE_DIR_ROOT}/*'",
+        (f"docker exec dlm_rclone sh -lc 'rm -rf {destination_file}'"),
         shell=True,
         check=False,
     )
 
 
+_cleanup_destination_storage()  # clean any previously migrated files
+
+
 @pytest.mark.integration
 def test_data_was_copied_correctly():
-    """Verify that the test data was transferred correctly to the watcher container."""
-    expected_path = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}/{ARB_MS}"
+    """Verify that the test data is visible inside the watcher container."""
+    expected_file = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}/{ARB_MS}/table.dat"
 
-    subprocess.run(
-        f"docker exec {SRC_HOST} sh -lc 'test -d {expected_path}'", shell=True, check=True
+    result = subprocess.run(
+        f"docker exec {SRC_HOST} sh -lc 'test -f {expected_file}'", shell=True, check=False
     )
+    assert result.returncode == 0, f"Could not find expected file: {expected_file}"
 
 
 @pytest.mark.asyncio
