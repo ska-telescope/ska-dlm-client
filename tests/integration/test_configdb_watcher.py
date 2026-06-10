@@ -287,7 +287,7 @@ def _cleanup_destination_storage() -> None:
     )
 
 
-_cleanup_destination_storage()  # clean any previously migrated files
+_cleanup_destination_storage()  # remove – DMAN-200
 
 
 @pytest.mark.integration
