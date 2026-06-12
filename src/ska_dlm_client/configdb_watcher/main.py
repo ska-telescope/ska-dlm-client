@@ -4,8 +4,6 @@ import argparse
 import asyncio
 import logging
 import os
-from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
 
 import athreading
@@ -26,30 +24,14 @@ from ska_dlm_client.registration_processor import (
     RegistrationProcessor,
     directory_contains_metadata_file,
 )
-from ska_dlm_client.utils import CmdLineParameters
+from ska_dlm_client.configdb_watcher.config import WatcherArgs, SdpWatcherConfig
 
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
 # TODO: add a proper option for LOG_LEVEL=DEBUG
 
 
-# pylint: disable=too-many-instance-attributes
-@dataclass
-class SDPIngestConfig:
-    """Runtime configuration for the SDP→DLM ConfigDB Watcher."""
-
-    include_existing: bool
-    ingest_url: str
-    ingest_configuration: Configuration
-    storage_url: str
-    storage_name: str
-    uid_expiration_days: datetime | None = None
-    oid_expiration_days: datetime | None = None
-    migration_destination_storage_name: str | None = None
-    migration_configuration: Configuration | None = None
-
-
-def process_args(args: argparse.Namespace) -> SDPIngestConfig:
-    """Collect all command line parameters and create an SDPIngestConfig object."""
+def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
+    """Collect all command line parameters and create an SdpWatcherConfig object."""
     ingest_configuration = Configuration(host=args.ingest_url)
 
     # Only configure migration if the user supplied a migration server URL
@@ -62,16 +44,10 @@ def process_args(args: argparse.Namespace) -> SDPIngestConfig:
     if args.source_name:
         RCLONE_CONFIG_SOURCE["name"] = args.source_name
 
-    return SDPIngestConfig(
-        include_existing=args.include_existing,
+    return SdpWatcherConfig(
         ingest_url=args.ingest_url,
-        ingest_configuration=ingest_configuration,
         storage_url=args.storage_url,
-        storage_name=args.source_name,
-        uid_expiration_days=args.uid_expiration_days,
-        oid_expiration_days=args.oid_expiration_days,
-        migration_destination_storage_name=args.target_name,
-        migration_configuration=migration_configuration,
+        target_name=args.target_name,
     )
 
 
@@ -133,7 +109,7 @@ async def _process_completed_flow(  # noqa: C901
     # pylint: disable=too-many-locals
     configdb: Config,
     dataproduct_key: Flow.Key,
-    ingest_config: SDPIngestConfig,
+    config: SdpWatcherConfig,
 ) -> None:
     """Process a single COMPLETED data product.
 
@@ -164,8 +140,9 @@ async def _process_completed_flow(  # noqa: C901
             logger.info("Dependency status set to %s.", state.get("status"))
 
     # Resolve the source directory from the Flow sink
+    source_root = SdpWatcherConfig.directory_to_watch
     source_subpath = get_pvc_subpath(configdb, dataproduct_key)
-    source_path_full = source_root / source_subpath
+    source_path_full = Path(source_root / source_subpath)
 
     logger.info(
         "New COMPLETED data-product identified via data-product-persist: DataProduct uri=%s, "
@@ -183,7 +160,7 @@ async def _process_completed_flow(  # noqa: C901
         )
         return
 
-    processor = RegistrationProcessor(ingest_config)
+    processor = RegistrationProcessor(config)
     processor.last_migration_result = None  # Clear any stale migration result
 
     # ---- Find MS directories (directly or one level deeper) ----
@@ -248,27 +225,27 @@ async def _process_completed_flow(  # noqa: C901
 
 
 async def sdp_to_dlm_ingest_and_migrate(
-    ingest_config: SDPIngestConfig
+    config: SdpWatcherConfig
 ) -> None:
     """Ingest and migrate SDP data-products using DLM."""
     configdb = Config()  # Share one handle between writer & watcher
     _ = setup_volume(
-        watcher_config=ingest_config,
-        api_configuration=ingest_config.ingest_configuration,
+        watcher_config=config,
+        api_configuration=config.ingest_configuration,
         rclone_config=RCLONE_CONFIG_SOURCE,
-        storage_url=ingest_config.storage_url,
+        storage_url=config.storage_url,
     )
     logger.info(
-        "Starting ConfigDB watcher (include_existing=%s, source storage=%s, target storage=%s)",
-        ingest_config.include_existing,
-        ingest_config.storage_name,
-        ingest_config.migration_destination_storage_name,
+        "Starting ConfigDB watcher (include_existing=%s, source name=%s, target name=%s)",
+        config.include_existing,
+        config.source_name,
+        config.target_name,
     )
 
     async with watch_dataproduct_status(
         configdb,
         status="COMPLETED",
-        include_existing=ingest_config.include_existing,
+        include_existing=config.include_existing,
     ) as producer:  # make the desired status configurable?
         logger.info("Watcher READY and looking for events.")
 
@@ -277,7 +254,7 @@ async def sdp_to_dlm_ingest_and_migrate(
                 await _process_completed_flow(
                     configdb,
                     dataproduct_key,
-                    ingest_config,
+                    config,
                 )
                 logger.info("Done processing %s", dataproduct_key)
             except Exception:  # pylint: disable=broad-exception-caught  # pragma: no cover
@@ -293,79 +270,12 @@ def main() -> None:
     """Control the main execution of the program."""
     ska_ser_logging.configure_logging(logging.INFO)
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--include-existing",
-        action="store_true",
-        help="If set, first yield existing dataproduct keys with matching status.",
-    )
-    parser.add_argument(
-        "-i",
-        "--ingest-url",
-        type=str,
-        default="http://dlm_ingest:8001",
-        help=(
-            "Ingest server URL including the service port. " "Default 'http://dlm_ingest:8001'."
-        ),
-    )
-    parser.add_argument(
-        "--source-name",
-        type=str,
-        required=True,
-        help="Source storage name (e.g., 'SDPBuffer').",
-    )
-    parser.add_argument(
-        "--storage-url",
-        type=str,
-        default="http://dlm_storage:8003",
-        help=(
-            "Storage server URL including the service port. " "Default 'http://dlm_storage:8003'."
-        ),
-    )
-    parser.add_argument(
-        "-r",
-        "--source-root",
-        type=str,
-        default="/dlm/product_dir",
-        help=("Local mount directory of the shared PVC inside the configdb-watcher pod."),
-    )
-    parser.add_argument(
-        "--target-name",
-        type=str,
-        default=None,
-        help=(
-            "Destination storage name used for migration. "
-            "If omitted, migration will be skipped."
-        ),
-    )
-    parser.add_argument(
-        "-m",
-        "--migration-url",
-        type=str,
-        default=None,
-        help=(
-            "Migration server URL including the service port. "
-            "If omitted, migration will be skipped."
-        ),
-    )
-    parser.add_argument(
-        "--uid-expiration-days",
-        type=int,
-        default=os.getenv("UID_EXPIRATION_DAYS"),
-        help="UID expiration in days.",
-    )
-    parser.add_argument(
-        "--oid-expiration-days",
-        type=int,
-        default=os.getenv("OID_EXPIRATION_DAYS"),
-        help="OID expiration in days.",
-    )
-    args = parser.parse_args()
-    cmd_line_parameters = CmdLineParameters(parser)
+    cmd_line_parameters = WatcherArgs()
+    args = cmd_line_parameters.parser.parse_args()
     cmd_line_parameters.parse_arguments(args)
-    ingest_config = process_args(args)
+    config = process_args(args)
 
-    asyncio.run(sdp_to_dlm_ingest_and_migrate(ingest_config))
+    asyncio.run(sdp_to_dlm_ingest_and_migrate(config))
 
 
 if __name__ == "__main__":

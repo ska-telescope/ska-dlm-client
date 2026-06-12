@@ -106,7 +106,7 @@ ConfigDB Watcher component
 - ``include_existing``: If true, registers & migrates all existing COMPLETED data-products found in the etcd DB at startup.
 - ``source_storage``: Storage where the new data appears.
 - ``source_root_directory``: Root directory used to generate URIs for the DLM database.
-- ``migration_destination_storage_name``: Target storage (where new data will be migrated to). Default is ``dlm-archive``.
+- ``target_name``: Target storage (where new data will be migrated to). Default is ``dlm-archive``.
 - ``uid_expiration_days``: Number of days from now until this UID expires. 0 = expire immediately. Leave empty to use DB default: now() + 24:00.
 - ``oid_expiration_days``: Number of days from now until this OID expires. Leave empty to use DB default: 2099-12-31T23:59:59.
 - ``pvc.name``: Name of the volume to mount into the configdb-watcher pod.

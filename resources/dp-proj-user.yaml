@@ -61,7 +61,7 @@ configdb_watcher:
   include_existing: false
   source_storage: SDPBuffer
   source_root_directory: /dlm/product_dir
-  migration_destination_storage_name: dlm-archive
+  target_name: dlm-archive
   uid_expiration_days: # leave empty to use DB default, now() + 24:00
   oid_expiration_days: # leave empty to use DB default, 2099-12-31T23:59:59
   pvc:

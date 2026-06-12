@@ -190,11 +190,11 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
             api_configuration, storage_url=storage_url, location=LOCATION_NAME
         )
     if setup_target:
-        storage_name = watcher_config.migration_destination_storage_name
+        storage_name = watcher_config.target_name
         storage_root_directory = "/dlm-archive"
     else:
-        storage_name = watcher_config.storage_name
-        storage_root_directory = watcher_config.storage_root_directory
+        storage_name = watcher_config.source_name
+        storage_root_directory = watcher_config.directory_to_watch
     storage_id = get_or_init_storage(
         storage_name=storage_name,
         storage_url=storage_url,

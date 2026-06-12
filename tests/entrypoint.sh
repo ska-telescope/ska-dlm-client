@@ -8,7 +8,6 @@ chmod g+w /dlm/watch_dir
 case "$watcher_mode" in
     "directory-watcher")
         CMD="dlm-directory-watcher \
-          --directory-to-watch ${SOURCE_ROOT:-/dlm/watch_dir} \
           --source-name ${SOURCE_NAME:-dir-watcher} \
           --source-root ${SOURCE_ROOT:-/dlm/watch_dir} \
           --target-name ${TARGET_NAME:-dlm-archive} \

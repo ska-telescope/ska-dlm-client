@@ -17,7 +17,7 @@ from ska_dlm_client.directory_watcher.directory_watcher_entries import Directory
 from ska_dlm_client.directory_watcher.main import process_args
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.registration_processor import RegistrationProcessor
-from ska_dlm_client.utils import CmdLineParameters
+from ska_dlm_client.config import CmdLineParameters
 
 def create_parser() -> argparse.ArgumentParser:
     """Define a parser for all the command line parameters.
@@ -95,7 +95,7 @@ class MockCmdLineParameters:
     def __init__(self):
         """Initialize with default values."""
         self.migration_url = None
-        self.migration_destination_storage_name = None
+        self.target_name = None
 
     def parse_arguments(self, args):
         """Mock method that does nothing."""
@@ -165,7 +165,7 @@ class TestDirectoryWatcher:
 
         # Test migration-related attributes
         assert self.config.migration_url is None
-        assert self.config.migration_destination_storage_name is None
+        assert self.config.target_name is None
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("test_polling", [True, False])

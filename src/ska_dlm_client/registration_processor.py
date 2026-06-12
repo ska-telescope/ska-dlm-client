@@ -118,7 +118,7 @@ class RegistrationProcessor:
 
         destination_storage_name = getattr(
             self._config,
-            "migration_destination_storage_name",
+            "target_name",
             None,
         )
         if not destination_storage_name:
@@ -179,7 +179,7 @@ class RegistrationProcessor:
         result: str | None = None
         destination_storage_name = getattr(
             cfg,
-            "migration_destination_storage_name",
+            "target_name",
             None,
         )
         with api_client.ApiClient(migration_configuration) as migration_api_client:
@@ -258,7 +258,7 @@ class RegistrationProcessor:
             # register not explicitly migrated items on target storage
             target_storage = getattr(
                 self._config,
-                "migration_destination_storage_name",
+                "target_name",
                 None,
             )
             register_kwargs = self._build_register_kwargs(
@@ -302,24 +302,21 @@ class RegistrationProcessor:
         ingest_configuration = getattr(cfg, "ingest_configuration", None)
         ingest_url = getattr(cfg, "ingest_url", None)
 
-        # storage_name for Directory Watcher; source_storage for ConfigDB Watcher
-        source_storage = getattr(cfg, "storage_name", None)
-        if source_storage is None:
-            source_storage = getattr(cfg, "source_storage", None)
+        source_name = getattr(cfg, "source_name", None)
 
-        if ingest_configuration is None or ingest_url is None or source_storage is None:
+        if ingest_configuration is None or ingest_url is None or source_name is None:
             logger.error(
                 "RegistrationProcessor config missing required ingest settings "
-                "(ingest_configuration=%r, ingest_url=%r, source_storage=%r)",
+                "(ingest_configuration=%r, ingest_url=%r, source_name=%r)",
                 ingest_configuration,
                 ingest_url,
-                source_storage,
+                source_name,
             )
             return None
 
         register_kwargs = self._build_register_kwargs(
             item=item,
-            storage_name=source_storage,
+            storage_name=source_name,
             do_storage_access_check=rclone_access_check_on_register,
         )
 

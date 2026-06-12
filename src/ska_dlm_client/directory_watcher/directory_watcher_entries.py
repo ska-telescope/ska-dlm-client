@@ -27,12 +27,13 @@ class DirectoryWatcherEntry:
 class DirectoryWatcherEntries:
     """The list of entries to be managed."""
 
-    directory_watcher_entries: list[DirectoryWatcherEntry]
-    entries_file: str
-    write_directory_entries_file: bool
+    directory_watcher_entries: list[DirectoryWatcherEntry] = []
 
     def __init__(
-        self, entries_file: str, reload_from_status_file: bool, write_directory_entries_file: bool
+        self,
+        entries_file: str = "/tmp/dlm_entires.json",
+        reload_from_status_file: bool = False,
+        write_directory_entries_file: bool = True
     ):
         """Init the class."""
         self.directory_watcher_entries = []

@@ -15,7 +15,7 @@ from ska_dlm_client.directory_watcher.directory_watcher import (
 )
 from ska_dlm_client.register_storage_location.main import RCLONE_CONFIG_SOURCE, setup_volume
 from ska_dlm_client.registration_processor import RegistrationProcessor
-from ska_dlm_client.utils import CmdLineParameters
+from ska_dlm_client.directory_watcher.config import WatcherArgs
 
 from .config import WatcherConfig
 
@@ -36,15 +36,12 @@ def process_args(args: argparse.Namespace) -> WatcherConfig:
         RCLONE_CONFIG_SOURCE["name"] = args.source_name
     # TODO: not all command line args are being processed below
     config = WatcherConfig(
-        directory_to_watch=args.directory_to_watch,
-        ingest_url=args.ingest_url,
+        source_name=args.source_name,
+        target_name=args.target_name,
         storage_url=args.storage_url,
-        storage_name=args.source_name,
-        status_file_absolute_path=f"{args.directory_to_watch}/{args.status_file_filename}",
-        migration_destination_storage_name=args.target_name,
         migration_url=args.migration_url,
+        ingest_url=args.ingest_url,
         reload_status_file=args.reload_status_file,
-        use_status_file=args.use_status_file,
         rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,
     )
     return config
@@ -63,14 +60,12 @@ def create_directory_watcher() -> DirectoryWatcher:
     # parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
     # This is only enabling the additional parameters required only for the directory watcher.
     # We want the watcher to set readiness probe file when ready so pass class during creation
-    cmd_line_parameters = CmdLineParameters(add_readiness_probe_file=True)
+    cmd_line_parameters = WatcherArgs()
     args = cmd_line_parameters.parser.parse_args()
     cmd_line_parameters.parse_arguments(args)
     config = process_args(args=args)
 
-    # For the directory_watcher we need to register the volume where the watch
-    # directory is located, if not registered already, but only in non-dev-test-mode.
-    # logger.info("Watcher Config: %s", config)
+    # For the directory_watcher we need to register the volume where the watch directory is located
     _ = setup_volume(
         watcher_config=config,
         api_configuration=config.ingest_configuration,

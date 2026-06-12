@@ -5,7 +5,7 @@ import argparse
 
 import pytest
 
-from ska_dlm_client.utils import CmdLineParameters
+from ska_dlm_client.config import CmdLineParameters
 
 
 @pytest.fixture(name="parser")
@@ -100,7 +100,7 @@ def test_args_fixture() -> argparse.Namespace:
         migration_url="http://migration-server:8080",
         request_url="http://request-server:8080",
         readiness_probe_file="/tmp/ready",
-        migration_destination_storage_name="dest-storage",
+        target_name="dest-storage",
         dir_updates_wait_time=30,
     )
 

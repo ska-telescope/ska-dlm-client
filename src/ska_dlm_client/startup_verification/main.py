@@ -25,7 +25,7 @@ import ska_ser_logging
 from ska_dlm_client.openapi import ApiException, api_client, configuration
 from ska_dlm_client.openapi.dlm_api import request_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
-from ska_dlm_client.utils import CmdLineParameters
+from ska_dlm_client.config import CmdLineParameters
 
 logger = logging.getLogger(__name__)
 

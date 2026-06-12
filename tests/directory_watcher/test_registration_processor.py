@@ -100,7 +100,7 @@ def mock_config():
     config.storage_name = None  # TODO: fix source_storage/storage_name discrepency
     config.ingest_register_path_to_add = ""
     config.rclone_access_check_on_register = False
-    config.migration_destination_storage_name = "test-destination-storage"
+    config.target_name = "test-destination-storage"
     config.directory_watcher_entries = mock.MagicMock(spec=DirectoryWatcherEntries)
     config.ingest_url = "http://test-ingest:8000"
     config.storage_url = "http://test-storage:8000"
@@ -195,7 +195,7 @@ def test_registration_processor_copy_data_item_to_new_storage(
     result = processor._initiate_migration("test-uuid")
     assert result == "test-migration-uuid"
     mock_migration_api.return_value.copy_data_item.assert_called_once_with(
-        uid="test-uuid", destination_name=mock_config.migration_destination_storage_name
+        uid="test-uuid", destination_name=mock_config.target_name
     )
 
     # Test with migration disabled
@@ -203,12 +203,12 @@ def test_registration_processor_copy_data_item_to_new_storage(
     assert result is None
 
     # Test with missing destination storage name
-    mock_config.migration_destination_storage_name = None
+    mock_config.target_name = None
     result = processor._initiate_migration("test-uuid")
     assert result is None
 
     # Test with API exception
-    mock_config.migration_destination_storage_name = "test-destination-storage"
+    mock_config.target_name = "test-destination-storage"
     mock_migration_api.return_value.copy_data_item.side_effect = OpenApiException("Test error")
     result = processor._initiate_migration("test-uuid")
     assert result is None

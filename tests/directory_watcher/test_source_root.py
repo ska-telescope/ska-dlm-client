@@ -8,7 +8,7 @@ from ska_dlm_client.config import STATUS_FILE_FILENAME
 from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.directory_watcher.main import process_args
 from ska_dlm_client.registration_processor import Item, RegistrationProcessor
-from ska_dlm_client.utils import CmdLineParameters
+from ska_dlm_client.config import CmdLineParameters
 
 
 class TestSourceRootDirectory:

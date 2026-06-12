@@ -91,9 +91,9 @@ spec:
           - name: SOURCE_ROOT
             value: {{ .Values.configdb_watcher.source_root_directory | quote }}
 
-          {{- if .Values.configdb_watcher.migration_destination_storage_name }}
+          {{- if .Values.configdb_watcher.target_name }}
           - name: TARGET_NAME
-            value: {{ .Values.configdb_watcher.migration_destination_storage_name | quote }}
+            value: {{ .Values.configdb_watcher.target_name | quote }}
           {{- end }}
 
           {{- if .Values.configdb_watcher.migration_url }}
