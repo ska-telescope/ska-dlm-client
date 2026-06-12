@@ -213,6 +213,7 @@ async def _process_completed_flow(  # noqa: C901
         dep_status = _register_and_migrate_path(
             processor,
             str(work_dir),
+            config.directory_to_watch,
             dataproduct_key,
             new_dep,
         )
