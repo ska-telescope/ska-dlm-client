@@ -88,8 +88,8 @@ spec:
           - name: SOURCE_NAME
             value: {{ .Values.configdb_watcher.source_storage | quote }}
 
-          - name: SOURCE_ROOT
-            value: {{ .Values.configdb_watcher.source_root_directory | quote }}
+          - name: DIRECTORY_TO_WATCH
+            value: {{ .Values.configdb_watcher.directory_to_watch | quote }}
 
           {{- if .Values.configdb_watcher.target_name }}
           - name: TARGET_NAME

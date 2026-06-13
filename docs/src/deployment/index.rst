@@ -105,7 +105,7 @@ ConfigDB Watcher component
 - ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``include_existing``: If true, registers & migrates all existing COMPLETED data-products found in the etcd DB at startup.
 - ``source_storage``: Storage where the new data appears.
-- ``source_root_directory``: Root directory used to generate URIs for the DLM database.
+- ``directory_to_watch``: Directory used to generate URIs for the DLM database.
 - ``target_name``: Target storage (where new data will be migrated to). Default is ``dlm-archive``.
 - ``uid_expiration_days``: Number of days from now until this UID expires. 0 = expire immediately. Leave empty to use DB default: now() + 24:00.
 - ``oid_expiration_days``: Number of days from now until this OID expires. Leave empty to use DB default: 2099-12-31T23:59:59.

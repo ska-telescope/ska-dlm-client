@@ -33,7 +33,7 @@ class DirectoryWatcherEntries:
         self,
         entries_file: str = "/tmp/dlm_entires.json",
         reload_from_status_file: bool = False,
-        write_directory_entries_file: bool = True
+        write_directory_entries_file: bool = True,
     ):
         """Init the class."""
         self.directory_watcher_entries = []

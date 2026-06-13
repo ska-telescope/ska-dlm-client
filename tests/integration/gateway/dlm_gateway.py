@@ -245,6 +245,7 @@ class Entra(Provider):
             raise HTTPException(status_code=403, detail=str(e))
 
     async def _check_token(self, token: str):
+        # pylint: disable=c-extension-no-member
         token_headers = jwt.get_unverified_header(token)
         token_alg = token_headers["alg"]
         token_kid = token_headers["kid"]
@@ -259,6 +260,7 @@ class Entra(Provider):
             format=serialization.PublicFormat.SubjectPublicKeyInfo,
         )
         # Ignoring expiry date. This may be an issue if the state of the user changes
+        # pylint: disable=c-extension-no-member
         decoded_token = jwt.decode(
             token,
             key=rsa_pem_key_bytes,

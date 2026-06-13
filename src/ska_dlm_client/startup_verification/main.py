@@ -22,10 +22,10 @@ from datetime import datetime
 
 import ska_ser_logging
 
+from ska_dlm_client.config import CmdLineParameters
 from ska_dlm_client.openapi import ApiException, api_client, configuration
 from ska_dlm_client.openapi.dlm_api import request_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
-from ska_dlm_client.config import CmdLineParameters
 
 logger = logging.getLogger(__name__)
 
@@ -93,14 +93,12 @@ def main():
     verification_passed: bool = False
     try:
         parser = argparse.ArgumentParser(prog="dlm_startup_verification")
-        cmd_line_parameters = CmdLineParameters(
-            parser, add_directory_to_watch=True, add_storage_name=True, add_request_url=True
-        )
+        cmd_line_parameters = CmdLineParameters(parser)
         cmd_line_parameters.parse_arguments()
 
         startup_verification = StartupVerification(
             directory_to_watch=cmd_line_parameters.directory_to_watch,
-            storage_name=cmd_line_parameters.storage_name,
+            storage_name=cmd_line_parameters.source_name,
             request_url=cmd_line_parameters.request_url,
         )
         verification_passed = startup_verification.verify_registration()

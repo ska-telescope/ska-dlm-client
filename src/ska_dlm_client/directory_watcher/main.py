@@ -8,6 +8,7 @@ import signal
 
 import ska_ser_logging
 
+from ska_dlm_client.directory_watcher.config import WatcherArgs
 from ska_dlm_client.directory_watcher.directory_watcher import (
     DirectoryWatcher,
     INotifyDirectoryWatcher,
@@ -15,7 +16,6 @@ from ska_dlm_client.directory_watcher.directory_watcher import (
 )
 from ska_dlm_client.register_storage_location.main import RCLONE_CONFIG_SOURCE, setup_volume
 from ska_dlm_client.registration_processor import RegistrationProcessor
-from ska_dlm_client.directory_watcher.config import WatcherArgs
 
 from .config import WatcherConfig
 
@@ -27,7 +27,6 @@ def process_args(args: argparse.Namespace) -> WatcherConfig:
 
     Args:
         args: The parsed command line arguments from argparse.
-        cmd_line_parameters: Additional command line parameters processed by CmdLineParameters.
 
     Returns:
         A Config object initialized with all the command line parameters.
@@ -36,6 +35,7 @@ def process_args(args: argparse.Namespace) -> WatcherConfig:
         RCLONE_CONFIG_SOURCE["name"] = args.source_name
     # TODO: not all command line args are being processed below
     config = WatcherConfig(
+        directory_to_watch=args.directory_to_watch,
         source_name=args.source_name,
         target_name=args.target_name,
         storage_url=args.storage_url,

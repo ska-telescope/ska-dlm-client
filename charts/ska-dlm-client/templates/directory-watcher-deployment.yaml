@@ -48,7 +48,7 @@ spec:
         env:
           - name: STORAGE_URL
             value: {{ .Values.directory_watcher.storage_url | quote }}
-          - name: SOURCE_ROOT
+          - name: DIRECTORY_TO_WATCH
             value: {{ .Values.directory_watcher.directory_to_watch | quote }}
           - name: SOURCE_NAME
             value: {{ .Values.directory_watcher.source_storage | quote }}

@@ -23,7 +23,7 @@ spec:
     - "dir-watcher"
     - "--storage-url"
     - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}:80"
-    - "--source-root"
+    - "--directory-to-watch"
     - "/dlm"
   volumes:
     - name: test-configmap

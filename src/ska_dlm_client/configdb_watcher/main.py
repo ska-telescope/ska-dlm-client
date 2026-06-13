@@ -12,19 +12,18 @@ from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Dependency, Flow
 
 from ska_dlm_client.config import DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
+from ska_dlm_client.configdb_watcher.config import SdpWatcherConfig, WatcherArgs
 from ska_dlm_client.configdb_watcher.configdb_utils import (
     create_sdp_migration_dependency,
     get_pvc_subpath,
     update_dependency_state,
 )
 from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
-from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.register_storage_location.main import RCLONE_CONFIG_SOURCE, setup_volume
 from ska_dlm_client.registration_processor import (
     RegistrationProcessor,
     directory_contains_metadata_file,
 )
-from ska_dlm_client.configdb_watcher.config import WatcherArgs, SdpWatcherConfig
 
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
 # TODO: add a proper option for LOG_LEVEL=DEBUG
@@ -32,15 +31,6 @@ logger = logging.getLogger("ska_dlm_client.configdb_watcher")
 
 def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
     """Collect all command line parameters and create an SdpWatcherConfig object."""
-    ingest_configuration = Configuration(host=args.ingest_url)
-
-    # Only configure migration if the user supplied a migration server URL
-    if args.migration_url is not None:
-        migration_configuration = Configuration(host=args.migration_url)
-    else:
-        migration_configuration = None
-        logger.warning("No migration server specified. Unable to perform migrations.")
-
     if args.source_name:
         RCLONE_CONFIG_SOURCE["name"] = args.source_name
 
@@ -123,7 +113,6 @@ async def _process_completed_flow(  # noqa: C901
     Args:
         configdb: Shared SDP ConfigDB client.
         dataproduct_key: Flow.Key from the related DataProduct Flow.
-        ingest_config: Runtime ingest and migration configuration.
 
     Notes:
         This implementation processes each derived work directory sequentially.
@@ -140,15 +129,15 @@ async def _process_completed_flow(  # noqa: C901
             logger.info("Dependency status set to %s.", state.get("status"))
 
     # Resolve the source directory from the Flow sink
-    source_root = SdpWatcherConfig.directory_to_watch
+    directory_to_watch = SdpWatcherConfig.directory_to_watch
     source_subpath = get_pvc_subpath(configdb, dataproduct_key)
-    source_path_full = Path(source_root / source_subpath)
+    source_path_full = Path(directory_to_watch / source_subpath)
 
     logger.info(
         "New COMPLETED data-product identified via data-product-persist: DataProduct uri=%s, "
-        "source_root=%s, source_subpath=%s, source_path_full=%s",
+        "directory_to_watch=%s, source_subpath=%s, source_path_full=%s",
         dataproduct_key,
-        source_root,
+        directory_to_watch,
         source_subpath,
         source_path_full,
     )
@@ -225,9 +214,7 @@ async def _process_completed_flow(  # noqa: C901
     await _aupdate_dependency_state(final_status)
 
 
-async def sdp_to_dlm_ingest_and_migrate(
-    config: SdpWatcherConfig
-) -> None:
+async def sdp_to_dlm_ingest_and_migrate(config: SdpWatcherConfig) -> None:
     """Ingest and migrate SDP data-products using DLM."""
     configdb = Config()  # Share one handle between writer & watcher
     _ = setup_volume(

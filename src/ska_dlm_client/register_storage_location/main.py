@@ -20,10 +20,10 @@ from ska_dlm_client.openapi.dlm_api import storage_api
 logger = logging.getLogger(__name__)
 
 # Constants that can be used for testing.
-LOCATION_NAME = os.getenv("LOCATION_NAME","MyDLMClient")
-LOCATION_TYPE = os.getenv("LOCATION_TYPE", LocationType.LOCAL_DEV)
-LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY",LocationCountry.AU)
-LOCATION_CITY = os.getenv("LOCATION_CITY","Perth")
+LOCATION_NAME = os.getenv("LOCATION_NAME", "MyDLMClient")
+LOCATION_TYPE = os.getenv("LOCATION_TYPE", str(LocationType.LOCAL_DEV))
+LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY", str(LocationCountry.AU))
+LOCATION_CITY = os.getenv("LOCATION_CITY", "Perth")
 LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")
 RCLONE_CONFIG_TARGET = {
     "name": "dlm-archive",

@@ -100,7 +100,6 @@ class RegistrationProcessor:
 
     def _execute_migration_checks(self, uid: str) -> bool:
         """Determine if migration should/can be performed based on the configuration."""
-
         # Require an explicit migration_configuration with a host
         migration_configuration = getattr(self._config, "migration_configuration", None)
         if migration_configuration is None:
