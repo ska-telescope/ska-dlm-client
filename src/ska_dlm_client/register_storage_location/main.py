@@ -25,7 +25,7 @@ LOCATION_TYPE = os.getenv("LOCATION_TYPE", LocationType.LOCAL_DEV.value)
 LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY", LocationCountry.AU.value)
 LOCATION_CITY = os.getenv("LOCATION_CITY", "Perth")
 LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")
-TARGET_PHASE = os.getenv("TARGET_PHASE", "GAS")
+TARGET_PHASE = os.getenv("TARGET_PHASE", "SOLID")
 RCLONE_CONFIG_TARGET = {
     "name": "dlm-archive",
     "type": "alias",
@@ -122,7 +122,7 @@ def get_or_init_storage(
     api_configuration: Configuration,
     the_location_id: str,
     rclone_config: str,
-    storage_phase: str="GAS",
+    storage_phase: str = "GAS",
 ) -> str:
     """Get storage_id or perform storage initialisation based on the storage_name provided."""
     assert the_location_id is not None

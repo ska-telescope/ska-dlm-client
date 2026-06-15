@@ -16,13 +16,19 @@ import pytest
 import requests
 
 from ska_dlm_client.common_types import (
-    LocationCountry, LocationType, StorageInterface, StorageType
+    LocationCountry,
+    LocationType,
+    StorageInterface,
+    StorageType,
 )
 from ska_dlm_client.openapi import api_client
-from ska_dlm_client.openapi.dlm_api import storage_api
 from ska_dlm_client.openapi.configuration import Configuration
+from ska_dlm_client.openapi.dlm_api import storage_api
 from tests.integration.test_configdb_watcher import (
-    _get_container_log, _get_id, _init_location_if_needed, _init_storage_if_needed
+    _get_container_log,
+    _get_id,
+    _init_location_if_needed,
+    _init_storage_if_needed,
 )
 
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
@@ -116,11 +122,6 @@ os.environ["SDP_CONFIG_HOST"] = SDP_CONFIG_HOST
 os.environ["SDP_CONFIG_PORT"] = SDP_CONFIG_PORT
 
 
-def pytest_configure(config):
-    """Register local pytest markers used by this suite."""
-    config.addinivalue_line("markers", "integration: marks integration tests")
-
-
 def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 204, 301, 302)):
     """Check HTTP endpoints for server services and replace hostname if required."""
     url_parts = urlparse(url)
@@ -165,15 +166,14 @@ def request_configuration() -> Configuration:
     """Storage API client config."""
     return Configuration(host=REQUEST_URL)
 
+
 def storage_initialisation(storage_config: Configuration):
-    """set up a location, storage and storage config."""
+    """Location, storage and storage config setup."""
     with api_client.ApiClient(storage_config) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
 
         # --- ensure location exists ---
-        log.info(
-            "Using storage configuration host for registering: %s", storage_config.host
-        )
+        log.info("Using storage configuration host for registering: %s", storage_config.host)
         os.environ["STORAGE_URL"] = storage_config.host
         storage_log = _get_container_log("dlm_storage")
         log.info("Log from storage container: %s", storage_log)
@@ -195,7 +195,7 @@ def storage_initialisation(storage_config: Configuration):
         resp2 = api_storage.query_storage(storage_name=STORAGE["TGT"]["STORAGE_NAME"])
         assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
 
+
 if __name__ == "__main__":
-    """Run storage_initialisation standalone for manual testing."""
     config = Configuration(host=STORAGE_URL)
     storage_initialisation(config)
