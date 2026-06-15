@@ -44,8 +44,8 @@ STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
 
 LOCATION_NAME = "MyDLMClient"
-LOCATION_TYPE = LocationType.LOCAL_DEV
-LOCATION_COUNTRY = LocationCountry.AU
+LOCATION_TYPE = LocationType.LOCAL_DEV.value
+LOCATION_COUNTRY = LocationCountry.AU.value
 
 LOCATION_CITY = "Marksville"
 LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
