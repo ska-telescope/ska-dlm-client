@@ -59,7 +59,7 @@ configdb_watcher:
   storage_url: "http://ska-dlm-storage.dp-dm"
   migration_url: "http://ska-dlm-migration.dp-dm"
   include_existing: false
-  source_storage: SDPBuffer
+  source_storage: configdb-watcher
   directory_to_watch: /dlm/product_dir
   target_name: dlm-archive
   uid_expiration_days: # leave empty to use DB default, now() + 24:00

@@ -25,6 +25,7 @@ LOCATION_TYPE = os.getenv("LOCATION_TYPE", LocationType.LOCAL_DEV.value)
 LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY", LocationCountry.AU.value)
 LOCATION_CITY = os.getenv("LOCATION_CITY", "Perth")
 LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")
+TARGET_ROOT = os.getenv("TARGET_ROOT", "/dlm-archive")
 TARGET_PHASE = os.getenv("TARGET_PHASE", "SOLID")
 RCLONE_CONFIG_TARGET = {
     "name": "dlm-archive",
@@ -232,7 +233,7 @@ def setup_testing(api_configuration: Configuration):
         storage_url=storage_url,
         storage_phase=TARGET_PHASE,
         api_configuration=api_configuration,
-        storage_root_directory=RCLONE_CONFIG_TARGET["parameters"]["remote"],
+        storage_root_directory=TARGET_ROOT,
         the_location_id=location_id,
         rclone_config=RCLONE_CONFIG_TARGET,
     )

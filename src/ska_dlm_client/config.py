@@ -67,7 +67,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             "-s",
             "--source-name",
             type=str,
-            help="Source storage name (e.g., 'SDPBuffer').",
+            help="Source storage name (e.g., 'configdb-watcher').",
         )
         self.parser.add_argument(
             "-d",

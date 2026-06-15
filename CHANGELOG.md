@@ -4,6 +4,13 @@
 
 ### Updated
 
+* Aligned CLI between configdb and directory watchers
+* Removed CLI setup complexity (no add_* functions)
+* Removed testing flags from CLI
+* Aligned CLI parameters class with config class
+* Aligned tests with new CLI
+* Aligned helm charts with new CLI
+* Test registration of dlm-archive is now SOLID
 * Running tests with server image 2.1.0.
 
 ### Changed

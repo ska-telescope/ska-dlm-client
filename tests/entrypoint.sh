@@ -23,7 +23,7 @@ case "$watcher_mode" in
     "configdb-watcher")
         # allow overriding SDP_CONFIG_HOST from the environment.
         CMD="SDP_CONFIG_HOST=${SDP_CONFIG_HOST:-etcd} dlm-configdb-watcher \
-          --source-name ${SOURCE_NAME:-SDPBuffer} \
+          --source-name ${SOURCE_NAME:-configdb-watcher} \
           --directory-to-watch ${DIRECTORY_TO_WATCH:-/dlm/product_dir} \
           --target-name ${TARGET_NAME:-dlm-archive} \
           --storage-url ${STORAGE_URL:-http://dlm_storage:8003} \
