@@ -30,7 +30,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Constants that can be used for testing.
-LOCATION_NAME = "ThisDLMClientLocationName"
+LOCATION_NAME = "MyDLMClient"
 LOCATION_TYPE = LocationType.LOW_INTEGRATION
 LOCATION_COUNTRY = LocationCountry.AU
 LOCATION_CITY = "Marksville"

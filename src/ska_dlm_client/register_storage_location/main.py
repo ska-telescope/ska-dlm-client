@@ -21,15 +21,16 @@ logger = logging.getLogger(__name__)
 
 # Constants that can be used for testing.
 LOCATION_NAME = os.getenv("LOCATION_NAME", "MyDLMClient")
-LOCATION_TYPE = os.getenv("LOCATION_TYPE", str(LocationType.LOCAL_DEV))
-LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY", str(LocationCountry.AU))
+LOCATION_TYPE = os.getenv("LOCATION_TYPE", LocationType.LOCAL_DEV.value)
+LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY", LocationCountry.AU.value)
 LOCATION_CITY = os.getenv("LOCATION_CITY", "Perth")
 LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")
+TARGET_PHASE = os.getenv("TARGET_PHASE", "GAS")
 RCLONE_CONFIG_TARGET = {
     "name": "dlm-archive",
     "type": "alias",
     "root_path": "/",
-    "parameters": {"remote": "/dlm-archive"},
+    "parameters": {"remote": "/"},
 }
 RCLONE_CONFIG_SOURCE = {
     "name": f"{os.getenv('SOURCE_NAME', 'dir-watcher')}",
@@ -121,6 +122,7 @@ def get_or_init_storage(
     api_configuration: Configuration,
     the_location_id: str,
     rclone_config: str,
+    storage_phase: str="GAS",
 ) -> str:
     """Get storage_id or perform storage initialisation based on the storage_name provided."""
     assert the_location_id is not None
@@ -151,6 +153,7 @@ def get_or_init_storage(
                 root_directory=storage_root_directory,
                 location_id=the_location_id,
                 location_name=LOCATION_NAME,
+                storage_phase=storage_phase,
             )
             logger.info("Storage %s created in DLM", storage_name)
         else:
@@ -227,6 +230,7 @@ def setup_testing(api_configuration: Configuration):
     storage_id = get_or_init_storage(
         storage_name=RCLONE_CONFIG_TARGET["name"],
         storage_url=storage_url,
+        storage_phase=TARGET_PHASE,
         api_configuration=api_configuration,
         storage_root_directory=RCLONE_CONFIG_TARGET["parameters"]["remote"],
         the_location_id=location_id,
@@ -260,6 +264,14 @@ def create_parser() -> argparse.ArgumentParser:
         type=str,
         required=True,
         help="Storage root directory.",
+    )
+    parser.add_argument(
+        "-p",
+        "--storage-phase",
+        type=str,
+        required=False,
+        default="GAS",
+        help="Phase provided by storage.",
     )
     return parser
 

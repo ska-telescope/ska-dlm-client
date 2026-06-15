@@ -43,7 +43,7 @@ INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
 
-LOCATION_NAME = "ThisDLMClientLocationName"
+LOCATION_NAME = "MyDLMClient"
 LOCATION_TYPE = LocationType.LOCAL_DEV
 LOCATION_COUNTRY = LocationCountry.AU
 
@@ -55,10 +55,11 @@ STORAGE = {
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
         "ROOT_DIRECTORY": "/dlm-archive",
+        "STORAGE_PHASE": "SOLID",
         "STORAGE_CONFIG": {
             "name": "dlm-archive",
             "type": "alias",  # type 'alias' or 'local'?
-            "parameters": {"remote": "/dlm-archive"},
+            "parameters": {"remote": "/"},
         },
     },
     "SRC": {
@@ -66,6 +67,7 @@ STORAGE = {
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
         "ROOT_DIRECTORY": "/dlm/product_dir",
+        "STORAGE_PHASE": "GAS",
         "STORAGE_CONFIG": {
             "name": "dlm",
             "type": "sftp",
@@ -226,6 +228,7 @@ def _init_storage_if_needed(
             storage_name=storage["STORAGE_NAME"],
             storage_type=storage["STORAGE_TYPE"],
             storage_interface=storage["STORAGE_INTERFACE"],
+            storage_phase=storage["STORAGE_PHASE"],
             root_directory=storage["ROOT_DIRECTORY"],
             location_id=location_id,
             location_name=LOCATION_NAME,
@@ -391,10 +394,10 @@ async def test_configdb_watcher_higher_dir():
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
 
     # Cleanup
-    log.info("Cleaning up copied MS file(s) from watcher container.")
-    cmd = f"docker exec {SRC_HOST} sh -lc 'rm -rf {WATCHER_SOURCE_DIR_ROOT}/*'"
-    subprocess.run(cmd, shell=True, check=False)
-    _cleanup_destination_storage(src_host=SRC_HOST)
+    # log.info("Cleaning up copied MS file(s) from watcher container.")
+    # cmd = f"docker exec {SRC_HOST} sh -lc 'rm -rf {WATCHER_SOURCE_DIR_ROOT}/*'"
+    # subprocess.run(cmd, shell=True, check=False)
+    # _cleanup_destination_storage(src_host=SRC_HOST)
 
 
 @pytest.mark.asyncio

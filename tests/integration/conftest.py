@@ -15,14 +15,64 @@ from urllib.parse import urlparse
 import pytest
 import requests
 
-import ska_dlm_client.openapi.api_client as _dlm_api_client
+from ska_dlm_client.common_types import (
+    LocationCountry, LocationType, StorageInterface, StorageType
+)
+from ska_dlm_client.openapi import api_client
+from ska_dlm_client.openapi.dlm_api import storage_api
 from ska_dlm_client.openapi.configuration import Configuration
+from tests.integration.test_configdb_watcher import (
+    _get_container_log, _get_id, _init_location_if_needed, _init_storage_if_needed
+)
+
+INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
+STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
+
+LOCATION_NAME = "MyDLMClient"
+LOCATION_TYPE = LocationType.LOCAL_DEV
+LOCATION_COUNTRY = LocationCountry.AU
+
+LOCATION_CITY = "Marksville"
+LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
+STORAGE = {
+    "TGT": {
+        "STORAGE_NAME": "dlm-archive",
+        "STORAGE_TYPE": StorageType.FILESYSTEM,
+        "STORAGE_INTERFACE": StorageInterface.POSIX,
+        "ROOT_DIRECTORY": "/dlm-archive",
+        "STORAGE_PHASE": "SOLID",
+        "STORAGE_CONFIG": {
+            "name": "dlm-archive",
+            "type": "alias",  # type 'alias' or 'local'?
+            "parameters": {"remote": "/"},
+        },
+    },
+    "SRC": {
+        "STORAGE_NAME": "sdp-watcher",
+        "STORAGE_TYPE": StorageType.FILESYSTEM,
+        "STORAGE_INTERFACE": StorageInterface.POSIX,
+        "ROOT_DIRECTORY": "/dlm/product_dir",
+        "STORAGE_PHASE": "GAS",
+        "STORAGE_CONFIG": {
+            "name": "dlm",
+            "type": "sftp",
+            "parameters": {
+                "host": "dlm_configdb_watcher",
+                "key_file": "/root/.ssh/id_rsa",
+                "shell_type": "unix",
+                "type": "sftp",
+                "user": "ska-dlm",
+            },
+        },
+    },
+}
 
 log = logging.getLogger(__name__)
 
 # --- OpenAPI client deserialization patch (handles Optional[Dict[str, object]]) ---
 # Original private method
-__orig_deserialize = getattr(_dlm_api_client.ApiClient, "_ApiClient__deserialize")
+__orig_deserialize = getattr(api_client.ApiClient, "_ApiClient__deserialize")
 
 
 def __lenient_deserialize(self, data, klass):
@@ -44,7 +94,7 @@ def __lenient_deserialize(self, data, klass):
     return __orig_deserialize(self, data, klass)
 
 
-setattr(_dlm_api_client.ApiClient, "_ApiClient__deserialize", __lenient_deserialize)
+setattr(api_client.ApiClient, "_ApiClient__deserialize", __lenient_deserialize)
 # TODO(regen): Fix generator so ApiClient.__deserialize unwraps Optional[...] and
 # returns raw JSON for 'object' types; remove this test-time patch after regen.
 # --- end patch ---
@@ -114,3 +164,38 @@ def storage_configuration(request) -> Configuration:
 def request_configuration() -> Configuration:
     """Storage API client config."""
     return Configuration(host=REQUEST_URL)
+
+def storage_initialisation(storage_config: Configuration):
+    """set up a location, storage and storage config."""
+    with api_client.ApiClient(storage_config) as the_api_client:
+        api_storage = storage_api.StorageApi(the_api_client)
+
+        # --- ensure location exists ---
+        log.info(
+            "Using storage configuration host for registering: %s", storage_config.host
+        )
+        os.environ["STORAGE_URL"] = storage_config.host
+        storage_log = _get_container_log("dlm_storage")
+        log.info("Log from storage container: %s", storage_log)
+        location_id = _init_location_if_needed(api_storage)
+        # --- ensure storage exists ---
+        storage_id = _init_storage_if_needed(api_storage, location_id, storage=STORAGE["TGT"])
+
+        # --- set storage config ---
+        cfg_id = api_storage.create_storage_config(
+            request_body=STORAGE["TGT"]["STORAGE_CONFIG"],
+            storage_id=storage_id,
+            storage_name=STORAGE["TGT"]["STORAGE_NAME"],
+            config_type="rclone",
+        )
+        assert isinstance(cfg_id, str) and cfg_id
+        log.info("Target storage config id: %s", cfg_id)
+
+        # --- verify by querying again ---
+        resp2 = api_storage.query_storage(storage_name=STORAGE["TGT"]["STORAGE_NAME"])
+        assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
+
+if __name__ == "__main__":
+    """Run storage_initialisation standalone for manual testing."""
+    config = Configuration(host=STORAGE_URL)
+    storage_initialisation(config)
