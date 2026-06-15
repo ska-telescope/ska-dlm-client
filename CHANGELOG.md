@@ -2,6 +2,10 @@
 
 ## Development
 
+### Updated
+
+* Improve ConfigDB Watcher integration test coverage with a larger, more representative test dataset.
+
 ### Added
 
 * Test file pb-test-20260126-24294.tar.bz2 to Git LFS.

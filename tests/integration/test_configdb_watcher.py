@@ -28,16 +28,18 @@ from ska_dlm_client.common_types import (
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.api_client import ApiException
 from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.dlm_api import storage_api
+from ska_dlm_client.openapi.dlm_api import request_api, storage_api
 from ska_dlm_client.register_storage_location.main import setup_testing
 
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 EB_ID = "eb-00000000"
-PB_ID = "pb-test-00000000-a"
-MS_NAME = "output.scan-1.beam-vis0.ms"
-MS_PATH_LOCAL = f"{dir_path}/../test_registration_processor/product_dir"
+PB_ID = "pb-test-20260126-24294"
+ARB_MS = "scan90-99/output.scan-99.beam-vis0.ms"  # random MS file in pb-test-20260126-24294
+PVC_SUBPATH = f"product/{EB_ID}/ska-sdp/{PB_ID}"
+PVC_SUBPATH_DIRECT = f"product/{EB_ID}/ska-sdp/{PB_ID}/scan90-99"
+DATA_PATH_LOCAL = f"{dir_path}/../registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
@@ -82,8 +84,6 @@ STORAGE = {
 
 SRC_HOST = STORAGE["SRC"]["STORAGE_CONFIG"]["parameters"]["host"]
 WATCHER_SOURCE_DIR_ROOT = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}"
-PVC_SUBPATH1 = f"product/{EB_ID}/ska-sdp/{PB_ID}/beam-vis0/scan-0"
-PVC_SUBPATH2 = f"product/{EB_ID}/ska-sdp/{PB_ID}/beam-vis0"
 
 
 def _get_cfg() -> Config:
@@ -276,68 +276,44 @@ def test_storage_initialisation(storage_configuration: Configuration):
         assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
 
 
-def _copy_fixture_into_container(src_host: str, watcher_src_subpath: str) -> None:
-    """Copy the MS fixture into watcher_src_subpath and wait until the path becomes visible."""
-    # 1) Ensure watcher source dir exists
-    cmd = f"docker exec {src_host} sh -lc 'mkdir -p {watcher_src_subpath}'"
-    log.info("Ensure watcher source dir exists: %s", cmd)
-    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
-    assert p.returncode == 0, p.stderr
-    cmd = f"ls -la {MS_PATH_LOCAL}"
-    log.info("Local fixture contents: %s", cmd)
-    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
-    log.info("Local fixture contents rc=%s stdout=%s stderr=%s", p.returncode, p.stdout, p.stderr)
-
-    # 2) Copy the contents of MS_PATH_LOCAL into <container>:<dest>
-    cmd = f"docker container cp {MS_PATH_LOCAL}/. {src_host}:{watcher_src_subpath}/"
-    log.info("Copy MS fixture into watcher container: %s", cmd)
-    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
-    assert p.returncode == 0, p.stderr
-
-    # 3) Wait until expected path is visible (avoid race with watcher)
-    deadline = time.time() + 10
-    while time.time() < deadline:
-        expected_ms_path = f"{watcher_src_subpath}/{MS_NAME}"
-        cmd = f"docker exec {src_host} sh -lc 'test -d {expected_ms_path}'"
-        p = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=False)
-        if p.returncode == 0:
-            log.info("Expected path visible: %s", watcher_src_subpath)
-            log.info("dir check stdout: %s", p.stdout)
-            return
-        sleep(1)
-
-    assert (
-        p.returncode == 0
-    ), f"Expected path not visible in watcher container: {watcher_src_subpath}\n{p.stderr}"
-
-
-def _cleanup_destination_storage(src_host: str) -> None:
-    """For consecutive tests, the destination copy must not already exist."""
-    cmd = (
-        f"docker exec {src_host} sh -lc "
-        "'rm -rf /dlm-archive/* /dlm-archive/.[!.]* /dlm-archive/..?* 2>/dev/null || true'"
+def _cleanup_destination_storage() -> None:
+    """Remove migrated test data from the rclone destination."""
+    destination_file = f"/dlm-archive/dlm-archive/product/{EB_ID}"
+    log.info("Cleaning up %s, destination_file")
+    subprocess.run(
+        (f"docker exec dlm_rclone sh -lc 'rm -rf {destination_file}'"),
+        shell=True,
+        check=False,
     )
-    log.info("Cleaning destination storage: %s", cmd)
-    subprocess.run(cmd, shell=True, check=False)
+
+
+_cleanup_destination_storage()  # remove – DMAN-200
+
+
+@pytest.mark.integration
+def test_data_was_copied_correctly():
+    """Verify that the test data is visible inside the watcher container."""
+    expected_file = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}/{ARB_MS}/table.dat"
+
+    result = subprocess.run(
+        f"docker exec {SRC_HOST} sh -lc 'test -f {expected_file}'", shell=True, check=False
+    )
+    assert result.returncode == 0, f"Could not find expected file: {expected_file}"
 
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_configdb_watcher():
-    """Flow points directly at scan-0 (contains .ms file)."""
+async def test_configdb_watcher(request_configuration: Configuration):
+    """Flow points to subfolder scan90-99, containing 10 MS files."""
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
 
-    # Copy fixture into chosen watcher source path
-    source_path = f"{WATCHER_SOURCE_DIR_ROOT}/{PVC_SUBPATH1}"
-    _copy_fixture_into_container(SRC_HOST, source_path)
-
-    # Trigger COMPLETED Flow pointing directly at scan-0
+    # Trigger COMPLETED Flow pointing directly at scan90-99
     flow_name = "test-flow"
     persist_flow_name = "persist-flow"
-    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH1)
+    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH_DIRECT)
 
     # Poll for FINISHED dependency status
     deadline = time.time() + 10
@@ -350,51 +326,83 @@ async def test_configdb_watcher():
 
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
 
-    # Cleanup
-    log.info("Cleaning up copied MS file(s) from watcher container.")
-    cmd = f"docker exec {SRC_HOST} sh -lc 'rm -rf {WATCHER_SOURCE_DIR_ROOT}/*'"
-    subprocess.run(cmd, shell=True, check=False)
-    _cleanup_destination_storage(src_host=SRC_HOST)
+    expected_items = [
+        f"product/{EB_ID}/ska-sdp/{PB_ID}/scan90-99/output.scan-{i}.beam-vis0.ms"
+        for i in range(90, 100)
+    ]
+
+    with api_client.ApiClient(request_configuration) as the_api_client:
+        api_request = request_api.RequestApi(the_api_client)
+
+        for item_name in expected_items:
+            resp = api_request.query_data_item(item_name=item_name)
+            # assert each data_item is in source and destination:
+            assert len(resp) == 2, f"Expected 2 entries for {item_name}, got {len(resp)}"
 
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_configdb_watcher_higher_dir():
+async def test_configdb_watcher_higher_dir(request_configuration: Configuration):
     """
-    Flow points at beam-vis0 (one level above scan-0).
+    Flow points at pb-test-20260126-24294 (one level higher).
 
-    Watcher must search one level deeper to find .ms file.
+    Watcher must search one level deeper to find all ms files.
     """
     host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
 
-    # Copy fixture into watcher root
-    source_path = f"{WATCHER_SOURCE_DIR_ROOT}/{PVC_SUBPATH2}"
-    _copy_fixture_into_container(SRC_HOST, source_path)
-
-    # Trigger COMPLETED Flow pointing at beam-vis0
+    # Trigger COMPLETED Flow pointing at pb-test-20260126-24294 directory
     flow_name = "test-flow-higher-dir"
     persist_flow_name = "persist-flow2"
-    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH2)
+    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH)
 
-    # Poll for FINISHED dependency status
-    deadline = time.time() + 10
-    statuses = []
-    while time.time() < deadline:
-        statuses = _get_dependency_statuses_for_product(PB_ID, flow_name)
-        if "FINISHED" in statuses:
-            break
-        sleep(1)
+    def _wait_for_dependency_status(
+        pb_id: str,
+        flow_name: str,
+        expected_status: str = "FINISHED",
+        timeout_s: int = 60,
+        poll_interval_s: int = 2,
+    ) -> list[str]:
+        """Poll dependency statuses until expected_status appears, or time out."""
+        deadline = time.time() + timeout_s
+        statuses: list[str] = []
 
+        while time.time() < deadline:
+            statuses = _get_dependency_statuses_for_product(pb_id, flow_name)
+            if expected_status in statuses:
+                return statuses
+
+            sleep(poll_interval_s)
+
+        return statuses
+
+    statuses = _wait_for_dependency_status(PB_ID, flow_name, timeout_s=60)
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
 
-    # Cleanup
-    log.info("Cleaning up copied MS file(s) from watcher container.")
-    cmd = f"docker exec {SRC_HOST} sh -lc 'rm -rf {WATCHER_SOURCE_DIR_ROOT}/*'"
-    subprocess.run(cmd, shell=True, check=False)
-    _cleanup_destination_storage(src_host=SRC_HOST)
+    representative_items = [
+        f"product/{EB_ID}/ska-sdp/{PB_ID}/ancillary/file2.png",
+        f"product/{EB_ID}/ska-sdp/{PB_ID}/broken.ms",
+        f"product/{EB_ID}/ska-sdp/{PB_ID}/output.scan-5.beam-vis0.ms",
+        f"product/{EB_ID}/ska-sdp/{PB_ID}/scan10-19/output.scan-15.beam-vis0.ms",
+        f"product/{EB_ID}/ska-sdp/{PB_ID}/scan40-49/output.scan-45.beam-vis0.ms",
+        f"product/{EB_ID}/ska-sdp/{PB_ID}/scan80-89/output.scan-85.beam-vis0.ms",
+    ]
+
+    with api_client.ApiClient(request_configuration) as the_api_client:
+        api_request = request_api.RequestApi(the_api_client)
+        # assert each data_item is in source and destination:
+        for item_name in representative_items:
+            resp = api_request.query_data_item(item_name=item_name)
+            assert len(resp) == 2, f"Expected 2 entries for {item_name}, got {len(resp)}"
+
+    # By now there should be >200 entries in data_item:
+    resp = api_request.query_data_item(item_name="")
+    assert len(resp) > 200, f"Expected more than 200 data_items, got {len(resp)}"
+
+
+# TODO: write logic for metadata files found without data.
 
 
 @pytest.mark.asyncio
@@ -406,12 +414,8 @@ async def test_watcher_logs_failed_registration():
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
 
-    # Copy fixture into watcher root
-    source_path = f"{WATCHER_SOURCE_DIR_ROOT}/{PVC_SUBPATH2}"
-    _copy_fixture_into_container(SRC_HOST, source_path)
-
     # Trigger a COMPLETED Flow with same subpath as previous test
-    trigger_completed_flows("test-flow-failure", "persist-flow3", subpath=PVC_SUBPATH2)
+    trigger_completed_flows("test-flow-failure", "persist-flow3", subpath=PVC_SUBPATH)
 
     # Poll for FAILED dependency status
     deadline = time.time() + 10
@@ -423,13 +427,3 @@ async def test_watcher_logs_failed_registration():
         sleep(1)
 
     assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"
-
-
-@pytest.mark.integration
-def test_pb_test_data_stub():
-    """PLACEHOLDER for new integration test. Check that pb-test integration data was extracted."""
-    test_data = Path(
-        "tests/test_registration_processor/product_dir/"
-        "pb-test-20260126-24294/output.scan-1.beam-vis0.ms"
-    )
-    assert test_data.exists()
