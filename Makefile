@@ -9,7 +9,6 @@ DOCKER_COMPOSE = docker compose
 DOCS_SPHINXOPTS = -n --keep-going
 PYTHON_LINE_LENGTH = 99
 PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
-MEASUREMENT_SETS_FOR_TESTS = output.scan-1.beam-vis0.ms.tar.gz
 
 # The DLM server image to use in integration tests:
 DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:2.1.0
@@ -25,8 +24,9 @@ python-do-test:
 
 python-post-test: docker-compose-down
 
+# extract all compressed files in `data` directory
 extract-test-data:
-	./extract_data.sh $(MEASUREMENT_SETS_FOR_TESTS)
+	./extract_data.sh
 
 integration-test: extract-test-data docker-compose-up run-integration-test docker-compose-down
 

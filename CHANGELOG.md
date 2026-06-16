@@ -12,6 +12,11 @@
 * Aligned helm charts with new CLI
 * Test registration of dlm-archive is now SOLID
 * Running tests with server image 2.1.0.
+* Improve ConfigDB Watcher integration test coverage with a larger, more representative test dataset.
+
+### Added
+
+* Test file pb-test-20260126-24294.tar.bz2 to Git LFS.
 
 ### Changed
 
@@ -19,6 +24,7 @@
 
 ### Updated
 
+* Running tests with server image 2.1.0.
 * Running tests with server image 2.0.0.
 * Use real MeasurementSet structure for testing.
 * The ConfigDB watcher now watches DataProductPersist Flows and checks the status of the related DataProduct Flow.
