@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import logging
 import os
+import urllib
 from typing import Optional
 
 from ska_sdp_config import Config, ConfigCollision
@@ -12,7 +13,6 @@ from ska_sdp_config.backend.etcd3 import Etcd3Backend
 from ska_sdp_config.entity.common import PVCPath
 from ska_sdp_config.entity.common.path import RelativePurePath
 from ska_sdp_config.entity.flow import DataProduct, Dependency, Flow
-import urllib
 
 logger = logging.getLogger(__name__)
 

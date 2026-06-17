@@ -116,6 +116,7 @@ POSTGREST_URL = os.getenv("POSTGREST_URL", "http://dlm_postgrest:3000")
 RCLONE_BASE = os.getenv("RCLONE_BASE", "https://dlm_rclone:5572")
 ETCD_URL = os.getenv("ETCD_URL", "http://etcd:2379")
 
+
 def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 204, 301, 302)):
     """Check HTTP endpoints for server services and replace hostname if required."""
     url_parts = urlparse(url)

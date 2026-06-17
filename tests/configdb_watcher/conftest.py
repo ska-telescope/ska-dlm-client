@@ -2,10 +2,10 @@
 
 import logging
 import os
+import urllib
 
 import pytest
 from ska_sdp_config import Config
-import urllib
 
 ETCD_URL = "http://etcd:2379"
 

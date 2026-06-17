@@ -217,7 +217,9 @@ async def _process_completed_flow(  # noqa: C901
 
 async def sdp_to_dlm_ingest_and_migrate(config: SdpWatcherConfig) -> None:
     """Ingest and migrate SDP data-products using DLM."""
-    configdb = Config(host=config.etcd_host, port=config.etcd_port)  # Share one handle between writer & watcher
+    configdb = Config(
+        host=config.etcd_host, port=config.etcd_port
+    )  # Share one handle between writer & watcher
     _ = setup_volume(
         watcher_config=config,
         api_configuration=config.ingest_configuration,

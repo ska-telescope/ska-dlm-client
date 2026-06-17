@@ -24,6 +24,7 @@ def create_cmd_line_parameters() -> WatcherArgs:
     """Create command-line parameters for directory watcher tests."""
     return WatcherArgs()
 
+
 def create_args() -> argparse.Namespace:
     """Create a test Namespace containing directory watcher arguments.
 

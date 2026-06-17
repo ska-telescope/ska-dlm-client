@@ -1,6 +1,5 @@
 # pylint: disable=too-many-instance-attributes
 """Class to hold the configuration used by the directory_watcher package."""
-from argparse import BooleanOptionalAction
 from dataclasses import dataclass, field
 
 from ska_dlm_client.config import ClientConfig, CmdLineParameters
