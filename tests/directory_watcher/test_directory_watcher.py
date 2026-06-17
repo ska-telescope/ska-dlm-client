@@ -20,24 +20,31 @@ from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.registration_processor import RegistrationProcessor
 
 
-def create_parser() -> argparse.ArgumentParser:
-    """Define a parser for all the command line parameters.
+def create_cmd_line_parameters() -> WatcherArgs:
+    """Create command-line parameters for directory watcher tests."""
+    return WatcherArgs()
 
-    Creates and configures an ArgumentParser with all the command line options
-    needed for the ska-dlm-client's various components.
+def create_args() -> argparse.Namespace:
+    """Create a test Namespace containing directory watcher arguments.
 
     Returns:
-        An ArgumentParser instance configured with all required and optional arguments.
+        An argparse.Namespace populated with the argument values required
+        by the tests.
     """
-    cmd_line_parameters = WatcherArgs()
-    cmd_line_parameters.directory_to_watch = ""
-    cmd_line_parameters.dir_updates_wait_time = True
-    cmd_line_parameters.use_status_file = False
-    cmd_line_parameters.reload_status_file = True
-    cmd_line_parameters.status_file_filename = STATUS_FILE_FILENAME
-    cmd_line_parameters.skip_rclone_access_check_on_register = False
-    cmd_line_parameters.register_contents_of_watch_directory = False
-    return cmd_line_parameters
+    return argparse.Namespace(
+        directory_to_watch="",
+        source_name="",
+        target_name="",
+        storage_url="",
+        migration_url="",
+        ingest_url="",
+        reload_status_file=True,
+        status_file_filename=STATUS_FILE_FILENAME,
+        skip_rclone_access_check_on_register=False,
+        register_contents_of_watch_directory=False,
+        dir_updates_wait_time=1,
+        use_status_file=False,
+    )
 
 
 class MockCmdLineParameters:
@@ -59,22 +66,22 @@ class TestDirectoryWatcher:
     """DirectoryWatcher unit test stubs."""
 
     SOURCE_NAME = "dir-watcher"
-    INGREST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
+    INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
     ROOT_DIRECTORY = "/dlm"
 
     add_path_successful = False
 
     @classmethod
     def setup_class(cls) -> None:
-        """Set for the testing process."""
+        """Set up the test environment."""
         cls.the_watch_dir = tempfile.mkdtemp()
-        cls.cmd_line_parameters = create_parser()
+        cls.cmd_line_parameters = create_cmd_line_parameters()
         cls.parsed = cls.cmd_line_parameters.parser.parse_args(
             [
                 "--directory-to-watch",
                 cls.the_watch_dir,
                 "--ingest-url",
-                cls.INGREST_URL,
+                cls.INGEST_URL,
                 "--source-name",
                 cls.SOURCE_NAME,
             ]
@@ -91,7 +98,7 @@ class TestDirectoryWatcher:
     def test_process_args(self) -> None:
         """Test case for init_data_item_ingest_init_data_item_post."""
         assert self.parsed.directory_to_watch == self.the_watch_dir
-        assert self.parsed.ingest_url == self.INGREST_URL
+        assert self.parsed.ingest_url == self.INGEST_URL
         assert self.parsed.source_name == self.SOURCE_NAME
         assert self.parsed.reload_status_file is False
         assert self.parsed.status_file_filename == STATUS_FILE_FILENAME
@@ -101,7 +108,7 @@ class TestDirectoryWatcher:
     def test_config_generation(self) -> None:
         """Test the correct config is generated from the command line args."""
         assert self.config.directory_to_watch == self.the_watch_dir
-        assert self.config.ingest_url == self.INGREST_URL
+        assert self.config.ingest_url == self.INGEST_URL
         assert self.config.source_name == self.SOURCE_NAME
         assert self.config.reload_status_file is False
         assert (

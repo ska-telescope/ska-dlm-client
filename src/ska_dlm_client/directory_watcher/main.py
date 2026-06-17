@@ -57,7 +57,6 @@ def create_directory_watcher() -> DirectoryWatcher:
     Returns:
         A DirectoryWatcher instance configured with the parsed command line arguments.
     """
-    # parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
     # This is only enabling the additional parameters required only for the directory watcher.
     # We want the watcher to set readiness probe file when ready so pass class during creation
     cmd_line_parameters = WatcherArgs()
