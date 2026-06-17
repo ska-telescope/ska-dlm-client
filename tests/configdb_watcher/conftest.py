@@ -5,9 +5,9 @@ import os
 
 import pytest
 from ska_sdp_config import Config
+import urllib
 
-SDP_CONFIG_HOST = "etcd"
-SDP_CONFIG_PORT = "2379"
+ETCD_URL = "http://etcd:2379"
 
 log = logging.getLogger(__name__)
 
@@ -15,8 +15,9 @@ log = logging.getLogger(__name__)
 @pytest.fixture(name="config")
 def sdp_config_fixture():
     """Provide a clean SDP ConfigDB client for each test."""
-    host = os.environ.get("SDP_CONFIG_HOST", "etcd")
-    port = os.environ.get("SDP_CONFIG_PORT", "2379")
+    etcd_url = os.environ.get("ETCD_URL", ETCD_URL)
+    host = urllib.parse.urlparse(etcd_url).hostname
+    port = urllib.parse.urlparse(etcd_url).port
 
     with Config(backend="etcd3", host=host, port=port) as cfg:
         # Clean before test

@@ -45,7 +45,7 @@ directory_watcher:
   oid_expiration_days: # leave empty to use DB default, 2099-12-31T23:59:59
   use_polling_watcher: false # false means using the iNotify-based watcher, which might not work with networked filesystems.
   skip_rclone_access_check_on_register: false
-  register_contents_of_watch_directory: false
+  include_existing: false
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-ingest.other-namespace:port
   pvc:
@@ -74,7 +74,6 @@ configdb_watcher:
   # If these services run in another namespace, use e.g. ska-dlm-ingest.other-namespace:port
   uid_expiration_days: # leave empty to use DB default, now() + 24:00
   oid_expiration_days: # leave empty to use DB default, 2099-12-31T23:59:59
-  skip_rclone_access_check_on_register: false
   pvc:
     name: shared
     read_only: false

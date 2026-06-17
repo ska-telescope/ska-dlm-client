@@ -63,7 +63,7 @@ Directory Watcher component
 - ``oid_expiration_days``: Number of days from now until this OID expires. Leave empty to use DB default: 2099-12-31T23:59:59.
 - ``use_polling_watcher``: false means using the iNotify-based watcher, which might not work with networked filesystems.
 - ``skip_rclone_access_check_on_register``: If ``true``, skips verifying rclone access before attempting to register the file.
-- ``register_contents_of_watch_directory``: If ``true``, registers & migrates all contents of the watch directory at startup, not just newly detected files.
+- ``include_existing``: If ``true``, registers & migrates all contents of the watch directory at startup, not just newly detected files.
 - ``pvc.name``: Name of the volume to mount into the directory-watcher pod.
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the directory-watcher can do. Needs to be ``false`` to allow for data deletion.
 

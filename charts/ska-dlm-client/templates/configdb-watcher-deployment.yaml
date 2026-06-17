@@ -62,8 +62,10 @@ spec:
             - sh
             - -c
             - |
-              echo "Waiting for etcd at ${SDP_CONFIG_HOST}:${SDP_CONFIG_PORT}..."
-              until nc -z -w 2 "${SDP_CONFIG_HOST}" "${SDP_CONFIG_PORT}"; do
+              echo "Waiting for etcd at ${ETCD_URL}..."
+              ETCD_HOST=$(echo "${ETCD_URL}" | cut -d: -f1)
+              ETCD_PORT=$(echo "${ETCD_URL}" | cut -d: -f2)
+              until nc -z -w 2 "${ETCD_HOST}" "${ETCD_PORT}"; do
                 sleep 2
               done
               echo "etcd service is ready."

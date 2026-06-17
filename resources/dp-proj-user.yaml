@@ -41,7 +41,7 @@ directory_watcher:
   oid_expiration_days: # leave empty to use DB default, 2099-12-31T23:59:59
   use_polling_watcher: false
   skip_rclone_access_check_on_register: false
-  register_contents_of_watch_directory: false
+  include_existing: false
 
   pvc:
     name: shared

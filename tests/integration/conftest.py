@@ -114,13 +114,7 @@ MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 POSTGREST_URL = os.getenv("POSTGREST_URL", "http://dlm_postgrest:3000")
 RCLONE_BASE = os.getenv("RCLONE_BASE", "https://dlm_rclone:5572")
-SDP_CONFIG_HOST = os.environ.get("SDP_CONFIG_HOST", "etcd")
-SDP_CONFIG_PORT = os.environ.get("SDP_CONFIG_PORT", "2379")
-ETCD_URL = f"http://{SDP_CONFIG_HOST}:{SDP_CONFIG_PORT}"
-
-os.environ["SDP_CONFIG_HOST"] = SDP_CONFIG_HOST
-os.environ["SDP_CONFIG_PORT"] = SDP_CONFIG_PORT
-
+ETCD_URL = os.getenv("ETCD_URL", "http://etcd:2379")
 
 def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 204, 301, 302)):
     """Check HTTP endpoints for server services and replace hostname if required."""

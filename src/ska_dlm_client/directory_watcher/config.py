@@ -20,7 +20,7 @@ class WatcherConfig(ClientConfig):
     directory_to_watch: str = "/dlm/watch_dir"
     reload_status_file: bool = True
     use_status_file: bool = False
-    register_contents_of_watch_directory: bool = False
+    include_existing: bool = False
     directory_watcher_entries: DirectoryWatcherEntries = field(init=False)
 
     def __post_init__(self):
@@ -59,13 +59,6 @@ class WatcherArgs(CmdLineParameters):
             help="Path of status file",
         )
         self.parser.add_argument(
-            "--register_contents_of_watch_directory",
-            type=bool,
-            required=False,
-            default=False,
-            help="Register existing contents (def: False)",
-        )
-        self.parser.add_argument(
             "--use_polling_watcher",
             type=bool,
             required=False,
@@ -77,10 +70,4 @@ class WatcherArgs(CmdLineParameters):
             default=1,
             help="If set, a directory will only be added once its contents has been static "
             + "for at least the given number of seconds.",
-        )
-        self.parser.add_argument(
-            "--register-contents-of-watch-directory",
-            action=BooleanOptionalAction,
-            default=False,
-            help="First register each file/directory in the watch directory as a data product.",
         )

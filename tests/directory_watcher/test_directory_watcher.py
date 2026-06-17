@@ -41,7 +41,7 @@ def create_args() -> argparse.Namespace:
         reload_status_file=True,
         status_file_filename=STATUS_FILE_FILENAME,
         skip_rclone_access_check_on_register=False,
-        register_contents_of_watch_directory=False,
+        include_existing=False,
         dir_updates_wait_time=1,
         use_status_file=False,
     )

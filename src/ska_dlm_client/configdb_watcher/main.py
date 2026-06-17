@@ -38,6 +38,7 @@ def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
         ingest_url=args.ingest_url,
         storage_url=args.storage_url,
         target_name=args.target_name,
+        etcd_url=args.etcd_url,
     )
 
 
@@ -216,7 +217,7 @@ async def _process_completed_flow(  # noqa: C901
 
 async def sdp_to_dlm_ingest_and_migrate(config: SdpWatcherConfig) -> None:
     """Ingest and migrate SDP data-products using DLM."""
-    configdb = Config()  # Share one handle between writer & watcher
+    configdb = Config(host=config.etcd_host, port=config.etcd_port)  # Share one handle between writer & watcher
     _ = setup_volume(
         watcher_config=config,
         api_configuration=config.ingest_configuration,

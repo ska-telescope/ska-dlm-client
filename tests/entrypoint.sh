@@ -21,14 +21,14 @@ case "$watcher_mode" in
           ${USE_POLLING_WATCHER:+--use-polling-watcher}"
         ;;
     "configdb-watcher")
-        # allow overriding SDP_CONFIG_HOST from the environment.
-        CMD="SDP_CONFIG_HOST=${SDP_CONFIG_HOST:-etcd} dlm-configdb-watcher \
+        CMD="dlm-configdb-watcher \
           --source-name ${SOURCE_NAME:-configdb-watcher} \
           --directory-to-watch ${DIRECTORY_TO_WATCH:-/dlm/product_dir} \
           --target-name ${TARGET_NAME:-dlm-archive} \
           --storage-url ${STORAGE_URL:-http://dlm_storage:8003} \
           --migration-url ${MIGRATION_URL:-http://dlm_migration:8004} \
-          --ingest-url ${INGEST_URL:-http://dlm_ingest:8001}
+          --ingest-url ${INGEST_URL:-http://dlm_ingest:8001} \
+          --etcd-url ${ETCD_URL:-http://etcd:2379} \
           ${UID_EXPIRATION_DAYS:+--uid-expiration-days ${UID_EXPIRATION_DAYS}} \
           ${OID_EXPIRATION_DAYS:+--oid-expiration-days ${OID_EXPIRATION_DAYS}}"
         ;;

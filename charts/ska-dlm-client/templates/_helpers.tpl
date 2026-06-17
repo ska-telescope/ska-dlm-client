@@ -71,13 +71,11 @@ intent: production
 {{/*
 ConfigDB / SDP Config environment variables
 Used by both the configdb-watcher container and the wait-for-etcd initContainer.
-If configdb_watcher.sdp_config.host is empty, default to local etcd Service name "<fullname>-etcd".
+If configdb_watcher.sdp_config.etcd_url is empty, default to local etcd Service "<fullname>-etcd:2379".
 */}}
 {{- define "ska-dlm-client.configdb-watcher.sdp-config-env" -}}
-- name: SDP_CONFIG_HOST
-  value: {{ .Values.configdb_watcher.sdp_config.host | default (printf "%s-etcd" (include "ska-dlm-client.fullname" .)) | quote }}
-- name: SDP_CONFIG_PORT
-  value: {{ .Values.configdb_watcher.sdp_config.port | quote }}
+- name: ETCD_URL
+  value: {{ .Values.configdb_watcher.sdp_config.etcd_url | default (printf "%s-etcd:2379" (include "ska-dlm-client.fullname" .)) | quote }}
 {{- if .Values.configdb_watcher.sdp_config.path | default "" | trim }}
 - name: SDP_CONFIG_PATH
   value: {{ .Values.configdb_watcher.sdp_config.path | quote }}
