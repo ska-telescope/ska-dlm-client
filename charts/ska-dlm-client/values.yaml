@@ -78,11 +78,9 @@ configdb_watcher:
     name: shared
     read_only: false
   sdp_config:
-    etcd_url:
-    host:    # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
-    port: 2379    # default etcd client port
+    etcd_url: # e.g., "http://some-external-etcd.namespace:port". Leave empty when using the local etcd service.
     path: ""      # optional
-    etcd:
+    local_etcd:
       enabled: true # deploy a local etcd service
       image: "artefact.skao.int/ska-sdp-etcd"
       tag: "3.5.9"

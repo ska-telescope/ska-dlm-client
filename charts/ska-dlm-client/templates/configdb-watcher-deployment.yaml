@@ -1,15 +1,13 @@
 {{- if .Values.configdb_watcher.enabled -}}
-{{- $host := .Values.configdb_watcher.sdp_config.host | default "" | trim -}}
-{{- $local := .Values.configdb_watcher.sdp_config.etcd.enabled -}}
+{{- $etcd_url := .Values.configdb_watcher.sdp_config.etcd_url | default "" | trim -}}
+{{- $local_etcd_enabled := .Values.configdb_watcher.sdp_config.local_etcd.enabled -}}
 
-{{- /* 1) User selected BOTH local and external */ -}}
-{{- if and $local (ne $host "") -}}
-{{- fail "Invalid config: choose ONE etcd option for configdb_watcher. Either (a) external: set configdb_watcher.sdp_config.host and set configdb_watcher.sdp_config.etcd.enabled=false, OR (b) local: leave configdb_watcher.sdp_config.host empty and set configdb_watcher.sdp_config.etcd.enabled=true." -}}
+{{- if and $local_etcd_enabled (ne $etcd_url "") -}}
+{{- fail "Invalid config: choose ONE etcd option for configdb_watcher. Either set configdb_watcher.sdp_config.etcd_url and set configdb_watcher.sdp_config.local_etcd.enabled=false, OR leave configdb_watcher.sdp_config.etcd_url empty and set configdb_watcher.sdp_config.local_etcd.enabled=true." -}}
 {{- end -}}
 
-{{- /* 2) User selected NEITHER local nor external */ -}}
-{{- if and (not $local) (eq $host "") -}}
-{{- fail "Invalid config: configdb_watcher.enabled=true but no etcd configured. Either set configdb_watcher.sdp_config.host (external etcd) OR set configdb_watcher.sdp_config.etcd.enabled=true (deploy local etcd)." -}}
+{{- if and (not $local_etcd_enabled) (eq $etcd_url "") -}}
+{{- fail "Invalid config: configdb_watcher.enabled=true but no etcd configured. Either set configdb_watcher.sdp_config.etcd_url for external etcd OR set configdb_watcher.sdp_config.local_etcd.enabled=true to deploy local etcd." -}}
 {{- end -}}
 
 apiVersion: v1
@@ -51,7 +49,7 @@ spec:
       dnsPolicy: ClusterFirst
 
       # if bringing up a local etcd service, wait for the pod to be ready
-      {{ if .Values.configdb_watcher.sdp_config.etcd.enabled }}
+      {{ if .Values.configdb_watcher.sdp_config.local_etcd.enabled }}
       initContainers:
         - name: wait-for-etcd
           image: busybox:1.36
