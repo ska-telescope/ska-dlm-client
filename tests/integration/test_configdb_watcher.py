@@ -18,6 +18,7 @@ from ska_sdp_config.entity.flow import (
     Flow,
     FlowSource,
 )
+import urllib
 
 from ska_dlm_client.common_types import (
     LocationCountry,
@@ -44,6 +45,7 @@ SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
+ETCD_URL = os.getenv("ETCD_URL", "http://etcd:2379")
 
 LOCATION_NAME = "MyDLMClient"
 LOCATION_TYPE = LocationType.LOCAL_DEV.value
@@ -90,7 +92,9 @@ WATCHER_SOURCE_DIR_ROOT = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}"
 
 def _get_cfg() -> Config:
     """Return a Config using the same env-based backend settings as the watcher."""
-    return Config()
+    etcd_host = urllib.parse.urlparse(ETCD_URL).hostname
+    etcd_port = urllib.parse.urlparse(ETCD_URL).port
+    return Config(host=etcd_host, port=etcd_port)
 
 
 def _ensure_processing_block() -> None:
