@@ -75,7 +75,7 @@ If configdb_watcher.sdp_config.etcd_url is empty, default to local etcd Service 
 */}}
 {{- define "ska-dlm-client.configdb-watcher.sdp-config-env" -}}
 - name: ETCD_URL
-  value: {{ .Values.configdb_watcher.sdp_config.etcd_url | default (printf "%s-etcd:2379" (include "ska-dlm-client.fullname" .)) | quote }}
+  value: {{ .Values.configdb_watcher.sdp_config.etcd_url | default (printf "http://%s-etcd:2379" (include "ska-dlm-client.fullname" .)) | quote }}
 {{- if .Values.configdb_watcher.sdp_config.path | default "" | trim }}
 - name: SDP_CONFIG_PATH
   value: {{ .Values.configdb_watcher.sdp_config.path | quote }}

@@ -63,8 +63,12 @@ spec:
             - -c
             - |
               echo "Waiting for etcd at ${ETCD_URL}..."
-              ETCD_HOST=$(echo "${ETCD_URL}" | cut -d: -f1)
-              ETCD_PORT=$(echo "${ETCD_URL}" | cut -d: -f2)
+              ETCD_ADDR="${ETCD_URL#http://}"
+              ETCD_ADDR="${ETCD_ADDR#https://}"
+              ETCD_HOST="${ETCD_ADDR%%:*}"
+              ETCD_PORT="${ETCD_ADDR##*:}"
+              echo "ETCD_HOST=${ETCD_HOST}"
+              echo "ETCD_PORT=${ETCD_PORT}"
               until nc -z -w 2 "${ETCD_HOST}" "${ETCD_PORT}"; do
                 sleep 2
               done
