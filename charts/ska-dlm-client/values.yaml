@@ -78,6 +78,7 @@ configdb_watcher:
     name: shared
     read_only: false
   sdp_config:
+    etcd_url:
     host:    # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
     port: 2379    # default etcd client port
     path: ""      # optional
