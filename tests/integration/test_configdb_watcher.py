@@ -4,6 +4,7 @@ import logging
 import os
 import subprocess
 import time
+import urllib.parse
 from pathlib import Path
 from time import sleep
 
@@ -18,7 +19,6 @@ from ska_sdp_config.entity.flow import (
     Flow,
     FlowSource,
 )
-import urllib
 
 from ska_dlm_client.common_types import (
     LocationCountry,
