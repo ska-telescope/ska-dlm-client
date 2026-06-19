@@ -33,6 +33,8 @@ def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
     """Collect all command line parameters and create an SdpWatcherConfig object."""
     if args.source_name:
         RCLONE_CONFIG_SOURCE["name"] = args.source_name
+    if args.watcher_hostname:
+        RCLONE_CONFIG_SOURCE["parameters"]["host"] = args.watcher_hostname
 
     return SdpWatcherConfig(
         ingest_url=args.ingest_url,

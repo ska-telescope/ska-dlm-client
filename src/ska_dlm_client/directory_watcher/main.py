@@ -33,7 +33,8 @@ def process_args(args: argparse.Namespace) -> WatcherConfig:
     """
     if args.source_name:
         RCLONE_CONFIG_SOURCE["name"] = args.source_name
-    # TODO: not all command line args are being processed below
+    if args.watcher_hostname:
+        RCLONE_CONFIG_SOURCE["parameters"]["host"] = args.watcher_hostname
     config = WatcherConfig(
         directory_to_watch=args.directory_to_watch,
         source_name=args.source_name,

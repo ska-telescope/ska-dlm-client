@@ -14,6 +14,7 @@ case "$watcher_mode" in
           --migration-url ${MIGRATION_URL:-http://dlm_migration:8004} \
           --storage-url ${STORAGE_URL:-http://dlm_storage:8003} \
           --ingest-url ${INGEST_URL:-http://dlm_ingest:8001} \
+          --watcher-hostname ${WATCHER_HOSTNAME:-$(hostname)} \
           --readiness-probe-file "${READINESS_PROBE_FILE:-/tmp/dlm-client-ready}" \
           ${UID_EXPIRATION_DAYS:+--uid-expiration-days ${UID_EXPIRATION_DAYS}} \
           ${OID_EXPIRATION_DAYS:+--oid-expiration-days ${OID_EXPIRATION_DAYS}} \
@@ -29,6 +30,7 @@ case "$watcher_mode" in
           --migration-url ${MIGRATION_URL:-http://dlm_migration:8004} \
           --ingest-url ${INGEST_URL:-http://dlm_ingest:8001} \
           --etcd-url ${ETCD_URL:-http://etcd:2379} \
+          --watcher-hostname ${WATCHER_HOSTNAME:-$(hostname)} \
           ${UID_EXPIRATION_DAYS:+--uid-expiration-days ${UID_EXPIRATION_DAYS}} \
           ${OID_EXPIRATION_DAYS:+--oid-expiration-days ${OID_EXPIRATION_DAYS}}"
         ;;

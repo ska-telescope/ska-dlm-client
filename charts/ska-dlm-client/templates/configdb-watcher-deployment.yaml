@@ -110,7 +110,7 @@ spec:
             value: "true"
           {{- end }}
 
-          - name: RCLONE_HOSTNAME
+          - name: WATCHER_HOSTNAME
             value: {{ include "ska-dlm-client.fullname" . }}-configdb-watcher.{{ .Release.Namespace }}
 
           {{- if .Values.configdb_watcher.uid_expiration_days }}

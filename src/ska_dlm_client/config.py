@@ -5,6 +5,7 @@ import logging
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+import socket
 
 from ska_dlm_client.openapi.configuration import Configuration
 
@@ -120,6 +121,15 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             help=(
                 "Migration server URL including the service port. "
                 "If omitted, migration will be skipped."
+            ),
+        )
+        self.parser.add_argument(
+            "--watcher-hostname",
+            type=str,
+            default=socket.gethostname(),
+            help=(
+                "Hostname of this watcher instance. "
+                "If omitted, the system hostname will be used."
             ),
         )
         self.parser.add_argument(

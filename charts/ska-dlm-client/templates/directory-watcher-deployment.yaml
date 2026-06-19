@@ -80,7 +80,7 @@ spec:
           - name: INCLUDE_EXISTING
             value: "true"
           {{- end }}
-          - name: RCLONE_HOSTNAME
+          - name: WATCHER_HOSTNAME
             value: {{ include "ska-dlm-client.fullname" . }}-directory-watcher.{{ .Release.Namespace }}
           {{- if .Values.directory_watcher.uid_expiration_days }}
           - name: UID_EXPIRATION_DAYS
