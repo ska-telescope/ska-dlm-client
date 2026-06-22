@@ -120,7 +120,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             default="http://dlm_migration:8004",
             help=(
                 "Migration server URL including the service port. "
-                "If omitted, migration will be skipped."
+                "Default 'http://dlm_migration:8004'."
             ),
         )
         self.parser.add_argument(

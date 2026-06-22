@@ -39,6 +39,7 @@ def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
     return SdpWatcherConfig(
         ingest_url=args.ingest_url,
         storage_url=args.storage_url,
+        migration_url=args.migration_url,
         target_name=args.target_name,
         etcd_url=args.etcd_url,
     )
