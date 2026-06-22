@@ -147,7 +147,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         self.parser.add_argument(
             "--readiness-probe-file",
             type=str,
-            default="/tmp/dlm_client_ready",
+            default="/tmp/dlm-client-ready",
             help="Indicator file to probe readiness",
         )
         self.parser.add_argument(
@@ -157,7 +157,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             help="Use a status file (def False)",
         )
 
-    def parse_arguments(self, args: argparse.Namespace = None):
+    def parse_arguments(self, args: argparse.Namespace | None = None):
         """Parse command line arguments and assign to class parameters."""
         if args is None:
             args = self.parser.parse_args()
@@ -169,6 +169,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         self.migration_url = args.migration_url
         self.request_url = args.request_url
         self.use_status_file = args.use_status_file
+        self.readiness_probe_file = args.readiness_probe_file
 
     def set_application_ready(self):
         """Create the required file to indicate the application is ready."""
