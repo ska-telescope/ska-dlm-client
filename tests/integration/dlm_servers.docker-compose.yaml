@@ -98,6 +98,7 @@ services:
       - dlm_network
 
   dlm_migrations:
+    platform: linux/amd64
     image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:2.0.0-dev.c2f37650e
     container_name: dlm_migrations
     command: >

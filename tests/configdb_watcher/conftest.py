@@ -2,7 +2,7 @@
 
 import logging
 import os
-import urllib
+import urllib.parse
 
 import pytest
 from ska_sdp_config import Config

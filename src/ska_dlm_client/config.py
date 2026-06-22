@@ -3,9 +3,9 @@
 import argparse
 import logging
 import os
+import socket
 from dataclasses import dataclass, field
 from pathlib import Path
-import socket
 
 from ska_dlm_client.openapi.configuration import Configuration
 

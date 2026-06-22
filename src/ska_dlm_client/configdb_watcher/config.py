@@ -1,5 +1,5 @@
 # pylint: disable=too-many-instance-attributes
-"""Class to hold the configuration used by the directory_watcher package."""
+"""Class to hold the configuration used by the configdb_watcher package."""
 import urllib.parse
 from dataclasses import dataclass
 
