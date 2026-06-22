@@ -1,7 +1,6 @@
 # wrapper/top-level integration stack
 include:
-- path: ../services.docker-compose.yaml
-- path: dlm_services.docker-compose.yaml
+  - path: dlm_services.docker-compose.yaml
 
 services:
   dlm_migration:
