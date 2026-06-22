@@ -66,6 +66,8 @@ integration-tests:
   image: docker:27.0.2-dind
   services:
     - docker:27.0.2-dind
+  before_script:
+    - add apk add --no-cache make
   script:
     - make integration-test
   retry:
