@@ -151,7 +151,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             help="Indicator file to probe readiness",
         )
         self.parser.add_argument(
-            "--use_status-file",
+            "--use-status-file",
             type=bool,
             default=False,
             help="Use a status file (def False)",
