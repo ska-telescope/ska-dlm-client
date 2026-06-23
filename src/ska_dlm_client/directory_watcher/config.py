@@ -9,10 +9,7 @@ from ska_dlm_client.openapi.configuration import Configuration
 
 @dataclass
 class WatcherConfig(ClientConfig):
-    """
-    This class holds all configuration parameters needed for the directory watcher
-    to monitor directories and register data items with the DLM.
-    """
+    """Configuration parameters for the directory watcher."""
 
     source_name: str = "dir-watcher"
     directory_to_watch: str = "/dlm/watch_dir"

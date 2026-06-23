@@ -16,6 +16,7 @@ class LocationName(str, Enum):
     SKA_LOW = "SKA-low"
     SKA_MID = "SKA-mid"
 
+
 class LocationType(str, Enum):
     """Location type."""
 
