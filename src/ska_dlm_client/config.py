@@ -19,7 +19,6 @@ METADATA_FILENAME = "ska-data-product.yaml"  # TODO: import from from ska_sdp_da
 METADATA_EXECUTION_BLOCK_KEY = "execution_block"
 
 # pylint: disable=too-many-instance-attributes
-"""Class to hold the configuration used by the directory_watcher package."""
 
 
 @dataclass
@@ -30,7 +29,7 @@ class ClientConfig:
     Specific configurations for the individual clients are expanding this class.
     """
 
-    source_name: str = None
+    source_name: str = ""
     target_name: str = "dlm-archive"
     ingest_url: str = "http://dlm_ingest:8001"
     storage_url: str = "http://dlm_storage:8003"

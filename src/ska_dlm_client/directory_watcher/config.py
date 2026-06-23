@@ -9,8 +9,7 @@ from ska_dlm_client.openapi.configuration import Configuration
 
 @dataclass
 class WatcherConfig(ClientConfig):
-    """Running configuration of the SKA DLM client directory watcher.
-
+    """
     This class holds all configuration parameters needed for the directory watcher
     to monitor directories and register data items with the DLM.
     """
@@ -48,7 +47,8 @@ class WatcherArgs(CmdLineParameters):
             type=bool,
             required=False,
             default=False,
-            help="Reload the status file on startup (def: True)",
+            help="If True, skips verifying rclone access before attempting to register the file "
+            "(def: False)",
         )
         self.parser.add_argument(
             "--status_file_filename",
@@ -67,6 +67,6 @@ class WatcherArgs(CmdLineParameters):
         self.parser.add_argument(
             "--dir-updates-wait-time",
             default=1,
-            help="If set, a directory will only be added once its contents has been static "
-            + "for at least the given number of seconds.",
+            help="If set, a directory will only be added once its contents have been static "
+            + "for at least the given number of seconds. (def: 1)",
         )

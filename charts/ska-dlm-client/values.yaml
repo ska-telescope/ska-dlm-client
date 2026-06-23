@@ -59,6 +59,7 @@ startup_verification: # Test directory_watcher at startup
   request_url: "http://ska-dlm-request"
 
 configdb_watcher:
+  # Settings specific to configdb_watcher
   enabled: true
   component: configdb-watcher
   subsystem: data-lifecycle-management

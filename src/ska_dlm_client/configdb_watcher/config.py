@@ -9,10 +9,9 @@ from ska_dlm_client.openapi.configuration import Configuration
 
 @dataclass
 class SdpWatcherConfig(ClientConfig):
-    """Running configuration of the SKA DLM client directory watcher.
-
-    This class holds all configuration parameters needed for the ConfigDB watcher
-    to monitor flows and register data items with the DLM.
+    """
+    This class holds all configuration parameters needed for the ConfigDB watcher to monitor flows
+    and register data items with the DLM.
     """
 
     source_name: str = "configdb-watcher"
