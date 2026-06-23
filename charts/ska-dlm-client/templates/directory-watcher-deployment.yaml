@@ -46,6 +46,8 @@ spec:
         imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
 
         env:
+          - name: LOCATION_NAME
+            value: {{ .Values.global.location_name | quote }}
           - name: STORAGE_URL
             value: {{ .Values.directory_watcher.storage_url | quote }}
           - name: DIRECTORY_TO_WATCH

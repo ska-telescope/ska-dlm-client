@@ -11,7 +11,7 @@ import sys
 
 import ska_ser_logging
 
-from ska_dlm_client.common_types import LocationCountry, LocationType
+from ska_dlm_client.common_types import LocationCountry, LocationName, LocationType
 from ska_dlm_client.config import Config
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
@@ -20,7 +20,7 @@ from ska_dlm_client.openapi.dlm_api import storage_api
 logger = logging.getLogger(__name__)
 
 # Constants that can be used for testing.
-LOCATION_NAME = os.getenv("LOCATION_NAME", "MyDLMClient")
+LOCATION_NAME = os.getenv("LOCATION_NAME", LocationName.LOCAL_DEV.value)
 LOCATION_TYPE = os.getenv("LOCATION_TYPE", LocationType.LOCAL_DEV.value)
 LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY", LocationCountry.AU.value)
 LOCATION_CITY = os.getenv("LOCATION_CITY", "Perth")

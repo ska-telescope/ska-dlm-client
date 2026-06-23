@@ -22,6 +22,7 @@ from ska_sdp_config.entity.flow import (
 
 from ska_dlm_client.common_types import (
     LocationCountry,
+    LocationName,
     LocationType,
     StorageInterface,
     StorageType,
@@ -47,7 +48,7 @@ STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
 ETCD_URL = os.getenv("ETCD_URL", "http://etcd:2379")
 
-LOCATION_NAME = "MyDLMClient"
+LOCATION_NAME = LocationName.LOCAL_DEV.value
 LOCATION_TYPE = LocationType.LOCAL_DEV.value
 LOCATION_COUNTRY = LocationCountry.AU.value
 

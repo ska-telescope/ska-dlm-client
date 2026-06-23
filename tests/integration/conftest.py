@@ -35,7 +35,7 @@ INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
 
-LOCATION_NAME = "MyDLMClient"
+LOCATION_NAME = "SKA-DEV"
 LOCATION_TYPE = LocationType.LOCAL_DEV
 LOCATION_COUNTRY = LocationCountry.AU
 

@@ -83,6 +83,9 @@ spec:
           # Where ska_sdp_config.Config() should look for etcd / ConfigDB
           {{- include "ska-dlm-client.configdb-watcher.sdp-config-env" . | nindent 10 }}
 
+          - name: LOCATION_NAME
+            value: {{ .Values.global.location_name | quote }}
+
           - name: INGEST_URL
             value: {{ .Values.configdb_watcher.ingest_url | quote }}
 

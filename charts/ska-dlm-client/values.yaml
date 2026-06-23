@@ -7,6 +7,7 @@
 
 # --- Global configuration (shared across components / subcharts) ---
 global:
+  location_name: "SKA-DEV"
   storageClass: nfss1
 
 # --- Chart metadata / naming ---
@@ -40,10 +41,10 @@ directory_watcher:
   migration_url: "http://ska-dlm-migration"
   source_name: dir_watcher
   directory_to_watch: /dlm/watch_dir
-  target_name: dlm-archive # default target storage 'dlm-archive' is defined in the DLM Server and always available.
-  uid_expiration_days: # leave empty to use DB default, now() + 24:00
-  oid_expiration_days: # leave empty to use DB default, 2099-12-31T23:59:59
-  use_polling_watcher: false # false means using the iNotify-based watcher, which might not work with networked filesystems.
+  target_name: dlm-archive  # default target storage 'dlm-archive' is defined in the DLM Server and always available.
+  uid_expiration_days:  # leave empty to use DB default, now() + 24:00
+  oid_expiration_days:  # leave empty to use DB default, 2099-12-31T23:59:59
+  use_polling_watcher: false  # false means using the iNotify-based watcher, which might not work with networked filesystems.
   skip_rclone_access_check_on_register: false
   include_existing: false
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
@@ -53,7 +54,7 @@ directory_watcher:
     read_only: false
 
 startup_verification: # Test directory_watcher at startup
-  enabled: false # Keep false for now because this code hasn't been maintained recently
+  enabled: false  # Keep false for now because this code hasn't been maintained recently
   component: startup-verification
   subsystem: data-lifecycle-management
   request_url: "http://ska-dlm-request"
@@ -73,21 +74,21 @@ configdb_watcher:
   target_name: dlm-archive  # default target storage 'dlm-archive' is defined in the DLM Server and always available.
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-ingest.other-namespace:port
-  uid_expiration_days: # leave empty to use DB default, now() + 24:00
-  oid_expiration_days: # leave empty to use DB default, 2099-12-31T23:59:59
+  uid_expiration_days:  # leave empty to use DB default, now() + 24:00
+  oid_expiration_days:  # leave empty to use DB default, 2099-12-31T23:59:59
   pvc:
     name: shared
     read_only: false
   sdp_config:
-    etcd_url: # e.g., "http://some-external-etcd.namespace:port". Leave empty when using the local etcd service.
+    etcd_url:  # e.g., "http://some-external-etcd.namespace:port". Leave empty when using the local etcd service.
     path: ""      # optional
     local_etcd:
-      enabled: true # deploy a local etcd service
+      enabled: true  # deploy a local etcd service
       image: "artefact.skao.int/ska-sdp-etcd"
       tag: "3.5.9"
 
 
 # --- Auxiliary utility images ---
-kubectl: # the kubectl image used for k8s readiness testing
+kubectl:  # the kubectl image used for k8s readiness testing
   image: artefact.skao.int/ska-ser-utils
   version: 0.1.0
