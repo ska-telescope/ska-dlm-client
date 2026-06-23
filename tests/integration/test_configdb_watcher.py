@@ -4,6 +4,7 @@ import logging
 import os
 import subprocess
 import time
+import urllib.parse
 from pathlib import Path
 from time import sleep
 
@@ -21,6 +22,7 @@ from ska_sdp_config.entity.flow import (
 
 from ska_dlm_client.common_types import (
     LocationCountry,
+    LocationName,
     LocationType,
     StorageInterface,
     StorageType,
@@ -44,10 +46,11 @@ SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
+ETCD_URL = os.getenv("ETCD_URL", "http://etcd:2379")
 
-LOCATION_NAME = "ThisDLMClientLocationName"
-LOCATION_TYPE = LocationType.LOCAL_DEV
-LOCATION_COUNTRY = LocationCountry.AU
+LOCATION_NAME = LocationName.LOCAL_DEV.value
+LOCATION_TYPE = LocationType.LOCAL_DEV.value
+LOCATION_COUNTRY = LocationCountry.AU.value
 
 LOCATION_CITY = "Marksville"
 LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
@@ -57,10 +60,11 @@ STORAGE = {
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
         "ROOT_DIRECTORY": "/dlm-archive",
+        "STORAGE_PHASE": "SOLID",
         "STORAGE_CONFIG": {
             "name": "dlm-archive",
             "type": "alias",  # type 'alias' or 'local'?
-            "parameters": {"remote": "/dlm-archive"},
+            "parameters": {"remote": "/"},
         },
     },
     "SRC": {
@@ -68,6 +72,7 @@ STORAGE = {
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
         "ROOT_DIRECTORY": "/dlm/product_dir",
+        "STORAGE_PHASE": "GAS",
         "STORAGE_CONFIG": {
             "name": "dlm",
             "type": "sftp",
@@ -88,7 +93,9 @@ WATCHER_SOURCE_DIR_ROOT = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}"
 
 def _get_cfg() -> Config:
     """Return a Config using the same env-based backend settings as the watcher."""
-    return Config()
+    etcd_host = urllib.parse.urlparse(ETCD_URL).hostname
+    etcd_port = urllib.parse.urlparse(ETCD_URL).port
+    return Config(host=etcd_host, port=etcd_port)
 
 
 def _ensure_processing_block() -> None:
@@ -226,6 +233,7 @@ def _init_storage_if_needed(
             storage_name=storage["STORAGE_NAME"],
             storage_type=storage["STORAGE_TYPE"],
             storage_interface=storage["STORAGE_INTERFACE"],
+            storage_phase=storage["STORAGE_PHASE"],
             root_directory=storage["ROOT_DIRECTORY"],
             location_id=location_id,
             location_name=LOCATION_NAME,

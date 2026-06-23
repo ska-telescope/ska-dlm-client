@@ -1,23 +1,25 @@
 include:
-  - path: services.docker-compose.yaml
   - path: test_services.docker-compose.yaml
+  - path: integration/dlm_servers.docker-compose.yaml
+
 
 services:
-  dlm_directory_watcher:
+  dlm_setup_storage_location:
     platform: linux/amd64
-    image: dlm_directory_watcher
-    container_name: dlm_directory_watcher
-    hostname: ska-dlm-directory-watcher
-    env_file:
-      - directory_watcher.env
-    entrypoint: /entrypoint.sh
+    image: dlm_setup_storage_location
+    container_name: dlm_setup_storage_location
     build:
       context: ..
       dockerfile: Dockerfile
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+    # NOTE: the IP address is fixed here but need to work out how to connect in
+    # the general case via a service name or similar.
+    entrypoint: python3 -m ska_dlm_client.register_storage_location.main --storage-name dlm-archive --storage-root-directory /dlm-archive --storage-phase SOLID --storage-url "http://dlm_storage:8003"
     networks:
       - dlm_network
+    depends_on:
+      dlm_storage:
+        condition: service_healthy
+
   dlm_configdb_watcher:
     platform: linux/amd64
     image: dlm_configdb_watcher
@@ -36,16 +38,26 @@ services:
     networks:
       - dlm_network
     depends_on:
-      - etcd
-  setup_storage_location:
+      etcd:
+        condition: service_started
+      dlm_setup_storage_location:
+        condition: service_completed_successfully
+
+  dlm_directory_watcher:
     platform: linux/amd64
-    image: dlm_setup_storage_location
-    container_name: dlm_setup_storage_location
+    image: dlm_directory_watcher
+    container_name: dlm_directory_watcher
+    hostname: ska-dlm-directory-watcher
+    env_file:
+      - directory_watcher.env
+    entrypoint: /entrypoint.sh
     build:
       context: ..
       dockerfile: Dockerfile
-    # NOTE: the IP address is fixed here but need to work out how to connect in
-    # the general case via a service name or similar.
-    entrypoint: python3 -m ska_dlm_client.register_storage_location.main --storage-name data --storage-root-directory /dlm --storage-url "http://dlm_storage:8003"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - dlm_network
+    depends_on:
+      dlm_setup_storage_location:
+        condition: service_completed_successfully

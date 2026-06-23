@@ -1,6 +1,6 @@
 """Top-level package for ska-dlm-client."""
 
-from ska_dlm_client.utils import CmdLineParameters
+from ska_dlm_client.config import CmdLineParameters
 
 __author__ = """Mark Boulton"""
 __email__ = "mark.boulton@uwa.edu.au"

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import logging
 import os
+import urllib.parse
 from typing import Optional
 
 from ska_sdp_config import Config, ConfigCollision
@@ -143,12 +144,11 @@ def log_configdb_backend_details(config: Config) -> None:
     """Log backend and environment details for the SDP ConfigDB connection."""
     backend = getattr(config, "_backend", None)
 
+    etcd_url = os.getenv("ETCD_URL", "http://etcd:2379")
+    sdp_host = urllib.parse.urlparse(etcd_url).hostname
+    sdp_port = urllib.parse.urlparse(etcd_url).port
     sdp_backend = os.getenv("SDP_CONFIG_BACKEND")
-    sdp_host = os.getenv("SDP_CONFIG_HOST", "etcd")
-    sdp_port = os.getenv("SDP_CONFIG_PORT", "2379")
     sdp_path = os.getenv("SDP_CONFIG_PATH")
-
-    os.environ["SDP_CONFIG_HOST"] = sdp_host  # make sure that this is in sync
 
     if isinstance(backend, Etcd3Backend):
         client = getattr(backend, "_client", None)

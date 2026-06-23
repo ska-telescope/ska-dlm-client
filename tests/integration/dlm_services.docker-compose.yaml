@@ -1,7 +1,10 @@
 # lower-level shared infrastructure/services
 include:
   - path: ../services.docker-compose.yaml
-services:  # TODO: DMAN-261
+services:
+  # Not running or using the gateway or keycloak in the testing anyway for now
+  # so leaving these out of the composition to speed up test runs and avoid unnecessary complexity.
+  #
   # dlm_gateway:
   #   platform: linux/amd64
   #   image: dlm_gateway

@@ -4,6 +4,7 @@
 
 # --- Global configuration (shared across components / subcharts) ---
 global:
+  location_name: "SKA-DEV"
   storageClass: nfss1
 
 # --- Chart metadata / naming ---
@@ -18,14 +19,15 @@ ska_dlm:
 
 # --- Shared client configuration ---
 ska_dlm_client:
-  image: artefact.skao.int/ska-dlm-client
-  version: "2.0.0"
+  image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client #artefact.skao.int/ska-dlm-client
+  version: "2.0.0-dev.c363be711"
   imagePullPolicy: Always
   securityContext: {}
 
 # --- Component configurations ---
 
 directory_watcher:
+  # Settings specific to directory_watcher
   enabled: true
   component: directory-watcher
   subsystem: data-lifecycle-management
@@ -33,16 +35,14 @@ directory_watcher:
   ingest_url: "http://ska-dlm-ingest.dp-dm"
   storage_url: "http://ska-dlm-storage.dp-dm"
   migration_url: "http://ska-dlm-migration.dp-dm"
-  source_storage: watch_dir
-  storage_root_directory: /dlm/watch_dir
+  source_name: dir_watcher
   directory_to_watch: /dlm/watch_dir
-  target_name: dlm-archive
-  target_root:
+  target_name: dlm-archive # default target storage 'dlm-archive' is defined in the DLM Server and always available.
   uid_expiration_days: # leave empty to use DB default, now() + 24:00
   oid_expiration_days: # leave empty to use DB default, 2099-12-31T23:59:59
   use_polling_watcher: false
   skip_rclone_access_check_on_register: false
-  register_contents_of_watch_directory: false
+  include_existing: false
 
   pvc:
     name: shared
@@ -52,6 +52,7 @@ startup_verification:
   enabled: false
 
 configdb_watcher:
+  # Settings specific to configdb_watcher
   enabled: true
   component: configdb-watcher
   subsystem: data-lifecycle-management
@@ -60,24 +61,23 @@ configdb_watcher:
   storage_url: "http://ska-dlm-storage.dp-dm"
   migration_url: "http://ska-dlm-migration.dp-dm"
   include_existing: false
-  source_storage: SDPBuffer
-  source_root_directory: /dlm/product_dir
-  migration_destination_storage_name: dlm-archive
+  source_name: configdb-watcher
+  directory_to_watch: /dlm/product_dir
+  target_name: dlm-archive
   uid_expiration_days: # leave empty to use DB default, now() + 24:00
   oid_expiration_days: # leave empty to use DB default, 2099-12-31T23:59:59
   pvc:
     name: shared
     read_only: false
   sdp_config:
-    host:   # <some-external-etcd.namespace.svc.cluster.local>. If empty, default to local etcd Service name
-    port: 2379    # default etcd client port
+    etcd_url: # e.g., "http://some-external-etcd.namespace:port". Leave empty when using the local etcd service.
     path: ""      # optional
-    etcd:
+    local_etcd:
       enabled: true # deploy a local etcd service
       image: "artefact.skao.int/ska-sdp-etcd"
       tag: "3.5.9"
 
-  # --- Auxiliary utility images ---
+# --- Auxiliary utility images ---
 kubectl: # the kubectl image used for k8s readiness testing
   image: artefact.skao.int/ska-ser-utils
   version: 0.1.0

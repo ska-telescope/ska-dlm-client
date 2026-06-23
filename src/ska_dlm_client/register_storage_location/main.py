@@ -11,7 +11,7 @@ import sys
 
 import ska_ser_logging
 
-from ska_dlm_client.common_types import LocationCountry, LocationType
+from ska_dlm_client.common_types import LocationCountry, LocationName, LocationType
 from ska_dlm_client.config import Config
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
@@ -20,26 +20,28 @@ from ska_dlm_client.openapi.dlm_api import storage_api
 logger = logging.getLogger(__name__)
 
 # Constants that can be used for testing.
-LOCATION_NAME = "ThisDLMClientLocationName"
-LOCATION_TYPE = LocationType.LOW_INTEGRATION
-LOCATION_COUNTRY = LocationCountry.AU
-LOCATION_CITY = "Kensington"
-LOCATION_FACILITY = "local"
+LOCATION_NAME = os.getenv("LOCATION_NAME", LocationName.LOCAL_DEV.value)
+LOCATION_TYPE = os.getenv("LOCATION_TYPE", LocationType.LOCAL_DEV.value)
+LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY", LocationCountry.AU.value)
+LOCATION_CITY = os.getenv("LOCATION_CITY", "Perth")
+LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")
+TARGET_ROOT = os.getenv("TARGET_ROOT", "/dlm-archive")
+TARGET_PHASE = os.getenv("TARGET_PHASE", "SOLID")
 RCLONE_CONFIG_TARGET = {
     "name": "dlm-archive",
     "type": "alias",
     "root_path": "/",
-    "parameters": {"remote": "/dlm-archive"},
+    "parameters": {"remote": "/"},
 }
 RCLONE_CONFIG_SOURCE = {
     "name": f"{os.getenv('SOURCE_NAME', 'dir-watcher')}",
     "type": "sftp",
     "parameters": {
-        "host": f"{os.getenv('RCLONE_HOSTNAME', socket.gethostname())}",
+        "host": f"{os.getenv('WATCHER_HOSTNAME', socket.gethostname())}",
         "key_file": "/root/.ssh/id_rsa",
         "shell_type": "unix",
         "type": "sftp",
-        "user": "ska-dlm",
+        "user": f"{os.getenv('USER', 'ska-dlm')}",
     },
 }
 STORAGE_INTERFACE = "posix"
@@ -117,10 +119,11 @@ def get_or_init_storage(
     # pylint: disable=too-many-arguments, disable=too-many-positional-arguments
     storage_name: str,
     storage_url: str,
-    api_configuration: Configuration,
     storage_root_directory: str,
+    api_configuration: Configuration,
     the_location_id: str,
     rclone_config: str,
+    storage_phase: str = "GAS",
 ) -> str:
     """Get storage_id or perform storage initialisation based on the storage_name provided."""
     assert the_location_id is not None
@@ -151,6 +154,7 @@ def get_or_init_storage(
                 root_directory=storage_root_directory,
                 location_id=the_location_id,
                 location_name=LOCATION_NAME,
+                storage_phase=storage_phase,
             )
             logger.info("Storage %s created in DLM", storage_name)
         else:
@@ -190,11 +194,11 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
             api_configuration, storage_url=storage_url, location=LOCATION_NAME
         )
     if setup_target:
-        storage_name = watcher_config.migration_destination_storage_name
+        storage_name = watcher_config.target_name
         storage_root_directory = "/dlm-archive"
     else:
-        storage_name = watcher_config.storage_name
-        storage_root_directory = watcher_config.storage_root_directory
+        storage_name = watcher_config.source_name
+        storage_root_directory = watcher_config.directory_to_watch
     storage_id = get_or_init_storage(
         storage_name=storage_name,
         storage_url=storage_url,
@@ -227,8 +231,9 @@ def setup_testing(api_configuration: Configuration):
     storage_id = get_or_init_storage(
         storage_name=RCLONE_CONFIG_TARGET["name"],
         storage_url=storage_url,
+        storage_phase=TARGET_PHASE,
         api_configuration=api_configuration,
-        storage_root_directory=RCLONE_CONFIG_TARGET["parameters"]["remote"],
+        storage_root_directory=TARGET_ROOT,
         the_location_id=location_id,
         rclone_config=RCLONE_CONFIG_TARGET,
     )
@@ -261,11 +266,22 @@ def create_parser() -> argparse.ArgumentParser:
         required=True,
         help="Storage root directory.",
     )
+    parser.add_argument(
+        "-p",
+        "--storage-phase",
+        type=str,
+        required=False,
+        default="GAS",
+        help="Phase provided by storage.",
+    )
     return parser
 
 
 def main():
-    """If this is called as a CLI we just register the integration/developer setup volumes."""
+    """If this is called as a CLI we register the requested volumes.
+
+    The CLI is now used also to start the client in operations.
+    """
     ska_ser_logging.configure_logging(logging.INFO)
     parser = create_parser()
     args = parser.parse_args()

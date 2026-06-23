@@ -4,6 +4,14 @@
 
 ### Updated
 
+* Aligned CLI between configdb and directory watchers
+* Removed CLI setup complexity (no add_* functions)
+* Removed testing flags from CLI
+* Aligned CLI parameters class with config class
+* Aligned tests with new CLI
+* Aligned helm charts with new CLI
+* Test registration of dlm-archive is now SOLID
+* Running tests with server image 2.1.0.
 * Improve ConfigDB Watcher integration test coverage with a larger, more representative test dataset.
 
 ### Added
@@ -99,7 +107,7 @@
 * DLM Client tests now run against OCI images of DLM server (instead of building the DLM server).
 * Refactored the directory-watcher and configdb-watcher helm templates to set arguments using environment variables (instead of CLI args).
 * Docker tests now also use environment variables.
-* Moved the etcd configuration from a top-level values.yaml section to configdb_watcher.sdp_config.etcd.
+* Moved the etcd configuration from a top-level values.yaml section to configdb_watcher.sdp_config.
 * The SSH key is always installed, to allow for re-starts of the container.
 * Testing against the new server image (1.3.0).
 * Various changes to variable names, e.g. storage_name --> source_storage.

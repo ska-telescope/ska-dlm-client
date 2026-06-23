@@ -18,6 +18,7 @@ import sys
 
 from ska_dlm_client.common_types import (
     LocationCountry,
+    LocationName,
     LocationType,
     StorageInterface,
     StorageType,
@@ -30,10 +31,10 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Constants that can be used for testing.
-LOCATION_NAME = "ThisDLMClientLocationName"
+LOCATION_NAME = LocationName.LOCAL_DEV.value
 LOCATION_TYPE = LocationType.LOW_INTEGRATION
 LOCATION_COUNTRY = LocationCountry.AU
-LOCATION_CITY = "Marksville"
+LOCATION_CITY = "Perth"
 LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
 STORAGE_CONFIG = {"name": "dir-watcher", "type": "alias", "root_path": "", "parameters": {}}
 # type 'alias' or 'local'?

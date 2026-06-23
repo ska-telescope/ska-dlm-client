@@ -113,10 +113,6 @@ class DataProductStatusWatcher(
 
         Yields:
             DataProductKeyState: tuple of Flow.Key and flow state
-
-        Returns:
-            AsyncIteratorContext[DataProductKeyState]: context manager to an async iterator.
-
         """
         ignored_keys = []  # TODO: look into using a set instead of a list
         if not self._include_existing:

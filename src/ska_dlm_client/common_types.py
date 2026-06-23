@@ -8,6 +8,15 @@ from enum import Enum
 # https://gitlab.com/ska-telescope/ska-data-lifecycle/-/blob/main/src/ska_dlm/common_types.py?ref_type=heads
 
 
+class LocationName(str, Enum):
+    """Location names."""
+
+    LOCAL_DEV = "SKA-DEV"
+    INTEGRATION = "SKA-INT"
+    SKA_LOW = "SKA-low"
+    SKA_MID = "SKA-mid"
+
+
 class LocationType(str, Enum):
     """Location type."""
 

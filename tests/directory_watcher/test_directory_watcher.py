@@ -1,5 +1,6 @@
 """Tests for directory watcher."""
 
+import argparse
 import asyncio
 import os
 import tempfile
@@ -8,14 +9,43 @@ from pathlib import Path
 import pytest
 
 from ska_dlm_client.config import STATUS_FILE_FILENAME
+from ska_dlm_client.directory_watcher.config import WatcherArgs
 from ska_dlm_client.directory_watcher.directory_watcher import (
     INotifyDirectoryWatcher,
     PollingDirectoryWatcher,
 )
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntries
-from ska_dlm_client.directory_watcher.main import create_parser, process_args
+from ska_dlm_client.directory_watcher.main import process_args
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.registration_processor import RegistrationProcessor
+
+
+def create_cmd_line_parameters() -> WatcherArgs:
+    """Create command-line parameters for directory watcher tests."""
+    return WatcherArgs()
+
+
+def create_args() -> argparse.Namespace:
+    """Create a test Namespace containing directory watcher arguments.
+
+    Returns:
+        An argparse.Namespace populated with the argument values required
+        by the tests.
+    """
+    return argparse.Namespace(
+        directory_to_watch="",
+        source_name="",
+        target_name="",
+        storage_url="",
+        migration_url="",
+        ingest_url="",
+        reload_status_file=True,
+        status_file_filename=STATUS_FILE_FILENAME,
+        skip_rclone_access_check_on_register=False,
+        include_existing=False,
+        dir_updates_wait_time=1,
+        use_status_file=False,
+    )
 
 
 class MockCmdLineParameters:
@@ -24,8 +54,7 @@ class MockCmdLineParameters:
     def __init__(self):
         """Initialize with default values."""
         self.migration_url = None
-        self.migration_destination_storage_name = None
-        self.perform_actual_ingest_and_migration = True
+        self.target_name = None
 
     def parse_arguments(self, args):
         """Mock method that does nothing."""
@@ -37,32 +66,30 @@ class MockCmdLineParameters:
 class TestDirectoryWatcher:
     """DirectoryWatcher unit test stubs."""
 
-    STORAGE_NAME = "dir-watcher"
-    INGREST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
+    SOURCE_NAME = "dir-watcher"
+    INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
     ROOT_DIRECTORY = "/dlm"
 
     add_path_successful = False
 
     @classmethod
     def setup_class(cls) -> None:
-        """Set for the testing process."""
+        """Set up the test environment."""
         cls.the_watch_dir = tempfile.mkdtemp()
-        cls.parser = create_parser()
-        cls.parsed = cls.parser.parse_args(
+        cls.cmd_line_parameters = create_cmd_line_parameters()
+        cls.parsed = cls.cmd_line_parameters.parser.parse_args(
             [
                 "--directory-to-watch",
                 cls.the_watch_dir,
                 "--ingest-url",
-                cls.INGREST_URL,
+                cls.INGEST_URL,
                 "--source-name",
-                cls.STORAGE_NAME,
-                "--source-root",
-                cls.ROOT_DIRECTORY,
+                cls.SOURCE_NAME,
             ]
         )
-        cls.cmd_line_parameters = MockCmdLineParameters()
+        # cls.cmd_line_parameters = MockCmdLineParameters()
         cls.cmd_line_parameters.parse_arguments(cls.parsed)
-        cls.config = process_args(args=cls.parsed, cmd_line_parameters=cls.cmd_line_parameters)
+        cls.config = process_args(args=cls.parsed)
 
     @classmethod
     def teardown_class(cls) -> None:
@@ -72,8 +99,8 @@ class TestDirectoryWatcher:
     def test_process_args(self) -> None:
         """Test case for init_data_item_ingest_init_data_item_post."""
         assert self.parsed.directory_to_watch == self.the_watch_dir
-        assert self.parsed.ingest_url == self.INGREST_URL
-        assert self.parsed.source_name == self.STORAGE_NAME
+        assert self.parsed.ingest_url == self.INGEST_URL
+        assert self.parsed.source_name == self.SOURCE_NAME
         assert self.parsed.reload_status_file is False
         assert self.parsed.status_file_filename == STATUS_FILE_FILENAME
         assert self.parsed.use_status_file is False
@@ -82,8 +109,8 @@ class TestDirectoryWatcher:
     def test_config_generation(self) -> None:
         """Test the correct config is generated from the command line args."""
         assert self.config.directory_to_watch == self.the_watch_dir
-        assert self.config.ingest_url == self.INGREST_URL
-        assert self.config.storage_name == self.STORAGE_NAME
+        assert self.config.ingest_url == self.INGEST_URL
+        assert self.config.source_name == self.SOURCE_NAME
         assert self.config.reload_status_file is False
         assert (
             self.config.status_file_absolute_path == f"{self.the_watch_dir}/{STATUS_FILE_FILENAME}"
@@ -94,9 +121,8 @@ class TestDirectoryWatcher:
         assert isinstance(self.config.ingest_configuration, Configuration)
 
         # Test migration-related attributes
-        assert self.config.migration_url is None
-        assert self.config.migration_destination_storage_name is None
-        assert self.config.perform_actual_ingest_and_migration is True
+        assert self.config.migration_url == "http://dlm_migration:8004"
+        assert self.config.target_name == "dlm-archive"
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("test_polling", [True, False])
@@ -104,6 +130,7 @@ class TestDirectoryWatcher:
         """Test code for process_directory_entry_change both polling and non polling."""
         registration_processor = MockRegistrationProcessor(self.config)
         a_temp_file = tempfile.mktemp(dir=self.the_watch_dir)
+        self.config.directory_to_watch = self.the_watch_dir
         if test_polling:
             directory_watcher = PollingDirectoryWatcher(
                 config=self.config,

@@ -46,9 +46,11 @@ spec:
         imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
 
         env:
+          - name: LOCATION_NAME
+            value: {{ .Values.global.location_name | quote }}
           - name: STORAGE_URL
             value: {{ .Values.directory_watcher.storage_url | quote }}
-          - name: SOURCE_ROOT
+          - name: DIRECTORY_TO_WATCH
             value: {{ .Values.directory_watcher.directory_to_watch | quote }}
           - name: SOURCE_NAME
             value: {{ .Values.directory_watcher.source_storage | quote }}
@@ -76,11 +78,11 @@ spec:
           - name: USE_POLLING_WATCHER
             value: "true"
           {{- end }}
-          {{- if eq $.Values.directory_watcher.register_contents_of_watch_directory true }}
-          - name: REGISTER_CONTENTS_OF_WATCH_DIRECTORY
+          {{- if eq $.Values.directory_watcher.include_existing true }}
+          - name: INCLUDE_EXISTING
             value: "true"
           {{- end }}
-          - name: RCLONE_HOSTNAME
+          - name: WATCHER_HOSTNAME
             value: {{ include "ska-dlm-client.fullname" . }}-directory-watcher.{{ .Release.Namespace }}
           {{- if .Values.directory_watcher.uid_expiration_days }}
           - name: UID_EXPIRATION_DAYS
