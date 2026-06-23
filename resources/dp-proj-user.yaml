@@ -4,6 +4,7 @@
 
 # --- Global configuration (shared across components / subcharts) ---
 global:
+  location_name: "SKA-DEV"
   storageClass: nfss1
 
 # --- Chart metadata / naming ---
