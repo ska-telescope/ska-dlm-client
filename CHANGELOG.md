@@ -4,6 +4,7 @@
 
 ### Updated
 
+* location_name is now configurable as a global variable.
 * Aligned CLI between configdb and directory watchers
 * Removed CLI setup complexity (no add_* functions)
 * Removed testing flags from CLI
@@ -13,6 +14,11 @@
 * Test registration of dlm-archive is now SOLID
 * Running tests with server image 2.1.0.
 * Improve ConfigDB Watcher integration test coverage with a larger, more representative test dataset.
+* Running tests with server image 2.1.0.
+* Running tests with server image 2.0.0.
+* Use real MeasurementSet structure for testing.
+* The ConfigDB watcher now watches DataProductPersist Flows and checks the status of the related DataProduct Flow.
+* OCI image build process is more selective when copying sources for package building.
 
 ### Added
 
@@ -22,13 +28,6 @@
 
 * Use published migrations image for integration tests.
 
-### Updated
-
-* Running tests with server image 2.1.0.
-* Running tests with server image 2.0.0.
-* Use real MeasurementSet structure for testing.
-* The ConfigDB watcher now watches DataProductPersist Flows and checks the status of the related DataProduct Flow.
-* OCI image build process is more selective when copying sources for package building.
 
 ## 2.0.0
 
