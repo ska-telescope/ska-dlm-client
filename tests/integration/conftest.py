@@ -1,78 +1,24 @@
-"""
-Integration test harness for ska_dlm_client.
-
-Brings up a minimal DLM stack via Docker Compose using the server stack definitions
-and locally defined overrides. Server components are pulled from published images.
-
-Run with: `pytest -m integration`
-"""
+"""Shared pytest fixtures and service readiness checks for DLM integration tests."""
 
 import logging
 import os
-from pathlib import Path
 from urllib.parse import urlparse
 
 import pytest
 import requests
 
-from ska_dlm_client.common_types import (
-    LocationCountry,
-    LocationType,
-    StorageInterface,
-    StorageType,
-)
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.dlm_api import storage_api
-from tests.integration.test_configdb_watcher import (
-    _get_container_log,
-    _get_id,
-    _init_location_if_needed,
-    _init_storage_if_needed,
-)
 
+# URLs can be overridden in CI to hit the DinD host
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
+REQUEST_URL = os.getenv("REQUEST_URL", "http://dlm_request:8002")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
+POSTGREST_URL = os.getenv("POSTGREST_URL", "http://dlm_postgrest:3000")
+RCLONE_BASE = os.getenv("RCLONE_BASE", "https://dlm_rclone:5572")
+ETCD_URL = os.getenv("ETCD_URL", "http://etcd:2379")
 
-LOCATION_NAME = "SKA-DEV"
-LOCATION_TYPE = LocationType.LOCAL_DEV
-LOCATION_COUNTRY = LocationCountry.AU
-
-LOCATION_CITY = "Marksville"
-LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
-STORAGE = {
-    "TGT": {
-        "STORAGE_NAME": "dlm-archive",
-        "STORAGE_TYPE": StorageType.FILESYSTEM,
-        "STORAGE_INTERFACE": StorageInterface.POSIX,
-        "ROOT_DIRECTORY": "/dlm-archive",
-        "STORAGE_PHASE": "SOLID",
-        "STORAGE_CONFIG": {
-            "name": "dlm-archive",
-            "type": "alias",  # type 'alias' or 'local'?
-            "parameters": {"remote": "/"},
-        },
-    },
-    "SRC": {
-        "STORAGE_NAME": "sdp-watcher",
-        "STORAGE_TYPE": StorageType.FILESYSTEM,
-        "STORAGE_INTERFACE": StorageInterface.POSIX,
-        "ROOT_DIRECTORY": "/dlm/product_dir",
-        "STORAGE_PHASE": "GAS",
-        "STORAGE_CONFIG": {
-            "name": "dlm",
-            "type": "sftp",
-            "parameters": {
-                "host": "dlm_configdb_watcher",
-                "key_file": "/root/.ssh/id_rsa",
-                "shell_type": "unix",
-                "type": "sftp",
-                "user": "ska-dlm",
-            },
-        },
-    },
-}
 
 log = logging.getLogger(__name__)
 
@@ -105,17 +51,6 @@ setattr(api_client.ApiClient, "_ApiClient__deserialize", __lenient_deserialize)
 # returns raw JSON for 'object' types; remove this test-time patch after regen.
 # --- end patch ---
 
-CLIENT_ROOT = Path(__file__).resolve().parents[2]
-
-# URLs can be overridden in CI to hit the DinD host
-REQUEST_URL = "http://dlm_request:8002"
-INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
-MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
-STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
-POSTGREST_URL = os.getenv("POSTGREST_URL", "http://dlm_postgrest:3000")
-RCLONE_BASE = os.getenv("RCLONE_BASE", "https://dlm_rclone:5572")
-ETCD_URL = os.getenv("ETCD_URL", "http://etcd:2379")
-
 
 def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 204, 301, 302)):
     """Check HTTP endpoints for server services and replace hostname if required."""
@@ -136,11 +71,8 @@ def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 2
 
 
 @pytest.fixture(scope="session")
-def dlm_stack():
-    """Bring up the minimal DLM stack for integration tests and wait for readiness.
-
-    Wait for the services to start and check hostname options
-    """
+def dlm_service_readiness():
+    """Check that DLM integration test services are reachable."""
     _check_service(POSTGREST_URL, timeout_s=2)
     _check_service(f"{INGEST_URL}/openapi.json", timeout_s=2)
     _check_service(f"{REQUEST_URL}/openapi.json", timeout_s=2)
@@ -152,45 +84,12 @@ def dlm_stack():
 @pytest.fixture(scope="session")
 def storage_configuration(request) -> Configuration:
     """Storage API client config."""
-    request.getfixturevalue("dlm_stack")  # triggers setup
+    request.getfixturevalue("dlm_service_readiness")
     return Configuration(host=STORAGE_URL)
 
 
 @pytest.fixture(scope="session")
-def request_configuration() -> Configuration:
-    """Storage API client config."""
+def request_configuration(request) -> Configuration:
+    """Request API client config."""
+    request.getfixturevalue("dlm_service_readiness")
     return Configuration(host=REQUEST_URL)
-
-
-def storage_initialisation(storage_config: Configuration):
-    """Location, storage and storage config setup."""
-    with api_client.ApiClient(storage_config) as the_api_client:
-        api_storage = storage_api.StorageApi(the_api_client)
-
-        # --- ensure location exists ---
-        log.info("Using storage configuration host for registering: %s", storage_config.host)
-        os.environ["STORAGE_URL"] = storage_config.host
-        storage_log = _get_container_log("dlm_storage")
-        log.info("Log from storage container: %s", storage_log)
-        location_id = _init_location_if_needed(api_storage)
-        # --- ensure storage exists ---
-        storage_id = _init_storage_if_needed(api_storage, location_id, storage=STORAGE["TGT"])
-
-        # --- set storage config ---
-        cfg_id = api_storage.create_storage_config(
-            request_body=STORAGE["TGT"]["STORAGE_CONFIG"],
-            storage_id=storage_id,
-            storage_name=STORAGE["TGT"]["STORAGE_NAME"],
-            config_type="rclone",
-        )
-        assert isinstance(cfg_id, str) and cfg_id
-        log.info("Target storage config id: %s", cfg_id)
-
-        # --- verify by querying again ---
-        resp2 = api_storage.query_storage(storage_name=STORAGE["TGT"]["STORAGE_NAME"])
-        assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
-
-
-if __name__ == "__main__":
-    config = Configuration(host=STORAGE_URL)
-    storage_initialisation(config)

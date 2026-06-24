@@ -68,7 +68,6 @@ class TestDirectoryWatcher:
 
     SOURCE_NAME = "dir-watcher"
     INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
-    ROOT_DIRECTORY = "/dlm"
 
     add_path_successful = False
 

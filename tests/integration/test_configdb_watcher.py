@@ -153,12 +153,9 @@ def _create_completed_flows(subpath: str, flow_name_arg: str, persist_flow_name_
         ops.create({"status": "COMPLETED"})
 
 
-def trigger_completed_flows(flow_name, persist_flow_name, subpath) -> None:
+def trigger_completed_flows(flow_name: str, persist_flow_name: str, subpath: str) -> None:
     """Ensure PB + Flow exist and mark Flow as COMPLETED."""
     _ensure_processing_block()
-    # IMPORTANT: this must match what the watcher expects:
-    #   - same `storage_root_directory`
-    #   - points at a directory that actually contains the .ms + metadata
     _create_completed_flows(
         subpath=subpath,
         persist_flow_name_arg=persist_flow_name,
@@ -166,8 +163,11 @@ def trigger_completed_flows(flow_name, persist_flow_name, subpath) -> None:
     )
 
 
-def _get_id(item, key: str):
-    return item[key] if isinstance(item, dict) else getattr(item, key)
+def _get_id(item, key: str) -> str:
+    """Return a string ID from a dict or generated API model."""
+    value = item[key] if isinstance(item, dict) else getattr(item, key)
+    assert isinstance(value, str)
+    return value
 
 
 def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
@@ -221,7 +221,7 @@ def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
 
 
 def _init_storage_if_needed(
-    api_storage: storage_api.StorageApi, location_id: str, storage: dict = None
+    api_storage: storage_api.StorageApi, location_id: str, storage: dict
 ) -> str:
     resp = api_storage.query_storage(storage_name=storage["STORAGE_NAME"])
     assert isinstance(resp, list)
@@ -266,6 +266,7 @@ def test_storage_initialisation(storage_configuration: Configuration):
         storage_log = _get_container_log("dlm_storage")
         log.info("Log from storage container: %s", storage_log)
         location_id = _init_location_if_needed(api_storage)
+
         # --- ensure storage exists ---
         storage_id = _init_storage_if_needed(api_storage, location_id, storage=STORAGE["TGT"])
 
@@ -287,7 +288,7 @@ def test_storage_initialisation(storage_configuration: Configuration):
 def _cleanup_destination_storage() -> None:
     """Remove migrated test data from the rclone destination."""
     destination_file = f"/dlm-archive/dlm-archive/product/{EB_ID}"
-    log.info("Cleaning up %s, destination_file")
+    log.info("Cleaning up %s", destination_file)
     subprocess.run(
         (f"docker exec dlm_rclone sh -lc 'rm -rf {destination_file}'"),
         shell=True,
