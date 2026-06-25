@@ -114,3 +114,24 @@ services:
         condition: service_healthy
     networks:
       - dlm_network
+  dlm_heuristics:
+    platform: linux/amd64
+    image: ${SERVER_IMAGE}
+    container_name: dlm_heuristics
+    command: ["ska-dlm-heuristics"]
+    user: root
+    environment:
+      DLM_HEURISTIC_DATABASE_URL: "postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm"
+      DLM_HEURISTIC_POLL_INTERVAL: "10"
+    depends_on:
+      dlm_db:
+        condition: service_healthy
+      dlm_migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "ska-dlm --help || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dlm_network

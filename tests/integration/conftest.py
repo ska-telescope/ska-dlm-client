@@ -2,6 +2,7 @@
 
 import logging
 import os
+from typing import Iterator
 from urllib.parse import urlparse
 
 import pytest
@@ -9,6 +10,7 @@ import requests
 
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
+from ska_dlm_client.openapi.dlm_api import request_api
 
 # URLs can be overridden in CI to hit the DinD host
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
@@ -50,6 +52,13 @@ setattr(api_client.ApiClient, "_ApiClient__deserialize", __lenient_deserialize)
 # TODO(regen): Fix generator so ApiClient.__deserialize unwraps Optional[...] and
 # returns raw JSON for 'object' types; remove this test-time patch after regen.
 # --- end patch ---
+
+
+@pytest.fixture
+def dlm_request_api(request_configuration: Configuration) -> Iterator[request_api.RequestApi]:
+    """Reusable API request object."""
+    with api_client.ApiClient(request_configuration) as client:
+        yield request_api.RequestApi(client)
 
 
 def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 204, 301, 302)):

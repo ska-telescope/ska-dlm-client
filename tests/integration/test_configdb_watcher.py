@@ -5,6 +5,7 @@ import os
 import subprocess
 import time
 import urllib.parse
+from datetime import datetime, timezone
 from pathlib import Path
 from time import sleep
 
@@ -43,17 +44,15 @@ PVC_SUBPATH = f"product/{EB_ID}/ska-sdp/{PB_ID}"
 PVC_SUBPATH_DIRECT = f"product/{EB_ID}/ska-sdp/{PB_ID}/scan90-99"
 DATA_PATH_LOCAL = f"{dir_path}/../registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
-INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
-MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
 ETCD_URL = os.getenv("ETCD_URL", "http://etcd:2379")
 
 LOCATION_NAME = LocationName.LOCAL_DEV.value
 LOCATION_TYPE = LocationType.LOCAL_DEV.value
 LOCATION_COUNTRY = LocationCountry.AU.value
-
 LOCATION_CITY = "Marksville"
 LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
+
 STORAGE = {
     "TGT": {
         "STORAGE_NAME": "dlm-archive",
@@ -63,7 +62,7 @@ STORAGE = {
         "STORAGE_PHASE": "SOLID",
         "STORAGE_CONFIG": {
             "name": "dlm-archive",
-            "type": "alias",  # type 'alias' or 'local'?
+            "type": "alias",
             "parameters": {"remote": "/"},
         },
     },
@@ -89,6 +88,22 @@ STORAGE = {
 
 SRC_HOST = STORAGE["SRC"]["STORAGE_CONFIG"]["parameters"]["host"]
 WATCHER_SOURCE_DIR_ROOT = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}"
+
+# might need this again - if it turns out mounted files can't be deleted
+# @pytest.fixture(scope="module", autouse=True)
+# def copy_test_data_into_watcher():
+#     """Copy local test data into the watcher container."""
+#     destination_parent = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp"
+
+#     # clear any stale files from previous runs
+#     subprocess.run(["docker", "exec", SRC_HOST, "rm", "-rf", destination_parent], check=True)
+
+#     subprocess.run(["docker", "exec", SRC_HOST, "mkdir", "-p", destination_parent], check=True)
+#     subprocess.run(
+#         f"docker cp {DATA_PATH_LOCAL}/{PB_ID} {SRC_HOST}:{destination_parent}/",
+#         shell=True,
+#         check=True,
+#     )
 
 
 def _get_cfg() -> Config:
@@ -285,20 +300,6 @@ def test_storage_initialisation(storage_configuration: Configuration):
         assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
 
 
-def _cleanup_destination_storage() -> None:
-    """Remove migrated test data from the rclone destination."""
-    destination_file = f"/dlm-archive/dlm-archive/product/{EB_ID}"
-    log.info("Cleaning up %s", destination_file)
-    subprocess.run(
-        (f"docker exec dlm_rclone sh -lc 'rm -rf {destination_file}'"),
-        shell=True,
-        check=False,
-    )
-
-
-_cleanup_destination_storage()  # remove – DMAN-200
-
-
 @pytest.mark.integration
 def test_data_was_copied_correctly():
     """Verify that the test data is visible inside the watcher container."""
@@ -314,7 +315,7 @@ def test_data_was_copied_correctly():
 @pytest.mark.integration
 async def test_configdb_watcher(request_configuration: Configuration):
     """Flow points to subfolder scan90-99, containing 10 MS files."""
-    host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    host = STORAGE_URL
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
@@ -357,7 +358,7 @@ async def test_configdb_watcher_higher_dir(request_configuration: Configuration)
 
     Watcher must search one level deeper to find all ms files.
     """
-    host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    host = STORAGE_URL
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
@@ -418,7 +419,7 @@ async def test_configdb_watcher_higher_dir(request_configuration: Configuration)
 @pytest.mark.integration
 async def test_watcher_logs_failed_registration():
     """Flow points to a data item that is already registered on the storage."""
-    host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    host = STORAGE_URL
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
@@ -436,3 +437,25 @@ async def test_watcher_logs_failed_registration():
         sleep(1)
 
     assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"
+
+
+@pytest.mark.integration
+def test_automatic_deletion(dlm_request_api):
+    """Expire all data_items and let the heuristics delete the payloads."""
+    now = datetime.now(timezone.utc).isoformat()
+
+    items = dlm_request_api.query_data_item()  # return first 1000 items
+    log.info("Found %d data items", len(items))
+    # update all uid_expiration's to now:
+    for item in items:  # oid or uid?
+        dlm_request_api.set_oid_expiration(oid=item["oid"], expiration=now)
+        dlm_request_api.set_uid_expiration(uid=item["uid"], expiration=now)
+    # Potential optimisation: expose a server-side bulk update endpoint via @rest.patch to
+    # avoid iterative HTTP round-trips to a single DB update, from the client-side.
+
+    sleep(20)  # default poll interval of the heuristics is 10 seconds
+
+    test_dir = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}"
+    # test -d <path> returns 0 if directory exists:
+    result = subprocess.run(["docker", "exec", SRC_HOST, "test", "-d", test_dir])
+    assert result.returncode != 0, f"Directory {test_dir} still exists"

@@ -4,6 +4,7 @@
 
 ### Updated
 
+* The DLM removes test files (no direct `rm` commands)
 * location_name is now configurable as a global variable.
 * Aligned CLI between configdb and directory watchers
 * Removed CLI setup complexity (no add_* functions)
@@ -12,7 +13,6 @@
 * Aligned tests with new CLI
 * Aligned helm charts with new CLI
 * Test registration of dlm-archive is now SOLID
-* Running tests with server image 2.1.0.
 * Improve ConfigDB Watcher integration test coverage with a larger, more representative test dataset.
 * Running tests with server image 2.1.0.
 * Running tests with server image 2.0.0.
