@@ -89,22 +89,6 @@ STORAGE = {
 SRC_HOST = STORAGE["SRC"]["STORAGE_CONFIG"]["parameters"]["host"]
 WATCHER_SOURCE_DIR_ROOT = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}"
 
-# might need this again - if it turns out mounted files can't be deleted
-# @pytest.fixture(scope="module", autouse=True)
-# def copy_test_data_into_watcher():
-#     """Copy local test data into the watcher container."""
-#     destination_parent = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp"
-
-#     # clear any stale files from previous runs
-#     subprocess.run(["docker", "exec", SRC_HOST, "rm", "-rf", destination_parent], check=True)
-
-#     subprocess.run(["docker", "exec", SRC_HOST, "mkdir", "-p", destination_parent], check=True)
-#     subprocess.run(
-#         f"docker cp {DATA_PATH_LOCAL}/{PB_ID} {SRC_HOST}:{destination_parent}/",
-#         shell=True,
-#         check=True,
-#     )
-
 
 def _get_cfg() -> Config:
     """Return a Config using the same env-based backend settings as the watcher."""
@@ -440,19 +424,31 @@ async def test_watcher_logs_failed_registration():
 
 
 @pytest.mark.integration
-def test_automatic_deletion(dlm_request_api):
+def test_automatic_deletion(dlm_request_api, storage_configuration):
     """Expire all data_items and let the heuristics delete the payloads."""
     now = datetime.now(timezone.utc).isoformat()
 
-    items = dlm_request_api.query_data_item()  # return first 1000 items
-    log.info("Found %d data items", len(items))
-    # update all uid_expiration's to now:
-    for item in items:  # oid or uid?
-        dlm_request_api.set_oid_expiration(oid=item["oid"], expiration=now)
+    with api_client.ApiClient(storage_configuration) as the_api_client:
+        api_storage = storage_api.StorageApi(the_api_client)
+        source_storage = api_storage.query_storage(storage_name="configdb-watcher")
+
+    assert source_storage
+    source_storage_id = _get_id(source_storage[0], "storage_id")
+
+    items = dlm_request_api.query_data_item(
+        storage_id=source_storage_id,
+    )
+    log.info("Found %d data items on source storage %s.", len(items), source_storage)
+    log.info("Setting uid expirations to now...")
+
+    # Update uid expirations of source items to now.
+    for item in items:
         dlm_request_api.set_uid_expiration(uid=item["uid"], expiration=now)
+
     # Potential optimisation: expose a server-side bulk update endpoint via @rest.patch to
     # avoid iterative HTTP round-trips to a single DB update, from the client-side.
 
+    log.info("Sleep to give heuristics some time to do its thing.")
     sleep(20)  # default poll interval of the heuristics is 10 seconds
 
     test_dir = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}"

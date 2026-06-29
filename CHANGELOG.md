@@ -4,7 +4,7 @@
 
 ### Updated
 
-* The DLM removes test files (no direct `rm` commands)
+* The DLM heuristics removes test files (no direct `rm` commands)
 * location_name is now configurable as a global variable.
 * Aligned CLI between configdb and directory watchers
 * Removed CLI setup complexity (no add_* functions)
