@@ -74,7 +74,7 @@ Directory Watcher component
 - ``include_existing``: If ``true``, registers & migrates all contents of the watch directory at startup, not just newly detected files.
 - ``pvc.name``: Name of the volume to mount into the directory-watcher pod.
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the directory-watcher can do. Needs to be ``false`` to allow for data deletion.
-- ``toleration``: Optional list of Kubernetes pod tolerations for scheduling the directory watcher onto tainted nodes.
+- ``tolerations``: Optional list of Kubernetes pod tolerations for scheduling the directory watcher onto tainted nodes.
 - ``affinity``: Optional Kubernetes affinity configuration for scheduling the directory watcher onto specific nodes, for example where local storage is available.
 
 
