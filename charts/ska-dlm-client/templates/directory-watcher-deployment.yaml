@@ -40,6 +40,14 @@ spec:
       securityContext:
         {{- .Values.ska_dlm_client.securityContext | toYaml | nindent 8 }}
       {{- end }}
+      {{- with .Values.directory_watcher.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.directory_watcher.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: directory-watcher
         image: {{ .Values.ska_dlm_client.image}}:{{ .Values.ska_dlm_client.version }}
