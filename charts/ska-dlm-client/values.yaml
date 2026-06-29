@@ -52,6 +52,8 @@ directory_watcher:
   pvc:
     name: shared
     read_only: false
+  tolerations: []
+  affinity: {}
 
 startup_verification: # Test directory_watcher at startup
   enabled: false  # Keep false for now because this code hasn't been maintained recently
