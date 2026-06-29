@@ -16,6 +16,7 @@
 
 ### Added
 
+* Optional `directory_watcher.tolerations` and `directory_watcher.affinity` to `values.yaml`.
 * Test file pb-test-20260126-24294.tar.bz2 to Git LFS.
 
 ### Changed
