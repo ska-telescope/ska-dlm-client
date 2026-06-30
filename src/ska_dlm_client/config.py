@@ -30,6 +30,7 @@ class ClientConfig:
     """
 
     source_name: str = ""
+    directory_to_watch: str = "/dlm/watch_dir"
     target_name: str = "dlm-archive"
     ingest_url: str = "http://dlm_ingest:8001"
     storage_url: str = "http://dlm_storage:8003"
