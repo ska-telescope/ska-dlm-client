@@ -282,7 +282,8 @@ def main():
 
     The CLI is now used also to start the client in operations.
     """
-    ska_ser_logging.configure_logging(logging.INFO)
+    LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
+    ska_ser_logging.configure_logging(LOGLEVEL)
     parser = create_parser()
     args = parser.parse_args()
     api_configuration = Configuration(host=args.storage_url)
