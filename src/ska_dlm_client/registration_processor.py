@@ -1,7 +1,9 @@
+# pylint: disable=broad-exception-caught
 """Register the given file or directory with the DLM."""
 
 import logging
 import os
+import sys
 import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -16,7 +18,7 @@ from ska_dlm_client.common_types import ItemType
 from ska_dlm_client.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntry
 from ska_dlm_client.openapi import ApiException, api_client
-from ska_dlm_client.openapi.dlm_api import ingest_api, migration_api
+from ska_dlm_client.openapi.dlm_api import ingest_api, migration_api, request_api, storage_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
 
 logger = logging.getLogger(__name__)
@@ -68,6 +70,13 @@ class RegistrationProcessor:
         """
         self._config = config
         self.last_migration_result: str | None = None
+        (self.target_storage_id, self.target_storage_phase) = (
+            self._get_storage_info_from_name(
+            getattr(self._config, "target_name", None)
+            ))
+        request_configuration = getattr(self._config, "request_configuration", None)
+        with api_client.ApiClient(request_configuration) as the_api_client:
+            self.api_request = request_api.RequestApi(the_api_client)
 
     def get_config(self) -> Any:
         """Get the configuration being used by the RegistrationProcessor.
@@ -203,6 +212,34 @@ class RegistrationProcessor:
 
         return result
 
+    def _get_storage_info_from_name(self, storage_name: str) -> tuple[str, str] | None:
+        """Get the storage_id and phase for a given storage_name.
+
+        Args:
+            storage_name: The name of the storage to look up.
+
+        Returns:
+            A tuple containing the storage_id and phase, or None if not found.
+        """
+        storage_configuration = getattr(self._config, "storage_configuration", None)
+        if storage_configuration is None:
+            logger.error("Storage configuration not found")
+            return None
+        with api_client.ApiClient(storage_configuration) as the_api_client:
+            api_storage = storage_api.StorageApi(the_api_client)
+            # Get the storage_id
+            response = api_storage.query_storage(storage_name=storage_name)
+            logger.info("query_storage response: %s", response)
+            if not isinstance(response, list):
+                logger.error("Unexpected response from query_storage_storage")
+                return None
+            if len(response) == 1:
+                the_storage_id = response[0]["storage_id"]
+                the_storage_phase = response[0]["storage_phase"]
+                logger.info("storage_id already exists in DLM")
+                return (the_storage_id, the_storage_phase)
+        return None
+
     def _bookkeeping_after_registration(
         self, item: Item, dlm_registration_uuid: str, storage_name: str, migration_result: str
     ) -> None:
@@ -260,13 +297,37 @@ class RegistrationProcessor:
                 "target_name",
                 None,
             )
-            register_kwargs = self._build_register_kwargs(
-                item=item,
-                storage_name=target_storage,
-                do_storage_access_check=False,
-            )
+            # get the oid of the already registered item on the source storage
+            resp = []
+            oid = None
             try:
-                response = api_ingest.register_data_item(**register_kwargs)
+                resp = self.api_request.query_data_item(uid=uuid)
+                if resp:
+                    oid = resp[0]["oid"]
+            except Exception as exc:
+                logger.error(
+                    "Failed to query data item with uid %s, %s",
+                    uuid, exc
+                )
+            # register_kwargs = self._build_register_kwargs(
+            #     item=item,
+            #     oid=oid,
+            #     storage_name=target_storage,
+            #     do_storage_access_check=False,
+            # )
+            try:
+                init_item = {
+                    "item_name": str(item.path_rel_to_watch_dir),
+                    "oid": oid,
+                    "storage_id": self.target_storage_id,
+                    "uid_phase": self.target_storage_phase,
+                    "uri": str(item.path_rel_to_watch_dir),
+                    "target_phase": "SOLID",
+                    "item_type": item.item_type,
+                    "item_state": "READY",
+                }
+                response = api_ingest.init_data_item(request_body=init_item)
+                # response = api_ingest.register_data_item(**register_kwargs)
                 logger.debug("register_data_item response: %s", response)
             except OpenApiException as err:
                 logger.error("OpenApiException caught during child item registration")
