@@ -116,7 +116,8 @@ services:
       - dlm_network
   dlm_heuristics:
     platform: linux/amd64
-    image: ${SERVER_IMAGE}
+    # image: ${SERVER_IMAGE}
+    image: dlm_heuristics:latest
     container_name: dlm_heuristics
     command: ["ska-dlm-heuristics"]
     user: root
