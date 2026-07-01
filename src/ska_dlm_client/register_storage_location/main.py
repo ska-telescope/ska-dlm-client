@@ -283,8 +283,8 @@ def main():
 
     The CLI is now used also to start the client in operations.
     """
-    LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
-    ska_ser_logging.configure_logging(LOGLEVEL)
+    loglevel = os.environ.get("LOGLEVEL", "INFO").upper()
+    ska_ser_logging.configure_logging(loglevel)
 
 
 if __name__ == "__main__":

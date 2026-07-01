@@ -56,7 +56,9 @@ setattr(api_client.ApiClient, "_ApiClient__deserialize", __lenient_deserialize)
 
 
 @pytest.fixture
-def dlm_request_api(request_configuration: Configuration) -> Iterator[request_api.RequestApi]:
+def dlm_request_api(  # pylint: disable=redefined-outer-name
+    request_configuration: Configuration,
+) -> Iterator[request_api.RequestApi]:
     """Reusable API request object."""
     with api_client.ApiClient(request_configuration) as client:
         yield request_api.RequestApi(client)
