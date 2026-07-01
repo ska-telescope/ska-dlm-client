@@ -262,7 +262,6 @@ def test_storage_initialisation(storage_configuration: Configuration):
         log.info(
             "Using storage configuration host for registering: %s", storage_configuration.host
         )
-        os.environ["STORAGE_URL"] = storage_configuration.host
         storage_log = _get_container_log("dlm_storage")
         log.info("Log from storage container: %s", storage_log)
         location_id = _init_location_if_needed(api_storage)
