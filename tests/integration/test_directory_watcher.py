@@ -26,7 +26,6 @@ def test_auto_migration(
     storage_configuration: Configuration,
 ):
     """Test auto migration using directory watcher."""
-
     testfilename = f"group.{str(time())}"
     dst = f"/dlm/watch_dir/{testfilename}"
 
