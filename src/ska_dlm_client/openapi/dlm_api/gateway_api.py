@@ -223,7 +223,6 @@ class GatewayApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -481,7 +480,6 @@ class GatewayApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -496,11 +494,9 @@ class GatewayApi:
         # process the path parameters
         # process the query parameters
         if token is not None:
-
             _query_params.append(("token", token))
 
         if permission is not None:
-
             _query_params.append(("permission", permission))
 
         # process the header parameters
@@ -718,7 +714,6 @@ class GatewayApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -947,7 +942,6 @@ class GatewayApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -1205,7 +1199,6 @@ class GatewayApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -1220,11 +1213,9 @@ class GatewayApi:
         # process the path parameters
         # process the query parameters
         if username is not None:
-
             _query_params.append(("username", username))
 
         if password is not None:
-
             _query_params.append(("password", password))
 
         # process the header parameters

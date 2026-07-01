@@ -39,6 +39,7 @@ class Item:
         item_type: ItemType,
         metadata: DataProductMetadata | None,
         parent: Self | None = None,
+        parent_uid: str | None = None,
     ):
         """Initialise the Item with required values.
 
@@ -48,6 +49,7 @@ class Item:
         self.item_type = item_type
         self.metadata = metadata
         self.parent = parent
+        self.parent_uid = parent_uid
 
 
 class RegistrationProcessor:
@@ -69,10 +71,9 @@ class RegistrationProcessor:
         """
         self._config = config
         self.last_migration_result: str | None = None
-        (self.target_storage_id, self.target_storage_phase) = (
-            self._get_storage_info_from_name(
+        (self.target_storage_id, self.target_storage_phase) = self._get_storage_info_from_name(
             getattr(self._config, "target_name", None)
-            ))
+        )
         request_configuration = getattr(self._config, "request_configuration", None)
         with api_client.ApiClient(request_configuration) as the_api_client:
             self.api_request = request_api.RequestApi(the_api_client)
@@ -150,6 +151,7 @@ class RegistrationProcessor:
             "uri": str(item.path_rel_to_watch_dir),
             "item_type": item.item_type,
             "storage_name": storage_name,
+            "parents": item.parent_uid,
             "do_storage_access_check": do_storage_access_check,
             "request_body": (None if item.metadata is None else item.metadata.as_dict()),
         }
@@ -291,7 +293,7 @@ class RegistrationProcessor:
             )
         else:
             # register not explicitly migrated items on target storage
-            target_storage = getattr(
+            target_name = getattr(
                 self._config,
                 "target_name",
                 None,
@@ -304,17 +306,12 @@ class RegistrationProcessor:
                 if resp:
                     oid = resp[0]["oid"]
             except Exception as exc:
-                logger.error(
-                    "Failed to query data item with uid %s, %s",
-                    uuid, exc
-                )
-            # register_kwargs = self._build_register_kwargs(
-            #     item=item,
-            #     oid=oid,
-            #     storage_name=target_storage,
-            #     do_storage_access_check=False,
-            # )
+                logger.error("Failed to query data item with uid %s, %s", uuid, exc)
             try:
+                # NOTE: default expiration on dlm-archive is 1 year
+                uid_expiration = (
+                    datetime.now() + timedelta(days=365) if target_name == "dlm-archive" else None
+                )
                 init_item = {
                     "item_name": str(item.path_rel_to_watch_dir),
                     "oid": oid,
@@ -324,7 +321,10 @@ class RegistrationProcessor:
                     "target_phase": "SOLID",
                     "item_type": item.item_type,
                     "item_state": "READY",
+                    "item_owner": "SKA",
+                    "uid_expiration": uid_expiration.isoformat(),
                 }
+
                 response = api_ingest.init_data_item(request_body=init_item)
                 # response = api_ingest.register_data_item(**register_kwargs)
                 logger.debug("register_data_item response: %s", response)
@@ -336,7 +336,9 @@ class RegistrationProcessor:
                 logger.error("Ignoring and continuing.....")
         # The return value is the UUID of the top level item.
 
-    def _register_single_item(self, item: Item, migrate: bool = True) -> str | None:
+    def _register_single_item(
+        self, item: Item, migrate: bool = True, parent_id: str | None = None
+    ) -> str | None:
         """Register a single data item with the DLM.
 
         Sends a registration request to the DLM API for the given item,
@@ -372,6 +374,8 @@ class RegistrationProcessor:
                 source_name,
             )
             return None
+
+        item.parent_uid = parent_id
 
         register_kwargs = self._build_register_kwargs(
             item=item,
@@ -409,7 +413,7 @@ class RegistrationProcessor:
         )
         return dlm_registration_uuid
 
-    def _register_container_items(self, item_list: list[Item]):
+    def _register_container_items(self, item_list: list[Item], parent_id: str = None) -> None:
         """Register a list of data items with the DLM.
 
         Sends registration requests to the DLM API for each item in the list,
@@ -417,10 +421,11 @@ class RegistrationProcessor:
 
         Args:
             item_list: A list of data items to register with the DLM.
+            parent_id: The unique identifier of the parent item, if applicable.
         """
         migrate = True
         for item in item_list:
-            _ = self._register_single_item(item=item, migrate=migrate)
+            _ = self._register_single_item(item=item, migrate=migrate, parent_id=parent_id)
             migrate = False  # Only the top-level container item triggers migration
             time.sleep(0.01)
 
@@ -450,10 +455,9 @@ class RegistrationProcessor:
         # Register the container directory first so that its uuid can be used for the files.
         parent_item = item_list[0]
         parent_uuid = self._register_single_item(parent_item)
-        # TODO: Check whether the parent_uuid is actually used!
         time.sleep(1)
         item_list.remove(parent_item)
-        self._register_container_items(item_list=item_list)
+        self._register_container_items(item_list=item_list, parent_id=parent_uuid)
         logger.debug(
             "Finished adding %s",
             (

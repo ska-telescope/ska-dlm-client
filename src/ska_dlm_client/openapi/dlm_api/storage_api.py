@@ -247,7 +247,6 @@ class StorageApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -555,7 +554,6 @@ class StorageApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -570,15 +568,12 @@ class StorageApi:
         # process the path parameters
         # process the query parameters
         if storage_id is not None:
-
             _query_params.append(("storage_id", storage_id))
 
         if storage_name is not None:
-
             _query_params.append(("storage_name", storage_name))
 
         if config_type is not None:
-
             _query_params.append(("config_type", config_type))
 
         # process the header parameters
@@ -808,7 +803,6 @@ class StorageApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -1088,7 +1082,6 @@ class StorageApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -1103,15 +1096,12 @@ class StorageApi:
         # process the path parameters
         # process the query parameters
         if storage_id is not None:
-
             _query_params.append(("storage_id", storage_id))
 
         if storage_name is not None:
-
             _query_params.append(("storage_name", storage_name))
 
         if config_type is not None:
-
             _query_params.append(("config_type", config_type))
 
         # process the header parameters
@@ -1421,7 +1411,6 @@ class StorageApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -1436,23 +1425,18 @@ class StorageApi:
         # process the path parameters
         # process the query parameters
         if location_name is not None:
-
             _query_params.append(("location_name", location_name))
 
         if location_type is not None:
-
             _query_params.append(("location_type", location_type))
 
         if location_country is not None:
-
             _query_params.append(("location_country", location_country))
 
         if location_city is not None:
-
             _query_params.append(("location_city", location_city))
 
         if location_facility is not None:
-
             _query_params.append(("location_facility", location_facility))
 
         # process the header parameters
@@ -1820,7 +1804,6 @@ class StorageApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -1835,35 +1818,27 @@ class StorageApi:
         # process the path parameters
         # process the query parameters
         if storage_name is not None:
-
             _query_params.append(("storage_name", storage_name))
 
         if storage_type is not None:
-
             _query_params.append(("storage_type", storage_type))
 
         if root_directory is not None:
-
             _query_params.append(("root_directory", root_directory))
 
         if storage_interface is not None:
-
             _query_params.append(("storage_interface", storage_interface))
 
         if location_id is not None:
-
             _query_params.append(("location_id", location_id))
 
         if location_name is not None:
-
             _query_params.append(("location_name", location_name))
 
         if storage_capacity is not None:
-
             _query_params.append(("storage_capacity", storage_capacity))
 
         if storage_phase is not None:
-
             _query_params.append(("storage_phase", storage_phase))
 
         # process the header parameters
@@ -2143,7 +2118,6 @@ class StorageApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -2158,11 +2132,9 @@ class StorageApi:
         # process the path parameters
         # process the query parameters
         if location_name is not None:
-
             _query_params.append(("location_name", location_name))
 
         if location_id is not None:
-
             _query_params.append(("location_id", location_id))
 
         # process the header parameters
@@ -2380,7 +2352,6 @@ class StorageApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -2668,7 +2639,6 @@ class StorageApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -2683,11 +2653,9 @@ class StorageApi:
         # process the path parameters
         # process the query parameters
         if storage_name is not None:
-
             _query_params.append(("storage_name", storage_name))
 
         if storage_id is not None:
-
             _query_params.append(("storage_id", storage_id))
 
         # process the header parameters

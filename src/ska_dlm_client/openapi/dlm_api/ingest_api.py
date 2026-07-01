@@ -304,7 +304,6 @@ class IngestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -319,11 +318,9 @@ class IngestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-
             _query_params.append(("item_name", item_name))
 
         if uid_phase is not None:
-
             _query_params.append(("uid_phase", uid_phase))
 
         # process the header parameters
@@ -714,7 +711,6 @@ class IngestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -729,31 +725,24 @@ class IngestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-
             _query_params.append(("item_name", item_name))
 
         if uri is not None:
-
             _query_params.append(("uri", uri))
 
         if item_type is not None:
-
             _query_params.append(("item_type", item_type))
 
         if storage_name is not None:
-
             _query_params.append(("storage_name", storage_name))
 
         if storage_id is not None:
-
             _query_params.append(("storage_id", storage_id))
 
         if parents is not None:
-
             _query_params.append(("parents", parents))
 
         if do_storage_access_check is not None:
-
             _query_params.append(("do_storage_access_check", do_storage_access_check))
 
         # process the header parameters

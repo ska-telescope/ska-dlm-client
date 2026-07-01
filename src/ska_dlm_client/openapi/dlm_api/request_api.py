@@ -344,7 +344,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -359,23 +358,18 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-
             _query_params.append(("item_name", item_name))
 
         if oid is not None:
-
             _query_params.append(("oid", oid))
 
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         if storage_id is not None:
-
             _query_params.append(("storage_id", storage_id))
 
         if params is not None:
-
             _query_params.append(("params", params))
 
         # process the header parameters
@@ -615,7 +609,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -630,7 +623,6 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         # process the header parameters
@@ -921,7 +913,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -936,19 +927,15 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-
             _query_params.append(("item_name", item_name))
 
         if oid is not None:
-
             _query_params.append(("oid", oid))
 
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         if ready is not None:
-
             _query_params.append(("ready", ready))
 
         # process the header parameters
@@ -1220,7 +1207,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -1235,15 +1221,12 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-
             _query_params.append(("item_name", item_name))
 
         if oid is not None:
-
             _query_params.append(("oid", oid))
 
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         # process the header parameters
@@ -1483,7 +1466,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -1498,7 +1480,6 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if offset is not None:
-
             _query_params.append(("offset", offset))
 
         # process the header parameters
@@ -1770,7 +1751,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -1785,15 +1765,12 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-
             _query_params.append(("item_name", item_name))
 
         if oid is not None:
-
             _query_params.append(("oid", oid))
 
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         # process the header parameters
@@ -2046,7 +2023,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -2061,11 +2037,9 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if check_date is not None:
-
             _query_params.append(("check_date", check_date))
 
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         # process the header parameters
@@ -2343,7 +2317,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -2358,15 +2331,12 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if oid is not None:
-
             _query_params.append(("oid", oid))
 
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         if acl is not None:
-
             _query_params.append(("acl", acl))
 
         # process the header parameters
@@ -2644,7 +2614,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -2659,15 +2628,12 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if oid is not None:
-
             _query_params.append(("oid", oid))
 
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         if group is not None:
-
             _query_params.append(("group", group))
 
         # process the header parameters
@@ -2911,7 +2877,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -2926,7 +2891,6 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         # process the header parameters
@@ -3191,7 +3155,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -3206,11 +3169,9 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if oid is not None:
-
             _query_params.append(("oid", oid))
 
         if expiration is not None:
-
             _query_params.append(("expiration", expiration))
 
         # process the header parameters
@@ -3457,7 +3418,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -3472,11 +3432,9 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         if phase is not None:
-
             _query_params.append(("phase", phase))
 
         # process the header parameters
@@ -3723,7 +3681,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -3738,11 +3695,9 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         if state is not None:
-
             _query_params.append(("state", state))
 
         # process the header parameters
@@ -3995,7 +3950,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -4010,11 +3964,9 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         if expiration is not None:
-
             _query_params.append(("expiration", expiration))
 
         # process the header parameters
@@ -4280,7 +4232,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -4295,15 +4246,12 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         if uri is not None:
-
             _query_params.append(("uri", uri))
 
         if storage_id is not None:
-
             _query_params.append(("storage_id", storage_id))
 
         # process the header parameters
@@ -4581,7 +4529,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -4596,15 +4543,12 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if oid is not None:
-
             _query_params.append(("oid", oid))
 
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         if user is not None:
-
             _query_params.append(("user", user))
 
         # process the header parameters
@@ -4892,7 +4836,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -4907,15 +4850,12 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-
             _query_params.append(("item_name", item_name))
 
         if oid is not None:
-
             _query_params.append(("oid", oid))
 
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         # process the header parameters
@@ -5196,7 +5136,6 @@ class RequestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -5211,11 +5150,9 @@ class RequestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-
             _query_params.append(("item_name", item_name))
 
         if oid is not None:
-
             _query_params.append(("oid", oid))
 
         # process the header parameters
