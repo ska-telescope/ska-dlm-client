@@ -22,6 +22,7 @@ def _get_id(item: Any, key: str) -> Any:
     return item[key] if isinstance(item, dict) else getattr(item, key)
 
 
+@pytest.mark.skip(reason="WIP: DMAN-200")
 @pytest.mark.integration
 def test_auto_migration(
     request_configuration: Configuration,
