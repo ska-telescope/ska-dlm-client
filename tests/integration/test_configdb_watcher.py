@@ -299,11 +299,6 @@ def test_data_was_copied_correctly():
 @pytest.mark.integration
 async def test_configdb_watcher(request_configuration: Configuration):
     """Flow points to subfolder scan90-99, containing 10 MS files."""
-    host = STORAGE_URL
-    api_configuration = Configuration(host=host)
-    setup_testing(api_configuration)
-    sleep(2)  # TODO: DMAN-193
-
     # Trigger COMPLETED Flow pointing directly at scan90-99
     flow_name = "test-flow"
     persist_flow_name = "persist-flow"
@@ -342,11 +337,6 @@ async def test_configdb_watcher_higher_dir(request_configuration: Configuration)
 
     Watcher must search one level deeper to find all ms files.
     """
-    host = STORAGE_URL
-    api_configuration = Configuration(host=host)
-    setup_testing(api_configuration)
-    sleep(2)  # TODO: DMAN-193
-
     # Trigger COMPLETED Flow pointing at pb-test-20260126-24294 directory
     flow_name = "test-flow-higher-dir"
     persist_flow_name = "persist-flow2"
@@ -403,11 +393,6 @@ async def test_configdb_watcher_higher_dir(request_configuration: Configuration)
 @pytest.mark.integration
 async def test_watcher_logs_failed_registration():
     """Flow points to a data item that is already registered on the storage."""
-    host = STORAGE_URL
-    api_configuration = Configuration(host=host)
-    setup_testing(api_configuration)
-    sleep(2)  # TODO: DMAN-193
-
     # Trigger a COMPLETED Flow with same subpath as previous test
     trigger_completed_flows("test-flow-failure", "persist-flow3", subpath=PVC_SUBPATH)
 
