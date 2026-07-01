@@ -26,7 +26,7 @@ def _get_id(item: Any, key: str) -> Any:
 def test_auto_migration(
     request_configuration: Configuration,
     storage_configuration: Configuration,
-):
+):  # pylint: disable=too-many-locals
     """Test auto migration using directory watcher."""
     testfilename = f"group.{str(time())}"
     dst = f"/dlm/watch_dir/{testfilename}"
