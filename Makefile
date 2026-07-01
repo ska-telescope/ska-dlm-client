@@ -11,7 +11,8 @@ PYTHON_LINE_LENGTH = 99
 PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
 
 # The DLM server image to use in integration tests:
-DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:2.1.0
+# DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:2.1.0
+DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:2.1.0-dev.c72f8649f
 
 python-test: extract-test-data python-pre-test python-do-test python-post-test
 

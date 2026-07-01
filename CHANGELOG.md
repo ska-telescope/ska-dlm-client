@@ -2,6 +2,10 @@
 
 ## Development
 
+### Removed
+
+* All references to previous DB name `ska_dlm_meta`.
+
 ### Updated
 
 * The DLM heuristics removes test files (no direct `rm` commands)

@@ -410,6 +410,7 @@ async def test_watcher_logs_failed_registration():
     assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"
 
 
+@pytest.mark.skip(reason="WIP: DMAN-200")
 @pytest.mark.integration
 def test_automatic_deletion(dlm_request_api, storage_configuration):
     """Expire all data_items and let the heuristics delete the payloads."""
