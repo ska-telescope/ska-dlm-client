@@ -276,6 +276,15 @@ def test_data_was_copied_correctly():
     result = subprocess.run(
         f"docker exec {SRC_HOST} sh -lc 'test -f {expected_file}'", shell=True, check=False
     )
+    if result.returncode != 0:
+        log.error("docker exec failed")
+        log.error("stdout:\n%s", result.stdout)
+        log.error("stderr:\n%s", result.stderr)
+
+        subprocess.run(["docker", "ps", "-a"], check=False)
+        subprocess.run(["docker", "logs", "dlm_configdb_watcher"], check=False)
+        subprocess.run(["docker", "logs", "dlm_directory_watcher"], check=False)
+        subprocess.run(["docker", "logs", "dlm_storage"], check=False)
     assert result.returncode == 0, f"Could not find expected file: {expected_file}"
 
 
