@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 """Application to watch a directory for changes and send to DLM."""
 
 import argparse

@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 """
 Application to verify the state of the DLM Directory Watcher, intended for startup.
 

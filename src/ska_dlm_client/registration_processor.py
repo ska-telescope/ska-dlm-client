@@ -1,4 +1,6 @@
 # pylint: disable=broad-exception-caught
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
 """Register the given file or directory with the DLM."""
 
 import logging
@@ -72,7 +74,7 @@ class RegistrationProcessor:
         self._config = config
         self.last_migration_result: str | None = None
         (self.target_storage_id, self.target_storage_phase) = self._get_storage_info_from_name(
-            getattr(self._config, "target_name", None)
+            getattr(self._config, "target_name", None),
         )
         request_configuration = getattr(self._config, "request_configuration", None)
         with api_client.ApiClient(request_configuration) as the_api_client:
@@ -225,7 +227,7 @@ class RegistrationProcessor:
         storage_configuration = getattr(self._config, "storage_configuration", None)
         if storage_configuration is None:
             logger.error("Storage configuration not found")
-            return None
+            return (None, None)
         with api_client.ApiClient(storage_configuration) as the_api_client:
             api_storage = storage_api.StorageApi(the_api_client)
             # Get the storage_id
@@ -233,13 +235,13 @@ class RegistrationProcessor:
             logger.info("query_storage response: %s", response)
             if not isinstance(response, list):
                 logger.error("Unexpected response from query_storage_storage")
-                return None
+                return (None, None)
             if len(response) == 1:
                 the_storage_id = response[0]["storage_id"]
                 the_storage_phase = response[0]["storage_phase"]
                 logger.info("storage_id already exists in DLM")
                 return (the_storage_id, the_storage_phase)
-        return None
+        return (None, None)
 
     def _bookkeeping_after_registration(
         self, item: Item, dlm_registration_uuid: str, storage_name: str, migration_result: str
@@ -322,7 +324,7 @@ class RegistrationProcessor:
                     "item_type": item.item_type,
                     "item_state": "READY",
                     "item_owner": "SKA",
-                    "uid_expiration": uid_expiration.isoformat(),
+                    "uid_expiration": uid_expiration,
                 }
 
                 response = api_ingest.init_data_item(request_body=init_item)
@@ -337,7 +339,7 @@ class RegistrationProcessor:
         # The return value is the UUID of the top level item.
 
     def _register_single_item(
-        self, item: Item, migrate: bool = True, parent_id: str | None = None
+        self, item: Item, migrate: bool = True, parent_uid: str | None = None
     ) -> str | None:
         """Register a single data item with the DLM.
 
@@ -375,7 +377,7 @@ class RegistrationProcessor:
             )
             return None
 
-        item.parent_uid = parent_id
+        item.parent_uid = parent_uid
 
         register_kwargs = self._build_register_kwargs(
             item=item,
@@ -413,7 +415,7 @@ class RegistrationProcessor:
         )
         return dlm_registration_uuid
 
-    def _register_container_items(self, item_list: list[Item], parent_id: str = None) -> None:
+    def _register_container_items(self, item_list: list[Item], parent_uid: str = None) -> None:
         """Register a list of data items with the DLM.
 
         Sends registration requests to the DLM API for each item in the list,
@@ -421,11 +423,11 @@ class RegistrationProcessor:
 
         Args:
             item_list: A list of data items to register with the DLM.
-            parent_id: The unique identifier of the parent item, if applicable.
+            parent_uid: The unique identifier of the parent item, if applicable.
         """
         migrate = True
         for item in item_list:
-            _ = self._register_single_item(item=item, migrate=migrate, parent_id=parent_id)
+            _ = self._register_single_item(item=item, migrate=migrate, parent_uid=parent_uid)
             migrate = False  # Only the top-level container item triggers migration
             time.sleep(0.01)
 
@@ -457,7 +459,7 @@ class RegistrationProcessor:
         parent_uuid = self._register_single_item(parent_item)
         time.sleep(1)
         item_list.remove(parent_item)
-        self._register_container_items(item_list=item_list, parent_id=parent_uuid)
+        self._register_container_items(item_list=item_list, parent_uid=parent_uuid)
         logger.debug(
             "Finished adding %s",
             (

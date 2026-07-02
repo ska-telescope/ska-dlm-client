@@ -100,6 +100,7 @@ def mock_config():
     config.storage_name = None  # TODO: fix source_storage/storage_name discrepency
     config.rclone_access_check_on_register = False
     config.target_name = "test-destination-storage"
+    config.target_phase = "SOLID"
     config.directory_watcher_entries = mock.MagicMock(spec=DirectoryWatcherEntries)
     config.ingest_url = "http://test-ingest:8000"
     config.storage_url = "http://test-storage:8000"
@@ -220,6 +221,7 @@ def test_registration_processor_register_single_item(
         path_rel_to_watch_dir="test-item",
         item_type=ItemType.FILE,
         metadata=mock_data_product_metadata.return_value,
+        parent_uid=None,
     )
 
     # Test with registration enabled
@@ -272,6 +274,7 @@ def test_registration_processor_register_container_items(
         item_type=ItemType.FILE,
         metadata=None,
         parent=parent_item,
+        parent_uid="test-uuid",
     )
 
     child_item2 = Item(
@@ -279,16 +282,17 @@ def test_registration_processor_register_container_items(
         item_type=ItemType.FILE,
         metadata=None,
         parent=parent_item,
+        parent_uid="test-uuid",
     )
 
     # Test with registration enabled
-    processor._register_container_items([child_item1, child_item2])
-    assert mock_ingest_api.return_value.register_data_item.call_count == 3
+    processor._register_container_items([child_item1, child_item2], parent_uid=parent_item.uuid)
+    assert mock_ingest_api.return_value.register_data_item.call_count == 2
 
     # Test with API exception
     mock_ingest_api.reset_mock()
     mock_ingest_api.return_value.register_data_item.side_effect = OpenApiException("Test error")
-    processor._register_container_items([child_item1, child_item2])
+    processor._register_container_items([child_item1, child_item2], parent_uid=parent_item.uuid)
     assert mock_ingest_api.return_value.register_data_item.call_count == 2
 
 
@@ -308,6 +312,7 @@ def test_registration_processor_generate_dir_item_list(
         path_rel_to_watch_dir="file-item",
         item_type=ItemType.FILE,
         metadata=mock_data_product_metadata.return_value,
+        parent_uid=None,
     )
     mock_generate.return_value = [file_item]
 
@@ -325,6 +330,7 @@ def test_registration_processor_generate_dir_item_list(
         path_rel_to_watch_dir="container-item",
         item_type=ItemType.CONTAINER,
         metadata=mock_data_product_metadata.return_value,
+        parent_uid=None,
     )
     mock_generate.return_value = [container_item]
 
@@ -340,18 +346,23 @@ def test_registration_processor_generate_dir_item_list(
         path_rel_to_watch_dir="container-item",
         item_type=ItemType.CONTAINER,
         metadata=mock_data_product_metadata.return_value,
+        parent_uid=None,
     )
+    container_item.uuid = "test-uuid"
+
     file_item1 = Item(
         path_rel_to_watch_dir="file-item1",
         item_type=ItemType.FILE,
         metadata=None,
         parent=container_item,
+        parent_uid=container_item.uuid,
     )
     file_item2 = Item(
         path_rel_to_watch_dir="file-item2",
         item_type=ItemType.FILE,
         metadata=None,
         parent=container_item,
+        parent_uid=container_item.uuid,
     )
     mock_generate.return_value = [container_item, file_item1, file_item2]
 
@@ -360,7 +371,9 @@ def test_registration_processor_generate_dir_item_list(
         processor.add_path("/test/abs/path", "rel/path")
 
     processor._register_single_item.assert_called_once_with(container_item)
-    processor._register_container_items.assert_called_once_with(item_list=[file_item1, file_item2])
+    processor._register_container_items.assert_called_once_with(
+        item_list=[file_item1, file_item2], parent_uid=container_item.uuid
+    )
 
     # Test with no items
     mock_generate.reset_mock()

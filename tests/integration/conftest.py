@@ -1,3 +1,4 @@
+# pylint: disable=redefined-outer-name
 """Shared pytest fixtures and service readiness checks for DLM integration tests."""
 
 import logging

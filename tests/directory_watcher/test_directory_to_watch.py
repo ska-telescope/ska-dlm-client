@@ -65,7 +65,9 @@ class TestDirectoryToWatch:
                 self.register_data_item_args = None
                 self.dry_run_for_debug = True  # Prevent actual API calls
 
-            def _register_single_item(self, item: Item, migrate: bool = True) -> str | None:
+            def _register_single_item(
+                self, item: Item, migrate: bool = True, parent_uid: str = None
+            ) -> str | None:
                 """Capture the item path that would be registered."""
                 _ = migrate
                 self.register_data_item_args = {

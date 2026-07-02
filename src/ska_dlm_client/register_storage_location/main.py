@@ -1,4 +1,5 @@
 # pylint: disable=broad-exception-caught
+# pylint: disable=invalid-name
 """Initialize a location and a storage."""
 
 import argparse
