@@ -14,7 +14,7 @@ services:
     volumes:
       - shared-tmpfs:/dlm
       - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      DO_AUTH: "1"
+    env_file:
+      - testrunner.env
     networks:
       - dlm_network

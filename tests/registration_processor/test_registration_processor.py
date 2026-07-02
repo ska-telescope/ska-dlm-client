@@ -109,6 +109,7 @@ def mock_config():
 
     # Use real Configuration instances instead of MagicMocks
     config.ingest_configuration = Configuration(host="http://test-ingest:8000")
+    config.storage_configuration = Configuration(host="http://test-storage:8000")
     config.migration_configuration = Configuration(host="http://test-migration:8000")
 
     return config
@@ -155,20 +156,20 @@ def mock_data_product_metadata():
 
 def test_registration_processor_init(mock_config):  # pylint: disable=redefined-outer-name
     """Test the RegistrationProcessor initialization."""
-    processor = RegistrationProcessor(mock_config)
+    processor = MockRegistrationProcessor(mock_config)
     assert processor.get_config() == mock_config
 
 
 def test_registration_processor_set_config(mock_config):  # pylint: disable=redefined-outer-name
     """Test the RegistrationProcessor set_config method."""
-    processor = RegistrationProcessor(mock.MagicMock(spec=WatcherConfig))
+    processor = MockRegistrationProcessor(mock.MagicMock(spec=WatcherConfig))
     processor.set_config(mock_config)
     assert processor.get_config() == mock_config
 
 
 def test_registration_processor_follow_sym_link():
     """Test the RegistrationProcessor _follow_sym_link method."""
-    processor = RegistrationProcessor(mock.MagicMock(spec=WatcherConfig))
+    processor = MockRegistrationProcessor(mock.MagicMock(spec=WatcherConfig))
 
     # Test with a non-symlink path
     path = mock.MagicMock()
@@ -189,9 +190,10 @@ def test_registration_processor_copy_data_item_to_new_storage(
     mock_config, mock_migration_api
 ):  # pylint: disable=protected-access, redefined-outer-name
     """Test the RegistrationProcessor _copy_data_item_to_new_storage method."""
-    processor = RegistrationProcessor(mock_config)
+    processor = MockRegistrationProcessor(mock_config)
 
-    # Test with migration enabled
+    # Test with migration enabled using mocked storage info
+    MockRegistrationProcessor,
     result = processor._initiate_migration("test-uuid")
     assert result == "test-migration-uuid"
 
@@ -214,7 +216,7 @@ def test_registration_processor_register_single_item(
     mock_config.uid_expiration_days = 7
     mock_config.oid_expiration_days = 1
 
-    processor = RegistrationProcessor(mock_config)
+    processor = MockRegistrationProcessor(mock_config)
 
     # Create a test item
     item = Item(
@@ -255,10 +257,13 @@ def test_registration_processor_register_single_item(
 
 
 def test_registration_processor_register_container_items(
-    mock_config, mock_ingest_api, mock_migration_api, mock_data_product_metadata
+    mock_config,
+    mock_ingest_api,
+    mock_migration_api,
+    mock_data_product_metadata,
 ):  # pylint: disable=protected-access, redefined-outer-name, unused-argument
     """Test the RegistrationProcessor _register_container_items method."""
-    processor = RegistrationProcessor(mock_config)
+    processor = MockRegistrationProcessor(mock_config)
 
     # Create a parent item
     parent_item = Item(
@@ -301,7 +306,7 @@ def test_registration_processor_generate_dir_item_list(
     mock_generate, mock_config, mock_data_product_metadata
 ):  # pylint: disable=protected-access, redefined-outer-name
     """Test the RegistrationProcessor _generate_dir_item_list method."""
-    processor = RegistrationProcessor(mock_config)
+    processor = MockRegistrationProcessor(mock_config)
 
     # Mock the _register_single_item and _register_container_items methods
     processor._register_single_item = mock.MagicMock(return_value="test-uuid")
@@ -392,7 +397,7 @@ def test_registration_processor_register_data_products_from_watch_directory(
     mock_join, mock_listdir, mock_config
 ):  # pylint: disable=redefined-outer-name
     """Test the RegistrationProcessor register_data_products_from_watch_directory method."""
-    processor = RegistrationProcessor(mock_config)
+    processor = MockRegistrationProcessor(mock_config)
 
     # Mock the add_path method
     processor.add_path = mock.MagicMock()
@@ -420,3 +425,20 @@ def test_registration_processor_register_data_products_from_watch_directory(
         absolute_path=f"{mock_config.directory_to_watch}/item3",
         path_rel_to_watch_dir="item3",
     )
+
+
+class MockRegistrationProcessor(RegistrationProcessor):
+    """A class to use for test of directory watcher."""
+
+    absolute_path: str
+    path_rel_to_watch_dir: str
+
+    def __init__(self, config):
+        """Initialize with default values."""
+        super().__init__(config)
+        self.absolute_path = ""
+        self.path_rel_to_watch_dir = ""
+
+    def _get_storage_info_from_name(self, storage_name: str) -> tuple[str, str]:
+        """Return fixed storage info without calling the real helper."""
+        return ("test-target", "SOLID")
