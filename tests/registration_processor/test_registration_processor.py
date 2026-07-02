@@ -193,7 +193,6 @@ def test_registration_processor_copy_data_item_to_new_storage(
     processor = MockRegistrationProcessor(mock_config)
 
     # Test with migration enabled using mocked storage info
-    MockRegistrationProcessor,
     result = processor._initiate_migration("test-uuid")
     assert result == "test-migration-uuid"
 
