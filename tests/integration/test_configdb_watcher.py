@@ -449,10 +449,12 @@ def test_automatic_deletion(dlm_request_api, storage_configuration):
     # Potential optimisation: expose a server-side bulk update endpoint via @rest.patch to
     # avoid iterative HTTP round-trips to a single DB update, from the client-side.
 
-    log.info("Sleep to give heuristics some time to do its thing.")
+    log.info("Sleep 20s to give heuristics some time to do its thing.")
     sleep(20)  # default poll interval of the heuristics is 10 seconds
 
     test_dir = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}"
     # test -d <path> returns 0 if directory exists:
     result = subprocess.run(["docker", "exec", SRC_HOST, "test", "-d", test_dir])
-    assert result.returncode != 0, f"Directory {test_dir} still exists: {result.stderr}"
+    log.info("STDOUT/STDERR of test for directory: %s / %s", result.stdout, result.stderr)
+
+    assert result.returncode != 0, f"Directory {test_dir} still exists: {result.stdout}"
