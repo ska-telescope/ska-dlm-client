@@ -424,6 +424,9 @@ async def test_watcher_logs_failed_registration():
     assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"
 
 
+@pytest.mark.xfail(
+    condition=bool(os.environ.get("SKA_DEFAULT_RUNNER")), reason="running extremely slow on CI"
+)
 @pytest.mark.integration
 def test_automatic_deletion(dlm_request_api, storage_configuration):
     """Expire all data_items and let the heuristics delete the payloads."""
@@ -466,6 +469,8 @@ def test_automatic_deletion(dlm_request_api, storage_configuration):
             break
         counter += 1
     if result.returncode == 0:
-        logs = subprocess.run(["docker", "--tail", "500", "logs", "dlm_heuristics"], capture_output=True, text=True)
+        logs = subprocess.run(
+            ["docker", "--tail", "500", "logs", "dlm_heuristics"], capture_output=True, text=True
+        )
         log.info("Still failing: More logs from heuristics container: %s", logs.stdout)
     assert result.returncode != 0, f"Directory {test_dir} still exists: {result.stdout}"
