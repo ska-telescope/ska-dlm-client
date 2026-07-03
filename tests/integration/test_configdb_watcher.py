@@ -452,7 +452,7 @@ def test_automatic_deletion(dlm_request_api, storage_configuration):
     log.info("Sleep 20s to give heuristics some time to do its thing.")
     sleep(20)  # default poll interval of the heuristics is 10 seconds
 
-    test_dir = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}"
+    test_dir = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}/{ARB_MS}"
     # test -d <path> returns 0 if directory exists:
     result = subprocess.run(["docker", "exec", SRC_HOST, "test", "-d", test_dir])
     log.info("STDOUT/STDERR of test for directory: %s / %s", result.stdout, result.stderr)
