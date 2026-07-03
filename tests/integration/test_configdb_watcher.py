@@ -103,7 +103,7 @@ def _ensure_processing_block() -> None:
     cfg = _get_cfg()
     for txn in cfg.txn():
         if txn.processing_block.get(PB_ID) is None:
-            txn.processing_block.SRC_HOSTcreate(
+            txn.processing_block.create(
                 ProcessingBlock(
                     key=PB_ID,
                     eb_id=None,
@@ -455,4 +455,4 @@ def test_automatic_deletion(dlm_request_api, storage_configuration):
     test_dir = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}"
     # test -d <path> returns 0 if directory exists:
     result = subprocess.run(["docker", "exec", SRC_HOST, "test", "-d", test_dir])
-    assert result.returncode != 0, f"Directory {test_dir} still exists: result.stderr"
+    assert result.returncode != 0, f"Directory {test_dir} still exists: {result.stderr}"
