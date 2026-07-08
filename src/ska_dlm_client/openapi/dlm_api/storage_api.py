@@ -1474,17 +1474,17 @@ class StorageApi:
         storage_type: StrictStr,
         root_directory: Annotated[
             StrictStr,
-            Field(description="data directory as an absolute path on the remote storage endpoint"),
+            Field(description="Data directory as an absolute path on the remote storage endpoint"),
         ],
         storage_interface: StrictStr,
         location_id: Annotated[
-            Optional[StrictStr], Field(description="a dlm registered location id")
+            Optional[StrictStr], Field(description="A dlm registered location id")
         ] = None,
         location_name: Annotated[
-            Optional[StrictStr], Field(description="a dlm registered location name")
+            Optional[StrictStr], Field(description="A dlm registered location name")
         ] = None,
         storage_capacity: Annotated[
-            Optional[StrictInt], Field(description="reserved storage capacity in bytes")
+            Optional[StrictInt], Field(description="Reserved storage capacity in bytes")
         ] = None,
         storage_phase: Optional[StrictStr] = None,
         request_body: Optional[Dict[str, Any]] = None,
@@ -1509,16 +1509,16 @@ class StorageApi:
         storage_type : str
             (required)
         root_directory : str
-            data directory as an absolute path on the remote storage
+            Data directory as an absolute path on the remote storage
             endpoint (required)
         storage_interface : str
             (required)
         location_id : str
-            a dlm registered location id
+            A dlm registered location id
         location_name : str
-            a dlm registered location name
+            A dlm registered location name
         storage_capacity : int
-            reserved storage capacity in bytes
+            Reserved storage capacity in bytes
         storage_phase : str
         request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
@@ -1583,17 +1583,17 @@ class StorageApi:
         storage_type: StrictStr,
         root_directory: Annotated[
             StrictStr,
-            Field(description="data directory as an absolute path on the remote storage endpoint"),
+            Field(description="Data directory as an absolute path on the remote storage endpoint"),
         ],
         storage_interface: StrictStr,
         location_id: Annotated[
-            Optional[StrictStr], Field(description="a dlm registered location id")
+            Optional[StrictStr], Field(description="A dlm registered location id")
         ] = None,
         location_name: Annotated[
-            Optional[StrictStr], Field(description="a dlm registered location name")
+            Optional[StrictStr], Field(description="A dlm registered location name")
         ] = None,
         storage_capacity: Annotated[
-            Optional[StrictInt], Field(description="reserved storage capacity in bytes")
+            Optional[StrictInt], Field(description="Reserved storage capacity in bytes")
         ] = None,
         storage_phase: Optional[StrictStr] = None,
         request_body: Optional[Dict[str, Any]] = None,
@@ -1618,16 +1618,16 @@ class StorageApi:
         storage_type : str
             (required)
         root_directory : str
-            data directory as an absolute path on the remote storage
+            Data directory as an absolute path on the remote storage
             endpoint (required)
         storage_interface : str
             (required)
         location_id : str
-            a dlm registered location id
+            A dlm registered location id
         location_name : str
-            a dlm registered location name
+            A dlm registered location name
         storage_capacity : int
-            reserved storage capacity in bytes
+            Reserved storage capacity in bytes
         storage_phase : str
         request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
@@ -1692,17 +1692,17 @@ class StorageApi:
         storage_type: StrictStr,
         root_directory: Annotated[
             StrictStr,
-            Field(description="data directory as an absolute path on the remote storage endpoint"),
+            Field(description="Data directory as an absolute path on the remote storage endpoint"),
         ],
         storage_interface: StrictStr,
         location_id: Annotated[
-            Optional[StrictStr], Field(description="a dlm registered location id")
+            Optional[StrictStr], Field(description="A dlm registered location id")
         ] = None,
         location_name: Annotated[
-            Optional[StrictStr], Field(description="a dlm registered location name")
+            Optional[StrictStr], Field(description="A dlm registered location name")
         ] = None,
         storage_capacity: Annotated[
-            Optional[StrictInt], Field(description="reserved storage capacity in bytes")
+            Optional[StrictInt], Field(description="Reserved storage capacity in bytes")
         ] = None,
         storage_phase: Optional[StrictStr] = None,
         request_body: Optional[Dict[str, Any]] = None,
@@ -1727,16 +1727,16 @@ class StorageApi:
         storage_type : str
             (required)
         root_directory : str
-            data directory as an absolute path on the remote storage
+            Data directory as an absolute path on the remote storage
             endpoint (required)
         storage_interface : str
             (required)
         location_id : str
-            a dlm registered location id
+            A dlm registered location id
         location_name : str
-            a dlm registered location name
+            A dlm registered location name
         storage_capacity : int
-            reserved storage capacity in bytes
+            Reserved storage capacity in bytes
         storage_phase : str
         request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional

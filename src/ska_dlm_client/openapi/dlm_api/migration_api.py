@@ -79,7 +79,7 @@ class MigrationApi:
     ) -> Dict[str, object]:
         """Copy Data Item
 
-        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location
+        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) add record to the migration table
 
         Parameters
         ----------
@@ -197,7 +197,7 @@ class MigrationApi:
     ) -> ApiResponse[Dict[str, object]]:
         """Copy Data Item
 
-        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location
+        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) add record to the migration table
 
         Parameters
         ----------
@@ -315,7 +315,7 @@ class MigrationApi:
     ) -> RESTResponseType:
         """Copy Data Item
 
-        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location
+        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) add record to the migration table
 
         Parameters
         ----------

@@ -21,6 +21,7 @@ Steps
 (2) convert one (first) storage_id to a configured rclone backend
 (3) initialise the new item with the same OID on the new storage
 (4) use the rclone copy command to copy it to the new location
+(5) add record to the migration table
 
 ### Example
 

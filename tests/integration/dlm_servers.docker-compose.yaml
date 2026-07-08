@@ -117,7 +117,6 @@ services:
   dlm_heuristics:
     platform: linux/amd64
     image: ${SERVER_IMAGE}
-    # image: dlm_heuristics:latest
     container_name: dlm_heuristics
     command: ["ska-dlm-heuristics"]
     user: root
@@ -133,10 +132,5 @@ services:
         condition: service_started
       dlm_rclone:
         condition: service_started
-    healthcheck:
-      test: ["CMD-SHELL", "ska-dlm --help || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - dlm_network

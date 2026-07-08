@@ -20,7 +20,7 @@ import sys
 from logging import FileHandler
 from typing import Any, ClassVar, Dict, List, Literal, Optional, TypedDict, Union
 
-import urllib3.util
+import urllib3
 from typing_extensions import NotRequired, Self
 
 JSON_SCHEMA_VALIDATION_KEYWORDS = {

@@ -396,11 +396,11 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     api_instance = ska_dlm_client.openapi.StorageApi(api_client)
     storage_name = 'storage_name_example' # str | An organisation or owner name for the storage.
     storage_type = 'storage_type_example' # str | 
-    root_directory = 'root_directory_example' # str | data directory as an absolute path on the remote storage endpoint
+    root_directory = 'root_directory_example' # str | Data directory as an absolute path on the remote storage endpoint
     storage_interface = 'storage_interface_example' # str | 
-    location_id = 'location_id_example' # str | a dlm registered location id (optional)
-    location_name = 'location_name_example' # str | a dlm registered location name (optional)
-    storage_capacity = -1 # int | reserved storage capacity in bytes (optional) (default to -1)
+    location_id = 'location_id_example' # str | A dlm registered location id (optional)
+    location_name = 'location_name_example' # str | A dlm registered location name (optional)
+    storage_capacity = -1 # int | Reserved storage capacity in bytes (optional) (default to -1)
     storage_phase = GAS # str |  (optional) (default to GAS)
     request_body = None # Dict[str, object] |  (optional)
 
@@ -422,11 +422,11 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **storage_name** | **str**| An organisation or owner name for the storage. | 
  **storage_type** | **str**|  | 
- **root_directory** | **str**| data directory as an absolute path on the remote storage endpoint | 
+ **root_directory** | **str**| Data directory as an absolute path on the remote storage endpoint | 
  **storage_interface** | **str**|  | 
- **location_id** | **str**| a dlm registered location id | [optional] 
- **location_name** | **str**| a dlm registered location name | [optional] 
- **storage_capacity** | **int**| reserved storage capacity in bytes | [optional] [default to -1]
+ **location_id** | **str**| A dlm registered location id | [optional] 
+ **location_name** | **str**| A dlm registered location name | [optional] 
+ **storage_capacity** | **int**| Reserved storage capacity in bytes | [optional] [default to -1]
  **storage_phase** | **str**|  | [optional] [default to GAS]
  **request_body** | [**Dict[str, object]**](object.md)|  | [optional] 
 

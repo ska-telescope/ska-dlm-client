@@ -91,11 +91,9 @@ class ValidationError(BaseModel):
 
         _obj = cls.model_validate(
             {
-                "loc": (
-                    [ValidationErrorLocInner.from_dict(_item) for _item in obj["loc"]]
-                    if obj.get("loc") is not None
-                    else None
-                ),
+                "loc": [ValidationErrorLocInner.from_dict(_item) for _item in obj["loc"]]
+                if obj.get("loc") is not None
+                else None,
                 "msg": obj.get("msg"),
                 "type": obj.get("type"),
             }
