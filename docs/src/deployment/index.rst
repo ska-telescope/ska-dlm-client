@@ -112,6 +112,7 @@ ConfigDB Watcher component
 - ``uid_expiration_days``: Number of days from now until this UID expires. 0 = expire immediately. Leave empty to use DB default: now() + 24:00.
 - ``oid_expiration_days``: Number of days from now until this OID expires. Leave empty to use DB default: 2099-12-31T23:59:59.
 - ``pvc.name``: Name of the volume to mount into the configdb-watcher pod.
+- ``pvc.sub_path``: Optional subpath within the volume.
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the configdb-watcher can do. Needs to be ``false`` to allow for data deletion.
 - ``sdp_config.etcd_url``: Full URL of the external ConfigDB (etcd) service, for example ``http://my-etcd.other-namespace:2379``. To deploy a local etcd instance instead, leave this empty and set ``sdp_config.local_etcd.enabled`` to ``true``.
 - ``sdp_config.local_etcd.enabled``: Optionally enable a local etcd instance (for testing purposes).
