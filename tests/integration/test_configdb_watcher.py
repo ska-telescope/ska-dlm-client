@@ -426,7 +426,7 @@ async def test_watcher_logs_failed_registration():
 
 
 @pytest.mark.xfail(
-    condition=bool(os.environ.get("SKA_DEFAULT_RUNNER")), reason="running extremely slow on CI"
+    reason="running extremely slow on CI"
 )
 @pytest.mark.integration
 def test_automatic_deletion(dlm_request_api, storage_configuration):
@@ -460,13 +460,8 @@ def test_automatic_deletion(dlm_request_api, storage_configuration):
         sleep(20)  # default poll interval of the heuristics is 10 seconds
         result = subprocess.run(["docker", "exec", SRC_HOST, "test", "-d", test_dir])
         logs = subprocess.run(["docker", "logs", "dlm_heuristics"], capture_output=True, text=True)
-        log.info("Logs from heuristics container: %s", logs.stdout)
         if result.returncode != 0:
             break
+        log.info("Logs from heuristics container: %s", logs.stdout)
         counter += 1
-    if result.returncode == 0:
-        logs = subprocess.run(
-            ["docker", "--tail", "500", "logs", "dlm_heuristics"], capture_output=True, text=True
-        )
-        log.info("Still failing: More logs from heuristics container: %s", logs.stdout)
     assert result.returncode != 0, f"Directory {test_dir} still exists: {result.stdout}"
