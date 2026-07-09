@@ -328,7 +328,6 @@ class RegistrationProcessor:
                 }
 
                 response = api_ingest.init_data_item(request_body=init_item)
-                # response = api_ingest.register_data_item(**register_kwargs)
                 logger.debug("register_data_item response: %s", response)
             except OpenApiException as err:
                 logger.error("OpenApiException caught during child item registration")

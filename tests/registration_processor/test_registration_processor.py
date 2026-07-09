@@ -97,7 +97,7 @@ def mock_config():
     config = mock.MagicMock(spec=WatcherConfig)
     config.directory_to_watch = "/test/watch/dir"
     config.source_storage = "test-storage"
-    config.storage_name = None  # TODO: fix source_storage/storage_name discrepency
+    config.storage_name = None  # TODO (DMAN-288): fix source_storage/storage_name discrepency
     config.rclone_access_check_on_register = False
     config.target_name = "test-destination-storage"
     config.target_phase = "SOLID"
