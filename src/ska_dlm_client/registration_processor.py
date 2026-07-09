@@ -227,21 +227,23 @@ class RegistrationProcessor:
         storage_configuration = getattr(self._config, "storage_configuration", None)
         if storage_configuration is None:
             logger.error("Storage configuration not found")
-            return (None, None)
+            return None
         with api_client.ApiClient(storage_configuration) as the_api_client:
             api_storage = storage_api.StorageApi(the_api_client)
             # Get the storage_id
             response = api_storage.query_storage(storage_name=storage_name)
             logger.info("query_storage response: %s", response)
             if not isinstance(response, list):
-                logger.error("Unexpected response from query_storage_storage")
-                return (None, None)
-            if len(response) == 1:
-                the_storage_id = response[0]["storage_id"]
-                the_storage_phase = response[0]["storage_phase"]
-                logger.info("storage_id already exists in DLM")
-                return (the_storage_id, the_storage_phase)
-        return (None, None)
+                logger.error("Unexpected response from query_storage")
+                return None
+            if len(response) != 1:
+                logger.error("Expected exactly one storage entry for %s, got %d", storage_name, len(response))
+                return None
+
+            the_storage_id = response[0]["storage_id"]
+            the_storage_phase = response[0]["storage_phase"]
+            logger.info("storage_id already exists in DLM")
+        return the_storage_id, the_storage_phase
 
     def _bookkeeping_after_registration(
         self, item: Item, dlm_registration_uuid: str, storage_name: str, migration_result: str
