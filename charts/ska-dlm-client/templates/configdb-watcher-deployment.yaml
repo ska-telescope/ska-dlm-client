@@ -137,6 +137,9 @@ spec:
             {{- if $.Values.configdb_watcher.pvc.read_only }}
             readOnly: true
             {{- end }}
+            {{- if $.Values.configdb_watcher.pvc.sub_path }}
+            subPath: {{ $.Values.configdb_watcher.pvc.sub_path }}
+            {{- end }}
 
       volumes:
         - name: data-product-storage
