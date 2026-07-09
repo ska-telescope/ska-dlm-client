@@ -1,5 +1,4 @@
 # flake8: ignore=DAR101
-# pylint: disable=no-name-in-module
 """Shared helper functions for the ConfigDB dependency lifecycle."""
 
 from __future__ import annotations

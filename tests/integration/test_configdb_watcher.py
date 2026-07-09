@@ -1,5 +1,4 @@
 # pylint: disable=subprocess-run-check
-# pylint: disable=no-name-in-module
 """SDP Ingest (ConfigDB Watcher) integration tests."""
 
 import logging

@@ -1,5 +1,4 @@
 # pylint: disable=invalid-name
-# pylint: disable=no-name-in-module
 """Main entry-point for Configuration Database watcher."""
 
 import argparse
