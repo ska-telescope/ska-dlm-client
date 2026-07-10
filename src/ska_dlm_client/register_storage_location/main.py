@@ -1,4 +1,5 @@
 # pylint: disable=broad-exception-caught
+# pylint: disable=invalid-name
 """Initialize a location and a storage."""
 
 import argparse
@@ -26,7 +27,7 @@ LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY", LocationCountry.AU.value)
 LOCATION_CITY = os.getenv("LOCATION_CITY", "Perth")
 LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")
 TARGET_ROOT = os.getenv("TARGET_ROOT", "/dlm-archive")
-TARGET_PHASE = os.getenv("TARGET_PHASE", "SOLID")
+TGT_STORAGE_PHASE = os.getenv("TARGET_PHASE", "SOLID")
 RCLONE_CONFIG_TARGET = {
     "name": "dlm-archive",
     "type": "alias",
@@ -231,7 +232,7 @@ def setup_testing(api_configuration: Configuration):
     storage_id = get_or_init_storage(
         storage_name=RCLONE_CONFIG_TARGET["name"],
         storage_url=storage_url,
-        storage_phase=TARGET_PHASE,
+        storage_phase=TGT_STORAGE_PHASE,
         api_configuration=api_configuration,
         storage_root_directory=TARGET_ROOT,
         the_location_id=location_id,
@@ -282,7 +283,8 @@ def main():
 
     The CLI is now used also to start the client in operations.
     """
-    ska_ser_logging.configure_logging(logging.INFO)
+    LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
+    ska_ser_logging.configure_logging(LOGLEVEL)
     parser = create_parser()
     args = parser.parse_args()
     api_configuration = Configuration(host=args.storage_url)

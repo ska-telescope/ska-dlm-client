@@ -79,7 +79,7 @@ class MigrationApi:
     ) -> Dict[str, object]:
         """Copy Data Item
 
-        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location
+        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) add record to the migration table
 
         Parameters
         ----------
@@ -197,7 +197,7 @@ class MigrationApi:
     ) -> ApiResponse[Dict[str, object]]:
         """Copy Data Item
 
-        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location
+        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) add record to the migration table
 
         Parameters
         ----------
@@ -315,7 +315,7 @@ class MigrationApi:
     ) -> RESTResponseType:
         """Copy Data Item
 
-        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location
+        Copy a data_item from source to destination.  Steps (1) get the current storage_id(s) of the item (2) convert one (first) storage_id to a configured rclone backend (3) initialise the new item with the same OID on the new storage (4) use the rclone copy command to copy it to the new location (5) add record to the migration table
 
         Parameters
         ----------
@@ -398,7 +398,6 @@ class MigrationApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -413,27 +412,21 @@ class MigrationApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-
             _query_params.append(("item_name", item_name))
 
         if oid is not None:
-
             _query_params.append(("oid", oid))
 
         if uid is not None:
-
             _query_params.append(("uid", uid))
 
         if destination_name is not None:
-
             _query_params.append(("destination_name", destination_name))
 
         if destination_id is not None:
-
             _query_params.append(("destination_id", destination_id))
 
         if path is not None:
-
             _query_params.append(("path", path))
 
         # process the header parameters
@@ -669,7 +662,6 @@ class MigrationApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -684,7 +676,6 @@ class MigrationApi:
         # process the path parameters
         # process the query parameters
         if migration_id is not None:
-
             _query_params.append(("migration_id", migration_id))
 
         # process the header parameters
@@ -1008,7 +999,6 @@ class MigrationApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -1023,15 +1013,12 @@ class MigrationApi:
         # process the path parameters
         # process the query parameters
         if start_date is not None:
-
             _query_params.append(("start_date", start_date))
 
         if end_date is not None:
-
             _query_params.append(("end_date", end_date))
 
         if storage_id is not None:
-
             _query_params.append(("storage_id", storage_id))
 
         # process the header parameters

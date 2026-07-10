@@ -1,3 +1,4 @@
+# pylint: disable=subprocess-run-check
 """SDP Ingest (ConfigDB Watcher) integration tests."""
 
 import logging
@@ -5,6 +6,7 @@ import os
 import subprocess
 import time
 import urllib.parse
+from datetime import datetime, timezone
 from pathlib import Path
 from time import sleep
 
@@ -43,17 +45,15 @@ PVC_SUBPATH = f"product/{EB_ID}/ska-sdp/{PB_ID}"
 PVC_SUBPATH_DIRECT = f"product/{EB_ID}/ska-sdp/{PB_ID}/scan90-99"
 DATA_PATH_LOCAL = f"{dir_path}/../registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
-INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
-MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
 ETCD_URL = os.getenv("ETCD_URL", "http://etcd:2379")
 
 LOCATION_NAME = LocationName.LOCAL_DEV.value
 LOCATION_TYPE = LocationType.LOCAL_DEV.value
 LOCATION_COUNTRY = LocationCountry.AU.value
-
 LOCATION_CITY = "Marksville"
 LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
+
 STORAGE = {
     "TGT": {
         "STORAGE_NAME": "dlm-archive",
@@ -63,7 +63,7 @@ STORAGE = {
         "STORAGE_PHASE": "SOLID",
         "STORAGE_CONFIG": {
             "name": "dlm-archive",
-            "type": "alias",  # type 'alias' or 'local'?
+            "type": "alias",
             "parameters": {"remote": "/"},
         },
     },
@@ -153,12 +153,9 @@ def _create_completed_flows(subpath: str, flow_name_arg: str, persist_flow_name_
         ops.create({"status": "COMPLETED"})
 
 
-def trigger_completed_flows(flow_name, persist_flow_name, subpath) -> None:
+def trigger_completed_flows(flow_name: str, persist_flow_name: str, subpath: str) -> None:
     """Ensure PB + Flow exist and mark Flow as COMPLETED."""
     _ensure_processing_block()
-    # IMPORTANT: this must match what the watcher expects:
-    #   - same `storage_root_directory`
-    #   - points at a directory that actually contains the .ms + metadata
     _create_completed_flows(
         subpath=subpath,
         persist_flow_name_arg=persist_flow_name,
@@ -166,8 +163,11 @@ def trigger_completed_flows(flow_name, persist_flow_name, subpath) -> None:
     )
 
 
-def _get_id(item, key: str):
-    return item[key] if isinstance(item, dict) else getattr(item, key)
+def _get_id(item, key: str) -> str:
+    """Return a string ID from a dict or generated API model."""
+    value = item[key] if isinstance(item, dict) else getattr(item, key)
+    assert isinstance(value, str)
+    return value
 
 
 def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
@@ -221,7 +221,7 @@ def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
 
 
 def _init_storage_if_needed(
-    api_storage: storage_api.StorageApi, location_id: str, storage: dict = None
+    api_storage: storage_api.StorageApi, location_id: str, storage: dict
 ) -> str:
     resp = api_storage.query_storage(storage_name=storage["STORAGE_NAME"])
     assert isinstance(resp, list)
@@ -266,6 +266,7 @@ def test_storage_initialisation(storage_configuration: Configuration):
         storage_log = _get_container_log("dlm_storage")
         log.info("Log from storage container: %s", storage_log)
         location_id = _init_location_if_needed(api_storage)
+
         # --- ensure storage exists ---
         storage_id = _init_storage_if_needed(api_storage, location_id, storage=STORAGE["TGT"])
 
@@ -284,20 +285,6 @@ def test_storage_initialisation(storage_configuration: Configuration):
         assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
 
 
-def _cleanup_destination_storage() -> None:
-    """Remove migrated test data from the rclone destination."""
-    destination_file = f"/dlm-archive/dlm-archive/product/{EB_ID}"
-    log.info("Cleaning up %s, destination_file")
-    subprocess.run(
-        (f"docker exec dlm_rclone sh -lc 'rm -rf {destination_file}'"),
-        shell=True,
-        check=False,
-    )
-
-
-_cleanup_destination_storage()  # remove – DMAN-200
-
-
 @pytest.mark.integration
 def test_data_was_copied_correctly():
     """Verify that the test data is visible inside the watcher container."""
@@ -313,7 +300,7 @@ def test_data_was_copied_correctly():
 @pytest.mark.integration
 async def test_configdb_watcher(request_configuration: Configuration):
     """Flow points to subfolder scan90-99, containing 10 MS files."""
-    host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    host = STORAGE_URL
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
@@ -356,7 +343,7 @@ async def test_configdb_watcher_higher_dir(request_configuration: Configuration)
 
     Watcher must search one level deeper to find all ms files.
     """
-    host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    host = STORAGE_URL
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
@@ -417,7 +404,7 @@ async def test_configdb_watcher_higher_dir(request_configuration: Configuration)
 @pytest.mark.integration
 async def test_watcher_logs_failed_registration():
     """Flow points to a data item that is already registered on the storage."""
-    host = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    host = STORAGE_URL
     api_configuration = Configuration(host=host)
     setup_testing(api_configuration)
     sleep(2)  # TODO: DMAN-193
@@ -435,3 +422,43 @@ async def test_watcher_logs_failed_registration():
         sleep(1)
 
     assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"
+
+
+@pytest.mark.xfail(reason="running extremely slow on CI")
+@pytest.mark.integration
+def test_automatic_deletion(dlm_request_api, storage_configuration):
+    """Expire all data_items and let the heuristics delete the payloads."""
+    now = datetime.now(timezone.utc).isoformat()
+
+    with api_client.ApiClient(storage_configuration) as the_api_client:
+        api_storage = storage_api.StorageApi(the_api_client)
+        source_storage = api_storage.query_storage(storage_name="configdb-watcher")
+
+    assert source_storage
+    source_storage_id = _get_id(source_storage[0], "storage_id")
+
+    items = dlm_request_api.query_data_item(
+        storage_id=source_storage_id,
+    )
+    log.info("Found %d data items on source storage %s.", len(items), source_storage)
+    log.info("Setting uid expirations to now...")
+
+    # Update uid expirations of source items to now.
+    for item in items:
+        dlm_request_api.set_uid_expiration(uid=item["uid"], expiration=now)
+
+    # Potential optimisation: expose a server-side bulk update endpoint via @rest.patch to
+    # avoid iterative HTTP round-trips to a single DB update, from the client-side.
+
+    test_dir = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}"
+    counter = 0
+    while counter < 3:
+        log.info("Sleep 20s to give heuristics some time to do its thing.")
+        sleep(20)  # default poll interval of the heuristics is 10 seconds
+        result = subprocess.run(["docker", "exec", SRC_HOST, "test", "-d", test_dir])
+        logs = subprocess.run(["docker", "logs", "dlm_heuristics"], capture_output=True, text=True)
+        if result.returncode != 0:
+            break
+        log.info("Logs from heuristics container: %s", logs.stdout)
+        counter += 1
+    assert result.returncode != 0, f"Directory {test_dir} still exists: {result.stdout}"

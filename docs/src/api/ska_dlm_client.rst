@@ -6,11 +6,6 @@ Top-level modules
     :members:
     :special-members:
 
-.. automodule:: ska_dlm_client.utils
-    :ignore-module-all:
-    :members:
-    :special-members:
-
 .. automodule:: ska_dlm_client.common_types
     :ignore-module-all:
     :members:

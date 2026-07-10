@@ -1,12 +1,13 @@
 #!/bin/bash
 watcher_mode=${MODE:-$1}
-mkdir -p /dlm/watch_dir
-chown -R ska-dlm:ska-dlm /dlm/watch_dir
-chmod g+w /dlm/watch_dir
 /etc/init.d/ssh start
 
 case "$watcher_mode" in
     "directory-watcher")
+        mkdir -p /dlm/watch_dir
+        chown -R ska-dlm:ska-dlm /dlm/watch_dir
+        chmod g+w /dlm/watch_dir
+
         CMD="dlm-directory-watcher \
           --source-name ${SOURCE_NAME:-dir-watcher} \
           --directory-to-watch ${DIRECTORY_TO_WATCH:-/dlm/watch_dir} \

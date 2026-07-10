@@ -30,12 +30,16 @@ class ClientConfig:
     """
 
     source_name: str = ""
+    directory_to_watch: str = "/dlm/watch_dir"
     target_name: str = "dlm-archive"
     ingest_url: str = "http://dlm_ingest:8001"
+    request_url: str = "http://dlm_request:8002"
     storage_url: str = "http://dlm_storage:8003"
     migration_url: str = "http://dlm_migration:8004"
     reload_status_file: bool = True
     ingest_configuration: Configuration = field(init=False)
+    request_configuration: Configuration = field(init=False)
+    storage_configuration: Configuration = field(init=False)
     migration_configuration: Configuration = field(init=False)
     include_existing: bool = False
     rclone_access_check_on_register: bool = False

@@ -68,7 +68,6 @@ class TestDirectoryWatcher:
 
     SOURCE_NAME = "dir-watcher"
     INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
-    ROOT_DIRECTORY = "/dlm"
 
     add_path_successful = False
 
@@ -173,6 +172,10 @@ class MockRegistrationProcessor(RegistrationProcessor):
         super().__init__(config)
         self.absolute_path = ""
         self.path_rel_to_watch_dir = ""
+
+    def _get_storage_info_from_name(self, storage_name: str) -> tuple[str, str]:
+        """Return fixed storage info without calling the real helper."""
+        return ("test-target", "SOLID")
 
     def add_path(self, absolute_path: str, path_rel_to_watch_dir: str):
         """Perform testing on the given paths."""

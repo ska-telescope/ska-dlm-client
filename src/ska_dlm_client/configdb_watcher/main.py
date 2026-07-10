@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 """Main entry-point for Configuration Database watcher."""
 
 import argparse
@@ -262,7 +263,8 @@ async def sdp_to_dlm_ingest_and_migrate(config: SdpWatcherConfig) -> None:
 
 def main() -> None:
     """Control the main execution of the program."""
-    ska_ser_logging.configure_logging(logging.INFO)
+    LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
+    ska_ser_logging.configure_logging(LOGLEVEL)
 
     cmd_line_parameters = WatcherArgs()
     args = cmd_line_parameters.parser.parse_args()

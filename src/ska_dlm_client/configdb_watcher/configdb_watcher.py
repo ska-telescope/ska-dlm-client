@@ -72,7 +72,6 @@ class DataProductStatusWatcher(
         """Return data-product Flow.Keys referenced by data-product-persist flows."""
         keys = []
         for _persist_flow_key, persist_flow in txn.flow.query_values(kind="data-product-persist"):
-
             for source in persist_flow.sources:
                 if source.function != "ska-dlm-client:ingest":
                     logger.debug(

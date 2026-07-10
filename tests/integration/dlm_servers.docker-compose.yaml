@@ -8,6 +8,8 @@ services:
     image: ${SERVER_IMAGE}
     user: root
     container_name: dlm_migration
+    environment:
+      - LOGLEVEL=${LOGLEVEL:-INFO}
     entrypoint: uvicorn ska_dlm.dlm_migration.dlm_migration_requests:rest --host 0.0.0.0 --port 8004
     ports:
       - 8004:8004
@@ -30,7 +32,8 @@ services:
     container_name: dlm_storage
     user: root
     environment:
-      SSH_PUBLIC_KEY_PATH: "/dlm/.ssh/id_rsa.pub"
+      - SSH_PUBLIC_KEY_PATH=/dlm/.ssh/id_rsa.pub
+      - LOGLEVEL=${LOGLEVEL:-INFO}
     entrypoint: uvicorn ska_dlm.dlm_storage.dlm_storage_requests:rest --host 0.0.0.0 --port 8003
     ports:
       - 8003:8003
@@ -59,6 +62,8 @@ services:
     container_name: dlm_request
     user: root
     platform: linux/amd64
+    environment:
+      - LOGLEVEL=${LOGLEVEL:-INFO}
     entrypoint: uvicorn ska_dlm.dlm_request.dlm_request_requests:rest --host 0.0.0.0 --port 8002
     ports:
       - 8002:8002
@@ -80,6 +85,8 @@ services:
     image: ${SERVER_IMAGE}
     container_name: dlm_ingest
     user: root
+    environment:
+      - LOGLEVEL=${LOGLEVEL:-INFO}
     entrypoint: uvicorn ska_dlm.dlm_ingest.dlm_ingest_requests:rest --host 0.0.0.0 --port 8001
     ports:
       - 8001:8001
@@ -112,5 +119,26 @@ services:
     depends_on:
       dlm_db:
         condition: service_healthy
+    networks:
+      - dlm_network
+  dlm_heuristics:
+    platform: linux/amd64
+    image: ${SERVER_IMAGE}
+    container_name: dlm_heuristics
+    command: ["ska-dlm-heuristics"]
+    user: root
+    environment:
+      - LOGLEVEL=${LOGLEVEL:-INFO}
+      - DLM_HEURISTIC_DATABASE_URL=${DLM_HEURISTIC_DATABASE_URL:-postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm}
+      - DLM_HEURISTIC_POLL_INTERVAL=${DLM_HEURISTIC_POLL_INTERVAL:-10}
+    depends_on:
+      dlm_db:
+        condition: service_healthy
+      dlm_migrations:
+        condition: service_completed_successfully
+      dlm_postgrest:
+        condition: service_started
+      dlm_rclone:
+        condition: service_started
     networks:
       - dlm_network

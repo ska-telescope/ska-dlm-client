@@ -1,9 +1,11 @@
+# pylint: disable=invalid-name
 """Application to watch a directory for changes and send to DLM."""
 
 import argparse
 import asyncio
 import functools
 import logging
+import os
 import signal
 
 import ska_ser_logging
@@ -41,6 +43,7 @@ def process_args(args: argparse.Namespace) -> WatcherConfig:
         target_name=args.target_name,
         storage_url=args.storage_url,
         migration_url=args.migration_url,
+        request_url=args.request_url,
         ingest_url=args.ingest_url,
         reload_status_file=args.reload_status_file,
         rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,
@@ -113,7 +116,8 @@ def main():
     Creates a new asyncio event loop and runs the amain coroutine in it.
     This function is the entry point when the module is executed directly.
     """
-    ska_ser_logging.configure_logging(logging.INFO)
+    LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
+    ska_ser_logging.configure_logging(LOGLEVEL)
     asyncio.run(amain())
 
 

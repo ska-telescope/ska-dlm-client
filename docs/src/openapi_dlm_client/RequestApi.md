@@ -389,7 +389,7 @@ No authorization required
 
 Query Item Storage
 
-Query for the storage_ids of all backends holding a copy of a data_item.
+Query for the storage info of all backends holding a copy of a data_item.
 
 Either an item_name or a OID have to be provided.
 

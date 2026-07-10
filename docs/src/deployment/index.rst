@@ -38,6 +38,14 @@ Next, modify the ``values.yaml`` file as required. The sections below describe t
 
 .. Mention enums somewhere
 
+Global configuration
+--------------------
+
+- ``location_name``: Name of the DLM location in the ``location`` table.
+  Storage resources created by the chart will be registered against this location. For example, ``SKA-DEV``.
+- ``storageClass``: Kubernetes StorageClass used when provisioning Persistent
+  Volume Claims (PVCs) for chart components. For example, ``nfss1``.
+
 
 Shared ska-dlm-client values
 ----------------------------

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 SOURCE_DIR="data"
-TARGET_DIR="tests/registration_processor/product_dir"
+TARGET_DIR="tests/registration_processor/product_dir/product/eb-00000000/ska-sdp"
 mkdir -p "$TARGET_DIR"
 
 for filepath in "$SOURCE_DIR"/*.tar.*; do

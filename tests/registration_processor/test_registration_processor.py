@@ -97,9 +97,10 @@ def mock_config():
     config = mock.MagicMock(spec=WatcherConfig)
     config.directory_to_watch = "/test/watch/dir"
     config.source_storage = "test-storage"
-    config.storage_name = None  # TODO: fix source_storage/storage_name discrepency
+    config.storage_name = None  # TODO (DMAN-288): fix source_storage/storage_name discrepency
     config.rclone_access_check_on_register = False
     config.target_name = "test-destination-storage"
+    config.target_phase = "SOLID"
     config.directory_watcher_entries = mock.MagicMock(spec=DirectoryWatcherEntries)
     config.ingest_url = "http://test-ingest:8000"
     config.storage_url = "http://test-storage:8000"
@@ -108,6 +109,7 @@ def mock_config():
 
     # Use real Configuration instances instead of MagicMocks
     config.ingest_configuration = Configuration(host="http://test-ingest:8000")
+    config.storage_configuration = Configuration(host="http://test-storage:8000")
     config.migration_configuration = Configuration(host="http://test-migration:8000")
 
     return config
@@ -154,20 +156,20 @@ def mock_data_product_metadata():
 
 def test_registration_processor_init(mock_config):  # pylint: disable=redefined-outer-name
     """Test the RegistrationProcessor initialization."""
-    processor = RegistrationProcessor(mock_config)
+    processor = MockRegistrationProcessor(mock_config)
     assert processor.get_config() == mock_config
 
 
 def test_registration_processor_set_config(mock_config):  # pylint: disable=redefined-outer-name
     """Test the RegistrationProcessor set_config method."""
-    processor = RegistrationProcessor(mock.MagicMock(spec=WatcherConfig))
+    processor = MockRegistrationProcessor(mock.MagicMock(spec=WatcherConfig))
     processor.set_config(mock_config)
     assert processor.get_config() == mock_config
 
 
 def test_registration_processor_follow_sym_link():
     """Test the RegistrationProcessor _follow_sym_link method."""
-    processor = RegistrationProcessor(mock.MagicMock(spec=WatcherConfig))
+    processor = MockRegistrationProcessor(mock.MagicMock(spec=WatcherConfig))
 
     # Test with a non-symlink path
     path = mock.MagicMock()
@@ -188,9 +190,9 @@ def test_registration_processor_copy_data_item_to_new_storage(
     mock_config, mock_migration_api
 ):  # pylint: disable=protected-access, redefined-outer-name
     """Test the RegistrationProcessor _copy_data_item_to_new_storage method."""
-    processor = RegistrationProcessor(mock_config)
+    processor = MockRegistrationProcessor(mock_config)
 
-    # Test with migration enabled
+    # Test with migration enabled using mocked storage info
     result = processor._initiate_migration("test-uuid")
     assert result == "test-migration-uuid"
 
@@ -213,13 +215,14 @@ def test_registration_processor_register_single_item(
     mock_config.uid_expiration_days = 7
     mock_config.oid_expiration_days = 1
 
-    processor = RegistrationProcessor(mock_config)
+    processor = MockRegistrationProcessor(mock_config)
 
     # Create a test item
     item = Item(
         path_rel_to_watch_dir="test-item",
         item_type=ItemType.FILE,
         metadata=mock_data_product_metadata.return_value,
+        parent_uid=None,
     )
 
     # Test with registration enabled
@@ -253,10 +256,13 @@ def test_registration_processor_register_single_item(
 
 
 def test_registration_processor_register_container_items(
-    mock_config, mock_ingest_api, mock_migration_api, mock_data_product_metadata
+    mock_config,
+    mock_ingest_api,
+    mock_migration_api,
+    mock_data_product_metadata,
 ):  # pylint: disable=protected-access, redefined-outer-name, unused-argument
     """Test the RegistrationProcessor _register_container_items method."""
-    processor = RegistrationProcessor(mock_config)
+    processor = MockRegistrationProcessor(mock_config)
 
     # Create a parent item
     parent_item = Item(
@@ -272,6 +278,7 @@ def test_registration_processor_register_container_items(
         item_type=ItemType.FILE,
         metadata=None,
         parent=parent_item,
+        parent_uid="test-uuid",
     )
 
     child_item2 = Item(
@@ -279,16 +286,17 @@ def test_registration_processor_register_container_items(
         item_type=ItemType.FILE,
         metadata=None,
         parent=parent_item,
+        parent_uid="test-uuid",
     )
 
     # Test with registration enabled
-    processor._register_container_items([child_item1, child_item2])
-    assert mock_ingest_api.return_value.register_data_item.call_count == 3
+    processor._register_container_items([child_item1, child_item2], parent_uid=parent_item.uuid)
+    assert mock_ingest_api.return_value.register_data_item.call_count == 2
 
     # Test with API exception
     mock_ingest_api.reset_mock()
     mock_ingest_api.return_value.register_data_item.side_effect = OpenApiException("Test error")
-    processor._register_container_items([child_item1, child_item2])
+    processor._register_container_items([child_item1, child_item2], parent_uid=parent_item.uuid)
     assert mock_ingest_api.return_value.register_data_item.call_count == 2
 
 
@@ -297,7 +305,7 @@ def test_registration_processor_generate_dir_item_list(
     mock_generate, mock_config, mock_data_product_metadata
 ):  # pylint: disable=protected-access, redefined-outer-name
     """Test the RegistrationProcessor _generate_dir_item_list method."""
-    processor = RegistrationProcessor(mock_config)
+    processor = MockRegistrationProcessor(mock_config)
 
     # Mock the _register_single_item and _register_container_items methods
     processor._register_single_item = mock.MagicMock(return_value="test-uuid")
@@ -308,6 +316,7 @@ def test_registration_processor_generate_dir_item_list(
         path_rel_to_watch_dir="file-item",
         item_type=ItemType.FILE,
         metadata=mock_data_product_metadata.return_value,
+        parent_uid=None,
     )
     mock_generate.return_value = [file_item]
 
@@ -325,6 +334,7 @@ def test_registration_processor_generate_dir_item_list(
         path_rel_to_watch_dir="container-item",
         item_type=ItemType.CONTAINER,
         metadata=mock_data_product_metadata.return_value,
+        parent_uid=None,
     )
     mock_generate.return_value = [container_item]
 
@@ -340,18 +350,23 @@ def test_registration_processor_generate_dir_item_list(
         path_rel_to_watch_dir="container-item",
         item_type=ItemType.CONTAINER,
         metadata=mock_data_product_metadata.return_value,
+        parent_uid=None,
     )
+    container_item.uuid = "test-uuid"
+
     file_item1 = Item(
         path_rel_to_watch_dir="file-item1",
         item_type=ItemType.FILE,
         metadata=None,
         parent=container_item,
+        parent_uid=container_item.uuid,
     )
     file_item2 = Item(
         path_rel_to_watch_dir="file-item2",
         item_type=ItemType.FILE,
         metadata=None,
         parent=container_item,
+        parent_uid=container_item.uuid,
     )
     mock_generate.return_value = [container_item, file_item1, file_item2]
 
@@ -360,7 +375,9 @@ def test_registration_processor_generate_dir_item_list(
         processor.add_path("/test/abs/path", "rel/path")
 
     processor._register_single_item.assert_called_once_with(container_item)
-    processor._register_container_items.assert_called_once_with(item_list=[file_item1, file_item2])
+    processor._register_container_items.assert_called_once_with(
+        item_list=[file_item1, file_item2], parent_uid=container_item.uuid
+    )
 
     # Test with no items
     mock_generate.reset_mock()
@@ -379,7 +396,7 @@ def test_registration_processor_register_data_products_from_watch_directory(
     mock_join, mock_listdir, mock_config
 ):  # pylint: disable=redefined-outer-name
     """Test the RegistrationProcessor register_data_products_from_watch_directory method."""
-    processor = RegistrationProcessor(mock_config)
+    processor = MockRegistrationProcessor(mock_config)
 
     # Mock the add_path method
     processor.add_path = mock.MagicMock()
@@ -407,3 +424,20 @@ def test_registration_processor_register_data_products_from_watch_directory(
         absolute_path=f"{mock_config.directory_to_watch}/item3",
         path_rel_to_watch_dir="item3",
     )
+
+
+class MockRegistrationProcessor(RegistrationProcessor):
+    """A class to use for test of directory watcher."""
+
+    absolute_path: str
+    path_rel_to_watch_dir: str
+
+    def __init__(self, config):
+        """Initialize with default values."""
+        super().__init__(config)
+        self.absolute_path = ""
+        self.path_rel_to_watch_dir = ""
+
+    def _get_storage_info_from_name(self, storage_name: str) -> tuple[str, str]:
+        """Return fixed storage info without calling the real helper."""
+        return ("test-target", "SOLID")

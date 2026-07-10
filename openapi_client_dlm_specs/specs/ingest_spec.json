@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "1.3.2"
+        "version": "2.1.0"
     },
     "paths": {
         "/ingest/init_data_item": {
@@ -78,7 +78,6 @@
                                         "type": "null"
                                     }
                                 ],
-                                "description": "data item table values.",
                                 "title": "Json Data"
                             }
                         }
@@ -150,16 +149,59 @@
                         }
                     },
                     {
+                        "name": "target_phase",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/PhaseType",
+                            "default": "SOLID"
+                        }
+                    },
+                    {
+                        "name": "uid_expiration",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "format": "date-time"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Uid Expiration"
+                        }
+                    },
+                    {
+                        "name": "oid_expiration",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "format": "date-time"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Oid Expiration"
+                        }
+                    },
+                    {
                         "name": "storage_name",
                         "in": "query",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "description": "the name of the configured storage volume (name or ID required)",
+                            "description": "the name of the configured storage volume (name or ID required).",
                             "default": "",
                             "title": "Storage Name"
                         },
-                        "description": "the name of the configured storage volume (name or ID required)"
+                        "description": "the name of the configured storage volume (name or ID required)."
                     },
                     {
                         "name": "storage_id",
@@ -186,10 +228,10 @@
                                     "type": "null"
                                 }
                             ],
-                            "description": "uuid of parent item",
+                            "description": "uuid of parent item.",
                             "title": "Parents"
                         },
-                        "description": "uuid of parent item"
+                        "description": "uuid of parent item."
                     },
                     {
                         "name": "do_storage_access_check",
@@ -197,11 +239,11 @@
                         "required": false,
                         "schema": {
                             "type": "boolean",
-                            "description": "perform check_storage_access() against provided storage and uri",
+                            "description": "perform check_storage_access() against provided storage and uri.",
                             "default": true,
                             "title": "Do Storage Access Check"
                         },
-                        "description": "perform check_storage_access() against provided storage and uri"
+                        "description": "perform check_storage_access() against provided storage and uri."
                     },
                     {
                         "name": "authorization",
@@ -216,10 +258,10 @@
                                     "type": "null"
                                 }
                             ],
-                            "description": "Validated Bearer token with UserInfo",
+                            "description": "Validated Bearer token with UserInfo.",
                             "title": "Authorization"
                         },
-                        "description": "Validated Bearer token with UserInfo"
+                        "description": "Validated Bearer token with UserInfo."
                     }
                 ],
                 "requestBody": {
@@ -235,7 +277,6 @@
                                         "type": "null"
                                     }
                                 ],
-                                "description": "metadata provided by the client",
                                 "title": "Metadata"
                             }
                         }
@@ -295,10 +336,10 @@
             "PhaseType": {
                 "type": "string",
                 "enum": [
+                    "PLASMA",
                     "GAS",
                     "LIQUID",
-                    "SOLID",
-                    "PLASMA"
+                    "SOLID"
                 ],
                 "title": "PhaseType",
                 "description": "Phase type / resilience level."
