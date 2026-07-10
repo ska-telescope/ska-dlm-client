@@ -237,7 +237,11 @@ class RegistrationProcessor:
                 logger.error("Unexpected response from query_storage")
                 return None
             if len(response) != 1:
-                logger.error("Expected exactly one storage entry for %s, got %d", storage_name, len(response))
+                logger.error(
+                    "Expected exactly one storage entry for %s, got %d",
+                    storage_name,
+                    len(response),
+                )
                 return None
 
             the_storage_id = response[0]["storage_id"]

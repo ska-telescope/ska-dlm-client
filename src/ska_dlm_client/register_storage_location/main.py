@@ -27,7 +27,7 @@ LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY", LocationCountry.AU.value)
 LOCATION_CITY = os.getenv("LOCATION_CITY", "Perth")
 LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")
 TARGET_ROOT = os.getenv("TARGET_ROOT", "/dlm-archive")
-TGT_STORAGE_PHASE = os.getenv("TARGET_PHASE", "SOLID")  # "target phase" is ambigious.
+TGT_STORAGE_PHASE = os.getenv("TARGET_PHASE", "SOLID")
 RCLONE_CONFIG_TARGET = {
     "name": "dlm-archive",
     "type": "alias",
