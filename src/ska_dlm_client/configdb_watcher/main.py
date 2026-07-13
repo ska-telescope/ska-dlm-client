@@ -18,7 +18,6 @@ from ska_dlm_client.configdb_watcher.config import SdpWatcherConfig, WatcherArgs
 from ska_dlm_client.configdb_watcher.configdb_utils import (
     create_sdp_migration_dependency,
     get_pvc_subpath,
-    start_rabbitmq_consumer,
     update_dependency_state,
 )
 from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
