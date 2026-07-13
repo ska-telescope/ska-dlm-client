@@ -33,7 +33,6 @@ from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.api_client import ApiException
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import request_api, storage_api
-from ska_dlm_client.register_storage_location.main import setup_testing
 
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))

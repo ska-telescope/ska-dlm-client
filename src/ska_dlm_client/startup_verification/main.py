@@ -90,8 +90,8 @@ class StartupVerification:  # pylint: disable=too-few-public-methods
 
 def main():
     """Run main in its own function."""
-    loglevel = os.environ.get("LOGLEVEL", "INFO").upper()
-    ska_ser_logging.configure_logging(loglevel)
+    LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
+    ska_ser_logging.configure_logging(LOGLEVEL)
     verification_passed: bool = False
     try:
         parser = argparse.ArgumentParser(prog="dlm_startup_verification")
