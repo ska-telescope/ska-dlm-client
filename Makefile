@@ -57,12 +57,8 @@ docker-compose-down: ## Shut down test services in docker previously started wit
 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml down --volumes --remove-orphans
 	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml down --volumes
 
-oci-build-dlm_directory_watcher:
-	make oci-build OCI_IMAGE=ska-dlm-directory_watcher \
-	OCI_IMAGE_FILE_PATH=Dockerfile
-
-oci-build-dlm_configdb_watcher:
-	make oci-build OCI_IMAGE=ska-dlm-configdb_watcher \
+oci-build-dlm-client:
+	make oci-build OCI_IMAGE=ska-dlm-client \
 	OCI_IMAGE_FILE_PATH=Dockerfile
 
 openapi-code-from-local-dlm: ## Use the connection to DLM services to retrieve and generate OpenAPI code

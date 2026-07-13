@@ -6,7 +6,7 @@ include:
 services:
   dlm_setup_storage_location:
     platform: linux/amd64
-    image: dlm_setup_storage_location
+    image: dlm_client
     container_name: dlm_setup_storage_location
     build:
       context: ..
@@ -22,7 +22,7 @@ services:
 
   dlm_configdb_watcher:
     platform: linux/amd64
-    image: dlm_configdb_watcher
+    image: dlm_client
     container_name: dlm_configdb_watcher
     hostname: ska-dlm-configdb-watcher
     env_file:
@@ -45,7 +45,7 @@ services:
 
   dlm_directory_watcher:
     platform: linux/amd64
-    image: dlm_directory_watcher
+    image: dlm_client
     container_name: dlm_directory_watcher
     hostname: ska-dlm-directory-watcher
     env_file:
