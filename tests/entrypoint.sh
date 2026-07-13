@@ -33,7 +33,9 @@ case "$watcher_mode" in
           --etcd-url ${ETCD_URL:-http://etcd:2379} \
           --watcher-hostname ${WATCHER_HOSTNAME:-$(hostname)} \
           ${UID_EXPIRATION_DAYS:+--uid-expiration-days ${UID_EXPIRATION_DAYS}} \
-          ${OID_EXPIRATION_DAYS:+--oid-expiration-days ${OID_EXPIRATION_DAYS}}"
+          ${OID_EXPIRATION_DAYS:+--oid-expiration-days ${OID_EXPIRATION_DAYS}} \
+          --queue-connection-string ${QUEUE_CONNECTION_STRING} \
+          --queue-exchange-name ${QUEUE_EXCHANGE_NAME} "
         ;;
     *)
         echo "Usage: entrypoint.sh <directory-watcher|configdb-watcher>"

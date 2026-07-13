@@ -12,8 +12,8 @@ PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
 
 # The DLM server image to use in integration tests:
 # DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:2.2.0  #future: use this when we have a new release of the DLM server image
-# DLM_SERVER_IMAGE =ska-data-lifecycle:2.1.0-dirty  # This works for local testing of the DLM server image built using make oci-image-build.
-DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:8edebae2
+# DLM_SERVER_IMAGE = ska-data-lifecycle:2.1.0-dirty  # This works for local testing of the DLM server image built using make oci-image-build.
+DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:2.1.0-dev.c579aecb3
 
 python-test: extract-test-data python-pre-test python-do-test python-post-test
 

@@ -49,6 +49,7 @@ overrides = "^7.7.0"
 pyjwt = "^2.12.1"
 msal = "1.31.0"
 python-keycloak = "4.2.0"
+aio-pika = "^9.6.2"
 
 [tool.poetry.group.test.dependencies]
 black = "^24.8.0"
