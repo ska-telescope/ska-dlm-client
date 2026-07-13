@@ -5,7 +5,7 @@ include:
 services:
   dlm_migration:
     platform: linux/amd64
-    image: ${SERVER_IMAGE}
+    image: ${SERVER_IMAGE:-ska-data-lifecycle:2.1.0-dirty}
     user: root
     container_name: dlm_migration
     environment:
@@ -28,7 +28,7 @@ services:
 
   dlm_storage:
     platform: linux/amd64
-    image: ${SERVER_IMAGE}
+    image: ${SERVER_IMAGE:-ska-data-lifecycle:2.1.0-dirty}
     container_name: dlm_storage
     user: root
     environment:
@@ -58,7 +58,7 @@ services:
       start_period: 40s
 
   dlm_request:
-    image: ${SERVER_IMAGE}
+    image: ${SERVER_IMAGE:-ska-data-lifecycle:2.1.0-dirty}
     container_name: dlm_request
     user: root
     platform: linux/amd64
@@ -82,7 +82,7 @@ services:
 
   dlm_ingest:
     platform: linux/amd64
-    image: ${SERVER_IMAGE}
+    image: ${SERVER_IMAGE:-ska-data-lifecycle:2.1.0-dirty}
     container_name: dlm_ingest
     user: root
     environment:
@@ -123,7 +123,7 @@ services:
       - dlm_network
   dlm_heuristics:
     platform: linux/amd64
-    image: ${SERVER_IMAGE}
+    image: ${SERVER_IMAGE:-ska-data-lifecycle:2.1.0-dirty}
     container_name: dlm_heuristics
     command: ["ska-dlm-heuristics"]
     user: root
