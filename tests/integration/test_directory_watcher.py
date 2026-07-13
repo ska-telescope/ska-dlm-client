@@ -1,4 +1,3 @@
-# pylint: disable=too-many-locals
 """Directory Watcher integration tests."""
 
 import logging

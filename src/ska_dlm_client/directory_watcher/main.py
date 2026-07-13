@@ -119,8 +119,8 @@ def main():
     Creates a new asyncio event loop and runs the amain coroutine in it.
     This function is the entry point when the module is executed directly.
     """
-    loglevel = os.environ.get("LOGLEVEL", "INFO").upper()
-    ska_ser_logging.configure_logging(loglevel)
+    LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
+    ska_ser_logging.configure_logging(LOGLEVEL)
     asyncio.run(amain())
 
 
