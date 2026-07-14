@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 import urllib.parse
@@ -188,10 +189,13 @@ def log_configdb_backend_details(config: Config) -> None:
 async def on_message_received(message: aio_pika.abc.AbstractIncomingMessage) -> None:
     """Process and acknowledge an incoming RabbitMQ message."""
     try:
-        # The 'process' context manager automatically ACKs the message
-        # upon successful completion, or NACKs it if an exception occurs.
         logging.info(" [x] Received message: %s", message.body.decode())
-        await asyncio.sleep(2)
+        migration_record = json.loads(message.body.decode())
+        if migration_record["complete"]:
+            outcome = migration_record["job_status"]["success"]
+            logging.info("outcome of migration %s: %s", migration_record, outcome)
+            # TODO: DMAN-213
+
         await message.ack()
 
     except Exception as e:  # pylint: disable=broad-except

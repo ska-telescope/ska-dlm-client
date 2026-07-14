@@ -1,8 +1,11 @@
 """Unit test module for configdb_utils."""
 
+import asyncio
+import json
 import logging
 from datetime import datetime
 from pathlib import Path
+from unittest import mock
 
 import pytest
 from ska_sdp_config import ConfigCollision
@@ -14,6 +17,8 @@ from ska_dlm_client.configdb_watcher.configdb_utils import (
     create_sdp_migration_dependency,
     get_pvc_subpath,
     log_flow_dependencies,
+    on_message_received,
+    start_rabbitmq_consumer,
     update_dependency_state,
 )
 
@@ -23,6 +28,8 @@ KIND = "data-product"
 DP_FLOW_NAME = "prod-a"
 FLOW_NAME = "vis-receive-mswriter-processor"
 FUNCTION = "ska-dlm-client:ingest"
+
+# pylint: disable=redefined-outer-name
 
 
 # Note: This fixture mirrors the structure used in ska-sdp-config test_flow.py
@@ -206,3 +213,88 @@ def test_get_pvc_subpath_failure_non_pvcpath(config):
 
     with pytest.raises(TypeError, match=r"only PVCPath supported for flow data_dir"):
         get_pvc_subpath(config, key)
+
+
+@pytest.mark.asyncio
+async def test_on_message_received_acknowledges_valid_message() -> None:
+    """Test that a valid message is acknowledged."""
+    message = mock.MagicMock()
+    message.body = json.dumps(
+        {
+            "complete": True,
+            "job_status": {"success": True},
+        }
+    ).encode()
+    message.ack = mock.AsyncMock()
+    message.nack = mock.AsyncMock()
+
+    await on_message_received(message)
+
+    message.ack.assert_awaited_once()
+    message.nack.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_on_message_received_nacks_invalid_message() -> None:
+    """Test that an invalid message is negatively acknowledged."""
+    message = mock.MagicMock()
+    message.body = b"not valid JSON"
+    message.ack = mock.AsyncMock()
+    message.nack = mock.AsyncMock()
+
+    await on_message_received(message)
+
+    message.ack.assert_not_awaited()
+    message.nack.assert_awaited_once_with(requeue=True)
+
+
+@pytest.mark.asyncio
+async def test_start_rabbitmq_consumer_sets_up_consumer() -> None:
+    """Test that the RabbitMQ consumer is configured correctly."""
+    connection = mock.MagicMock()
+    channel = mock.MagicMock()
+    exchange = mock.MagicMock()
+    queue = mock.MagicMock()
+
+    connection.channel = mock.AsyncMock(return_value=channel)
+    channel.set_qos = mock.AsyncMock()
+    channel.declare_exchange = mock.AsyncMock(return_value=exchange)
+    channel.declare_queue = mock.AsyncMock(return_value=queue)
+    queue.bind = mock.AsyncMock()
+    queue.consume = mock.AsyncMock()
+
+    with (
+        mock.patch(
+            "ska_dlm_client.configdb_watcher.configdb_utils.aio_pika.connect_robust",
+            new=mock.AsyncMock(return_value=connection),
+        ) as connect_robust,
+        mock.patch(
+            "ska_dlm_client.configdb_watcher.configdb_utils.asyncio.Future",
+            side_effect=asyncio.CancelledError,
+        ),
+        pytest.raises(asyncio.CancelledError),
+    ):
+        await start_rabbitmq_consumer(
+            "amqp://guest:guest@rabbitmq/",
+            "dlm_exchange",
+        )
+
+    connect_robust.assert_awaited_once_with("amqp://guest:guest@rabbitmq/")
+    connection.channel.assert_awaited_once()
+    channel.set_qos.assert_awaited_once_with(prefetch_count=10)
+    channel.declare_exchange.assert_awaited_once_with(
+        "dlm_exchange",
+        passive=True,
+    )
+    channel.declare_queue.assert_awaited_once_with(
+        "configdb_watcher_queue",
+        durable=True,
+    )
+    queue.bind.assert_awaited_once_with(
+        exchange,
+        routing_key="dlm.migration.update",
+    )
+    queue.consume.assert_awaited_once_with(
+        on_message_received,
+        no_ack=False,
+    )
