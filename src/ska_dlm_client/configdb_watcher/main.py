@@ -239,10 +239,9 @@ async def sdp_to_dlm_ingest_and_migrate(config: SdpWatcherConfig) -> None:
     )
 
     # initialise RabbitMQ consumer (WIP)
-    task = asyncio.create_task(
+    asyncio.create_task(
         start_rabbitmq_consumer(config.queue_connection_string, config.queue_exchange_name)
     )
-    await task
 
     async with watch_dataproduct_status(
         configdb,
