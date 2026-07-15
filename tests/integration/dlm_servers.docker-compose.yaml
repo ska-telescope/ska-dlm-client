@@ -154,6 +154,10 @@ services:
       DLM_OUTBOX_BATCH_SIZE: "50"
       DLM_OUTBOX_EXCHANGE: "dlm.outbox"
     entrypoint: ["python", "-m", "ska_dlm.dlm_outbox.relay"]
+    volumes:
+      - shared-tmpfs:/dlm
+      - $PWD/tests/integration/ska-dlm-home/.dlm:/root/.dlm
+      - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
     depends_on:
       dlm_db:
         condition: service_healthy
