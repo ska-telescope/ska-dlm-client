@@ -445,8 +445,8 @@ def test_automatic_deletion(dlm_request_api, storage_configuration):
     test_dir = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}"
     counter = 0
     while counter < 3:
-        log.info("Sleep 20s to give heuristics some time to do its thing.")
-        sleep(10)  # default poll interval of the heuristics is 10 seconds
+        log.info("Sleep to give heuristics some time to do its thing.")
+        sleep(20)  # default poll interval of the heuristics is 10 seconds
         result = subprocess.run(["docker", "exec", SRC_HOST, "test", "-d", test_dir])
         logs = subprocess.run(["docker", "logs", "dlm_heuristics"], capture_output=True, text=True)
         if result.returncode != 0:
