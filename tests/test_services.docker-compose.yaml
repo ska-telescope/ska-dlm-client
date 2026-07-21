@@ -11,6 +11,7 @@ services:
       - dlm_network
     ports:
       - "2379:2379"
+    pull_policy: missing
     command:
       - /usr/bin/etcd
       - "--advertise-client-urls=http://0.0.0.0:2379"
