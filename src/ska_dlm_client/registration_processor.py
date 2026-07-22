@@ -340,6 +340,8 @@ class RegistrationProcessor:
                     "item_state": "READY",
                     "item_owner": "SKA",
                     "uid_expiration": uid_expiration,
+                    "item_size": item.item_size,
+                    "decompressed_size": item.decompressed_size,
                 }
 
                 response = api_ingest.init_data_item(request_body=init_item)
