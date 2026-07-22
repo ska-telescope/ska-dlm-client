@@ -41,7 +41,7 @@ configuration = ska_dlm_client.openapi.Configuration(
 with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = ska_dlm_client.openapi.StorageApi(api_client)
-    request_body = None # Dict[str, object] | 
+    request_body = None # Dict[str, Optional[object]] | 
 
     try:
         # Create Rclone Config
@@ -59,7 +59,7 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **request_body** | [**Dict[str, object]**](object.md)|  | 
+ **request_body** | [**Dict[str, Optional[object]]**](object.md)|  | 
 
 ### Return type
 
@@ -109,10 +109,10 @@ configuration = ska_dlm_client.openapi.Configuration(
 with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = ska_dlm_client.openapi.StorageApi(api_client)
-    request_body = None # Dict[str, object] | 
+    request_body = None # Dict[str, Optional[object]] | 
     storage_id = '' # str | the storage_id for which to create the entry. (optional) (default to '')
     storage_name = '' # str | the name of the storage for which the config is provided. (optional) (default to '')
-    config_type = rclone # str |  (optional) (default to rclone)
+    config_type = 'rclone' # str |  (optional) (default to 'rclone')
 
     try:
         # Create Storage Config
@@ -130,10 +130,10 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **request_body** | [**Dict[str, object]**](object.md)|  | 
+ **request_body** | [**Dict[str, Optional[object]]**](object.md)|  | 
  **storage_id** | **str**| the storage_id for which to create the entry. | [optional] [default to &#39;&#39;]
  **storage_name** | **str**| the name of the storage for which the config is provided. | [optional] [default to &#39;&#39;]
- **config_type** | **str**|  | [optional] [default to rclone]
+ **config_type** | **str**|  | [optional] [default to &#39;rclone&#39;]
 
 ### Return type
 
@@ -221,7 +221,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_storage_config**
-> List[Optional[Dict[str, object]]] get_storage_config(storage_id=storage_id, storage_name=storage_name, config_type=config_type)
+> List[Dict[str, Optional[object]]] get_storage_config(storage_id=storage_id, storage_name=storage_name, config_type=config_type)
 
 Get Storage Config
 
@@ -248,7 +248,7 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     api_instance = ska_dlm_client.openapi.StorageApi(api_client)
     storage_id = '' # str | the storage id, by default \"\" (optional) (default to '')
     storage_name = '' # str | the name of the storage volume, by default \"\" (optional) (default to '')
-    config_type = rclone # str |  (optional) (default to rclone)
+    config_type = 'rclone' # str |  (optional) (default to 'rclone')
 
     try:
         # Get Storage Config
@@ -268,11 +268,11 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **storage_id** | **str**| the storage id, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
  **storage_name** | **str**| the name of the storage volume, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
- **config_type** | **str**|  | [optional] [default to rclone]
+ **config_type** | **str**|  | [optional] [default to &#39;rclone&#39;]
 
 ### Return type
 
-**List[Optional[Dict[str, object]]]**
+**List[Dict[str, Optional[object]]]**
 
 ### Authorization
 
@@ -401,8 +401,8 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     location_id = 'location_id_example' # str | A dlm registered location id (optional)
     location_name = 'location_name_example' # str | A dlm registered location name (optional)
     storage_capacity = -1 # int | Reserved storage capacity in bytes (optional) (default to -1)
-    storage_phase = GAS # str |  (optional) (default to GAS)
-    request_body = None # Dict[str, object] |  (optional)
+    storage_phase = 'GAS' # str |  (optional) (default to 'GAS')
+    request_body = None # Dict[str, Optional[object]] |  (optional)
 
     try:
         # Init Storage
@@ -427,8 +427,8 @@ Name | Type | Description  | Notes
  **location_id** | **str**| A dlm registered location id | [optional] 
  **location_name** | **str**| A dlm registered location name | [optional] 
  **storage_capacity** | **int**| Reserved storage capacity in bytes | [optional] [default to -1]
- **storage_phase** | **str**|  | [optional] [default to GAS]
- **request_body** | [**Dict[str, object]**](object.md)|  | [optional] 
+ **storage_phase** | **str**|  | [optional] [default to &#39;GAS&#39;]
+ **request_body** | [**Dict[str, Optional[object]]**](object.md)|  | [optional] 
 
 ### Return type
 
@@ -453,7 +453,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_location**
-> List[Optional[Dict[str, object]]] query_location(location_name=location_name, location_id=location_id)
+> List[Dict[str, Optional[object]]] query_location(location_name=location_name, location_id=location_id)
 
 Query Location
 
@@ -502,7 +502,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**List[Optional[Dict[str, object]]]**
+**List[Dict[str, Optional[object]]]**
 
 ### Authorization
 
@@ -586,7 +586,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_storage**
-> List[Optional[Dict[str, object]]] query_storage(storage_name=storage_name, storage_id=storage_id)
+> List[Dict[str, Optional[object]]] query_storage(storage_name=storage_name, storage_id=storage_id)
 
 Query Storage
 
@@ -635,7 +635,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**List[Optional[Dict[str, object]]]**
+**List[Dict[str, Optional[object]]]**
 
 ### Authorization
 

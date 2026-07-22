@@ -234,6 +234,42 @@
                         "description": "uuid of parent item."
                     },
                     {
+                        "name": "item_size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "size of the data item in bytes.",
+                            "title": "Item Size"
+                        },
+                        "description": "size of the data item in bytes."
+                    },
+                    {
+                        "name": "decompressed_size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "size of the data item in bytes after decompression.",
+                            "title": "Decompressed Size"
+                        },
+                        "description": "size of the data item in bytes after decompression."
+                    },
+                    {
                         "name": "do_storage_access_check",
                         "in": "query",
                         "required": false,

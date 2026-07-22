@@ -105,7 +105,7 @@ services:
 
   dlm_migrations:
     platform: linux/amd64
-    image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:2.1.0-dev.c7c7e7352
+    image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:2.1.0-dev.cd25d1834
     container_name: dlm_migrations
     command: >
       --url="jdbc:postgresql://dlm_db:5432/ska_dlm"
@@ -115,7 +115,7 @@ services:
       --search-path=/changelog
       --changelog-file=changelog.yaml
       update
-      --context-filter="create-schema,unprivileged"
+      --context-filter="create-schema,unprivileged,2.3-release"
     depends_on:
       dlm_db:
         condition: service_healthy
