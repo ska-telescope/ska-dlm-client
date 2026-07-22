@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 class Item:
     """Data Item related information to aid registration."""
 
+    # pylint: disable=too-many-instance-attributes
     path_rel_to_watch_dir: str
     item_type: ItemType
     metadata: DataProductMetadata | None
@@ -43,6 +44,7 @@ class Item:
         item_type: ItemType,
         metadata: DataProductMetadata | None,
         decompressed_size: int | None = None,
+        item_size: int | None = None,
         parent: Self | None = None,
         parent_uid: str | None = None,
     ):
@@ -55,7 +57,7 @@ class Item:
         self.metadata = metadata
         self.parent = parent
         self.parent_uid = parent_uid
-        self.item_size = None
+        self.item_size = item_size
         self.decompressed_size = decompressed_size
 
 
@@ -526,7 +528,7 @@ def _generate_dir_item_list(absolute_path: str, path_rel_to_watch_dir: str) -> l
             path_rel_to_watch_dir=path_rel_to_watch_dir,
             item_type=ItemType.FILE,
             metadata=None,
-            decompressed_size=os.path.getsize(os.path.realpath(absolute_path))
+            decompressed_size=os.path.getsize(os.path.realpath(absolute_path)),
         )
         item_list.append(item)
         return item_list
@@ -545,7 +547,7 @@ def _generate_dir_item_list(absolute_path: str, path_rel_to_watch_dir: str) -> l
             metadata=metadata,
             decompressed_size=sum(
                 f.stat().st_size for f in Path(absolute_path).rglob("*") if f.is_file()
-            )
+            ),
         )
         item_list.append(item)
         return item_list
@@ -572,9 +574,7 @@ def _generate_dir_item_list(absolute_path: str, path_rel_to_watch_dir: str) -> l
 
         if entry.lower().endswith(ska_dlm_client.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX):
             item_type = ItemType.CONTAINER
-            size = sum(
-                f.stat().st_size for f in Path(entry_path).rglob("*") if f.is_file()
-            )
+            size = sum(f.stat().st_size for f in Path(entry_path).rglob("*") if f.is_file())
 
         elif os.path.isdir(os.path.realpath(entry_path)):
             # Found a non-MS subdirectory
@@ -587,7 +587,7 @@ def _generate_dir_item_list(absolute_path: str, path_rel_to_watch_dir: str) -> l
             item_type=item_type,
             metadata=None,  # Set to None as Container has this file's metadata
             parent=container_item,
-            decompressed_size=size
+            decompressed_size=size,
         )
         item_list.append(item)
 
