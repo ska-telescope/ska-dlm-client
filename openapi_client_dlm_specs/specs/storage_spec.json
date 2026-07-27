@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "1.3.2"
+        "version": "2.1.0"
     },
     "paths": {
         "/storage/query_location_facility": {
@@ -156,10 +156,10 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "description": "data directory as an absolute path on the remote storage endpoint",
+                            "description": "Data directory as an absolute path on the remote storage endpoint",
                             "title": "Root Directory"
                         },
-                        "description": "data directory as an absolute path on the remote storage endpoint"
+                        "description": "Data directory as an absolute path on the remote storage endpoint"
                     },
                     {
                         "name": "storage_interface",
@@ -182,10 +182,10 @@
                                     "type": "null"
                                 }
                             ],
-                            "description": "a dlm registered location id",
+                            "description": "A dlm registered location id",
                             "title": "Location Id"
                         },
-                        "description": "a dlm registered location id"
+                        "description": "A dlm registered location id"
                     },
                     {
                         "name": "location_name",
@@ -200,10 +200,10 @@
                                     "type": "null"
                                 }
                             ],
-                            "description": "a dlm registered location name",
+                            "description": "A dlm registered location name",
                             "title": "Location Name"
                         },
-                        "description": "a dlm registered location name"
+                        "description": "A dlm registered location name"
                     },
                     {
                         "name": "storage_capacity",
@@ -211,11 +211,11 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "description": "reserved storage capacity in bytes",
+                            "description": "Reserved storage capacity in bytes",
                             "default": -1,
                             "title": "Storage Capacity"
                         },
-                        "description": "reserved storage capacity in bytes"
+                        "description": "Reserved storage capacity in bytes"
                     },
                     {
                         "name": "storage_phase",
@@ -240,7 +240,6 @@
                                         "type": "null"
                                     }
                                 ],
-                                "description": "Alternative way to initialize a storage volume by providing JSON",
                                 "title": "Storage Config"
                             }
                         }
@@ -679,10 +678,10 @@
             "PhaseType": {
                 "type": "string",
                 "enum": [
+                    "PLASMA",
                     "GAS",
                     "LIQUID",
-                    "SOLID",
-                    "PLASMA"
+                    "SOLID"
                 ],
                 "title": "PhaseType",
                 "description": "Phase type / resilience level."

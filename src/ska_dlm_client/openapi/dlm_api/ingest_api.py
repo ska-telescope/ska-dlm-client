@@ -12,6 +12,7 @@ Do not edit the class manually.
 # noqa: E501
 
 import warnings
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import (
@@ -304,7 +305,6 @@ class IngestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -319,11 +319,9 @@ class IngestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-
             _query_params.append(("item_name", item_name))
 
         if uid_phase is not None:
-
             _query_params.append(("uid_phase", uid_phase))
 
         # process the header parameters
@@ -374,20 +372,23 @@ class IngestApi:
         ],
         uri: Annotated[StrictStr, Field(description="the relative access path to the payload.")],
         item_type: Optional[StrictStr] = None,
+        target_phase: Optional[StrictStr] = None,
+        uid_expiration: Optional[datetime] = None,
+        oid_expiration: Optional[datetime] = None,
         storage_name: Annotated[
             Optional[StrictStr],
-            Field(description="the name of the configured storage volume (name or ID required)"),
+            Field(description="the name of the configured storage volume (name or ID required)."),
         ] = None,
         storage_id: Annotated[
             Optional[StrictStr], Field(description="the ID of the configured storage.")
         ] = None,
-        parents: Annotated[Optional[StrictStr], Field(description="uuid of parent item")] = None,
+        parents: Annotated[Optional[StrictStr], Field(description="uuid of parent item.")] = None,
         do_storage_access_check: Annotated[
             Optional[StrictBool],
-            Field(description="perform check_storage_access() against provided storage and uri"),
+            Field(description="perform check_storage_access() against provided storage and uri."),
         ] = None,
         authorization: Annotated[
-            Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
+            Optional[StrictStr], Field(description="Validated Bearer token with UserInfo.")
         ] = None,
         request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
@@ -412,18 +413,21 @@ class IngestApi:
         uri : str
             the relative access path to the payload. (required)
         item_type : str
+        target_phase : str
+        uid_expiration : datetime
+        oid_expiration : datetime
         storage_name : str
             the name of the configured storage volume (name or ID
-            required)
+            required).
         storage_id : str
             the ID of the configured storage.
         parents : str
-            uuid of parent item
+            uuid of parent item.
         do_storage_access_check : bool
             perform check_storage_access() against provided storage and
-            uri
+            uri.
         authorization : str
-            Validated Bearer token with UserInfo
+            Validated Bearer token with UserInfo.
         request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
@@ -455,6 +459,9 @@ class IngestApi:
             item_name=item_name,
             uri=uri,
             item_type=item_type,
+            target_phase=target_phase,
+            uid_expiration=uid_expiration,
+            oid_expiration=oid_expiration,
             storage_name=storage_name,
             storage_id=storage_id,
             parents=parents,
@@ -486,20 +493,23 @@ class IngestApi:
         ],
         uri: Annotated[StrictStr, Field(description="the relative access path to the payload.")],
         item_type: Optional[StrictStr] = None,
+        target_phase: Optional[StrictStr] = None,
+        uid_expiration: Optional[datetime] = None,
+        oid_expiration: Optional[datetime] = None,
         storage_name: Annotated[
             Optional[StrictStr],
-            Field(description="the name of the configured storage volume (name or ID required)"),
+            Field(description="the name of the configured storage volume (name or ID required)."),
         ] = None,
         storage_id: Annotated[
             Optional[StrictStr], Field(description="the ID of the configured storage.")
         ] = None,
-        parents: Annotated[Optional[StrictStr], Field(description="uuid of parent item")] = None,
+        parents: Annotated[Optional[StrictStr], Field(description="uuid of parent item.")] = None,
         do_storage_access_check: Annotated[
             Optional[StrictBool],
-            Field(description="perform check_storage_access() against provided storage and uri"),
+            Field(description="perform check_storage_access() against provided storage and uri."),
         ] = None,
         authorization: Annotated[
-            Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
+            Optional[StrictStr], Field(description="Validated Bearer token with UserInfo.")
         ] = None,
         request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
@@ -524,18 +534,21 @@ class IngestApi:
         uri : str
             the relative access path to the payload. (required)
         item_type : str
+        target_phase : str
+        uid_expiration : datetime
+        oid_expiration : datetime
         storage_name : str
             the name of the configured storage volume (name or ID
-            required)
+            required).
         storage_id : str
             the ID of the configured storage.
         parents : str
-            uuid of parent item
+            uuid of parent item.
         do_storage_access_check : bool
             perform check_storage_access() against provided storage and
-            uri
+            uri.
         authorization : str
-            Validated Bearer token with UserInfo
+            Validated Bearer token with UserInfo.
         request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
@@ -567,6 +580,9 @@ class IngestApi:
             item_name=item_name,
             uri=uri,
             item_type=item_type,
+            target_phase=target_phase,
+            uid_expiration=uid_expiration,
+            oid_expiration=oid_expiration,
             storage_name=storage_name,
             storage_id=storage_id,
             parents=parents,
@@ -598,20 +614,23 @@ class IngestApi:
         ],
         uri: Annotated[StrictStr, Field(description="the relative access path to the payload.")],
         item_type: Optional[StrictStr] = None,
+        target_phase: Optional[StrictStr] = None,
+        uid_expiration: Optional[datetime] = None,
+        oid_expiration: Optional[datetime] = None,
         storage_name: Annotated[
             Optional[StrictStr],
-            Field(description="the name of the configured storage volume (name or ID required)"),
+            Field(description="the name of the configured storage volume (name or ID required)."),
         ] = None,
         storage_id: Annotated[
             Optional[StrictStr], Field(description="the ID of the configured storage.")
         ] = None,
-        parents: Annotated[Optional[StrictStr], Field(description="uuid of parent item")] = None,
+        parents: Annotated[Optional[StrictStr], Field(description="uuid of parent item.")] = None,
         do_storage_access_check: Annotated[
             Optional[StrictBool],
-            Field(description="perform check_storage_access() against provided storage and uri"),
+            Field(description="perform check_storage_access() against provided storage and uri."),
         ] = None,
         authorization: Annotated[
-            Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
+            Optional[StrictStr], Field(description="Validated Bearer token with UserInfo.")
         ] = None,
         request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
@@ -636,18 +655,21 @@ class IngestApi:
         uri : str
             the relative access path to the payload. (required)
         item_type : str
+        target_phase : str
+        uid_expiration : datetime
+        oid_expiration : datetime
         storage_name : str
             the name of the configured storage volume (name or ID
-            required)
+            required).
         storage_id : str
             the ID of the configured storage.
         parents : str
-            uuid of parent item
+            uuid of parent item.
         do_storage_access_check : bool
             perform check_storage_access() against provided storage and
-            uri
+            uri.
         authorization : str
-            Validated Bearer token with UserInfo
+            Validated Bearer token with UserInfo.
         request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
@@ -679,6 +701,9 @@ class IngestApi:
             item_name=item_name,
             uri=uri,
             item_type=item_type,
+            target_phase=target_phase,
+            uid_expiration=uid_expiration,
+            oid_expiration=oid_expiration,
             storage_name=storage_name,
             storage_id=storage_id,
             parents=parents,
@@ -703,6 +728,9 @@ class IngestApi:
         item_name,
         uri,
         item_type,
+        target_phase,
+        uid_expiration,
+        oid_expiration,
         storage_name,
         storage_id,
         parents,
@@ -714,7 +742,6 @@ class IngestApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
         _collection_formats: Dict[str, str] = {}
@@ -729,31 +756,49 @@ class IngestApi:
         # process the path parameters
         # process the query parameters
         if item_name is not None:
-
             _query_params.append(("item_name", item_name))
 
         if uri is not None:
-
             _query_params.append(("uri", uri))
 
         if item_type is not None:
-
             _query_params.append(("item_type", item_type))
 
-        if storage_name is not None:
+        if target_phase is not None:
+            _query_params.append(("target_phase", target_phase))
 
+        if uid_expiration is not None:
+            if isinstance(uid_expiration, datetime):
+                _query_params.append(
+                    (
+                        "uid_expiration",
+                        uid_expiration.strftime(self.api_client.configuration.datetime_format),
+                    )
+                )
+            else:
+                _query_params.append(("uid_expiration", uid_expiration))
+
+        if oid_expiration is not None:
+            if isinstance(oid_expiration, datetime):
+                _query_params.append(
+                    (
+                        "oid_expiration",
+                        oid_expiration.strftime(self.api_client.configuration.datetime_format),
+                    )
+                )
+            else:
+                _query_params.append(("oid_expiration", oid_expiration))
+
+        if storage_name is not None:
             _query_params.append(("storage_name", storage_name))
 
         if storage_id is not None:
-
             _query_params.append(("storage_id", storage_id))
 
         if parents is not None:
-
             _query_params.append(("parents", parents))
 
         if do_storage_access_check is not None:
-
             _query_params.append(("do_storage_access_check", do_storage_access_check))
 
         # process the header parameters

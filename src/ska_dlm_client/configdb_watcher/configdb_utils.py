@@ -3,11 +3,14 @@
 
 from __future__ import annotations
 
+import asyncio
+import json
 import logging
 import os
 import urllib.parse
 from typing import Optional
 
+import aio_pika
 from ska_sdp_config import Config, ConfigCollision
 from ska_sdp_config.backend.etcd3 import Etcd3Backend
 from ska_sdp_config.entity.common import PVCPath
@@ -181,3 +184,39 @@ def log_configdb_backend_details(config: Config) -> None:
             sdp_port,
             sdp_path,
         )
+
+
+async def on_message_received(message: aio_pika.abc.AbstractIncomingMessage) -> None:
+    """Process and acknowledge an incoming RabbitMQ message."""
+    try:
+        logging.info(" [x] Received message: %s", message.body.decode())
+        migration_record = json.loads(message.body.decode())
+        if migration_record["complete"]:
+            outcome = migration_record["job_status"]["success"]
+            logging.info("outcome of migration %s: %s", migration_record, outcome)
+            # TODO: DMAN-213
+
+        await message.ack()
+
+    except Exception as e:  # pylint: disable=broad-except
+        logging.exception(e)
+        await message.nack(requeue=True)
+
+
+async def start_rabbitmq_consumer(queue_connection_string: str, exchange_name: str):
+    """Connect to RabbitMQ and consume DLM migration update messages."""
+    logging.info(" [Background Consumer] Connecting to RabbitMQ...")
+
+    connection = await aio_pika.connect_robust(queue_connection_string)
+    channel = await connection.channel()
+    await channel.set_qos(prefetch_count=10)
+
+    exchange = await channel.declare_exchange(exchange_name, passive=True)
+    queue = await channel.declare_queue("configdb_watcher_queue", durable=True)
+    await queue.bind(exchange, routing_key="dlm.migration.update")
+
+    # Start consuming (this registers the callback internally within aio-pika)
+    await queue.consume(on_message_received, no_ack=False)
+
+    # Keep the coroutine running to listen for messages
+    await asyncio.Future()

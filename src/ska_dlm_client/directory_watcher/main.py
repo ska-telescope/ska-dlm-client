@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 """Application to watch a directory for changes and send to DLM."""
 
 import argparse
@@ -42,6 +43,7 @@ def process_args(args: argparse.Namespace) -> WatcherConfig:
         target_name=args.target_name,
         storage_url=args.storage_url,
         migration_url=args.migration_url,
+        request_url=args.request_url,
         ingest_url=args.ingest_url,
         reload_status_file=args.reload_status_file,
         rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,

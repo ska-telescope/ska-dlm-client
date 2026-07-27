@@ -13,8 +13,8 @@ class TestDirectoryToWatch:
     """Test class for directory_to_watch parameter."""
 
     SOURCE_NAME = "test-storage"
-    INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
-    STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
+    INGEST_URL = os.getenv("INGEST_URL", "http://localhost:8001")
+    STORAGE_URL = os.getenv("STORAGE_URL", "http://localhost:8003")
 
     @classmethod
     def setup_class(cls) -> None:
@@ -61,11 +61,18 @@ class TestDirectoryToWatch:
 
             def __init__(self, config: WatcherConfig):
                 """Initialize with the given config."""
+                (self.target_storage_id, self.target_storage_phase) = ("target-id", "SOLID")
                 super().__init__(config)
                 self.register_data_item_args = None
                 self.dry_run_for_debug = True  # Prevent actual API calls
 
-            def _register_single_item(self, item: Item, migrate: bool = True) -> str | None:
+            def _get_storage_info_from_name(self, storage_name: str) -> tuple[str, str]:
+                """Return fixed storage info without calling the real helper."""
+                return ("test-target", "SOLID")
+
+            def _register_single_item(
+                self, item: Item, migrate: bool = True, parent_uid: str = None
+            ) -> str | None:
                 """Capture the item path that would be registered."""
                 _ = migrate
                 self.register_data_item_args = {

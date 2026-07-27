@@ -17,12 +17,16 @@ class SdpWatcherConfig(ClientConfig):
     use_status_file: bool = False
     include_existing: bool = False
     etcd_url: str = "http://etcd:2379"
+    queue_connection_string: str = "amqp://guest:guest@rabbitmq/"
+    queue_exchange_name: str = "dlm.outbox"
 
     def __post_init__(self):
         self.status_file_absolute_path = f"{self.directory_to_watch}/{self.status_file_filename}"
         self.ingest_configuration = Configuration(host=self.ingest_url)
+        self.storage_configuration = Configuration(host=self.storage_url)
         # Migration related options
         self.migration_configuration = Configuration(host=self.migration_url)
+        self.request_configuration = Configuration(host=self.request_url)
         self.etcd_host = urllib.parse.urlparse(self.etcd_url).hostname
         self.etcd_port = urllib.parse.urlparse(self.etcd_url).port
 
@@ -38,4 +42,16 @@ class WatcherArgs(CmdLineParameters):
             type=str,
             required=False,
             help="etcd service URL (def: http://etcd:2379).",
+        )
+        self.parser.add_argument(
+            "--queue-connection-string",
+            type=str,
+            required=False,
+            help="RabbitMQ connection url",
+        )
+        self.parser.add_argument(
+            "--queue-exchange-name",
+            type=str,
+            required=False,
+            help="RabbitMQ exchange.",
         )

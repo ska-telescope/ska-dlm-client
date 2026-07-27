@@ -28,7 +28,7 @@ spec:
         - "--directory-to-watch"
         - {{ .Values.directory_watcher.directory_to_watch }}
         - "--storage-name"
-        - {{ .Values.directory_watcher.source_storage }}
+        - {{ .Values.directory_watcher.source_name }}
         - "--request-url"
         - {{ .Values.startup_verification.request_url }}
         volumeMounts:

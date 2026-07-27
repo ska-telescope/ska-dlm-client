@@ -81,6 +81,7 @@ configdb_watcher:
   pvc:
     name: shared
     read_only: false
+    sub_path: # Optional
   sdp_config:
     etcd_url:  # e.g., "http://some-external-etcd.namespace:port". Leave empty when using the local etcd service.
     path: ""      # optional

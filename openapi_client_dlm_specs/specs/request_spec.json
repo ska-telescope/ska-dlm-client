@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "1.3.2"
+        "version": "2.1.0"
     },
     "paths": {
         "/request/query_data_item": {
@@ -174,7 +174,6 @@
                                         "type": "null"
                                     }
                                 ],
-                                "description": "the json formatted update data, compatible with postgREST",
                                 "title": "Post Data"
                             }
                         }
@@ -309,7 +308,6 @@
                                         "type": "null"
                                     }
                                 ],
-                                "description": "a metadata JSON string",
                                 "title": "Metadata Post"
                             }
                         }
@@ -833,7 +831,6 @@
                                         "type": "null"
                                     }
                                 ],
-                                "description": "dictionary of keyword/value pairs",
                                 "title": "Item Tags"
                             }
                         }
@@ -1196,7 +1193,7 @@
                 "tags": [
                     "request"
                 ],
-                "description": "Query for the storage_ids of all backends holding a copy of a data_item.\n\nEither an item_name or a OID have to be provided.",
+                "description": "Query for the storage info of all backends holding a copy of a data_item.\n\nEither an item_name or a OID have to be provided.",
                 "operationId": "query_item_storage",
                 "parameters": [
                     {

@@ -1,3 +1,4 @@
+# pylint: disable=too-many-locals
 """Directory Watcher integration tests."""
 
 import logging
@@ -11,6 +12,7 @@ import pytest
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import request_api, storage_api
+from ska_dlm_client.register_storage_location.main import setup_testing
 
 log = logging.getLogger(__name__)
 
@@ -26,6 +28,9 @@ def test_auto_migration(
     storage_configuration: Configuration,
 ):
     """Test auto migration using directory watcher."""
+    setup_testing(storage_configuration)
+    sleep(2)  # TODO: DMAN-193
+
     testfilename = f"group.{str(time())}"
     dst = f"/dlm/watch_dir/{testfilename}"
 

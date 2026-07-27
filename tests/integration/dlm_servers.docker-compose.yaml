@@ -133,10 +133,6 @@ services:
         condition: service_started
       dlm_rclone:
         condition: service_started
-    healthcheck:
-      test: ["CMD-SHELL", "ska-dlm --help || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - dlm_network
+

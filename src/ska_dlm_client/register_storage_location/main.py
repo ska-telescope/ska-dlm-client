@@ -1,4 +1,5 @@
 # pylint: disable=broad-exception-caught
+# pylint: disable=invalid-name
 """Initialize a location and a storage."""
 
 import argparse
@@ -26,7 +27,7 @@ LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY", LocationCountry.AU.value)
 LOCATION_CITY = os.getenv("LOCATION_CITY", "Perth")
 LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")
 TARGET_ROOT = os.getenv("TARGET_ROOT", "/dlm-archive")
-TGT_STORAGE_PHASE = os.getenv("TARGET_PHASE", "SOLID")  # "target phase" is ambigious.
+TGT_STORAGE_PHASE = os.getenv("TARGET_PHASE", "SOLID")
 RCLONE_CONFIG_TARGET = {
     "name": "dlm-archive",
     "type": "alias",
@@ -211,6 +212,35 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     return storage_id
 
 
+def setup_testing(api_configuration: Configuration):
+    """Configure a target storage endpoint for rclone."""
+    # NOTE: This is only required for integration testing with the DLM
+    # server.
+    # The setup of the source volume is now performed during the startup
+    # of the client. In future the setup of a default (archive) storage
+    # endpoint will be performed during startup of the DLM server and
+    # then this can be removed as well.
+    logger.info("Testing setup.")
+    storage_url = (
+        f"{api_configuration.host}:8003"
+        if api_configuration.host.find(":") == -1
+        else api_configuration.host
+    )
+    location_id = get_or_init_location(
+        api_configuration, storage_url=storage_url, location=LOCATION_NAME
+    )
+    storage_id = get_or_init_storage(
+        storage_name=RCLONE_CONFIG_TARGET["name"],
+        storage_url=storage_url,
+        storage_phase=TGT_STORAGE_PHASE,
+        api_configuration=api_configuration,
+        storage_root_directory=TARGET_ROOT,
+        the_location_id=location_id,
+        rclone_config=RCLONE_CONFIG_TARGET,
+    )
+    logger.info("location id %s and storage id %s", location_id, storage_id)
+
+
 def create_parser() -> argparse.ArgumentParser:
     """Define a parser for all the command line parameters."""
     parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
@@ -257,8 +287,8 @@ def main():
     ska_ser_logging.configure_logging(LOGLEVEL)
     parser = create_parser()
     args = parser.parse_args()
-    # api_configuration = Configuration(host=args.storage_url)
-    # setup_testing(api_configuration)
+    api_configuration = Configuration(host=args.storage_url)
+    setup_testing(api_configuration)
 
 
 if __name__ == "__main__":

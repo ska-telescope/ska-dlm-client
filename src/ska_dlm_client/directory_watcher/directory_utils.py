@@ -92,7 +92,6 @@ def monitor_directory_with_watchdog(
                 diff.dirs_moved,
             ]
             if all(not changes for changes in change_attributes):
-
                 logger.info(
                     "No changes detected after %d iterations. Directory is stable.", iteration
                 )

@@ -61,7 +61,7 @@ spec:
           - name: DIRECTORY_TO_WATCH
             value: {{ .Values.directory_watcher.directory_to_watch | quote }}
           - name: SOURCE_NAME
-            value: {{ .Values.directory_watcher.source_storage | quote }}
+            value: {{ .Values.directory_watcher.source_name | quote }}
           {{- if .Values.directory_watcher.target_name }}
           - name: TARGET_NAME
             value: {{ .Values.directory_watcher.target_name | quote }}
