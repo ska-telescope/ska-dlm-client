@@ -101,7 +101,7 @@ services:
     image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:2.0.0-dev.c2f37650e
     container_name: dlm_migrations
     command: >
-      --url="jdbc:postgresql://dlm_db:5432/ska_dlm"
+      --url="jdbc:postgresql://dlm_db:5432/ska_dlm_testing"
       --username="ska_dlm_admin"
       --password="password"
       --driver=org.postgresql.Driver
@@ -121,8 +121,9 @@ services:
     command: ["ska-dlm-heuristics"]
     user: root
     environment:
-      DLM_HEURISTIC_DATABASE_URL: "postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm"
-      DLM_HEURISTIC_POLL_INTERVAL: "10"
+      - LOGLEVEL=${LOGLEVEL:-INFO}
+      - DLM_HEURISTIC_DATABASE_URL=${DLM_HEURISTIC_DATABASE_URL:-postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm_testing}
+      - DLM_HEURISTIC_POLL_INTERVAL=${DLM_HEURISTIC_POLL_INTERVAL:-10}
     depends_on:
       dlm_db:
         condition: service_healthy
