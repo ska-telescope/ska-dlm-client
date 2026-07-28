@@ -126,6 +126,12 @@ spec:
             value: {{ .Values.configdb_watcher.oid_expiration_days | quote }}
           {{- end }}
 
+          - name: QUEUE_CONNECTION_STRING
+            value: {{ .Values.configdb_watcher.queue_connection_string | quote }} # do we even want/need to make this configurable?
+
+          - name: QUEUE_EXCHANGE_NAME
+            value: {{ .Values.configdb_watcher.queue_exchange_name | quote }} # do we even want/need to make this configurable?
+
         command:
           - /entrypoint.sh
         args:

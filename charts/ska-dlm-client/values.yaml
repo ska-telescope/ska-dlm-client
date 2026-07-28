@@ -44,6 +44,8 @@ directory_watcher:
   target_name: dlm-archive  # default target storage 'dlm-archive' is defined in the DLM Server and always available.
   uid_expiration_days:  # leave empty to use DB default, now() + 24:00
   oid_expiration_days:  # leave empty to use DB default, 2099-12-31T23:59:59
+  queue_connection_string: "amqp://guest:guest@rabbitmq/"
+  queue_exchange_name: "dlm.outbox"
   use_polling_watcher: false  # false means using the iNotify-based watcher, which might not work with networked filesystems.
   skip_rclone_access_check_on_register: false
   include_existing: false

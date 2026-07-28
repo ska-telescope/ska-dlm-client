@@ -148,7 +148,7 @@ services:
     image: ${SERVER_IMAGE}
     container_name: dlm_outbox
     environment:
-      DLM_OUTBOX_DATABASE_URL: "postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm"
+      DLM_OUTBOX_DATABASE_URL: "postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm_testing"
       DLM_OUTBOX_RABBITMQ_URL: "amqp://guest:guest@rabbitmq/"
       DLM_OUTBOX_POLL_INTERVAL: "10"
       DLM_OUTBOX_BATCH_SIZE: "50"
