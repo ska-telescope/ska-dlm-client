@@ -9,7 +9,7 @@
 ### Updated
 
 * Get files sizes and pass them to `register_data_item`
-* The default SERVER_IMAGE for testing is now a local dirty build to enable direct startup of containers from the compose file. 
+* The default SERVER_IMAGE for testing is now a local dirty build to enable direct startup of containers from the compose file.
 * The DLM heuristics removes test files (no direct `rm` commands)
 * location_name is now configurable as a global variable.
 * Aligned CLI between configdb and directory watchers
