@@ -2,6 +2,10 @@
 
 ## Development
 
+### Removed
+
+* All references to previous DB name `ska_dlm_meta`.
+
 ### Updated
 
 * Get files sizes and pass them to `register_data_item`
