@@ -4,6 +4,7 @@
 
 ### Updated
 
+* Get files sizes and pass them to `register_data_item`
 * The DLM heuristics removes test files (no direct `rm` commands)
 * location_name is now configurable as a global variable.
 * Aligned CLI between configdb and directory watchers
