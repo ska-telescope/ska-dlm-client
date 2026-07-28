@@ -29,10 +29,13 @@ logger = logging.getLogger(__name__)
 class Item:
     """Data Item related information to aid registration."""
 
+    # pylint: disable=too-many-instance-attributes
     path_rel_to_watch_dir: str
     item_type: ItemType
     metadata: DataProductMetadata | None
-    parent: Self | None
+    item_size: int | None = None
+    decompressed_size: int | None = None
+    parent: Self | None = None
     uuid: str | None = None
 
     def __init__(
@@ -40,6 +43,8 @@ class Item:
         path_rel_to_watch_dir: str,
         item_type: ItemType,
         metadata: DataProductMetadata | None,
+        decompressed_size: int | None = None,
+        item_size: int | None = None,
         parent: Self | None = None,
         parent_uid: str | None = None,
     ):
@@ -52,6 +57,8 @@ class Item:
         self.metadata = metadata
         self.parent = parent
         self.parent_uid = parent_uid
+        self.item_size = item_size
+        self.decompressed_size = decompressed_size
 
 
 class RegistrationProcessor:
@@ -154,6 +161,8 @@ class RegistrationProcessor:
             "item_type": item.item_type,
             "storage_name": storage_name,
             "parents": item.parent_uid,
+            "item_size": item.item_size,
+            "decompressed_size": item.decompressed_size,
             "do_storage_access_check": do_storage_access_check,
             "request_body": (None if item.metadata is None else item.metadata.as_dict()),
         }
@@ -331,6 +340,8 @@ class RegistrationProcessor:
                     "item_state": "READY",
                     "item_owner": "SKA",
                     "uid_expiration": uid_expiration,
+                    "item_size": item.item_size,
+                    "decompressed_size": item.decompressed_size,
                 }
 
                 response = api_ingest.init_data_item(request_body=init_item)
@@ -519,6 +530,7 @@ def _generate_dir_item_list(absolute_path: str, path_rel_to_watch_dir: str) -> l
             path_rel_to_watch_dir=path_rel_to_watch_dir,
             item_type=ItemType.FILE,
             metadata=None,
+            decompressed_size=os.path.getsize(os.path.realpath(absolute_path)),
         )
         item_list.append(item)
         return item_list
@@ -535,6 +547,9 @@ def _generate_dir_item_list(absolute_path: str, path_rel_to_watch_dir: str) -> l
             path_rel_to_watch_dir=path_rel_to_watch_dir,
             item_type=ItemType.CONTAINER,
             metadata=metadata,
+            decompressed_size=sum(
+                f.stat().st_size for f in Path(absolute_path).rglob("*") if f.is_file()
+            ),
         )
         item_list.append(item)
         return item_list
@@ -553,21 +568,28 @@ def _generate_dir_item_list(absolute_path: str, path_rel_to_watch_dir: str) -> l
     for entry in os.listdir(absolute_path):
         if entry == ska_dlm_client.config.METADATA_FILENAME:
             continue
+
         item_type = ItemType.FILE
         entry_path = os.path.join(absolute_path, entry)
         entry_rel_path = os.path.join(path_rel_to_watch_dir, entry)
+        size = os.path.getsize(os.path.realpath(absolute_path))
+
         if entry.lower().endswith(ska_dlm_client.config.DIRECTORY_IS_MEASUREMENT_SET_SUFFIX):
             item_type = ItemType.CONTAINER
+            size = sum(f.stat().st_size for f in Path(entry_path).rglob("*") if f.is_file())
+
         elif os.path.isdir(os.path.realpath(entry_path)):
             # Found a non-MS subdirectory
             # recursion !!
             item_list += _generate_dir_item_list(entry_path, entry_rel_path)
             continue
+
         item = Item(
             path_rel_to_watch_dir=entry_rel_path,
             item_type=item_type,
             metadata=None,  # Set to None as Container has this file's metadata
             parent=container_item,
+            decompressed_size=size,
         )
         item_list.append(item)
 
