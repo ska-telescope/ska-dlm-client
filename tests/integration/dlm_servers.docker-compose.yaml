@@ -148,7 +148,7 @@ services:
     image: ${SERVER_IMAGE}
     container_name: dlm_outbox
     environment:
-      DLM_OUTBOX_DATABASE_URL: "postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm"
+      DLM_OUTBOX_DATABASE_URL: "postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm_testing"
       DLM_OUTBOX_RABBITMQ_URL: "amqp://guest:guest@rabbitmq/"
       DLM_OUTBOX_POLL_INTERVAL: "10"
       DLM_OUTBOX_BATCH_SIZE: "50"
@@ -170,5 +170,32 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - dlm_network
+
+  dlm_archive:
+    platform: linux/amd64
+    image: ${SERVER_IMAGE}
+    container_name: dlm_archive
+    ports:
+      - 2222:2222
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - USER_NAME=dlm
+      - PASSWORD_ACCESS=false
+      - PUBLIC_KEY_ACCESS=true
+      - PUBLIC_KEY_FILE=/dlm/.ssh/id_rsa.pub
+    healthcheck:
+      test: ["CMD", "wget", "--no-check-certificate", "--post-data='{\"my_key\": \"my_value\"}'", "-qO-", "https://dlm_rclone:5572/rc/noop"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      dlm_rclone:
+        condition: service_healthy
+    volumes:
+      - shared-tmpfs:/dlm
     networks:
       - dlm_network
