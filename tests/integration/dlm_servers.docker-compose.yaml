@@ -105,10 +105,10 @@ services:
 
   dlm_migrations:
     platform: linux/amd64
-    image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:2.0.0-dev.c2f37650e
+    image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:2.1.0-dev.c7c7e7352
     container_name: dlm_migrations
     command: >
-      --url="jdbc:postgresql://dlm_db:5432/ska_dlm"
+      --url="jdbc:postgresql://dlm_db:5432/ska_dlm_testing"
       --username="ska_dlm_admin"
       --password="password"
       --driver=org.postgresql.Driver
@@ -129,7 +129,7 @@ services:
     user: root
     environment:
       - LOGLEVEL=${LOGLEVEL:-INFO}
-      - DLM_HEURISTIC_DATABASE_URL=${DLM_HEURISTIC_DATABASE_URL:-postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm}
+      - DLM_HEURISTIC_DATABASE_URL=${DLM_HEURISTIC_DATABASE_URL:-postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm_testing}
       - DLM_HEURISTIC_POLL_INTERVAL=${DLM_HEURISTIC_POLL_INTERVAL:-10}
     depends_on:
       dlm_db:
@@ -140,5 +140,35 @@ services:
         condition: service_started
       dlm_rclone:
         condition: service_started
+    networks:
+      - dlm_network
+
+  dlm_outbox:
+    platform: linux/amd64
+    image: ${SERVER_IMAGE}
+    container_name: dlm_outbox
+    environment:
+      DLM_OUTBOX_DATABASE_URL: "postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm"
+      DLM_OUTBOX_RABBITMQ_URL: "amqp://guest:guest@rabbitmq/"
+      DLM_OUTBOX_POLL_INTERVAL: "10"
+      DLM_OUTBOX_BATCH_SIZE: "50"
+      DLM_OUTBOX_EXCHANGE: "dlm.outbox"
+    entrypoint: ["python", "-m", "ska_dlm.dlm_outbox.relay"]
+    volumes:
+      - shared-tmpfs:/dlm
+      - $PWD/tests/integration/ska-dlm-home/.dlm:/root/.dlm
+      - $PWD/tests/integration/ska-dlm-home:/home/ska-dlm
+    depends_on:
+      dlm_db:
+        condition: service_healthy
+      dlm_migrations:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "ska-dlm --help || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - dlm_network

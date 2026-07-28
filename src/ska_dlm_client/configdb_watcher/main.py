@@ -17,6 +17,7 @@ from ska_dlm_client.configdb_watcher.config import SdpWatcherConfig, WatcherArgs
 from ska_dlm_client.configdb_watcher.configdb_utils import (
     create_sdp_migration_dependency,
     get_pvc_subpath,
+    start_rabbitmq_consumer,
     update_dependency_state,
 )
 from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
@@ -235,6 +236,11 @@ async def sdp_to_dlm_ingest_and_migrate(config: SdpWatcherConfig) -> None:
         config.include_existing,
         config.source_name,
         config.target_name,
+    )
+
+    # initialise RabbitMQ consumer (WIP)
+    asyncio.create_task(
+        start_rabbitmq_consumer(config.queue_connection_string, config.queue_exchange_name)
     )
 
     async with watch_dataproduct_status(
