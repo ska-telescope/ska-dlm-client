@@ -35,6 +35,7 @@ services:
       - SSH_PUBLIC_KEY_PATH=/dlm/.ssh/id_rsa.pub
       - LOGLEVEL=${LOGLEVEL:-INFO}
     entrypoint: uvicorn ska_dlm.dlm_storage.dlm_storage_requests:rest --host 0.0.0.0 --port 8003
+
     ports:
       - 8003:8003
     volumes:
@@ -48,6 +49,8 @@ services:
         condition: service_started
       dlm_rclone:
         condition: service_started
+      dlm_archive:
+        condition: service_started # I'm trying to get dlm_storage to register the location SKA-DEV and storage dlm-archive
     networks:
       - dlm_network
     healthcheck:
@@ -105,7 +108,7 @@ services:
 
   dlm_migrations:
     platform: linux/amd64
-    image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:2.1.0-dev.cd25d1834
+    image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:c117abfc
     container_name: dlm_migrations
     command: >
       --url="jdbc:postgresql://dlm_db:5432/ska_dlm_testing"

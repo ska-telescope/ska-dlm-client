@@ -50,6 +50,15 @@ docs-pre-build:
 .PHONY: docs-pre-build openapi-code-from-local-dlm
 
 docker-compose-up: ## Bring up test services in docker
+# create shared-tmpfs volume if it doesn't exist:
+	docker volume inspect shared-tmpfs >/dev/null 2>&1 || \
+		docker volume create \
+			--driver local \
+			--opt type=tmpfs \
+			--opt device=tmpfs \
+			--opt o=mode=1777,uid=1000,gid=1000 \
+			shared-tmpfs
+
 	export LOGLEVEL=DEBUG && export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml build
 	export LOGLEVEL=DEBUG && export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml up -d --remove-orphans
 

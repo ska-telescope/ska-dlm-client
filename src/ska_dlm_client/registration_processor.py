@@ -265,7 +265,7 @@ class RegistrationProcessor:
 
         return result
 
-    def _get_storage_info_from_name(self, storage_name: str) -> tuple[str | None, str | None] :
+    def _get_storage_info_from_name(self, storage_name: str) -> tuple[str | None, str | None]:
         """Get the storage_id and phase for a given storage_name.
 
         Args:
