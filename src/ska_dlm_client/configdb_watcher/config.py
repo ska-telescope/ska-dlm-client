@@ -12,6 +12,7 @@ class SdpWatcherConfig(ClientConfig):
     """Configuration for the ConfigDB watcher."""
 
     source_name: str = "configdb-watcher"
+    source_phase: str = "GAS"
     directory_to_watch: str = "/dlm/product_dir"
     reload_status_file: bool = True
     use_status_file: bool = False

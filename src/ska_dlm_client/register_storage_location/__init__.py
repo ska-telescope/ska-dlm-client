@@ -10,16 +10,18 @@ __author__ = """Mark Boulton"""
 __email__ = "mark.boulton@uwa.edu.au"
 __version__ = "1.0.0"
 
-from ska_dlm_client.register_storage_location.main import (
-    get_or_init_location,
-    get_or_init_storage,
-    main,
-    setup_testing,
-)
-
 __all__ = [
     "main",
     "setup_testing",
     "get_or_init_location",
     "get_or_init_storage",
 ]
+
+
+def __getattr__(name: str):
+    """Lazily expose helpers without importing main at package import time."""
+    if name in __all__:
+        from ska_dlm_client.register_storage_location import main as _main
+
+        return getattr(_main, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

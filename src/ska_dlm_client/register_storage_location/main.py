@@ -28,11 +28,23 @@ LOCATION_CITY = os.getenv("LOCATION_CITY", "Perth")
 LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")
 TARGET_ROOT = os.getenv("TARGET_ROOT", "/dlm-archive")
 TGT_STORAGE_PHASE = os.getenv("TARGET_PHASE", "SOLID")
+# RCLONE_CONFIG_TARGET = {
+#     "name": "dlm-archive",
+#     "type": "alias",
+#     "root_path": "/",
+#     "parameters": {"remote": "/"},
+# }
 RCLONE_CONFIG_TARGET = {
-    "name": "dlm-archive",
-    "type": "alias",
-    "root_path": "/",
-    "parameters": {"remote": "/"},
+    "name": f"{os.getenv('TARGET_NAME', 'dlm-archive')}",
+    "type": "sftp",
+    "parameters": {
+        "host": "dlm_archive",
+        "port": 2222,
+        "key_file": "/root/.ssh/id_rsa",
+        "shell_type": "unix",
+        "type": "sftp",
+        "user": f"{os.getenv('USER', 'ska-dlm')}",
+    },
 }
 RCLONE_CONFIG_SOURCE = {
     "name": f"{os.getenv('SOURCE_NAME', 'dir-watcher')}",
@@ -196,12 +208,15 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
         )
     if setup_target:
         storage_name = watcher_config.target_name
-        storage_root_directory = "/dlm-archive"
+        storage_root_directory = TARGET_ROOT
+        storage_phase = TGT_STORAGE_PHASE
     else:
         storage_name = watcher_config.source_name
+        storage_phase = watcher_config.source_phase
         storage_root_directory = watcher_config.directory_to_watch
     storage_id = get_or_init_storage(
         storage_name=storage_name,
+        storage_phase=storage_phase,
         storage_url=storage_url,
         api_configuration=api_configuration,
         storage_root_directory=storage_root_directory,
@@ -288,7 +303,7 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
     api_configuration = Configuration(host=args.storage_url)
-    setup_testing(api_configuration)
+    # setup_testing(api_configuration)
 
 
 if __name__ == "__main__":

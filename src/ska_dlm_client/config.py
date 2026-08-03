@@ -30,6 +30,7 @@ class ClientConfig:
     """
 
     source_name: str = ""
+    source_phase: str = os.getenv("SOURCE_PHASE", "GAS")
     directory_to_watch: str = "/dlm/watch_dir"
     target_name: str = "dlm-archive"
     ingest_url: str = "http://dlm_ingest:8001"
@@ -54,6 +55,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
     """Class for common/required command line parameters and helper methods."""
 
     source_name: str = ""
+    source_phase: str = "GAS"
     directory_to_watch: str = ""
     target_name: str = ""
     storage_url: str = ""
@@ -72,6 +74,13 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
             "--source-name",
             type=str,
             help="Source storage name (e.g., 'configdb-watcher').",
+        )
+        self.parser.add_argument(
+            "-p",
+            "--source-phase",
+            type=str,
+            default="GAS",
+            help="Source storage phase ['SOLID'|'LIQUID'|'GAS'|'PLASMA'].",
         )
         self.parser.add_argument(
             "-d",
@@ -165,6 +174,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         if args is None:
             args = self.parser.parse_args()
         self.source_name = args.source_name
+        self.source_phase = args.source_phase
         self.directory_to_watch = args.directory_to_watch
         self.target_name = args.target_name
         self.ingest_url = args.ingest_url

@@ -10,6 +10,7 @@ case "$watcher_mode" in
 
         CMD="dlm-directory-watcher \
           --source-name ${SOURCE_NAME:-dir-watcher} \
+          --source-phase ${SOURCE_PHASE:-GAS} \
           --directory-to-watch ${DIRECTORY_TO_WATCH:-/dlm/watch_dir} \
           --target-name ${TARGET_NAME:-dlm-archive} \
           --migration-url ${MIGRATION_URL:-http://dlm_migration:8004} \
@@ -25,6 +26,7 @@ case "$watcher_mode" in
     "configdb-watcher")
         CMD="dlm-configdb-watcher \
           --source-name ${SOURCE_NAME:-configdb-watcher} \
+          --source-phase ${SOURCE_PHASE:-GAS} \
           --directory-to-watch ${DIRECTORY_TO_WATCH:-/dlm/product_dir} \
           --target-name ${TARGET_NAME:-dlm-archive} \
           --storage-url ${STORAGE_URL:-http://dlm_storage:8003} \

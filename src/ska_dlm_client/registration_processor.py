@@ -209,6 +209,7 @@ class RegistrationProcessor:
             api_migration = migration_api.MigrationApi(migration_api_client)
             api_migration.api_client.configuration.host = migration_configuration.host
             try:
+                # copy_data_item is an async call and returns success in most cases
                 response = api_migration.copy_data_item(
                     uid=uid,
                     destination_name=destination_storage_name,
@@ -245,13 +246,17 @@ class RegistrationProcessor:
             if not isinstance(response, list):
                 logger.error("Unexpected response from query_storage")
                 return None
-            if len(response) != 1:
+            if len(response) > 1:
                 logger.error(
                     "Expected exactly one storage entry for %s, got %d",
                     storage_name,
                     len(response),
                 )
                 return None
+            while len(response) == 0:
+                logger.info("Waiting for storage entry for %s", storage_name)
+                time.sleep(10)
+                response = api_storage.query_storage(storage_name=storage_name)
 
             the_storage_id = response[0]["storage_id"]
             the_storage_phase = response[0]["storage_phase"]
@@ -291,9 +296,14 @@ class RegistrationProcessor:
 
     def _migrate_item(self, migrate, item, uuid, api_ingest) -> None:
         """Migrate the last registered item."""
-        source_storage = getattr(self._config, "storage_name", None) or getattr(
+        source_name = getattr(self._config, "source_name", None) or getattr(
             self._config, "source_storage", None
         )  # TODO (DMAN-204): rename storage_name to source_storage in Dir Watcher
+        target_name = getattr(
+            self._config,
+            "target_name",
+            None,
+        )
         if migrate:
             # We are only migrating the top-level containers, since rclone is
             # performing a sync including all children.
@@ -305,16 +315,11 @@ class RegistrationProcessor:
             self._bookkeeping_after_registration(
                 item=item,
                 dlm_registration_uuid=uuid,
-                storage_name=source_storage,
+                storage_name=source_name,
                 migration_result=migration_result,
             )
-        else:
+        elif target_name is not None and source_name != target_name:
             # register not explicitly migrated items on target storage
-            target_name = getattr(
-                self._config,
-                "target_name",
-                None,
-            )
             # get the oid of the already registered item on the source storage
             resp = []
             oid = None
@@ -382,6 +387,8 @@ class RegistrationProcessor:
         ingest_url = getattr(cfg, "ingest_url", None)
 
         source_name = getattr(cfg, "source_name", None)
+        target_name = getattr(cfg, "target_name", None)
+        register_only = bool(target_name is None or source_name == target_name)
 
         if ingest_configuration is None or ingest_url is None or source_name is None:
             logger.error(
@@ -423,12 +430,13 @@ class RegistrationProcessor:
                 return None
 
         # This should be refactored out and made an async transaction.
-        self._migrate_item(
-            migrate=migrate,
-            item=item,
-            uuid=dlm_registration_uuid,
-            api_ingest=api_ingest,
-        )
+        if not register_only:
+            self._migrate_item(
+                migrate=migrate,
+                item=item,
+                uuid=dlm_registration_uuid,
+                api_ingest=api_ingest,
+            )
         return dlm_registration_uuid
 
     def _register_container_items(self, item_list: list[Item], parent_uid: str = None) -> None:
@@ -441,7 +449,20 @@ class RegistrationProcessor:
             item_list: A list of data items to register with the DLM.
             parent_uid: The unique identifier of the parent item, if applicable.
         """
-        migrate = True
+        source_name = getattr(self._config, "source_name", None)
+        target_name = getattr(self._config, "target_name", None)
+        # Never migrate if target_name is not defined or if it is the same as source_name
+        migrate = bool(target_name and source_name != target_name)
+        if migrate:
+            logger.info(
+                "Migration will be performed for items from source %s to target storage %s",
+                source_name,
+                target_name,
+            )
+        else:
+            logger.info(
+                "Migration is disabled since target is either undefined or the same as source %s",
+                source_name,)
         for item in item_list:
             _ = self._register_single_item(item=item, migrate=migrate, parent_uid=parent_uid)
             migrate = False  # Only the top-level container item triggers migration

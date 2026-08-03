@@ -37,9 +37,12 @@ def process_args(args: argparse.Namespace) -> WatcherConfig:
         RCLONE_CONFIG_SOURCE["name"] = args.source_name
     if args.watcher_hostname:
         RCLONE_CONFIG_SOURCE["parameters"]["host"] = args.watcher_hostname
+    source_phase = args.source_phase if args.source_phase else "GAS"
+
     config = WatcherConfig(
         directory_to_watch=args.directory_to_watch,
         source_name=args.source_name,
+        source_phase=source_phase,
         target_name=args.target_name,
         storage_url=args.storage_url,
         migration_url=args.migration_url,

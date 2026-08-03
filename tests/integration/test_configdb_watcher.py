@@ -55,29 +55,48 @@ LOCATION_CITY = "Marksville"
 LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
 
 STORAGE = {
-    "TGT": {
-        "STORAGE_NAME": "dlm-archive",
-        "STORAGE_TYPE": StorageType.FILESYSTEM,
-        "STORAGE_INTERFACE": StorageInterface.POSIX,
-        "ROOT_DIRECTORY": "/dlm-archive",
-        "STORAGE_PHASE": "SOLID",
-        "STORAGE_CONFIG": {
-            "name": "dlm-archive",
-            "type": "alias",
-            "parameters": {"remote": "/"},
-        },
-    },
+    # "TGT": {
+    #     "STORAGE_NAME": "dlm-archive",
+    #     "STORAGE_TYPE": StorageType.FILESYSTEM,
+    #     "STORAGE_INTERFACE": StorageInterface.POSIX,
+    #     "ROOT_DIRECTORY": "/dlm-archive",
+    #     "STORAGE_PHASE": "SOLID",
+    #     "STORAGE_CONFIG": {
+    #         "name": "dlm-archive",
+    #         "type": "alias",
+    #         "parameters": {"remote": "/"},
+    #     },
+    # },
     "SRC": {
-        "STORAGE_NAME": "sdp-watcher",
+        "STORAGE_NAME": "configdb-watcher",
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
         "ROOT_DIRECTORY": "/dlm/product_dir",
         "STORAGE_PHASE": "GAS",
         "STORAGE_CONFIG": {
-            "name": "dlm",
+            "name": "sdp-watcher",
             "type": "sftp",
             "parameters": {
                 "host": "dlm_configdb_watcher",
+                "key_file": "/root/.ssh/id_rsa",
+                "shell_type": "unix",
+                "type": "sftp",
+                "user": "ska-dlm",
+            },
+        },
+    },
+    "TGT": {
+        "STORAGE_NAME": "dlm-archive",
+        "STORAGE_TYPE": StorageType.FILESYSTEM,
+        "STORAGE_INTERFACE": StorageInterface.POSIX,
+        "ROOT_DIRECTORY": "/dlm/archive_dir",
+        "STORAGE_PHASE": "SOLID",
+        "STORAGE_CONFIG": {
+            "name": f"{os.getenv('TARGET_NAME', 'dlm-archive')}",
+            "type": "sftp",
+            "parameters": {
+                "host": "dlm_archive",
+                "port": 2222,
                 "key_file": "/root/.ssh/id_rsa",
                 "shell_type": "unix",
                 "type": "sftp",

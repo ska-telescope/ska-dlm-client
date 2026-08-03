@@ -37,8 +37,10 @@ def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
         RCLONE_CONFIG_SOURCE["name"] = args.source_name
     if args.watcher_hostname:
         RCLONE_CONFIG_SOURCE["parameters"]["host"] = args.watcher_hostname
+    source_phase = args.source_phase if args.source_phase else "GAS"
 
     return SdpWatcherConfig(
+        source_phase = source_phase,
         ingest_url=args.ingest_url,
         storage_url=args.storage_url,
         migration_url=args.migration_url,
