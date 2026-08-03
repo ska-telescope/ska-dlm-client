@@ -13,7 +13,7 @@ PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
 # The DLM server image to use in integration tests:
 # DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:2.1.0  # future: use this when we have a new release of the DLM server image
 # DLM_SERVER_IMAGE = ska-data-lifecycle:2.1.0-dirty  # This works for local testing of the DLM server image built using make oci-image-build.
-DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:1a1fb11d
+DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:9be3d259
 
 python-test: extract-test-data python-pre-test python-do-test python-post-test
 
@@ -50,6 +50,15 @@ docs-pre-build:
 .PHONY: docs-pre-build openapi-code-from-local-dlm
 
 docker-compose-up: ## Bring up test services in docker
+# create shared-tmpfs volume if it doesn't exist:
+	docker volume inspect shared-tmpfs >/dev/null 2>&1 || \
+		docker volume create \
+			--driver local \
+			--opt type=tmpfs \
+			--opt device=tmpfs \
+			--opt o=mode=1777,uid=1000,gid=1000 \
+			shared-tmpfs
+
 	export LOGLEVEL=DEBUG && export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml build
 	export LOGLEVEL=DEBUG && export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml up -d --remove-orphans
 
