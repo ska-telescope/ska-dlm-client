@@ -5,6 +5,9 @@ services:
   dlm_rclone:
     image: dlm_rclone
     container_name: dlm_rclone
+    build:
+       context: ..
+       dockerfile: tests/Dockerfile-rclone
     ports:
       - 5572:5572
     entrypoint: ["/bin/sh","-c"]
