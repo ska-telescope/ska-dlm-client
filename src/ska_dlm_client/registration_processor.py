@@ -1,6 +1,7 @@
 # pylint: disable=broad-exception-caught
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-positional-arguments
+# pylint: disable=too-many-locals
 """Register the given file or directory with the DLM."""
 
 import logging
@@ -462,7 +463,8 @@ class RegistrationProcessor:
         else:
             logger.info(
                 "Migration is disabled since target is either undefined or the same as source %s",
-                source_name,)
+                source_name,
+            )
         for item in item_list:
             _ = self._register_single_item(item=item, migrate=migrate, parent_uid=parent_uid)
             migrate = False  # Only the top-level container item triggers migration
