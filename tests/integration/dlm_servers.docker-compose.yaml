@@ -49,8 +49,6 @@ services:
         condition: service_started
       dlm_rclone:
         condition: service_started
-      dlm_archive:
-        condition: service_started # I'm trying to get dlm_storage to register the location SKA-DEV and storage dlm-archive
     networks:
       - dlm_network
     healthcheck:
