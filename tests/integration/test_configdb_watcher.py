@@ -237,39 +237,19 @@ def _restart_configdb_watcher(timeout_s: int = 60) -> None:
 
 
 @pytest.mark.integration
-def test_storage_initialisation(storage_configuration: Configuration):
-    """Test setting up a location, storage and storage config."""
+def test_storage_initialisation(storage_configuration: Configuration, _common_dlm_endpoints):
+    """Verify the storage endpoints exist."""
     with api_client.ApiClient(storage_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
 
-        # --- ensure location exists ---
-        log.info(
-            "Using storage configuration host for registering: %s", storage_configuration.host
-        )
-        storage_log = _get_container_log("dlm_storage")
-        log.info("Log from storage container: %s", storage_log)
-        location_id = _init_location_if_needed(api_storage)
-
-        # --- ensure storage exists ---
-        storage_id = _init_storage_if_needed(api_storage, location_id, storage=STORAGE["TGT"])
-
-        # --- set storage config ---
-        cfg_id = api_storage.create_storage_config(
-            request_body=STORAGE["TGT"]["STORAGE_CONFIG"],
-            storage_id=storage_id,
-            storage_name=STORAGE["TGT"]["STORAGE_NAME"],
-            config_type="rclone",
-        )
-        assert isinstance(cfg_id, str) and cfg_id
-        log.info("Target storage config id: %s", cfg_id)
-
-        # --- verify by querying again ---
-        resp2 = api_storage.query_storage(storage_name=STORAGE["TGT"]["STORAGE_NAME"])
-        assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
+        storage = api_storage.query_storage(storage_name="configdb-watcher")
+        assert storage
+        location = api_storage.query_location(location_name="SKA-DEV")
+        assert location
 
 
 @pytest.mark.integration
-def test_data_was_copied_correctly():
+def test_data_was_copied_correctly(_common_dlm_endpoints):
     """Verify that the test data is visible inside the watcher container."""
     expected_file = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}/{ARB_MS}/table.dat"
 
@@ -290,7 +270,7 @@ def test_data_was_copied_correctly():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_configdb_watcher(request_configuration: Configuration):
+async def test_configdb_watcher(request_configuration: Configuration, _common_dlm_endpoints):
     """Flow points to subfolder scan90-99, containing 10 MS files."""
     # Trigger COMPLETED Flow pointing directly at scan90-99
     flow_name = "test-flow"
@@ -318,7 +298,9 @@ async def test_configdb_watcher(request_configuration: Configuration):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_configdb_watcher_higher_dir(request_configuration: Configuration):
+async def test_configdb_watcher_higher_dir(
+    request_configuration: Configuration, _common_dlm_endpoints
+):
     """
     Flow points at pb-test-20260126-24294 (one level higher).
 
@@ -359,7 +341,7 @@ async def test_configdb_watcher_higher_dir(request_configuration: Configuration)
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_watcher_logs_failed_registration():
+async def test_watcher_logs_failed_registration(_common_dlm_endpoints):
     """Flow points to a data item that is already registered on the storage."""
     # Trigger a COMPLETED Flow with same subpath as previous test
     pvc_subpath = f"product/{EB_ID}/ska-sdp/{PB_ID}"

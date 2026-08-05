@@ -1,5 +1,8 @@
 # pylint: disable=broad-exception-caught
 # pylint: disable=invalid-name
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
+# pylint: disable=too-many-locals
 """Initialize a location and a storage."""
 
 import argparse
@@ -7,12 +10,10 @@ import logging
 import os
 import pwd
 import shutil
-import socket
 import sys
 
 import ska_ser_logging
 
-from ska_dlm_client.common_types import LocationCountry, LocationName, LocationType
 from ska_dlm_client.config import Config
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
@@ -46,16 +47,20 @@ STORAGE_TYPE = "filesystem"
 def get_or_init_location(
     api_configuration: Configuration,
     storage_url: str,
-    location: str,
+    location_name: str,
+    location_type: str = "",  # required by init_location
+    location_country: str = "",  # required by init_location
+    location_city: str = "",  # required by init_location
+    location_facility: str = "",  # required by init_location
 ) -> str:
-    """Perform location initialisation to be used when testing."""
+    """Get location_id or perform location initialisation based on the location_name provided."""
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
 
         # get the location_id
-        logger.info("Checking location: %s", location)
+        logger.info("Checking location: %s", location_name)
         api_storage.api_client.configuration.host = storage_url
-        response = api_storage.query_location(location_name=location)
+        response = api_storage.query_location(location_name=location_name)
         logger.info("query_location response: %s", response)
         if not isinstance(response, list):
             logger.error("Unexpected response from query_location_storage")
@@ -65,11 +70,11 @@ def get_or_init_location(
             logger.info("location already exists in DLM")
         else:
             response = api_storage.init_location(
-                location_name=LOCATION_NAME,
-                location_type=LOCATION_TYPE,
-                location_country=LOCATION_COUNTRY,
-                location_city=LOCATION_CITY,
-                location_facility=LOCATION_FACILITY,
+                location_name=location_name,
+                location_type=location_type,
+                location_country=location_country,
+                location_city=location_city,
+                location_facility=location_facility,
             )
             the_location_id = response
             logger.info("Location created in DLM")
@@ -117,8 +122,11 @@ def get_or_init_storage(
     storage_root_directory: str,
     api_configuration: Configuration,
     the_location_id: str,
-    rclone_config: str,
-    storage_phase: str = "GAS",
+    rclone_config: dict,
+    storage_type: str = "",  # enum | None?
+    storage_interface: str = "",  # enum | None?
+    location_name: str = "",
+    storage_phase: str = "GAS",  # enum = StoragePhase.GAS.value?
 ) -> str:
     """Get storage_id or perform storage initialisation based on the storage_name provided."""
     assert the_location_id is not None
@@ -146,11 +154,11 @@ def get_or_init_storage(
         if not store:
             storage_id = api_storage.init_storage(
                 storage_name=storage_name,
-                storage_type=STORAGE_TYPE,
-                storage_interface=STORAGE_INTERFACE,
+                storage_type=storage_type,
+                storage_interface=storage_interface,
                 root_directory=storage_root_directory,
                 location_id=the_location_id,
-                location_name=LOCATION_NAME,
+                location_name=location_name,
                 storage_phase=storage_phase,
             )
             logger.info("Storage %s created in DLM", storage_name)
@@ -165,7 +173,7 @@ def get_or_init_storage(
                     request_body=rclone_config,
                     storage_id=storage_id,
                     storage_name=storage_name,
-                    config_type="rclone",
+                    config_type="rclone",  # change to enum
                 )
                 logger.info("Storage config created with id: %s", storage_config_id)
             else:
@@ -180,17 +188,31 @@ def get_or_init_storage(
 def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arguments
     watcher_config: Config,
     api_configuration: Configuration,
-    rclone_config: str = None,
-    location_id: str = None,
-    storage_url: str = None,
+    rclone_config: dict,
+    location_name: str = "",
+    location_type: str = "",  # required by init_location
+    location_country: str = "",  # required by init_location
+    location_city: str = "",  # required by init_location
+    location_facility: str = "",  # required by init_location
+    location_id: str | None = None,
+    storage_url: str = "",
+    storage_type: str = "",
+    storage_interface: str = "",  # required by init_storage
     setup_target: bool = False,
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
     if location_id is None:
+        logger.debug("trying get_or_init_location...")
         location_id = get_or_init_location(
-            api_configuration, storage_url=storage_url, location=LOCATION_NAME
+            api_configuration,
+            storage_url=storage_url,
+            location_name=location_name,
+            location_type=location_type,
+            location_country=location_country,
+            location_city=location_city,
+            location_facility=location_facility,
         )
-    if setup_target:
+    if setup_target:  # do we need this in this function?
         storage_name = watcher_config.target_name
         storage_root_directory = TARGET_ROOT
         storage_phase = TGT_STORAGE_PHASE
@@ -202,6 +224,8 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
         storage_name=storage_name,
         storage_phase=storage_phase,
         storage_url=storage_url,
+        storage_type=storage_type,  # compulsory for init_storage
+        storage_interface=storage_interface,  # compulsory for init_storage
         api_configuration=api_configuration,
         storage_root_directory=storage_root_directory,
         the_location_id=location_id,

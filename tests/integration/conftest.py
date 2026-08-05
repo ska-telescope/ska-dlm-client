@@ -1,3 +1,6 @@
+# pylint: disable=too-many-arguments
+# pylint: disable=redefined-outer-name
+# pylint: disable=dangerous-default-value
 """Shared pytest fixtures and service readiness checks for DLM integration tests."""
 
 import logging
@@ -226,10 +229,10 @@ def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 2
     for host in host_options:
         check_url = f"{url_parts.scheme}://{host}:{url_parts.port}{url_parts.path}"
         try:
-            log.info(">>>> Checking HTTP endpoint: %s for %s", check_url, orig_hostname)
+            logger.info(">>>> Checking HTTP endpoint: %s for %s", check_url, orig_hostname)
             r = requests.get(check_url, timeout=timeout_s, verify=verify, allow_redirects=True)
             if r.status_code in ok:
-                log.info("OK!")
+                logger.info("OK!")
                 return
         except requests.RequestException:
             pass
