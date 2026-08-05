@@ -7,6 +7,7 @@ import functools
 import logging
 import os
 import signal
+import socket
 
 import ska_ser_logging
 
@@ -16,12 +17,27 @@ from ska_dlm_client.directory_watcher.directory_watcher import (
     INotifyDirectoryWatcher,
     PollingDirectoryWatcher,
 )
-from ska_dlm_client.register_storage_location.main import RCLONE_CONFIG_SOURCE, setup_volume
+from ska_dlm_client.register_storage_location.main import setup_volume
 from ska_dlm_client.registration_processor import RegistrationProcessor
 
 from .config import WatcherConfig
 
 logger = logging.getLogger(__name__)
+
+
+RCLONE_CONFIG_SOURCE = {
+    "name": f"{os.getenv('SOURCE_NAME', 'dir-watcher')}",
+    "type": "sftp",
+    "parameters": {
+        "host": f"{os.getenv('WATCHER_HOSTNAME', socket.gethostname())}",
+        "key_file": "/root/.ssh/id_rsa",
+        "shell_type": "unix",
+        "type": "sftp",
+        "user": f"{os.getenv('USER', 'ska-dlm')}",
+    },
+}
+STORAGE_INTERFACE = "posix"
+STORAGE_TYPE = "filesystem"
 
 
 def process_args(args: argparse.Namespace) -> WatcherConfig:
@@ -74,6 +90,14 @@ def create_directory_watcher() -> DirectoryWatcher:
         api_configuration=config.ingest_configuration,
         rclone_config=RCLONE_CONFIG_SOURCE,
         storage_url=config.storage_url,
+        # should the args below be configurable?
+        location_name="SKA-DEV",  # how can we get the location if it was initiated on the server?
+        location_type="local-dev",  # compulsory for init_location
+        location_country="AU",  # compulsory for init_location
+        location_city="Perth",  # compulsory for init_location
+        location_facility="local",  # compulsory for init_location
+        storage_type="filesystem",  # compulsory for init_storage
+        storage_interface="posix",  # compulsory for init_storage
     )
     registration_processor = RegistrationProcessor(config)
     if args.include_existing:
@@ -98,7 +122,7 @@ async def amain():
     Creates a DirectoryWatcher, sets up signal handlers for graceful shutdown,
     and starts the directory watching process.
     """
-    directory_watcher = create_directory_watcher()
+    directory_watcher = create_directory_watcher()  # triggers source storage setup
 
     def stop_watcher(signo: signal.Signals):
         logger.info("Received %s, stopping directory watcher", signo.name)

@@ -124,7 +124,7 @@ class INotifyDirectoryWatcher(DirectoryWatcher):
         """Watch for changes in the defined directory and process each change found."""
         logger.info("with config parameters %s", self._config)
         logger.info("starting to watch %s", self._config.directory_to_watch)
-        logger.info(
+        logger.debug(
             "NOTE: watchfiles.awatch has recursive=False, in case this matters in the future."
         )
         # Last opportunity to call post startup func before we wait.

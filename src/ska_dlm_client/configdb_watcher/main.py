@@ -34,7 +34,7 @@ RCLONE_CONFIG_SOURCE = {
     "name": f"{os.getenv('SOURCE_NAME', 'configdb-watcher')}",
     "type": "sftp",
     "parameters": {
-        "host": f"{os.getenv('WATCHER_HOSTNAME', socket.gethostname())}",
+        "host": f"{os.getenv('WATCHER_HOSTNAME', socket.gethostname())}",  # "dlm_configdb_watcher"
         "key_file": "/root/.ssh/id_rsa",
         "shell_type": "unix",
         "type": "sftp",
@@ -237,11 +237,18 @@ async def run_configdb_watcher(config: SdpWatcherConfig) -> None:
     configdb = Config(
         host=config.etcd_host, port=config.etcd_port
     )  # Share one handle between writer & watcher
-    _ = setup_volume(  # set up configdb-watcher storage endpoint
+    _ = setup_volume(  # set up configdb-watcher storage endpoint. Location should already be up.
         watcher_config=config,
         api_configuration=config.ingest_configuration,
         rclone_config=RCLONE_CONFIG_SOURCE,
         storage_url=config.storage_url,
+        location_name="SKA-DEV",  # how can we get the location if it was initiated on the server?
+        location_type="local-dev",  # compulsory for init_location
+        location_country="AU",  # compulsory for init_location
+        location_city="Perth",  # compulsory for init_location
+        location_facility="local",  # compulsory for init_location
+        storage_type="filesystem",  # compulsory for init_storage
+        storage_interface="posix",  # compulsory for init_storage
     )
     logger.info(
         "Starting ConfigDB watcher (include_existing=%s, source name=%s, target name=%s)",

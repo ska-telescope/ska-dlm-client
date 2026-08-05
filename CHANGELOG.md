@@ -4,6 +4,7 @@
 
 ### Removed
 
+* `dlm_setup_storage_location` docker container.
 * All references to previous DB name `ska_dlm_meta`.
 
 ### Updated

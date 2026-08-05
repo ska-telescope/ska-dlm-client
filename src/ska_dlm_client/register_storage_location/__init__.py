@@ -10,14 +10,9 @@ __author__ = """Mark Boulton"""
 __email__ = "mark.boulton@uwa.edu.au"
 __version__ = "1.0.0"
 
-from ska_dlm_client.register_storage_location.main import (
-    RCLONE_CONFIG_SOURCE,
-    get_or_init_location,
-    get_or_init_storage,
-)
+from ska_dlm_client.register_storage_location.main import get_or_init_location, get_or_init_storage
 
 __all__ = [
     "get_or_init_location",
     "get_or_init_storage",
-    "RCLONE_CONFIG_SOURCE",
 ]
