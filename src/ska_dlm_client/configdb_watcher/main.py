@@ -5,6 +5,7 @@ import argparse
 import asyncio
 import logging
 import os
+import socket
 from pathlib import Path
 
 import athreading
@@ -21,14 +22,25 @@ from ska_dlm_client.configdb_watcher.configdb_utils import (
     update_dependency_state,
 )
 from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
-from ska_dlm_client.register_storage_location.main import RCLONE_CONFIG_SOURCE, setup_volume
+from ska_dlm_client.register_storage_location.main import setup_volume
 from ska_dlm_client.registration_processor import (
     RegistrationProcessor,
     directory_contains_metadata_file,
 )
 
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
-# TODO: add a proper option for LOG_LEVEL=DEBUG
+
+RCLONE_CONFIG_SOURCE = {
+    "name": f"{os.getenv('SOURCE_NAME', 'configdb-watcher')}",
+    "type": "sftp",
+    "parameters": {
+        "host": f"{os.getenv('WATCHER_HOSTNAME', socket.gethostname())}",
+        "key_file": "/root/.ssh/id_rsa",
+        "shell_type": "unix",
+        "type": "sftp",
+        "user": f"{os.getenv('USER', 'ska-dlm')}",
+    },
+}
 
 
 def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
@@ -220,12 +232,12 @@ async def _process_completed_flow(  # noqa: C901
     await _aupdate_dependency_state(final_status)
 
 
-async def sdp_to_dlm_ingest_and_migrate(config: SdpWatcherConfig) -> None:
+async def run_configdb_watcher(config: SdpWatcherConfig) -> None:
     """Ingest and migrate SDP data-products using DLM."""
     configdb = Config(
         host=config.etcd_host, port=config.etcd_port
     )  # Share one handle between writer & watcher
-    _ = setup_volume(
+    _ = setup_volume(  # set up configdb-watcher storage endpoint
         watcher_config=config,
         api_configuration=config.ingest_configuration,
         rclone_config=RCLONE_CONFIG_SOURCE,
@@ -277,7 +289,7 @@ def main() -> None:
     cmd_line_parameters.parse_arguments(args)
     config = process_args(args)
 
-    asyncio.run(sdp_to_dlm_ingest_and_migrate(config))
+    asyncio.run(run_configdb_watcher(config))  # triggers source storage setup
 
 
 if __name__ == "__main__":
