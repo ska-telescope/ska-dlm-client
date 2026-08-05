@@ -114,7 +114,7 @@ def init_storage_for_testing(
     return the_storage_id
 
 
-def setup_testing(
+def setup_testing_helm(
     storage_name: str, storage_configuration: Configuration, storage_root_directory: str
 ):
     """Complete configuration of the environment."""
@@ -165,7 +165,7 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
     storage_configuration = Configuration(host=args.storage_url)
-    setup_testing(args.storage_name, storage_configuration, args.storage_root_directory)
+    setup_testing_helm(args.storage_name, storage_configuration, args.storage_root_directory)
 
 
 if __name__ == "__main__":
