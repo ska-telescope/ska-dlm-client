@@ -49,8 +49,6 @@ services:
         condition: service_started
       dlm_rclone:
         condition: service_started
-      dlm_archive:
-        condition: service_started # I'm trying to get dlm_storage to register the location SKA-DEV and storage dlm-archive
     networks:
       - dlm_network
     healthcheck:
@@ -148,7 +146,7 @@ services:
 
   dlm_outbox:
     platform: linux/amd64
-    image: ${SERVER_IMAGE}
+    image: ${SERVER_IMAGE:-ska-data-lifecycle:2.1.0-dirty}
     container_name: dlm_outbox
     environment:
       DLM_OUTBOX_DATABASE_URL: "postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm_testing"
@@ -186,16 +184,19 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Etc/UTC
-      - USER_NAME=dlm
+      - USER_NAME=ska-dlm
       - PASSWORD_ACCESS=false
       - PUBLIC_KEY_ACCESS=true
       - PUBLIC_KEY_FILE=/dlm/.ssh/id_rsa.pub
+      - PUBLIC_KEY_URL=http://dlm_storage:8003/storage/get_ssh_public_key
     healthcheck:
       test: ["CMD", "wget", "--no-check-certificate", "--post-data='{\"my_key\": \"my_value\"}'", "-qO-", "https://dlm_rclone:5572/rc/noop"]
       interval: 5s
       timeout: 5s
       retries: 10
     depends_on:
+      dlm_storage:
+        condition: service_healthy
       dlm_rclone:
         condition: service_healthy
     volumes:
