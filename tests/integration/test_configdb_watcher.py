@@ -33,7 +33,7 @@ from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.api_client import ApiException
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import request_api, storage_api
-from ska_dlm_client.register_storage_location.main import setup_testing
+from ska_dlm_client.register_storage_location.main import get_or_init_location, get_or_init_storage
 
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -95,7 +95,7 @@ STORAGE = {
             "name": f"{os.getenv('TARGET_NAME', 'dlm-archive')}",
             "type": "sftp",
             "parameters": {
-                "host": "dlm_archive",
+                "host": "dlm_storage",
                 "port": 2222,
                 "key_file": "/root/.ssh/id_rsa",
                 "shell_type": "unix",
@@ -108,6 +108,32 @@ STORAGE = {
 
 SRC_HOST = STORAGE["SRC"]["STORAGE_CONFIG"]["parameters"]["host"]
 WATCHER_SOURCE_DIR_ROOT = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}"
+
+def setup_testing(api_configuration: Configuration):
+    """Configure a target storage endpoint for rclone."""
+    # NOTE: This is only required for integration testing with the DLM
+    # server.
+    # The setup of the source volume is now performed during the startup
+    # of the client. In future the setup of a default (archive) storage
+    # endpoint will be performed during startup of the DLM server and
+    # then this can be removed as well.
+    storage_url = (
+        f"{api_configuration.host}:8003"
+        if api_configuration.host.find(":") == -1
+        else api_configuration.host
+    )
+    location_id = get_or_init_location(
+        api_configuration, storage_url=storage_url, location=LOCATION_NAME
+    )
+    _ = get_or_init_storage(
+        storage_name=STORAGE["TGT"]["STORAGE_NAME"],
+        storage_url=storage_url,
+        storage_phase=STORAGE["TGT"]["STORAGE_PHASE"],
+        api_configuration=api_configuration,
+        storage_root_directory=STORAGE["TGT"]["ROOT_DIRECTORY"],
+        the_location_id=location_id,
+        rclone_config=STORAGE["TGT"]["STORAGE_CONFIG"],
+    )
 
 
 def _get_cfg() -> Config:

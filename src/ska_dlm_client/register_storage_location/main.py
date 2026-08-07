@@ -29,23 +29,17 @@ LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")
 TARGET_ROOT = os.getenv("TARGET_ROOT", "/dlm-archive")
 TGT_STORAGE_PHASE = os.getenv("TARGET_PHASE", "SOLID")
 # RCLONE_CONFIG_TARGET = {
-#     "name": "dlm-archive",
-#     "type": "alias",
-#     "root_path": "/",
-#     "parameters": {"remote": "/"},
+#     "name": f"{os.getenv('TARGET_NAME', 'dlm-archive')}",
+#     "type": "sftp",
+#     "parameters": {
+#         "host": "dlm_storage",
+#         "port": 2222,
+#         "key_file": "/root/.ssh/id_rsa",
+#         "shell_type": "unix",
+#         "type": "sftp",
+#         "user": f"{os.getenv('USER', 'ska-dlm')}",
+#     },
 # }
-RCLONE_CONFIG_TARGET = {
-    "name": f"{os.getenv('TARGET_NAME', 'dlm-archive')}",
-    "type": "sftp",
-    "parameters": {
-        "host": "dlm_archive",
-        "port": 2222,
-        "key_file": "/root/.ssh/id_rsa",
-        "shell_type": "unix",
-        "type": "sftp",
-        "user": f"{os.getenv('USER', 'ska-dlm')}",
-    },
-}
 RCLONE_CONFIG_SOURCE = {
     "name": f"{os.getenv('SOURCE_NAME', 'dir-watcher')}",
     "type": "sftp",
@@ -225,36 +219,6 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     )
     logger.info("location id %s and storage id %s", location_id, storage_id)
     return storage_id
-
-
-def setup_testing(api_configuration: Configuration):
-    """Configure a target storage endpoint for rclone."""
-    # NOTE: This is only required for integration testing with the DLM
-    # server.
-    # The setup of the source volume is now performed during the startup
-    # of the client. In future the setup of a default (archive) storage
-    # endpoint will be performed during startup of the DLM server and
-    # then this can be removed as well.
-    logger.info("Testing setup.")
-    storage_url = (
-        f"{api_configuration.host}:8003"
-        if api_configuration.host.find(":") == -1
-        else api_configuration.host
-    )
-    location_id = get_or_init_location(
-        api_configuration, storage_url=storage_url, location=LOCATION_NAME
-    )
-    storage_id = get_or_init_storage(
-        storage_name=RCLONE_CONFIG_TARGET["name"],
-        storage_url=storage_url,
-        storage_phase=TGT_STORAGE_PHASE,
-        api_configuration=api_configuration,
-        storage_root_directory=TARGET_ROOT,
-        the_location_id=location_id,
-        rclone_config=RCLONE_CONFIG_TARGET,
-    )
-    logger.info("location id %s and storage id %s", location_id, storage_id)
-
 
 def create_parser() -> argparse.ArgumentParser:
     """Define a parser for all the command line parameters."""
