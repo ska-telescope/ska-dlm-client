@@ -11,6 +11,7 @@ from pathlib import Path
 from time import sleep
 
 import pytest
+
 from ska_sdp_config import Config
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.common import PVCPath
@@ -21,19 +22,20 @@ from ska_sdp_config.entity.flow import (
     Flow,
     FlowSource,
 )
-
-from ska_dlm_client.common_types import (
-    LocationCountry,
-    LocationName,
-    LocationType,
-    StorageInterface,
-    StorageType,
-)
 from ska_dlm_client.openapi import api_client
-from ska_dlm_client.openapi.api_client import ApiException
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import request_api, storage_api
-from ska_dlm_client.register_storage_location.main import get_or_init_location, get_or_init_storage
+from .conftest import (
+    STORAGE,
+    STORAGE_URL,
+    WATCHER_SOURCE_DIR_ROOT,
+    SRC_HOST,
+    _get_container_log,
+    _get_id,
+    setup_testing,
+    _init_location_if_needed,
+    _init_storage_if_needed,
+)
 
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -47,93 +49,6 @@ DATA_PATH_LOCAL = f"{dir_path}/../registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 ETCD_URL = os.getenv("ETCD_URL", "http://etcd:2379")
-
-LOCATION_NAME = LocationName.LOCAL_DEV.value
-LOCATION_TYPE = LocationType.LOCAL_DEV.value
-LOCATION_COUNTRY = LocationCountry.AU.value
-LOCATION_CITY = "Marksville"
-LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
-
-STORAGE = {
-    # "TGT": {
-    #     "STORAGE_NAME": "dlm-archive",
-    #     "STORAGE_TYPE": StorageType.FILESYSTEM,
-    #     "STORAGE_INTERFACE": StorageInterface.POSIX,
-    #     "ROOT_DIRECTORY": "/dlm-archive",
-    #     "STORAGE_PHASE": "SOLID",
-    #     "STORAGE_CONFIG": {
-    #         "name": "dlm-archive",
-    #         "type": "alias",
-    #         "parameters": {"remote": "/"},
-    #     },
-    # },
-    "SRC": {
-        "STORAGE_NAME": "configdb-watcher",
-        "STORAGE_TYPE": StorageType.FILESYSTEM,
-        "STORAGE_INTERFACE": StorageInterface.POSIX,
-        "ROOT_DIRECTORY": "/dlm/product_dir",
-        "STORAGE_PHASE": "GAS",
-        "STORAGE_CONFIG": {
-            "name": "sdp-watcher",
-            "type": "sftp",
-            "parameters": {
-                "host": "dlm_configdb_watcher",
-                "key_file": "/root/.ssh/id_rsa",
-                "shell_type": "unix",
-                "type": "sftp",
-                "user": "ska-dlm",
-            },
-        },
-    },
-    "TGT": {
-        "STORAGE_NAME": "dlm-archive",
-        "STORAGE_TYPE": StorageType.FILESYSTEM,
-        "STORAGE_INTERFACE": StorageInterface.POSIX,
-        "ROOT_DIRECTORY": "/dlm/archive_dir",
-        "STORAGE_PHASE": "SOLID",
-        "STORAGE_CONFIG": {
-            "name": f"{os.getenv('TARGET_NAME', 'dlm-archive')}",
-            "type": "sftp",
-            "parameters": {
-                "host": "dlm_storage",
-                "port": 2222,
-                "key_file": "/root/.ssh/id_rsa",
-                "shell_type": "unix",
-                "type": "sftp",
-                "user": "ska-dlm",
-            },
-        },
-    },
-}
-
-SRC_HOST = STORAGE["SRC"]["STORAGE_CONFIG"]["parameters"]["host"]
-WATCHER_SOURCE_DIR_ROOT = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}"
-
-def setup_testing(api_configuration: Configuration):
-    """Configure a target storage endpoint for rclone."""
-    # NOTE: This is only required for integration testing with the DLM
-    # server.
-    # The setup of the source volume is now performed during the startup
-    # of the client. In future the setup of a default (archive) storage
-    # endpoint will be performed during startup of the DLM server and
-    # then this can be removed as well.
-    storage_url = (
-        f"{api_configuration.host}:8003"
-        if api_configuration.host.find(":") == -1
-        else api_configuration.host
-    )
-    location_id = get_or_init_location(
-        api_configuration, storage_url=storage_url, location=LOCATION_NAME
-    )
-    _ = get_or_init_storage(
-        storage_name=STORAGE["TGT"]["STORAGE_NAME"],
-        storage_url=storage_url,
-        storage_phase=STORAGE["TGT"]["STORAGE_PHASE"],
-        api_configuration=api_configuration,
-        storage_root_directory=STORAGE["TGT"]["ROOT_DIRECTORY"],
-        the_location_id=location_id,
-        rclone_config=STORAGE["TGT"]["STORAGE_CONFIG"],
-    )
 
 
 def _get_cfg() -> Config:
@@ -208,13 +123,6 @@ def trigger_completed_flows(flow_name: str, persist_flow_name: str, subpath: str
     )
 
 
-def _get_id(item, key: str) -> str:
-    """Return a string ID from a dict or generated API model."""
-    value = item[key] if isinstance(item, dict) else getattr(item, key)
-    assert isinstance(value, str)
-    return value
-
-
 def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
     """Return all dependency statuses for a given pb_id/name."""
     cfg = _get_cfg()
@@ -232,70 +140,6 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
             if status is not None:
                 statuses.append(status)
     return statuses
-
-
-def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
-    try:
-        resp = api_storage.query_location(location_name=LOCATION_NAME)
-        assert isinstance(resp, list)
-    except ApiException as e:
-        log.error("Failed to query location: %s", e)
-        storage_log = _get_container_log("dlm_postgrest")
-        log.info("Log from storage container: %s", storage_log)
-        return ""
-    if resp:
-        location_id = _get_id(resp[0], "location_id")
-        log.info("Location already exists: %s", location_id)
-    else:
-        try:
-            location_id = api_storage.init_location(
-                location_name=LOCATION_NAME,
-                location_type=LOCATION_TYPE,
-                location_country=LOCATION_COUNTRY,
-                location_city=LOCATION_CITY,
-                location_facility=LOCATION_FACILITY,
-            )
-            assert isinstance(location_id, str) and location_id
-        except ApiException as e:
-            log.error("Failed to create location: %s", e)
-            storage_log = _get_container_log("dlm_storage")
-            log.info("Log from storage container: %s", storage_log)
-            return ""
-        log.info("Location created: %s", location_id)
-    return location_id
-
-
-def _init_storage_if_needed(
-    api_storage: storage_api.StorageApi, location_id: str, storage: dict
-) -> str:
-    resp = api_storage.query_storage(storage_name=storage["STORAGE_NAME"])
-    assert isinstance(resp, list)
-    if resp:
-        storage_id = _get_id(resp[0], "storage_id")
-        log.info("Storage already exists: %s", storage_id)
-    else:
-        storage_id = api_storage.init_storage(
-            storage_name=storage["STORAGE_NAME"],
-            storage_type=storage["STORAGE_TYPE"],
-            storage_interface=storage["STORAGE_INTERFACE"],
-            storage_phase=storage["STORAGE_PHASE"],
-            root_directory=storage["ROOT_DIRECTORY"],
-            location_id=location_id,
-            location_name=LOCATION_NAME,
-        )
-        assert isinstance(storage_id, str) and storage_id
-        log.info("Storage created: %s %s", storage["STORAGE_NAME"], storage_id)
-    return storage_id
-
-
-def _get_container_log(container_name: str) -> str:
-    cmd = ["docker", "logs", "--since", "600s", container_name]
-    p = subprocess.run(cmd, capture_output=True, text=True, check=True)
-    if p.returncode != 0:
-        log.error("Failed to get logs for container %s: %s", container_name, p.stderr)
-        return p.stderr
-    return p.stdout
-
 
 @pytest.mark.integration
 def test_storage_initialisation(storage_configuration: Configuration):
@@ -467,7 +311,6 @@ async def test_watcher_logs_failed_registration():
         sleep(1)
 
     assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"
-
 
 @pytest.mark.xfail(reason="running extremely slow on CI")
 @pytest.mark.integration

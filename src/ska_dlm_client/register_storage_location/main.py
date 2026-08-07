@@ -134,9 +134,10 @@ def get_or_init_storage(
 ) -> str:
     """Get storage_id or perform storage initialisation based on the storage_name provided."""
     assert the_location_id is not None
+
     if not os.path.exists(storage_root_directory):
         try:
-            os.makedirs(storage_root_directory, exist_ok=True)
+            os.makedirs(storage_root_directory, mode=0o777, exist_ok=True)
         except PermissionError as e:
             # we just log the error here
             logger.error(
