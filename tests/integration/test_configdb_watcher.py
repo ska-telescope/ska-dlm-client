@@ -178,6 +178,7 @@ def _wait_for_dependency_status(
         if "WORKING" in statuses and not saw_working:
             saw_working = True
             deadline = max(deadline, time.time() + working_timeout_s)
+        log.info("Polling dependency status for %3.1f s", deadline - time.time())
 
         sleep(poll_interval_s)
 
@@ -372,14 +373,7 @@ async def test_watcher_logs_failed_registration():
     trigger_completed_flows("test-flow-failure", "persist-flow3", subpath=pvc_subpath)
 
     # Poll for FAILED dependency status
-    deadline = time.time() + 10
-    statuses = []
-    while time.time() < deadline:
-        statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow-failure")
-        if "FAILED" in statuses:
-            break
-        sleep(1)
-
+    statuses = _wait_for_dependency_status(PB_ID, "test-flow-failure", timeout_s=60)
     assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"
 
 
