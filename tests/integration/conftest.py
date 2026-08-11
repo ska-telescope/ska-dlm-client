@@ -262,3 +262,22 @@ def request_configuration(request) -> Configuration:
     """Request API client config."""
     request.getfixturevalue("dlm_service_readiness")
     return Configuration(host=REQUEST_URL)
+
+
+@pytest.fixture(scope="session")
+def _configdb_watcher_ready(storage_configuration: Configuration, _common_dlm_endpoints):
+    """Wait until the ConfigDB watcher has registered its source storage."""
+    with api_client.ApiClient(storage_configuration) as the_api_client:
+        api_storage = storage_api.StorageApi(the_api_client)
+
+        deadline = time.time() + 30
+        storage = []
+
+        while time.time() < deadline:
+            storage = api_storage.query_storage(storage_name="configdb-watcher")
+            if storage:
+                return
+
+            time.sleep(1)
+
+    pytest.fail("Timed out waiting for configdb-watcher storage to be registered")

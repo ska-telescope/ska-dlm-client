@@ -270,7 +270,9 @@ def test_data_was_copied_correctly(_common_dlm_endpoints):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_configdb_watcher(request_configuration: Configuration, _common_dlm_endpoints):
+async def test_configdb_watcher(
+    request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
+):
     """Flow points to subfolder scan90-99, containing 10 MS files."""
     # Trigger COMPLETED Flow pointing directly at scan90-99
     flow_name = "test-flow"
@@ -299,7 +301,7 @@ async def test_configdb_watcher(request_configuration: Configuration, _common_dl
 @pytest.mark.asyncio
 @pytest.mark.integration
 async def test_configdb_watcher_higher_dir(
-    request_configuration: Configuration, _common_dlm_endpoints
+    request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
 ):
     """
     Flow points at pb-test-20260126-24294 (one level higher).
@@ -341,7 +343,7 @@ async def test_configdb_watcher_higher_dir(
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_watcher_logs_failed_registration(_common_dlm_endpoints):
+async def test_watcher_logs_failed_registration(_configdb_watcher_ready, _common_dlm_endpoints):
     """Flow points to a data item that is already registered on the storage."""
     # Trigger a COMPLETED Flow with same subpath as previous test
     pvc_subpath = f"product/{EB_ID}/ska-sdp/{PB_ID}"
