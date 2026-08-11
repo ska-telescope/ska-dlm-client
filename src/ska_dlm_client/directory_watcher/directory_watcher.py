@@ -6,8 +6,8 @@ import os
 from abc import ABC, abstractmethod
 
 from watchdog.events import DirCreatedEvent, FileCreatedEvent, FileSystemEvent
-from watchdog.observers.api import EventQueue, ObservedWatch
-from watchdog.observers.polling import DEFAULT_EMITTER_TIMEOUT, BaseObserver, PollingEmitter
+from watchdog.observers.api import DEFAULT_EMITTER_TIMEOUT, BaseObserver, EventQueue, ObservedWatch
+from watchdog.observers.polling import PollingEmitter
 from watchfiles import Change, awatch
 
 from ska_dlm_client.registration_processor import RegistrationProcessor
