@@ -28,18 +28,6 @@ LOCATION_CITY = os.getenv("LOCATION_CITY", "Perth")
 LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")
 TARGET_ROOT = os.getenv("TARGET_ROOT", "/dlm-archive")
 TGT_STORAGE_PHASE = os.getenv("TARGET_PHASE", "SOLID")
-# RCLONE_CONFIG_TARGET = {
-#     "name": f"{os.getenv('TARGET_NAME', 'dlm-archive')}",
-#     "type": "sftp",
-#     "parameters": {
-#         "host": "dlm_storage",
-#         "port": 2222,
-#         "key_file": "/root/.ssh/id_rsa",
-#         "shell_type": "unix",
-#         "type": "sftp",
-#         "user": f"{os.getenv('USER', 'ska-dlm')}",
-#     },
-# }
 RCLONE_CONFIG_SOURCE = {
     "name": f"{os.getenv('SOURCE_NAME', 'dir-watcher')}",
     "type": "sftp",
@@ -137,13 +125,14 @@ def get_or_init_storage(
 
     if not os.path.exists(storage_root_directory):
         try:
-            os.makedirs(storage_root_directory, mode=0o777, exist_ok=True)
+            os.makedirs(storage_root_directory)
+            os.chmod(storage_root_directory, 0o777)
+            logger.info("Data directory %s created!", storage_root_directory)
         except PermissionError as e:
             # we just log the error here
             logger.error(
                 "Unable to create storage root directory %s: %s", storage_root_directory, e
             )
-    logger.info("Data directory %s created (or already existed)", storage_root_directory)
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
         # Ensure storage API calls go to the storage service, not ingest
@@ -220,6 +209,7 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     )
     logger.info("location id %s and storage id %s", location_id, storage_id)
     return storage_id
+
 
 def create_parser() -> argparse.ArgumentParser:
     """Define a parser for all the command line parameters."""

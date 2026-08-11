@@ -4,21 +4,6 @@ include:
 
 
 services:
-  # dlm_setup_storage_location:
-  #   platform: linux/amd64
-  #   image: dlm_client
-  #   container_name: dlm_setup_storage_location
-  #   build:
-  #     context: ..
-  #     dockerfile: Dockerfile
-  #   # NOTE: the IP address is fixed here but need to work out how to connect in
-  #   # the general case via a service name or similar.
-  #   entrypoint: python3 -m ska_dlm_client.register_storage_location.main --storage-name sdp-watcher --storage-root-directory /dlm-archive --storage-phase SOLID --storage-url "http://dlm_storage:8003"
-  #   networks:
-  #     - dlm_network
-  #   depends_on:
-  #     dlm_storage:
-  #       condition: service_healthy
 
   dlm_configdb_watcher:
     platform: linux/amd64
@@ -48,8 +33,6 @@ services:
         condition: service_started
       dlm_storage:
         condition: service_healthy
-      # dlm_setup_storage_location:
-      #   condition: service_completed_successfully
 
   dlm_directory_watcher:
     platform: linux/amd64

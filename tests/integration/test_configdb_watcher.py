@@ -11,7 +11,6 @@ from pathlib import Path
 from time import sleep
 
 import pytest
-
 from ska_sdp_config import Config
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.common import PVCPath
@@ -22,19 +21,21 @@ from ska_sdp_config.entity.flow import (
     Flow,
     FlowSource,
 )
+
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import request_api, storage_api
+
 from .conftest import (
+    SRC_HOST,
     STORAGE,
     STORAGE_URL,
     WATCHER_SOURCE_DIR_ROOT,
-    SRC_HOST,
     _get_container_log,
     _get_id,
-    setup_testing,
     _init_location_if_needed,
     _init_storage_if_needed,
+    setup_testing,
 )
 
 log = logging.getLogger(__name__)
@@ -47,7 +48,6 @@ PVC_SUBPATH = f"product/{EB_ID}/ska-sdp/{PB_ID}"
 PVC_SUBPATH_DIRECT = f"product/{EB_ID}/ska-sdp/{PB_ID}/scan90-99"
 DATA_PATH_LOCAL = f"{dir_path}/../registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
-STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 ETCD_URL = os.getenv("ETCD_URL", "http://etcd:2379")
 
 
@@ -140,6 +140,7 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
             if status is not None:
                 statuses.append(status)
     return statuses
+
 
 @pytest.mark.integration
 def test_storage_initialisation(storage_configuration: Configuration):
@@ -311,6 +312,7 @@ async def test_watcher_logs_failed_registration():
         sleep(1)
 
     assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"
+
 
 @pytest.mark.xfail(reason="running extremely slow on CI")
 @pytest.mark.integration

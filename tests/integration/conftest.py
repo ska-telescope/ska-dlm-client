@@ -10,11 +10,6 @@ from urllib.parse import urlparse
 import pytest
 import requests
 
-from ska_dlm_client.openapi import api_client
-from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.dlm_api import request_api, storage_api
-from ska_dlm_client.register_storage_location.main import get_or_init_location, get_or_init_storage
-
 from ska_dlm_client.common_types import (
     LocationCountry,
     LocationName,
@@ -22,7 +17,11 @@ from ska_dlm_client.common_types import (
     StorageInterface,
     StorageType,
 )
+from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.api_client import ApiException
+from ska_dlm_client.openapi.configuration import Configuration
+from ska_dlm_client.openapi.dlm_api import request_api, storage_api
+from ska_dlm_client.register_storage_location.main import get_or_init_location, get_or_init_storage
 
 # URLs can be overridden in CI to hit the DinD host
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
@@ -44,9 +43,9 @@ STORAGE = {
         "STORAGE_TYPE": StorageType.FILESYSTEM,
         "STORAGE_INTERFACE": StorageInterface.POSIX,
         "ROOT_DIRECTORY": "/dlm/product_dir",
-        "STORAGE_PHASE": "GAS",
+        "STORAGE_PHASE": "SOLID",
         "STORAGE_CONFIG": {
-            "name": "sdp-watcher",
+            "name": "configdb-watcher",
             "type": "sftp",
             "parameters": {
                 "host": "dlm_configdb_watcher",
@@ -88,11 +87,13 @@ log = logging.getLogger(__name__)
 # Original private method
 __orig_deserialize = getattr(api_client.ApiClient, "_ApiClient__deserialize")
 
+
 def _get_id(item, key: str) -> str:
     """Return a string ID from a dict or generated API model."""
     value = item[key] if isinstance(item, dict) else getattr(item, key)
     assert isinstance(value, str)
     return value
+
 
 def _get_container_log(container_name: str) -> str:
     cmd = ["docker", "logs", "--since", "600s", container_name]
@@ -101,6 +102,7 @@ def _get_container_log(container_name: str) -> str:
         log.error("Failed to get logs for container %s: %s", container_name, p.stderr)
         return p.stderr
     return p.stdout
+
 
 def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
     try:
@@ -156,7 +158,6 @@ def _init_storage_if_needed(
     return storage_id
 
 
-
 def setup_testing(api_configuration: Configuration):
     """Configure a target storage endpoint for rclone."""
     # NOTE: This is only required for integration testing with the DLM
@@ -182,6 +183,7 @@ def setup_testing(api_configuration: Configuration):
         the_location_id=location_id,
         rclone_config=STORAGE["TGT"]["STORAGE_CONFIG"],
     )
+
 
 def __lenient_deserialize(self, data, klass):
     """Lenient deserializer patch for the OpenAPI client.
