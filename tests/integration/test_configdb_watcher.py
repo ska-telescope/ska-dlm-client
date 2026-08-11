@@ -1,4 +1,6 @@
 # pylint: disable=subprocess-run-check
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
 """SDP Ingest (ConfigDB Watcher) integration tests."""
 
 import logging
@@ -158,17 +160,24 @@ def _wait_for_dependency_status(
     pb_id: str,
     flow_name: str,
     expected_status: str = "FINISHED",
-    timeout_s: int = 60,
+    timeout_s: int = 10,
+    working_timeout_s: int = 60,
     poll_interval_s: int = 2,
 ) -> list[str]:
-    """Poll dependency statuses until expected_status appears, or time out."""
+    """Poll dependency statuses until a terminal state appears, or time out."""
     deadline = time.time() + timeout_s
     statuses: list[str] = []
+    saw_working = False
 
     while time.time() < deadline:
         statuses = _get_dependency_statuses_for_product(pb_id, flow_name)
         if expected_status in statuses:
             return statuses
+        if "FAILED" in statuses:
+            return statuses
+        if "WORKING" in statuses and not saw_working:
+            saw_working = True
+            deadline = max(deadline, time.time() + working_timeout_s)
 
         sleep(poll_interval_s)
 
@@ -286,14 +295,7 @@ async def test_configdb_watcher(request_configuration: Configuration):
     trigger_completed_flows(flow_name, persist_flow_name, subpath=pvc_subpath_direct)
 
     # Poll for FINISHED dependency status
-    deadline = time.time() + 10
-    statuses = []
-    while time.time() < deadline:
-        statuses = _get_dependency_statuses_for_product(PB_ID, flow_name)
-        if "FINISHED" in statuses:
-            break
-        sleep(1)
-
+    statuses = _wait_for_dependency_status(PB_ID, flow_name, poll_interval_s=1)
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
 
     expected_items = [
@@ -432,7 +434,9 @@ async def test_register_in_place(request_configuration: Configuration):
 
 @pytest.mark.xfail(reason="running extremely slow on CI")
 @pytest.mark.integration
-def test_automatic_deletion(dlm_request_api, storage_configuration):
+def test_automatic_deletion(
+    dlm_request_api: request_api.RequestApi, storage_configuration: Configuration
+):
     """Expire all data_items and let the heuristics delete the payloads."""
     now = datetime.now(timezone.utc).isoformat()
 
