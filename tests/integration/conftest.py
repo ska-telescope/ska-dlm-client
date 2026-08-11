@@ -5,6 +5,7 @@
 
 import logging
 import os
+import time
 from typing import Iterator
 from urllib.parse import urlparse
 
@@ -20,7 +21,7 @@ from ska_dlm_client.common_types import (
 )
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.dlm_api import request_api
+from ska_dlm_client.openapi.dlm_api import request_api, storage_api
 from ska_dlm_client.register_storage_location.main import get_or_init_location, get_or_init_storage
 
 logger = logging.getLogger(__name__)
@@ -191,3 +192,22 @@ def request_configuration(request) -> Configuration:
     """Request API client config."""
     request.getfixturevalue("dlm_service_readiness")
     return Configuration(host=REQUEST_URL)
+
+
+@pytest.fixture(scope="session")
+def _configdb_watcher_ready(storage_configuration: Configuration, _common_dlm_endpoints):
+    """Wait until the ConfigDB watcher has registered its source storage."""
+    with api_client.ApiClient(storage_configuration) as the_api_client:
+        api_storage = storage_api.StorageApi(the_api_client)
+
+        deadline = time.time() + 30
+        storage = []
+
+        while time.time() < deadline:
+            storage = api_storage.query_storage(storage_name="configdb-watcher")
+            if storage:
+                return
+
+            time.sleep(1)
+
+    pytest.fail("Timed out waiting for configdb-watcher storage to be registered")

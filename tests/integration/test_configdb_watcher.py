@@ -22,13 +22,7 @@ from ska_sdp_config.entity.flow import (
     FlowSource,
 )
 
-from ska_dlm_client.common_types import (
-    LocationCountry,
-    LocationName,
-    LocationType,
-    StorageInterface,
-    StorageType,
-)
+from ska_dlm_client.common_types import LocationCountry, LocationName, LocationType
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import request_api, storage_api
@@ -52,27 +46,8 @@ LOCATION_COUNTRY = LocationCountry.AU.value
 LOCATION_CITY = "Marksville"
 LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
 
-SRC_STORAGE = {
-    "STORAGE_NAME": "sdp-watcher",
-    "STORAGE_TYPE": StorageType.FILESYSTEM,
-    "STORAGE_INTERFACE": StorageInterface.POSIX,
-    "ROOT_DIRECTORY": "/dlm/product_dir",
-    "STORAGE_PHASE": "GAS",
-    "STORAGE_CONFIG": {
-        "name": "dlm",
-        "type": "sftp",
-        "parameters": {
-            "host": "dlm_configdb_watcher",
-            "key_file": "/root/.ssh/id_rsa",
-            "shell_type": "unix",
-            "type": "sftp",
-            "user": "ska-dlm",
-        },
-    },
-}
-
-SRC_HOST = SRC_STORAGE["STORAGE_CONFIG"]["parameters"]["host"]
-WATCHER_SOURCE_DIR_ROOT = f"{SRC_STORAGE['ROOT_DIRECTORY'].rstrip('/')}"
+SRC_HOST = "dlm_configdb_watcher"
+WATCHER_SOURCE_DIR_ROOT = "/dlm/product_dir"
 
 
 def _get_cfg() -> Config:
@@ -174,19 +149,7 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
 
 
 @pytest.mark.integration
-def test_storage_initialisation(storage_configuration: Configuration, _common_dlm_endpoints):
-    """Verify the storage endpoints exist."""
-    with api_client.ApiClient(storage_configuration) as the_api_client:
-        api_storage = storage_api.StorageApi(the_api_client)
-
-        storage = api_storage.query_storage(storage_name="configdb-watcher")
-        assert storage
-        location = api_storage.query_location(location_name="SKA-DEV")
-        assert location
-
-
-@pytest.mark.integration
-def test_data_was_copied_correctly(_common_dlm_endpoints):
+def test_data_was_copied_correctly(_configdb_watcher_ready, _common_dlm_endpoints):
     """Verify that the test data is visible inside the watcher container."""
     expected_file = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}/{ARB_MS}/table.dat"
 
@@ -207,7 +170,9 @@ def test_data_was_copied_correctly(_common_dlm_endpoints):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_configdb_watcher(request_configuration: Configuration, _common_dlm_endpoints):
+async def test_configdb_watcher(
+    request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
+):
     """Flow points to subfolder scan90-99, containing 10 MS files."""
     # Trigger COMPLETED Flow pointing directly at scan90-99
     flow_name = "test-flow"
@@ -242,7 +207,7 @@ async def test_configdb_watcher(request_configuration: Configuration, _common_dl
 @pytest.mark.asyncio
 @pytest.mark.integration
 async def test_configdb_watcher_higher_dir(
-    request_configuration: Configuration, _common_dlm_endpoints
+    request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
 ):
     """
     Flow points at pb-test-20260126-24294 (one level higher).
@@ -303,7 +268,7 @@ async def test_configdb_watcher_higher_dir(
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_watcher_logs_failed_registration(_common_dlm_endpoints):
+async def test_watcher_logs_failed_registration(_configdb_watcher_ready, _common_dlm_endpoints):
     """Flow points to a data item that is already registered on the storage."""
     # Trigger a COMPLETED Flow with same subpath as previous test
     trigger_completed_flows("test-flow-failure", "persist-flow3", subpath=PVC_SUBPATH)
@@ -322,7 +287,9 @@ async def test_watcher_logs_failed_registration(_common_dlm_endpoints):
 
 @pytest.mark.xfail(reason="running extremely slow on CI")
 @pytest.mark.integration
-def test_automatic_deletion(dlm_request_api, storage_configuration, _common_dlm_endpoints):
+def test_automatic_deletion(
+    dlm_request_api, storage_configuration, _configdb_watcher_ready, _common_dlm_endpoints
+):
     """Expire all data_items and let the heuristics delete the payloads."""
     now = datetime.now(timezone.utc).isoformat()
 
