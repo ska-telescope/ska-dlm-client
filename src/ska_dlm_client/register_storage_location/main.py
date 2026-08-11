@@ -5,7 +5,6 @@
 # pylint: disable=too-many-locals
 """Initialize a location and a storage."""
 
-import argparse
 import logging
 import os
 import pwd
@@ -208,43 +207,6 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     )
     logger.info("location id %s and storage id %s", location_id, storage_id)
     return storage_id
-
-
-def create_parser() -> argparse.ArgumentParser:
-    """Define a parser for all the command line parameters."""
-    parser = argparse.ArgumentParser(prog="dlm_directory_watcher")
-
-    # Adding optional argument.
-    parser.add_argument(
-        "-n",
-        "--storage-name",
-        type=str,
-        required=True,
-        help="The name by which the DLM system know the storage as.",
-    )
-    parser.add_argument(
-        "-s",
-        "--storage-url",
-        type=str,
-        required=True,
-        help="Storage service URL.",
-    )
-    parser.add_argument(
-        "-r",
-        "--storage-root-directory",
-        type=str,
-        required=True,
-        help="Storage root directory.",
-    )
-    parser.add_argument(
-        "-p",
-        "--storage-phase",
-        type=str,
-        required=False,
-        default="GAS",
-        help="Phase provided by storage.",
-    )
-    return parser
 
 
 def main():
