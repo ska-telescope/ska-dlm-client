@@ -19,7 +19,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./registration_processor/product_dir:/dlm/product_dir
+      - ${PRODUCT_DIR_PATH:-./registration_processor/product_dir}:/dlm/product_dir
     networks:
       - dlm_network
     healthcheck:
