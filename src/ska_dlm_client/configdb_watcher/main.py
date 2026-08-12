@@ -31,14 +31,17 @@ from ska_dlm_client.registration_processor import (
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
 
 RCLONE_CONFIG_SOURCE = {
-    "name": f"{os.getenv('SOURCE_NAME', 'configdb-watcher')}",
+    # TODO: Refactor RCLONE_CONFIG_SOURCE to be constructed from WatcherConfig/SdpWatcherConfig
+    # rather than mutating this global dictionary in process_args(). This would make all
+    # runtime configuration flow through the config object consistently.
+    "name": "configdb-watcher",
     "type": "sftp",
     "parameters": {
-        "host": f"{os.getenv('WATCHER_HOSTNAME', socket.gethostname())}",  # "dlm_configdb_watcher"
+        "host": socket.gethostname(),
         "key_file": "/root/.ssh/id_rsa",
         "shell_type": "unix",
         "type": "sftp",
-        "user": f"{os.getenv('USER', 'ska-dlm')}",
+        "user": os.getenv("USER", "ska-dlm"),
     },
 }
 
@@ -56,6 +59,7 @@ def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
         migration_url=args.migration_url,
         target_name=args.target_name,
         etcd_url=args.etcd_url,
+        location=args.location,
     )
 
 
@@ -237,18 +241,19 @@ async def run_configdb_watcher(config: SdpWatcherConfig) -> None:
     configdb = Config(
         host=config.etcd_host, port=config.etcd_port
     )  # Share one handle between writer & watcher
-    _ = setup_volume(  # set up configdb-watcher storage endpoint. Location should already be up.
+    _ = setup_volume(  # set up configdb-watcher storage endpoint.
         watcher_config=config,
         api_configuration=config.ingest_configuration,
         rclone_config=RCLONE_CONFIG_SOURCE,
         storage_url=config.storage_url,
-        location_name="SKA-DEV",  # how can we get the location if it was initiated on the server?
-        location_type="local-dev",  # compulsory for init_location
-        location_country="AU",  # compulsory for init_location
-        location_city="Perth",  # compulsory for init_location
-        location_facility="local",  # compulsory for init_location
-        storage_type="filesystem",  # compulsory for init_storage
-        storage_interface="posix",  # compulsory for init_storage
+        location_name=config.location,  # get_or_init_location.
+        # SHOULD already be there from server. If not, fallback values for get_or_init_location:
+        location_type="local-dev",  # compulsory arg for init_location
+        location_country="AU",  # compulsory arg for init_location
+        location_city="Perth",  # compulsory arg for init_location
+        location_facility="local",  # compulsory arg for init_location
+        storage_type="filesystem",  # compulsory arg for init_storage
+        storage_interface="posix",  # compulsory arg for init_storage
     )
     logger.info(
         "Starting ConfigDB watcher (include_existing=%s, source name=%s, target name=%s)",
