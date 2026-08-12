@@ -22,7 +22,7 @@ def _get_id(item: Any, key: str) -> Any:
 
 
 @pytest.mark.integration
-def test_auto_migration(
+def test_auto_migration(  # this test is flaky
     request_configuration: Configuration,
     storage_configuration: Configuration,
     _common_dlm_endpoints,

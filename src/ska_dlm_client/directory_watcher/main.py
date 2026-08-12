@@ -26,18 +26,19 @@ logger = logging.getLogger(__name__)
 
 
 RCLONE_CONFIG_SOURCE = {
-    "name": f"{os.getenv('SOURCE_NAME', 'dir-watcher')}",
+    # TODO: Refactor RCLONE_CONFIG_SOURCE to be constructed from WatcherConfig/SdpWatcherConfig
+    # rather than mutating this global dictionary in process_args(). This would make all
+    # runtime configuration flow through the config object consistently.
+    "name": "dir-watcher",
     "type": "sftp",
     "parameters": {
-        "host": f"{os.getenv('WATCHER_HOSTNAME', socket.gethostname())}",
+        "host": socket.gethostname(),
         "key_file": "/root/.ssh/id_rsa",
         "shell_type": "unix",
         "type": "sftp",
-        "user": f"{os.getenv('USER', 'ska-dlm')}",
+        "user": os.getenv("USER", "ska-dlm"),
     },
 }
-STORAGE_INTERFACE = "posix"
-STORAGE_TYPE = "filesystem"
 
 
 def process_args(args: argparse.Namespace) -> WatcherConfig:
@@ -66,6 +67,7 @@ def process_args(args: argparse.Namespace) -> WatcherConfig:
         ingest_url=args.ingest_url,
         reload_status_file=args.reload_status_file,
         rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,
+        location=args.location,
     )
     return config
 
@@ -93,14 +95,14 @@ def create_directory_watcher() -> DirectoryWatcher:
         api_configuration=config.ingest_configuration,
         rclone_config=RCLONE_CONFIG_SOURCE,
         storage_url=config.storage_url,
-        # should the args below be configurable?
-        location_name="SKA-DEV",  # how can we get the location if it was initiated on the server?
-        location_type="local-dev",  # compulsory for init_location
-        location_country="AU",  # compulsory for init_location
-        location_city="Perth",  # compulsory for init_location
-        location_facility="local",  # compulsory for init_location
-        storage_type="filesystem",  # compulsory for init_storage
-        storage_interface="posix",  # compulsory for init_storage
+        location_name=config.location,  # get_or_init_location. SHOULD already be there from server
+        # if no location, use fallback values:
+        location_type="local-dev",  # compulsory arg for init_location
+        location_country="AU",  # compulsory arg for init_location
+        location_city="Perth",  # compulsory arg for init_location
+        location_facility="local",  # compulsory arg for init_location
+        storage_type="filesystem",  # compulsory arg for init_storage
+        storage_interface="posix",  # compulsory arg for init_storage
     )
     registration_processor = RegistrationProcessor(config)
     if args.include_existing:

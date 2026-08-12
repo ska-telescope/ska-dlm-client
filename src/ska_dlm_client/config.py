@@ -29,6 +29,7 @@ class ClientConfig:
     Specific configurations for the individual clients are expanding this class.
     """
 
+    location: str = ""
     source_name: str = ""
     source_phase: str = os.getenv("SOURCE_PHASE", "GAS")
     directory_to_watch: str = "/dlm/watch_dir"
@@ -54,6 +55,7 @@ class ClientConfig:
 class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
     """Class for common/required command line parameters and helper methods."""
 
+    location: str = ""
     source_name: str = ""
     source_phase: str = "GAS"
     directory_to_watch: str = ""
@@ -69,6 +71,12 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
 
     def __default_args__(self):
         """Initialise parameters to include on the command line."""
+        self.parser.add_argument(
+            "-l",
+            "--location",
+            type=str,
+            help="Source location name (e.g., 'LOW-ITF'). ",
+        )
         self.parser.add_argument(
             "-s",
             "--source-name",
@@ -173,6 +181,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         """Parse command line arguments and assign to class parameters."""
         if args is None:
             args = self.parser.parse_args()
+        self.location = args.location
         self.source_name = args.source_name
         self.source_phase = args.source_phase
         self.directory_to_watch = args.directory_to_watch
