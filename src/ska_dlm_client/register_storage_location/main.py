@@ -17,6 +17,7 @@ from ska_dlm_client.config import Config
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
+from ska_dlm_client.openapi.exceptions import UnprocessableEntityException
 
 logger = logging.getLogger(__name__)
 
@@ -68,15 +69,25 @@ def get_or_init_location(
             the_location_id = response[0]["location_id"]
             logger.info("location already exists in DLM")
         else:
-            response = api_storage.init_location(
-                location_name=location_name,
-                location_type=location_type,
-                location_country=location_country,
-                location_city=location_city,
-                location_facility=location_facility,
-            )
-            the_location_id = response
-            logger.info("Location created in DLM")
+            try:
+                response = api_storage.init_location(
+                    location_name=location_name,
+                    location_type=location_type,
+                    location_country=location_country,
+                    location_city=location_city,
+                    location_facility=location_facility,
+                )
+                the_location_id = response
+                logger.info("Location created in DLM")
+            except UnprocessableEntityException:
+                # Another process may have created the location first (race condition)
+                response = api_storage.query_location(location_name=location_name)
+                the_location_id = response[0]["location_id"]
+                logger.info(
+                    "Location %s was created concurrently by another process",
+                    location_name,
+                )
+
         logger.info("location_id: %s", the_location_id)
     return the_location_id
 
