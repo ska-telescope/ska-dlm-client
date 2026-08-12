@@ -40,6 +40,7 @@ directory_watcher:
   storage_url: "http://ska-dlm-storage"
   migration_url: "http://ska-dlm-migration"
   source_name: dir_watcher
+  source_phase: "GAS"
   directory_to_watch: /dlm/watch_dir
   target_name: dlm-archive  # default target storage 'dlm-archive' is defined in the DLM Server and always available.
   uid_expiration_days:  # leave empty to use DB default, now() + 24:00
@@ -72,6 +73,7 @@ configdb_watcher:
   migration_url: "http://ska-dlm-migration"
   include_existing: false
   source_name: configdb-watcher
+  source_phase: "GAS"
   directory_to_watch: /dlm/product_dir
   target_name: dlm-archive  # default target storage 'dlm-archive' is defined in the DLM Server and always available.
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.

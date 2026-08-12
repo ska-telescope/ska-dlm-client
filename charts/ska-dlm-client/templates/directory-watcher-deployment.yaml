@@ -62,6 +62,10 @@ spec:
             value: {{ .Values.directory_watcher.directory_to_watch | quote }}
           - name: SOURCE_NAME
             value: {{ .Values.directory_watcher.source_name | quote }}
+          {{- if .Values.directory_watcher.source_phase }}
+          - name: SOURCE_PHASE
+            value: {{ .Values.directory_watcher.source_phase | quote }}
+          {{- end }}
           {{- if .Values.directory_watcher.target_name }}
           - name: TARGET_NAME
             value: {{ .Values.directory_watcher.target_name | quote }}

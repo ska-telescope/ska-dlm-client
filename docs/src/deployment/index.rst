@@ -64,6 +64,7 @@ Directory Watcher component
 - ``storage_url``: Full HTTP URL of the storage server. E.g., ``<http://service.namespace:port>``
 - ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``source_name``: Storage to monitor for new data.
+- ``source_phase``: Optional, Phase of the source storage (default ``GAS``).
 - ``directory_to_watch``: Directory to monitor for new data.
 - ``target_name``: Target storage (where new data will be migrated to, default dlm-archive)
 - ``target_root``: Target storage root directory.
@@ -115,6 +116,7 @@ ConfigDB Watcher component
 - ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``include_existing``: If true, registers & migrates all existing COMPLETED data-products found in the etcd DB at startup.
 - ``source_name``: Storage where the new data appears.
+- ``source_phase``: Optional, Phase of the source storage (default ``GAS``).
 - ``directory_to_watch``: Directory used to generate URIs for the DLM database.
 - ``target_name``: Target storage (where new data will be migrated to). Default is ``dlm-archive``.
 - ``uid_expiration_days``: Number of days from now until this UID expires. 0 = expire immediately. Leave empty to use DB default: now() + 24:00.
