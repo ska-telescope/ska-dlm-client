@@ -52,6 +52,15 @@ class StorageInterface(str, Enum):
     HTTPS = "https"
 
 
+class PhaseType(str, Enum):
+    """Phase type / resilience level."""
+
+    PLASMA = "PLASMA"
+    GAS = "GAS"
+    LIQUID = "LIQUID"
+    SOLID = "SOLID"
+
+
 class ItemType(str, Enum):
     """Data Item on the filesystem."""
 

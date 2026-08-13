@@ -80,9 +80,10 @@ class RegistrationProcessor:
         """
         self._config = config
         self.last_migration_result: str | None = None
-        (self.target_storage_id, self.target_storage_phase) = self._get_storage_info_from_name(
-            getattr(self._config, "target_name", None),
+        self.target_storage_id, self.target_storage_phase = self._get_storage_info_from_name(
+            self._config.target_name,
         )
+
         request_configuration = getattr(self._config, "request_configuration", None)
         with api_client.ApiClient(request_configuration) as the_api_client:
             self.api_request = request_api.RequestApi(the_api_client)
@@ -224,7 +225,7 @@ class RegistrationProcessor:
 
         return result
 
-    def _get_storage_info_from_name(self, storage_name: str) -> tuple[str, str] | None:
+    def _get_storage_info_from_name(self, storage_name: str) -> tuple[str | None, str | None]:
         """Get the storage_id and phase for a given storage_name.
 
         Args:
@@ -236,7 +237,7 @@ class RegistrationProcessor:
         storage_configuration = getattr(self._config, "storage_configuration", None)
         if storage_configuration is None:
             logger.error("Storage configuration not found")
-            return None
+            return None, None
         with api_client.ApiClient(storage_configuration) as the_api_client:
             api_storage = storage_api.StorageApi(the_api_client)
             # Get the storage_id
@@ -244,14 +245,14 @@ class RegistrationProcessor:
             logger.info("query_storage response: %s", response)
             if not isinstance(response, list):
                 logger.error("Unexpected response from query_storage")
-                return None
+                return None, None
             if len(response) != 1:
                 logger.error(
                     "Expected exactly one storage entry for %s, got %d",
                     storage_name,
                     len(response),
                 )
-                return None
+                return None, None
 
             the_storage_id = response[0]["storage_id"]
             the_storage_phase = response[0]["storage_phase"]
