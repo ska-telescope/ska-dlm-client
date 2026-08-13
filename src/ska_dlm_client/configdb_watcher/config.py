@@ -21,6 +21,7 @@ class SdpWatcherConfig(ClientConfig):
     queue_exchange_name: str = "dlm.outbox"
 
     def __post_init__(self):
+        """Create derived/processed attributes."""
         self.status_file_absolute_path = f"{self.directory_to_watch}/{self.status_file_filename}"
         self.ingest_configuration = Configuration(host=self.ingest_url)
         self.storage_configuration = Configuration(host=self.storage_url)
