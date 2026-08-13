@@ -192,20 +192,88 @@ def test_registration_processor_copy_data_item_to_new_storage(
     """Test the RegistrationProcessor _copy_data_item_to_new_storage method."""
     processor = MockRegistrationProcessor(mock_config)
 
-    # Test with migration enabled using mocked storage info
-    result = processor._initiate_migration("test-uuid")
-    assert result == "test-migration-uuid"
+    with mock.patch.object(processor, "_check_target_storage_access", return_value=True):
+        # Test with migration enabled using mocked storage info
+        result = processor._initiate_migration("test-uuid")
+        assert result == "test-migration-uuid"
 
     # Test with missing destination storage name
     mock_config.target_name = None
     result = processor._initiate_migration("test-uuid")
     assert result is None
 
-    # Test with API exception
+    # Test with unreachable target storage
     mock_config.target_name = "test-destination-storage"
-    mock_migration_api.return_value.copy_data_item.side_effect = OpenApiException("Test error")
-    result = processor._initiate_migration("test-uuid")
-    assert result is None
+    with mock.patch.object(processor, "_check_target_storage_access", return_value=False):
+        result = processor._initiate_migration("test-uuid")
+        assert result is None
+
+    # Test with API exception
+    with mock.patch.object(processor, "_check_target_storage_access", return_value=True):
+        mock_migration_api.return_value.copy_data_item.side_effect = OpenApiException("Test error")
+        result = processor._initiate_migration("test-uuid")
+        assert result is None
+
+
+def test_registration_processor_warns_when_target_storage_unreachable(mock_config):
+    """A warning should be raised when the target storage cannot be reached."""
+    processor = MockRegistrationProcessor(mock_config)
+
+    with mock.patch("ska_dlm_client.registration_processor.logger.warning") as mock_warning:
+        with mock.patch.object(
+            processor, "_get_storage_info_from_name", return_value=("test-target", "SOLID")
+        ):
+            with mock.patch(
+                "ska_dlm_client.registration_processor.storage_api.StorageApi"
+            ) as mock_storage_api:
+                mock_storage_api.return_value.rclone_access.return_value = []
+                assert processor._check_target_storage_access("test-destination-storage") is False
+                assert any(
+                    "not accessible to rclone" in str(call.args[0])
+                    for call in mock_warning.call_args_list
+                )
+
+
+def test_registration_processor_skips_child_registration_when_target_storage_unreachable(
+    mock_config,
+):
+    """Child items must not be registered when the target storage cannot be reached."""
+    processor = MockRegistrationProcessor(mock_config)
+    item = Item(
+        path_rel_to_watch_dir="test-item",
+        item_type=ItemType.FILE,
+        metadata=None,
+        item_size=123,
+        decompressed_size=123,
+    )
+
+    with mock.patch("ska_dlm_client.registration_processor.logger.warning") as mock_warning:
+        with mock.patch(
+            "ska_dlm_client.registration_processor.storage_api.StorageApi"
+        ) as mock_storage_api:
+            mock_storage_api.return_value.rclone_access.return_value = []
+            api_ingest = mock.MagicMock()
+
+            processor._migrate_item(
+                migrate=False,
+                item=item,
+                uuid="test-uuid",
+                api_ingest=api_ingest,
+            )
+
+            assert mock_warning.call_count >= 1
+            assert any(
+                "Target storage '%s' unaccessible" in str(call.args[0])
+                and mock_config.target_name in str(call.args[1])
+                for call in mock_warning.call_args_list
+                if len(call.args) > 1
+            )
+            assert any(
+                "Target storage '%s' unaccessible: Skipping child item registration"
+                in str(call.args[0])
+                for call in mock_warning.call_args_list
+            )
+            api_ingest.init_data_item.assert_not_called()
 
 
 def test_registration_processor_register_single_item(
@@ -226,7 +294,8 @@ def test_registration_processor_register_single_item(
     )
 
     # Test with registration enabled
-    result = processor._register_single_item(item)
+    with mock.patch.object(processor, "_check_target_storage_access", return_value=True):
+        result = processor._register_single_item(item)
     assert result == "test-uuid"
     mock_ingest_api.return_value.register_data_item.assert_called_once()
     _, kwargs = mock_ingest_api.return_value.register_data_item.call_args

@@ -117,6 +117,41 @@ class RegistrationProcessor:
             path.resolve()
         return path
 
+    def _check_target_storage_access(self, storage_name: str | None) -> bool:
+        """Check whether the target storage is actually accessible via rclone."""
+        if not storage_name:
+            logger.warning("Skipping migration due to missing destination storage name")
+            return False
+
+        storage_configuration = getattr(self._config, "storage_configuration", None)
+        if storage_configuration is None:
+            logger.warning(
+                "Target storage '%s': configuration is unavailable",
+                storage_name,
+            )
+            return False
+
+        try:
+            with api_client.ApiClient(storage_configuration) as the_api_client:
+                api_storage = storage_api.StorageApi(the_api_client)
+                response = api_storage.rclone_access(
+                    volume=f"{storage_name}:/", remote_file_path="etc/hosts"
+                )
+        except Exception as exc:  # pragma: no cover - defensive logging branch
+            logger.warning(
+                "Target storage '%s' is not accessible to rclone: %s", storage_name, exc
+            )
+            return False
+
+        if not isinstance(response, list) or not response:
+            logger.warning(
+                "Target storage '%s' is not accessible to rclone: backend access check failed",
+                storage_name,
+            )
+            return False
+
+        return True
+
     def _execute_migration_checks(self, uid: str) -> bool:
         """Determine if migration should/can be performed based on the configuration."""
         # Require an explicit migration_configuration with a host
@@ -141,6 +176,9 @@ class RegistrationProcessor:
         )
         if not destination_storage_name:
             logger.warning("Skipping migration due to missing destination storage name")
+            return False
+
+        if not self._check_target_storage_access(destination_storage_name):
             return False
 
         if not uid:
@@ -320,6 +358,13 @@ class RegistrationProcessor:
                 migration_result=migration_result,
             )
         elif target_name is not None and source_name != target_name:
+            if not self._check_target_storage_access(target_name):
+                logger.warning(
+                    "Target storage '%s' unaccessible: Skipping child item registration",
+                    target_name,
+                )
+                return
+
             # register not explicitly migrated items on target storage
             # get the oid of the already registered item on the source storage
             resp = []
@@ -430,8 +475,13 @@ class RegistrationProcessor:
                 logger.error("Ignoring and continuing.....")
                 return None
 
-        # This should be refactored out and made an async transaction.
         if not register_only:
+            if not self._check_target_storage_access(target_name):
+                logger.warning(
+                    "Target storage '%s' inaccessible: Skipping child item registration",
+                    target_name,
+                )
+                return None
             self._migrate_item(
                 migrate=migrate,
                 item=item,

@@ -41,9 +41,7 @@ class TestValidationError(unittest.TestCase):
                     null
                     ],
                 msg = '',
-                type = '',
-                input = None,
-                ctx = ska_dlm_client.openapi.models.context.Context()
+                type = ''
             )
         else:
             return ValidationError(

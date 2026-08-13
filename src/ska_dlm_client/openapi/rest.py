@@ -13,11 +13,9 @@ Do not edit the class manually.
 
 
 import io
-import ipaddress
 import json
 import re
 import ssl
-from urllib.parse import urlparse
 
 import urllib3
 
@@ -37,44 +35,6 @@ def is_socks_proxy_url(url):
         return split_section[0].lower() in SUPPORTED_SOCKS_PROXIES
 
 
-def should_bypass_proxies(url: str, no_proxy: str) -> bool:
-    """Return whether ``url`` matches the comma-separated ``no_proxy`` rules."""
-    parsed_url = urlparse(url)
-    if not parsed_url.hostname:
-        return True
-
-    host = parsed_url.hostname.lower()
-    host_and_port = parsed_url.netloc.lower()
-    try:
-        host_ip = ipaddress.ip_address(host)
-    except ValueError:
-        host_ip = None
-
-    for entry in (entry.strip().lower() for entry in no_proxy.split(",")):
-        if not entry:
-            continue
-        if entry == "*":
-            return True
-
-        if host_ip is not None:
-            try:
-                if host_ip in ipaddress.ip_network(entry, strict=False):
-                    return True
-            except ValueError:
-                pass
-
-        entry = entry.lstrip(".")
-        if (
-            host == entry
-            or host.endswith("." + entry)
-            or host_and_port == entry
-            or host_and_port.endswith("." + entry)
-        ):
-            return True
-
-    return False
-
-
 class RESTResponse(io.IOBase):
 
     def __init__(self, resp) -> None:
@@ -88,17 +48,12 @@ class RESTResponse(io.IOBase):
             self.data = self.response.data
         return self.data
 
-    @property
-    def headers(self):
-        """Returns a dictionary of response headers."""
-        return self.response.headers
-
     def getheaders(self):
-        """Returns a dictionary of the response headers; use ``headers`` instead."""
+        """Returns a dictionary of the response headers."""
         return self.response.headers
 
     def getheader(self, name, default=None):
-        """Returns a given response header; use ``headers.get()`` instead."""
+        """Returns a given response header."""
         return self.response.headers.get(name, default)
 
 
@@ -141,9 +96,7 @@ class RESTClientObject:
         # https pool manager
         self.pool_manager: urllib3.PoolManager
 
-        if configuration.proxy and not should_bypass_proxies(
-            configuration.host, configuration.no_proxy or ""
-        ):
+        if configuration.proxy:
             if is_socks_proxy_url(configuration.proxy):
                 from urllib3.contrib.socks import SOCKSProxyManager
 
@@ -200,17 +153,9 @@ class RESTClientObject:
             # For `POST`, `PUT`, `PATCH`, `OPTIONS`, `DELETE`
             if method in ["POST", "PUT", "PATCH", "OPTIONS", "DELETE"]:
 
+                # no content type provided or payload is json
                 content_type = headers.get("Content-Type")
-                is_json = not content_type or re.search("json", content_type, re.IGNORECASE)
-                # JSON is valid YAML 1.2, so structured YAML bodies can use
-                # the existing JSON serializer:
-                # https://yaml.org/spec/1.2.2/#13-relation-to-json
-                is_structured_yaml = (
-                    content_type
-                    and re.search("yaml", content_type, re.IGNORECASE)
-                    and not isinstance(body, (str, bytes))
-                )
-                if is_json or is_structured_yaml:
+                if not content_type or re.search("json", content_type, re.IGNORECASE):
                     request_body = None
                     if body is not None:
                         request_body = json.dumps(body)
