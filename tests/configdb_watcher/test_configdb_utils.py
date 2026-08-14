@@ -275,11 +275,11 @@ async def test_start_rabbitmq_consumer_sets_up_consumer() -> None:
         pytest.raises(asyncio.CancelledError),
     ):
         await start_rabbitmq_consumer(
-            "amqp://guest:guest@rabbitmq/",
+            "amqp://dlm-user:dlm-password@rabbitmq/",
             "dlm_exchange",
         )
 
-    connect_robust.assert_awaited_once_with("amqp://guest:guest@rabbitmq/")
+    connect_robust.assert_awaited_once_with("amqp://dlm-user:dlm-password@rabbitmq/")
     connection.channel.assert_awaited_once()
     channel.set_qos.assert_awaited_once_with(prefetch_count=10)
     channel.declare_exchange.assert_awaited_once_with(

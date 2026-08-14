@@ -16,9 +16,9 @@ class SdpWatcherConfig(ClientConfig):
     reload_status_file: bool = True
     use_status_file: bool = False
     include_existing: bool = False
-    etcd_url: str = "http://etcd:2379"
-    queue_connection_string: str = "amqp://guest:guest@rabbitmq/"
-    queue_exchange_name: str = "dlm.outbox"
+    etcd_url: str = ""
+    queue_connection_string: str = ""
+    queue_exchange_name: str = ""
 
     def __post_init__(self):
         """Create derived/processed attributes."""
@@ -41,14 +41,14 @@ class WatcherArgs(CmdLineParameters):
         self.parser.add_argument(
             "--etcd-url",
             type=str,
-            required=False,
+            default="http://etcd:2379",
             help="etcd service URL (def: http://etcd:2379).",
         )
         self.parser.add_argument(
             "--queue-connection-string",
             type=str,
             required=False,
-            default="amqp://guest:guest@rabbitmq/", # Docker value
+            default="amqp://dlm-user:dlm-password@rabbitmq/",  # Docker value
             help="RabbitMQ connection URL.",
         )
         self.parser.add_argument(

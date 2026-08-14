@@ -78,7 +78,7 @@ configdb_watcher:
   # If these services run in another namespace, use e.g. ska-dlm-ingest.other-namespace:port
   uid_expiration_days:  # leave empty to use DB default, now() + 24:00
   oid_expiration_days:  # leave empty to use DB default, 2099-12-31T23:59:59
-  queue_connection_string: "amqp://guest:guest@ska-dlm-rabbitmq/"
+  queue_connection_string: "amqp://dlm-user:dlm-password@ska-dlm-rabbitmq/"
   queue_exchange_name: "dlm.outbox"
   pvc:
     name: shared

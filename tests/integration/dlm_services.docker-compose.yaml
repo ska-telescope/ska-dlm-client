@@ -89,8 +89,8 @@ services:
       - 15672:15672
     pull_policy: missing
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: dlm-user
+      RABBITMQ_DEFAULT_PASS: dlm-password
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s
