@@ -421,9 +421,9 @@ async def test_register_in_place(request_configuration: Configuration):
             resp = api_request.query_data_item(item_name=item_name)
             assert len(resp) == 1, f"Expected 1 entries for {item_name}, got {len(resp)}"
 
-    # By now there should be >300 entries in data_item:
-    resp = api_request.query_data_item(item_name="")
-    assert len(resp) > 300, f"Expected more than 300 data_items, got {len(resp)}"
+        # By now there should be >300 entries in data_item:
+        resp = api_request.query_data_item(item_name="")
+        assert len(resp) > 300, f"Expected more than 300 data_items, got {len(resp)}"
 
 
 @pytest.mark.xfail(reason="running extremely slow on CI")
