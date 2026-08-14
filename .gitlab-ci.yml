@@ -3,7 +3,7 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   CI_POETRY_VERSION: 1.8.2
   # DLM_SERVER_IMAGE: artefact.skao.int/ska-data-lifecycle:2.1.0
-  DLM_SERVER_IMAGE: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:2.1.0-dev.cd49bef10
+  DLM_SERVER_IMAGE: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:2.1.0-dev.c0ee7d6e5
 
 # Enable caching for python
 cache:

@@ -127,10 +127,10 @@ spec:
           {{- end }}
 
           - name: QUEUE_CONNECTION_STRING
-            value: {{ .Values.configdb_watcher.queue_connection_string | quote }} # do we even want/need to make this configurable?
+            value: {{ .Values.configdb_watcher.queue_connection_string | quote }}
 
           - name: QUEUE_EXCHANGE_NAME
-            value: {{ .Values.configdb_watcher.queue_exchange_name | quote }} # do we even want/need to make this configurable?
+            value: {{ .Values.configdb_watcher.queue_exchange_name | quote }}
 
         command:
           - /entrypoint.sh
