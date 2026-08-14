@@ -28,17 +28,7 @@ from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import request_api, storage_api
 
-from .conftest import (
-    SRC_HOST,
-    STORAGE,
-    STORAGE_URL,
-    WATCHER_SOURCE_DIR_ROOT,
-    _get_container_log,
-    _get_id,
-    _init_location_if_needed,
-    _init_storage_if_needed,
-    setup_testing,
-)
+from .conftest import SRC_HOST, STORAGE_URL, WATCHER_SOURCE_DIR_ROOT, _get_id, setup_testing
 
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))

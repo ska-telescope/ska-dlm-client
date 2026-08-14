@@ -12,8 +12,6 @@ from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import request_api, storage_api
 
-from .conftest import setup_testing
-
 log = logging.getLogger(__name__)
 
 

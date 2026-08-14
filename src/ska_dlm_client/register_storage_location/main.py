@@ -9,10 +9,12 @@ import logging
 import os
 import pwd
 import shutil
+import socket
 import sys
 
 import ska_ser_logging
 
+from ska_dlm_client.common_types import LocationCountry, LocationName, LocationType
 from ska_dlm_client.config import Config
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
@@ -133,8 +135,8 @@ def get_or_init_storage(
     api_configuration: Configuration,
     the_location_id: str,
     rclone_config: dict,
-    storage_type: str = "",  # enum | None?
-    storage_interface: str = "",  # enum | None?
+    storage_type: str = "filesystem",  # enum | None?
+    storage_interface: str = "posix",  # enum | None?
     location_name: str = "",
     storage_phase: str = "GAS",  # enum = StoragePhase.GAS.value?
 ) -> str:

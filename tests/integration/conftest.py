@@ -1,11 +1,10 @@
-# pylint: disable=too-many-arguments
 # pylint: disable=redefined-outer-name
-# pylint: disable=dangerous-default-value
 """Shared pytest fixtures and service readiness checks for DLM integration tests."""
 
 import logging
 import os
 import subprocess
+import time
 from typing import Iterator
 from urllib.parse import urlparse
 
@@ -174,9 +173,9 @@ def setup_testing(api_configuration: Configuration):
         else api_configuration.host
     )
     location_id = get_or_init_location(
-        api_configuration, storage_url=storage_url, location=LOCATION_NAME
+        api_configuration, storage_url=storage_url, location_name=LOCATION_NAME
     )
-    _ = get_or_init_storage(
+    storage_id = get_or_init_storage(
         storage_name=STORAGE["TGT"]["STORAGE_NAME"],
         storage_url=storage_url,
         storage_phase=STORAGE["TGT"]["STORAGE_PHASE"],
@@ -185,6 +184,14 @@ def setup_testing(api_configuration: Configuration):
         the_location_id=location_id,
         rclone_config=STORAGE["TGT"]["STORAGE_CONFIG"],
     )
+    return location_id, storage_id
+
+
+@pytest.fixture(scope="session")
+def _common_dlm_endpoints(storage_configuration: Configuration) -> tuple[str, str]:
+    """Ensure the shared location and archive storage exist."""
+    log.debug(">>> setup_testing() fixture called")
+    return setup_testing(storage_configuration)
 
 
 def __lenient_deserialize(self, data, klass):
@@ -229,10 +236,10 @@ def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 2
     for host in host_options:
         check_url = f"{url_parts.scheme}://{host}:{url_parts.port}{url_parts.path}"
         try:
-            logger.info(">>>> Checking HTTP endpoint: %s for %s", check_url, orig_hostname)
+            log.info(">>>> Checking HTTP endpoint: %s for %s", check_url, orig_hostname)
             r = requests.get(check_url, timeout=timeout_s, verify=verify, allow_redirects=True)
             if r.status_code in ok:
-                logger.info("OK!")
+                log.info("OK!")
                 return
         except requests.RequestException:
             pass
