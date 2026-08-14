@@ -6,8 +6,8 @@ import os
 from abc import ABC, abstractmethod
 
 from watchdog.events import DirCreatedEvent, FileCreatedEvent, FileSystemEvent
-from watchdog.observers.api import EventQueue, ObservedWatch
-from watchdog.observers.polling import DEFAULT_EMITTER_TIMEOUT, BaseObserver, PollingEmitter
+from watchdog.observers.api import DEFAULT_EMITTER_TIMEOUT, BaseObserver, EventQueue, ObservedWatch
+from watchdog.observers.polling import PollingEmitter
 from watchfiles import Change, awatch
 
 from ska_dlm_client.registration_processor import RegistrationProcessor
@@ -124,7 +124,7 @@ class INotifyDirectoryWatcher(DirectoryWatcher):
         """Watch for changes in the defined directory and process each change found."""
         logger.info("with config parameters %s", self._config)
         logger.info("starting to watch %s", self._config.directory_to_watch)
-        logger.info(
+        logger.debug(
             "NOTE: watchfiles.awatch has recursive=False, in case this matters in the future."
         )
         # Last opportunity to call post startup func before we wait.

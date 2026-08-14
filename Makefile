@@ -11,7 +11,7 @@ PYTHON_LINE_LENGTH = 99
 PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
 
 # The DLM server image to use in integration tests:
-# DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:2.2.0  #future: use this when we have a new release of the DLM server image
+# DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:2.1.0  # future: use this when we have a new release of the DLM server image
 # DLM_SERVER_IMAGE = ska-data-lifecycle:2.1.0-dirty  # This works for local testing of the DLM server image built using make oci-image-build.
 DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:2.1.0-dev.c0ee7d6e5
 
@@ -50,6 +50,15 @@ docs-pre-build:
 .PHONY: docs-pre-build openapi-code-from-local-dlm
 
 docker-compose-up: ## Bring up test services in docker
+# create shared-tmpfs volume if it doesn't exist:
+	docker volume inspect shared-tmpfs >/dev/null 2>&1 || \
+		docker volume create \
+			--driver local \
+			--opt type=tmpfs \
+			--opt device=tmpfs \
+			--opt o=mode=1777,uid=1000,gid=1000 \
+			shared-tmpfs
+
 	export LOGLEVEL=DEBUG && export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml build
 	export LOGLEVEL=DEBUG && export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml up -d --remove-orphans
 
@@ -57,12 +66,8 @@ docker-compose-down: ## Shut down test services in docker previously started wit
 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml down --volumes --remove-orphans
 	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml down --volumes
 
-oci-build-dlm_directory_watcher:
-	make oci-build OCI_IMAGE=ska-dlm-directory_watcher \
-	OCI_IMAGE_FILE_PATH=Dockerfile
-
-oci-build-dlm_configdb_watcher:
-	make oci-build OCI_IMAGE=ska-dlm-configdb_watcher \
+oci-build-dlm-client:
+	make oci-build OCI_IMAGE=ska-dlm-client \
 	OCI_IMAGE_FILE_PATH=Dockerfile
 
 openapi-code-from-local-dlm: ## Use the connection to DLM services to retrieve and generate OpenAPI code

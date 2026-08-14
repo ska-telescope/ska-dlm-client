@@ -459,7 +459,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_new**
-> List[Dict[str, object]] query_new(check_date, uid=uid)
+> List[Optional[Dict[str, object]]] query_new(check_date, uid=uid)
 
 Query New
 
@@ -508,7 +508,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**List[Dict[str, object]]**
+**List[Optional[Dict[str, object]]]**
 
 ### Authorization
 
@@ -529,7 +529,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_acl**
-> Dict[str, object] set_acl(oid=oid, uid=uid, acl=acl)
+> Dict[str, Optional[object]] set_acl(oid=oid, uid=uid, acl=acl)
 
 Set Acl
 
@@ -580,7 +580,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+**Dict[str, Optional[object]]**
 
 ### Authorization
 
@@ -601,7 +601,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_group**
-> Dict[str, object] set_group(oid=oid, uid=uid, group=group)
+> Dict[str, Optional[object]] set_group(oid=oid, uid=uid, group=group)
 
 Set Group
 
@@ -652,7 +652,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+**Dict[str, Optional[object]]**
 
 ### Authorization
 
@@ -673,7 +673,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_metadata**
-> Dict[str, object] set_metadata(uid, request_body=request_body)
+> Dict[str, Optional[object]] set_metadata(uid, request_body=request_body)
 
 Set Metadata
 
@@ -722,7 +722,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+**Dict[str, Optional[object]]**
 
 ### Authorization
 
@@ -743,7 +743,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_oid_expiration**
-> Dict[str, object] set_oid_expiration(oid, expiration)
+> Dict[str, Optional[object]] set_oid_expiration(oid, expiration)
 
 Set Oid Expiration
 
@@ -792,7 +792,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+**Dict[str, Optional[object]]**
 
 ### Authorization
 
@@ -813,7 +813,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_phase**
-> Dict[str, object] set_phase(uid, phase)
+> Dict[str, Optional[object]] set_phase(uid, phase)
 
 Set Phase
 
@@ -862,7 +862,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+**Dict[str, Optional[object]]**
 
 ### Authorization
 
@@ -883,7 +883,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_state**
-> Dict[str, object] set_state(uid, state)
+> Dict[str, Optional[object]] set_state(uid, state)
 
 Set State
 
@@ -932,7 +932,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+**Dict[str, Optional[object]]**
 
 ### Authorization
 
@@ -953,7 +953,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_uid_expiration**
-> Dict[str, object] set_uid_expiration(uid, expiration)
+> Dict[str, Optional[object]] set_uid_expiration(uid, expiration)
 
 Set Uid Expiration
 
@@ -1002,7 +1002,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+**Dict[str, Optional[object]]**
 
 ### Authorization
 
@@ -1023,7 +1023,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_uri**
-> Dict[str, object] set_uri(uid, uri, storage_id)
+> Dict[str, Optional[object]] set_uri(uid, uri, storage_id)
 
 Set Uri
 
@@ -1074,7 +1074,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+**Dict[str, Optional[object]]**
 
 ### Authorization
 
@@ -1095,7 +1095,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_user**
-> Dict[str, object] set_user(oid=oid, uid=uid, user=user)
+> Dict[str, Optional[object]] set_user(oid=oid, uid=uid, user=user)
 
 Set User
 
@@ -1146,7 +1146,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+**Dict[str, Optional[object]]**
 
 ### Authorization
 
@@ -1167,7 +1167,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **update_data_item**
-> Dict[str, object] update_data_item(item_name=item_name, oid=oid, uid=uid, request_body=request_body)
+> Dict[str, Optional[object]] update_data_item(item_name=item_name, oid=oid, uid=uid, request_body=request_body)
 
 Update Data Item
 
@@ -1223,7 +1223,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+**Dict[str, Optional[object]]**
 
 ### Authorization
 
@@ -1244,7 +1244,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **update_item_tags**
-> Dict[str, object] update_item_tags(item_name=item_name, oid=oid, request_body=request_body)
+> Dict[str, Optional[object]] update_item_tags(item_name=item_name, oid=oid, request_body=request_body)
 
 Update Item Tags
 
@@ -1298,7 +1298,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+**Dict[str, Optional[object]]**
 
 ### Authorization
 

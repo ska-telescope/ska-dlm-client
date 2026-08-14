@@ -7,6 +7,7 @@ import functools
 import logging
 import os
 import signal
+import socket
 
 import ska_ser_logging
 
@@ -16,12 +17,28 @@ from ska_dlm_client.directory_watcher.directory_watcher import (
     INotifyDirectoryWatcher,
     PollingDirectoryWatcher,
 )
-from ska_dlm_client.register_storage_location.main import RCLONE_CONFIG_SOURCE, setup_volume
+from ska_dlm_client.register_storage_location.main import setup_volume
 from ska_dlm_client.registration_processor import RegistrationProcessor
 
 from .config import WatcherConfig
 
 logger = logging.getLogger(__name__)
+
+
+RCLONE_CONFIG_SOURCE = {
+    # TODO: Refactor RCLONE_CONFIG_SOURCE to be constructed from WatcherConfig/SdpWatcherConfig
+    # rather than mutating this global dictionary in process_args(). This would make all
+    # runtime configuration flow through the config object consistently.
+    "name": "dir-watcher",
+    "type": "sftp",
+    "parameters": {
+        "host": socket.gethostname(),
+        "key_file": "/root/.ssh/id_rsa",
+        "shell_type": "unix",
+        "type": "sftp",
+        "user": os.getenv("USER", "ska-dlm"),
+    },
+}
 
 
 def process_args(args: argparse.Namespace) -> WatcherConfig:
@@ -47,6 +64,7 @@ def process_args(args: argparse.Namespace) -> WatcherConfig:
         ingest_url=args.ingest_url,
         reload_status_file=args.reload_status_file,
         rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,
+        location=args.location,
     )
     return config
 
@@ -74,6 +92,14 @@ def create_directory_watcher() -> DirectoryWatcher:
         api_configuration=config.ingest_configuration,
         rclone_config=RCLONE_CONFIG_SOURCE,
         storage_url=config.storage_url,
+        location_name=config.location,  # get_or_init_location. SHOULD already be there from server
+        # if no location, use fallback values:
+        location_type="local-dev",  # compulsory arg for init_location
+        location_country="AU",  # compulsory arg for init_location
+        location_city="Perth",  # compulsory arg for init_location
+        location_facility="local",  # compulsory arg for init_location
+        storage_type="filesystem",  # compulsory arg for init_storage
+        storage_interface="posix",  # compulsory arg for init_storage
     )
     registration_processor = RegistrationProcessor(config)
     if args.include_existing:
@@ -98,7 +124,7 @@ async def amain():
     Creates a DirectoryWatcher, sets up signal handlers for graceful shutdown,
     and starts the directory watching process.
     """
-    directory_watcher = create_directory_watcher()
+    directory_watcher = create_directory_watcher()  # triggers source storage setup
 
     def stop_watcher(signo: signal.Signals):
         logger.info("Received %s, stopping directory watcher", signo.name)

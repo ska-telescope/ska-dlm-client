@@ -1,5 +1,5 @@
 # pylint: disable=subprocess-run-check
-"""SDP Ingest (ConfigDB Watcher) integration tests."""
+"""ConfigDB Watcher integration tests."""
 
 import logging
 import os
@@ -22,18 +22,10 @@ from ska_sdp_config.entity.flow import (
     FlowSource,
 )
 
-from ska_dlm_client.common_types import (
-    LocationCountry,
-    LocationName,
-    LocationType,
-    StorageInterface,
-    StorageType,
-)
+from ska_dlm_client.common_types import LocationCountry, LocationName, LocationType
 from ska_dlm_client.openapi import api_client
-from ska_dlm_client.openapi.api_client import ApiException
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import request_api, storage_api
-from ska_dlm_client.register_storage_location.main import setup_testing
 
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -54,41 +46,8 @@ LOCATION_COUNTRY = LocationCountry.AU.value
 LOCATION_CITY = "Marksville"
 LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
 
-STORAGE = {
-    "TGT": {
-        "STORAGE_NAME": "dlm-archive",
-        "STORAGE_TYPE": StorageType.FILESYSTEM,
-        "STORAGE_INTERFACE": StorageInterface.POSIX,
-        "ROOT_DIRECTORY": "/dlm-archive",
-        "STORAGE_PHASE": "SOLID",
-        "STORAGE_CONFIG": {
-            "name": "dlm-archive",
-            "type": "alias",
-            "parameters": {"remote": "/"},
-        },
-    },
-    "SRC": {
-        "STORAGE_NAME": "sdp-watcher",
-        "STORAGE_TYPE": StorageType.FILESYSTEM,
-        "STORAGE_INTERFACE": StorageInterface.POSIX,
-        "ROOT_DIRECTORY": "/dlm/product_dir",
-        "STORAGE_PHASE": "GAS",
-        "STORAGE_CONFIG": {
-            "name": "dlm",
-            "type": "sftp",
-            "parameters": {
-                "host": "dlm_configdb_watcher",
-                "key_file": "/root/.ssh/id_rsa",
-                "shell_type": "unix",
-                "type": "sftp",
-                "user": "ska-dlm",
-            },
-        },
-    },
-}
-
-SRC_HOST = STORAGE["SRC"]["STORAGE_CONFIG"]["parameters"]["host"]
-WATCHER_SOURCE_DIR_ROOT = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}"
+SRC_HOST = "dlm_configdb_watcher"
+WATCHER_SOURCE_DIR_ROOT = "/dlm/product_dir"
 
 
 def _get_cfg() -> Config:
@@ -189,122 +148,32 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
     return statuses
 
 
-def _init_location_if_needed(api_storage: storage_api.StorageApi) -> str:
-    try:
-        resp = api_storage.query_location(location_name=LOCATION_NAME)
-        assert isinstance(resp, list)
-    except ApiException as e:
-        log.error("Failed to query location: %s", e)
-        storage_log = _get_container_log("dlm_postgrest")
-        log.info("Log from storage container: %s", storage_log)
-        return ""
-    if resp:
-        location_id = _get_id(resp[0], "location_id")
-        log.info("Location already exists: %s", location_id)
-    else:
-        try:
-            location_id = api_storage.init_location(
-                location_name=LOCATION_NAME,
-                location_type=LOCATION_TYPE,
-                location_country=LOCATION_COUNTRY,
-                location_city=LOCATION_CITY,
-                location_facility=LOCATION_FACILITY,
-            )
-            assert isinstance(location_id, str) and location_id
-        except ApiException as e:
-            log.error("Failed to create location: %s", e)
-            storage_log = _get_container_log("dlm_storage")
-            log.info("Log from storage container: %s", storage_log)
-            return ""
-        log.info("Location created: %s", location_id)
-    return location_id
-
-
-def _init_storage_if_needed(
-    api_storage: storage_api.StorageApi, location_id: str, storage: dict
-) -> str:
-    resp = api_storage.query_storage(storage_name=storage["STORAGE_NAME"])
-    assert isinstance(resp, list)
-    if resp:
-        storage_id = _get_id(resp[0], "storage_id")
-        log.info("Storage already exists: %s", storage_id)
-    else:
-        storage_id = api_storage.init_storage(
-            storage_name=storage["STORAGE_NAME"],
-            storage_type=storage["STORAGE_TYPE"],
-            storage_interface=storage["STORAGE_INTERFACE"],
-            storage_phase=storage["STORAGE_PHASE"],
-            root_directory=storage["ROOT_DIRECTORY"],
-            location_id=location_id,
-            location_name=LOCATION_NAME,
-        )
-        assert isinstance(storage_id, str) and storage_id
-        log.info("Storage created: %s %s", storage["STORAGE_NAME"], storage_id)
-    return storage_id
-
-
-def _get_container_log(container_name: str) -> str:
-    cmd = ["docker", "logs", "--since", "600s", container_name]
-    p = subprocess.run(cmd, capture_output=True, text=True, check=True)
-    if p.returncode != 0:
-        log.error("Failed to get logs for container %s: %s", container_name, p.stderr)
-        return p.stderr
-    return p.stdout
-
-
 @pytest.mark.integration
-def test_storage_initialisation(storage_configuration: Configuration):
-    """Test setting up a location, storage and storage config."""
-    with api_client.ApiClient(storage_configuration) as the_api_client:
-        api_storage = storage_api.StorageApi(the_api_client)
-
-        # --- ensure location exists ---
-        log.info(
-            "Using storage configuration host for registering: %s", storage_configuration.host
-        )
-        os.environ["STORAGE_URL"] = storage_configuration.host
-        storage_log = _get_container_log("dlm_storage")
-        log.info("Log from storage container: %s", storage_log)
-        location_id = _init_location_if_needed(api_storage)
-
-        # --- ensure storage exists ---
-        storage_id = _init_storage_if_needed(api_storage, location_id, storage=STORAGE["TGT"])
-
-        # --- set storage config ---
-        cfg_id = api_storage.create_storage_config(
-            request_body=STORAGE["TGT"]["STORAGE_CONFIG"],
-            storage_id=storage_id,
-            storage_name=STORAGE["TGT"]["STORAGE_NAME"],
-            config_type="rclone",
-        )
-        assert isinstance(cfg_id, str) and cfg_id
-        log.info("Target storage config id: %s", cfg_id)
-
-        # --- verify by querying again ---
-        resp2 = api_storage.query_storage(storage_name=STORAGE["TGT"]["STORAGE_NAME"])
-        assert resp2 and _get_id(resp2[0], "storage_id") == storage_id
-
-
-@pytest.mark.integration
-def test_data_was_copied_correctly():
+def test_data_was_copied_correctly(_configdb_watcher_ready, _common_dlm_endpoints):
     """Verify that the test data is visible inside the watcher container."""
     expected_file = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}/{ARB_MS}/table.dat"
 
     result = subprocess.run(
         f"docker exec {SRC_HOST} sh -lc 'test -f {expected_file}'", shell=True, check=False
     )
+    if result.returncode != 0:
+        log.error("docker exec failed")
+        log.error("stdout:\n%s", result.stdout)
+        log.error("stderr:\n%s", result.stderr)
+
+        subprocess.run(["docker", "ps", "-a"], check=False)
+        subprocess.run(["docker", "logs", "dlm_configdb_watcher"], check=False)
+        subprocess.run(["docker", "logs", "dlm_directory_watcher"], check=False)
+        subprocess.run(["docker", "logs", "dlm_storage"], check=False)
     assert result.returncode == 0, f"Could not find expected file: {expected_file}"
 
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_configdb_watcher(request_configuration: Configuration):
+async def test_configdb_watcher(
+    request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
+):
     """Flow points to subfolder scan90-99, containing 10 MS files."""
-    host = STORAGE_URL
-    api_configuration = Configuration(host=host)
-    setup_testing(api_configuration)
-    sleep(2)  # TODO: DMAN-193
-
     # Trigger COMPLETED Flow pointing directly at scan90-99
     flow_name = "test-flow"
     persist_flow_name = "persist-flow"
@@ -337,17 +206,14 @@ async def test_configdb_watcher(request_configuration: Configuration):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_configdb_watcher_higher_dir(request_configuration: Configuration):
+async def test_configdb_watcher_higher_dir(
+    request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
+):
     """
     Flow points at pb-test-20260126-24294 (one level higher).
 
     Watcher must search one level deeper to find all ms files.
     """
-    host = STORAGE_URL
-    api_configuration = Configuration(host=host)
-    setup_testing(api_configuration)
-    sleep(2)  # TODO: DMAN-193
-
     # Trigger COMPLETED Flow pointing at pb-test-20260126-24294 directory
     flow_name = "test-flow-higher-dir"
     persist_flow_name = "persist-flow2"
@@ -402,13 +268,8 @@ async def test_configdb_watcher_higher_dir(request_configuration: Configuration)
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_watcher_logs_failed_registration():
+async def test_watcher_logs_failed_registration(_configdb_watcher_ready, _common_dlm_endpoints):
     """Flow points to a data item that is already registered on the storage."""
-    host = STORAGE_URL
-    api_configuration = Configuration(host=host)
-    setup_testing(api_configuration)
-    sleep(2)  # TODO: DMAN-193
-
     # Trigger a COMPLETED Flow with same subpath as previous test
     trigger_completed_flows("test-flow-failure", "persist-flow3", subpath=PVC_SUBPATH)
 
@@ -426,7 +287,9 @@ async def test_watcher_logs_failed_registration():
 
 @pytest.mark.xfail(reason="running extremely slow on CI")
 @pytest.mark.integration
-def test_automatic_deletion(dlm_request_api, storage_configuration):
+def test_automatic_deletion(
+    dlm_request_api, storage_configuration, _configdb_watcher_ready, _common_dlm_endpoints
+):
     """Expire all data_items and let the heuristics delete the payloads."""
     now = datetime.now(timezone.utc).isoformat()
 

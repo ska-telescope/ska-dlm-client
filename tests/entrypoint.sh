@@ -9,6 +9,7 @@ case "$watcher_mode" in
         chmod g+w /dlm/watch_dir
 
         CMD="dlm-directory-watcher \
+          --location ${LOCATION_NAME:-SKA-DEV} \
           --source-name ${SOURCE_NAME:-dir-watcher} \
           --directory-to-watch ${DIRECTORY_TO_WATCH:-/dlm/watch_dir} \
           --target-name ${TARGET_NAME:-dlm-archive} \
@@ -24,6 +25,7 @@ case "$watcher_mode" in
         ;;
     "configdb-watcher")
         CMD="dlm-configdb-watcher \
+          --location ${LOCATION_NAME:-SKA-DEV} \
           --source-name ${SOURCE_NAME:-configdb-watcher} \
           --directory-to-watch ${DIRECTORY_TO_WATCH:-/dlm/product_dir} \
           --target-name ${TARGET_NAME:-dlm-archive} \

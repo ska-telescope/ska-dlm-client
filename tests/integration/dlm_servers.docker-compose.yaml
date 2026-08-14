@@ -5,7 +5,7 @@ include:
 services:
   dlm_migration:
     platform: linux/amd64
-    image: ${SERVER_IMAGE}
+    image: ${SERVER_IMAGE:-ska-data-lifecycle:2.1.0-dirty}
     user: root
     container_name: dlm_migration
     environment:
@@ -28,13 +28,14 @@ services:
 
   dlm_storage:
     platform: linux/amd64
-    image: ${SERVER_IMAGE}
+    image: ${SERVER_IMAGE:-ska-data-lifecycle:2.1.0-dirty}
     container_name: dlm_storage
     user: root
     environment:
       - SSH_PUBLIC_KEY_PATH=/dlm/.ssh/id_rsa.pub
       - LOGLEVEL=${LOGLEVEL:-INFO}
     entrypoint: uvicorn ska_dlm.dlm_storage.dlm_storage_requests:rest --host 0.0.0.0 --port 8003
+
     ports:
       - 8003:8003
     volumes:
@@ -58,7 +59,7 @@ services:
       start_period: 40s
 
   dlm_request:
-    image: ${SERVER_IMAGE}
+    image: ${SERVER_IMAGE:-ska-data-lifecycle:2.1.0-dirty}
     container_name: dlm_request
     user: root
     platform: linux/amd64
@@ -82,7 +83,7 @@ services:
 
   dlm_ingest:
     platform: linux/amd64
-    image: ${SERVER_IMAGE}
+    image: ${SERVER_IMAGE:-ska-data-lifecycle:2.1.0-dirty}
     container_name: dlm_ingest
     user: root
     environment:
@@ -105,7 +106,7 @@ services:
 
   dlm_migrations:
     platform: linux/amd64
-    image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:2.1.0-dev.c7c7e7352
+    image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:c117abfc
     container_name: dlm_migrations
     command: >
       --url="jdbc:postgresql://dlm_db:5432/ska_dlm_testing"
@@ -115,7 +116,7 @@ services:
       --search-path=/changelog
       --changelog-file=changelog.yaml
       update
-      --context-filter="create-schema,unprivileged"
+      --context-filter="create-schema,unprivileged,2.3-release"
     depends_on:
       dlm_db:
         condition: service_healthy
@@ -123,7 +124,7 @@ services:
       - dlm_network
   dlm_heuristics:
     platform: linux/amd64
-    image: ${SERVER_IMAGE}
+    image: ${SERVER_IMAGE:-ska-data-lifecycle:2.1.0-dirty}
     container_name: dlm_heuristics
     command: ["ska-dlm-heuristics"]
     user: root
@@ -145,7 +146,7 @@ services:
 
   dlm_outbox:
     platform: linux/amd64
-    image: ${SERVER_IMAGE}
+    image: ${SERVER_IMAGE:-ska-data-lifecycle:2.1.0-dirty}
     container_name: dlm_outbox
     environment:
       DLM_OUTBOX_DATABASE_URL: "postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm_testing"
@@ -170,5 +171,35 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - dlm_network
+
+  dlm_archive:
+    platform: linux/amd64
+    image: linuxserver/openssh-server
+    container_name: dlm_archive
+    ports:
+      - 2222:2222
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - USER_NAME=ska-dlm
+      - PASSWORD_ACCESS=false
+      - PUBLIC_KEY_ACCESS=true
+      - PUBLIC_KEY_FILE=/dlm/.ssh/id_rsa.pub
+      - PUBLIC_KEY_URL=http://dlm_storage:8003/storage/get_ssh_public_key
+    healthcheck:
+      test: ["CMD", "wget", "--no-check-certificate", "--post-data='{\"my_key\": \"my_value\"}'", "-qO-", "https://dlm_rclone:5572/rc/noop"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      dlm_storage:
+        condition: service_healthy
+      dlm_rclone:
+        condition: service_healthy
+    volumes:
+      - shared-tmpfs:/dlm
     networks:
       - dlm_network

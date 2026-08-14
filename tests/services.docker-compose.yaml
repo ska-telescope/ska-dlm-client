@@ -7,4 +7,4 @@ networks:
 volumes:
   shared-tmpfs:
     name: shared-tmpfs
-    # external: true
+    external: true # Reuse the shared tmpfs volume created by the server integration tests.
