@@ -28,7 +28,7 @@ from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import request_api, storage_api
 
-from .conftest import SRC_HOST, STORAGE_URL, WATCHER_SOURCE_DIR_ROOT, _get_id, setup_testing
+from .conftest import STORAGE, STORAGE_URL, WATCHER_SOURCE_DIR_ROOT, _get_id, setup_testing
 
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -242,9 +242,10 @@ def test_storage_initialisation(storage_configuration: Configuration, _common_dl
 def test_data_was_copied_correctly(_common_dlm_endpoints):
     """Verify that the test data is visible inside the watcher container."""
     expected_file = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}/{ARB_MS}/table.dat"
+    src_host = STORAGE["SRC"]["STORAGE_CONFIG"]["parameters"]["host"]
 
     result = subprocess.run(
-        f"docker exec {SRC_HOST} sh -lc 'test -f {expected_file}'", shell=True, check=False
+        f"docker exec {src_host} sh -lc 'test -f {expected_file}'", shell=True, check=False
     )
     if result.returncode != 0:
         log.error("docker exec failed")
@@ -269,9 +270,6 @@ def test_data_was_copied_correctly(_common_dlm_endpoints):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_configdb_watcher(
-    request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
-):
 async def test_configdb_watcher(
     request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
 ):
@@ -302,9 +300,6 @@ async def test_configdb_watcher(
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_configdb_watcher_higher_dir(
-    request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
-):
 async def test_configdb_watcher_higher_dir(
     request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
 ):
@@ -348,7 +343,6 @@ async def test_configdb_watcher_higher_dir(
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-async def test_watcher_logs_failed_registration(_configdb_watcher_ready, _common_dlm_endpoints):
 async def test_watcher_logs_failed_registration(_configdb_watcher_ready, _common_dlm_endpoints):
     """Flow points to a data item that is already registered on the storage."""
     # Trigger a COMPLETED Flow with same subpath as previous test
@@ -438,11 +432,12 @@ def test_automatic_deletion(
     # avoid iterative HTTP round-trips to a single DB update, from the client-side.
 
     test_dir = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}"
+    src_host = STORAGE["SRC"]["STORAGE_CONFIG"]["parameters"]["host"]
     counter = 0
     while counter < 3:
         log.info("Sleep to give heuristics some time to do its thing.")
         sleep(20)  # default poll interval of the heuristics is 10 seconds
-        result = subprocess.run(["docker", "exec", SRC_HOST, "test", "-d", test_dir])
+        result = subprocess.run(["docker", "exec", src_host, "test", "-d", test_dir])
         logs = subprocess.run(["docker", "logs", "dlm_heuristics"], capture_output=True, text=True)
         if result.returncode != 0:
             break

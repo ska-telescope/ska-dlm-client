@@ -1,12 +1,9 @@
-# pylint: disable=too-many-arguments
 # pylint: disable=redefined-outer-name
-# pylint: disable=dangerous-default-value
 """Shared pytest fixtures and service readiness checks for DLM integration tests."""
 
 import logging
 import os
 import subprocess
-import time
 import time
 from typing import Iterator
 from urllib.parse import urlparse
@@ -21,22 +18,11 @@ from ska_dlm_client.common_types import (
     StorageInterface,
     StorageType,
 )
-from ska_dlm_client.common_types import (
-    LocationCountry,
-    LocationName,
-    LocationType,
-    StorageInterface,
-    StorageType,
-)
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.api_client import ApiException
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import request_api, storage_api
 from ska_dlm_client.register_storage_location.main import get_or_init_location, get_or_init_storage
-from ska_dlm_client.openapi.dlm_api import request_api, storage_api
-from ska_dlm_client.register_storage_location.main import get_or_init_location, get_or_init_storage
-
-logger = logging.getLogger(__name__)
 
 # URLs can be overridden in CI to hit the DinD host
 INGEST_URL = os.getenv("INGEST_URL", "http://dlm_ingest:8001")
@@ -46,83 +32,57 @@ MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
 POSTGREST_URL = os.getenv("POSTGREST_URL", "http://dlm_postgrest:3000")
 RCLONE_BASE = os.getenv("RCLONE_BASE", "https://dlm_rclone:5572")
 ETCD_URL = os.getenv("ETCD_URL", "http://etcd:2379")
+LOCATION_NAME = LocationName.LOCAL_DEV.value
+LOCATION_TYPE = LocationType.LOCAL_DEV.value
+LOCATION_COUNTRY = LocationCountry.AU.value
+LOCATION_CITY = "Marksville"
+LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
 
-# Test constants to set up common end points: SKA-DEV location and dlm-archive storage
-LOCATION_NAME = os.getenv("LOCATION_NAME", LocationName.LOCAL_DEV.value)
-LOCATION_TYPE = os.getenv("LOCATION_TYPE", LocationType.LOCAL_DEV.value)
-LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY", LocationCountry.AU.value)
-LOCATION_CITY = os.getenv("LOCATION_CITY", "Marksville")
-LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")  # TODO: query lookup table
-TARGET_ROOT = os.getenv("TARGET_ROOT", "/dlm-archive")
-TGT_STORAGE_PHASE = os.getenv("TARGET_PHASE", "SOLID")
-RCLONE_CONFIG_TARGET = {
-    "name": "dlm-archive",
-    "type": "alias",
-    "root_path": "/",
-    "parameters": {"remote": "/"},
+STORAGE = {
+    "SRC": {
+        "STORAGE_NAME": "configdb-watcher",
+        "STORAGE_TYPE": StorageType.FILESYSTEM,
+        "STORAGE_INTERFACE": StorageInterface.POSIX,
+        "ROOT_DIRECTORY": "/dlm/product_dir",
+        "STORAGE_PHASE": "GAS",
+        "STORAGE_CONFIG": {
+            "name": "sdp-watcher",
+            "type": "sftp",
+            "parameters": {
+                "host": "dlm_configdb_watcher",
+                "key_file": "/root/.ssh/id_rsa",
+                "shell_type": "unix",
+                "type": "sftp",
+                "user": "ska-dlm",
+            },
+        },
+    },
+    "TGT": {
+        "STORAGE_NAME": "dlm-archive",
+        "STORAGE_TYPE": StorageType.FILESYSTEM,
+        "STORAGE_INTERFACE": StorageInterface.POSIX,
+        "ROOT_DIRECTORY": "/dlm/archive_dir",
+        "STORAGE_PHASE": "SOLID",
+        "STORAGE_CONFIG": {
+            "name": f"{os.getenv('TARGET_NAME', 'dlm-archive')}",
+            "type": "sftp",
+            "parameters": {
+                "host": "dlm_archive",
+                "port": 2222,
+                "key_file": "/root/.ssh/id_rsa",
+                "shell_type": "unix",
+                "type": "sftp",
+                "user": "ska-dlm",
+            },
+        },
+    },
 }
 
-STORAGE_INTERFACE = StorageInterface.POSIX
-STORAGE_TYPE = StorageType.FILESYSTEM
+SRC_HOST = STORAGE["SRC"]["STORAGE_CONFIG"]["parameters"]["host"]
+WATCHER_SOURCE_DIR_ROOT = f"{STORAGE['SRC']['ROOT_DIRECTORY'].rstrip('/')}"
 
 
-def setup_testing(
-    api_configuration: Configuration,
-    *,
-    location_name: str = LOCATION_NAME,
-    location_type: str = LOCATION_TYPE,
-    location_country: str = LOCATION_COUNTRY,
-    location_city: str = LOCATION_CITY,
-    location_facility: str = LOCATION_FACILITY,
-    target_root: str = TARGET_ROOT,
-    target_phase: str = TGT_STORAGE_PHASE,
-    storage_type: str = STORAGE_TYPE,
-    storage_interface: str = STORAGE_INTERFACE,
-    rclone_config: dict = RCLONE_CONFIG_TARGET,
-) -> tuple[str, str]:
-    """Configure the common integration-test location and target storage."""
-    # The setup of the source volume is now performed during the startup of the client.
-    # In production, the setup of a default (archive) storage endpoint will be performed during
-    # startup of the DLM server.
-
-    logger.info("Setting up common integration-test endpoints.")
-    location_id = get_or_init_location(
-        api_configuration=api_configuration,
-        storage_url=api_configuration.host,
-        location_name=location_name,
-        location_type=location_type,
-        location_country=location_country,
-        location_city=location_city,
-        location_facility=location_facility,
-    )
-
-    storage_id = get_or_init_storage(
-        storage_name=rclone_config["name"],
-        storage_url=api_configuration.host,
-        storage_root_directory=target_root,
-        api_configuration=api_configuration,
-        the_location_id=location_id,
-        rclone_config=rclone_config,
-        storage_type=storage_type,
-        storage_interface=storage_interface,
-        location_name=location_name,
-        storage_phase=target_phase,
-    )
-
-    logger.info(
-        "Common endpoints ready: location_id=%s, storage_id=%s",
-        location_id,
-        storage_id,
-    )
-    return location_id, storage_id
-
-
-@pytest.fixture(scope="session")
-def _common_dlm_endpoints(storage_configuration: Configuration) -> tuple[str, str]:
-    """Ensure the shared location and archive storage exist."""
-    logger.debug(">>> setup_testing() fixture called")
-    return setup_testing(storage_configuration)
-
+log = logging.getLogger(__name__)
 
 # --- OpenAPI client deserialization patch (handles Optional[Dict[str, object]]) ---
 # Original private method
@@ -215,7 +175,7 @@ def setup_testing(api_configuration: Configuration):
     location_id = get_or_init_location(
         api_configuration, storage_url=storage_url, location_name=LOCATION_NAME
     )
-    storage_id = get_or_init_storage(
+    _ = get_or_init_storage(
         storage_name=STORAGE["TGT"]["STORAGE_NAME"],
         storage_url=storage_url,
         storage_phase=STORAGE["TGT"]["STORAGE_PHASE"],
@@ -224,14 +184,6 @@ def setup_testing(api_configuration: Configuration):
         the_location_id=location_id,
         rclone_config=STORAGE["TGT"]["STORAGE_CONFIG"],
     )
-    return location_id, storage_id
-
-
-@pytest.fixture(scope="session")
-def _common_dlm_endpoints(storage_configuration: Configuration) -> tuple[str, str]:
-    """Ensure the shared location and archive storage exist."""
-    log.debug(">>> setup_testing() fixture called")
-    return setup_testing(storage_configuration)
 
 
 def __lenient_deserialize(self, data, klass):
@@ -260,9 +212,7 @@ setattr(api_client.ApiClient, "_ApiClient__deserialize", __lenient_deserialize)
 
 
 @pytest.fixture
-def dlm_request_api(  # pylint: disable=redefined-outer-name
-    request_configuration: Configuration,
-) -> Iterator[request_api.RequestApi]:
+def dlm_request_api(request_configuration: Configuration) -> Iterator[request_api.RequestApi]:
     """Reusable API request object."""
     with api_client.ApiClient(request_configuration) as client:
         yield request_api.RequestApi(client)
@@ -276,10 +226,10 @@ def _check_service(url: str, timeout_s: int = 2, verify: bool = True, ok=(200, 2
     for host in host_options:
         check_url = f"{url_parts.scheme}://{host}:{url_parts.port}{url_parts.path}"
         try:
-            logger.info(">>>> Checking HTTP endpoint: %s for %s", check_url, orig_hostname)
+            log.info(">>>> Checking HTTP endpoint: %s for %s", check_url, orig_hostname)
             r = requests.get(check_url, timeout=timeout_s, verify=verify, allow_redirects=True)
             if r.status_code in ok:
-                logger.info("OK!")
+                log.info("OK!")
                 return
         except requests.RequestException:
             pass
@@ -312,22 +262,10 @@ def request_configuration(request) -> Configuration:
 
 
 @pytest.fixture(scope="session")
-def _configdb_watcher_ready(storage_configuration: Configuration, _common_dlm_endpoints):
-    """Wait until the ConfigDB watcher has registered its source storage."""
-    with api_client.ApiClient(storage_configuration) as the_api_client:
-        api_storage = storage_api.StorageApi(the_api_client)
-
-        deadline = time.time() + 30
-        storage = []
-
-        while time.time() < deadline:
-            storage = api_storage.query_storage(storage_name="configdb-watcher")
-            if storage:
-                return
-
-            time.sleep(1)
-
-    pytest.fail("Timed out waiting for configdb-watcher storage to be registered")
+def _common_dlm_endpoints(storage_configuration: Configuration) -> tuple[str, str]:
+    """Ensure the shared location and archive storage exist."""
+    log.debug(">>> setup_testing() fixture called")
+    return setup_testing(storage_configuration)
 
 
 @pytest.fixture(scope="session")

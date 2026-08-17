@@ -3,24 +3,22 @@
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-positional-arguments
 # pylint: disable=too-many-locals
-# pylint: disable=too-many-arguments
-# pylint: disable=too-many-positional-arguments
-# pylint: disable=too-many-locals
 """Initialize a location and a storage."""
 
 import logging
 import os
 import pwd
 import shutil
+import socket
 import sys
 
 import ska_ser_logging
 
+from ska_dlm_client.common_types import LocationCountry, LocationName, LocationType
 from ska_dlm_client.config import Config
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.dlm_api import storage_api
-from ska_dlm_client.openapi.exceptions import UnprocessableEntityException
 from ska_dlm_client.openapi.exceptions import UnprocessableEntityException
 
 logger = logging.getLogger(__name__)
@@ -51,27 +49,19 @@ STORAGE_TYPE = "filesystem"
 def get_or_init_location(
     api_configuration: Configuration,
     storage_url: str,
-    location_name: str,
-    location_type: str = "",  # required by init_location
-    location_country: str = "",  # required by init_location
-    location_city: str = "",  # required by init_location
-    location_facility: str = "",  # required by init_location
-    location_name: str,
+    location_name: str = "",
     location_type: str = "",  # required by init_location
     location_country: str = "",  # required by init_location
     location_city: str = "",  # required by init_location
     location_facility: str = "",  # required by init_location
 ) -> str:
     """Get location_id or perform location initialisation based on the location_name provided."""
-    """Get location_id or perform location initialisation based on the location_name provided."""
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
 
         # get the location_id
         logger.info("Checking location: %s", location_name)
-        logger.info("Checking location: %s", location_name)
         api_storage.api_client.configuration.host = storage_url
-        response = api_storage.query_location(location_name=location_name)
         response = api_storage.query_location(location_name=location_name)
         logger.info("query_location response: %s", response)
         if not isinstance(response, list):
@@ -197,11 +187,8 @@ def get_or_init_storage(
                 storage_name=storage_name,
                 storage_type=storage_type,
                 storage_interface=storage_interface,
-                storage_type=storage_type,
-                storage_interface=storage_interface,
                 root_directory=storage_root_directory,
                 location_id=the_location_id,
-                location_name=location_name,
                 location_name=location_name,
                 storage_phase=storage_phase,
             )
@@ -217,7 +204,6 @@ def get_or_init_storage(
                     request_body=rclone_config,
                     storage_id=storage_id,
                     storage_name=storage_name,
-                    config_type="rclone",  # change to enum
                     config_type="rclone",  # change to enum
                 )
                 logger.info("Storage config created with id: %s", storage_config_id)
@@ -243,16 +229,6 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     storage_url: str = "",
     storage_type: str = "",
     storage_interface: str = "",  # required by init_storage
-    rclone_config: dict,
-    location_name: str = "",
-    location_type: str = "",  # required by init_location
-    location_country: str = "",  # required by init_location
-    location_city: str = "",  # required by init_location
-    location_facility: str = "",  # required by init_location
-    location_id: str | None = None,
-    storage_url: str = "",
-    storage_type: str = "",
-    storage_interface: str = "",  # required by init_storage
     setup_target: bool = False,
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
@@ -267,15 +243,7 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
             location_country=location_country,
             location_city=location_city,
             location_facility=location_facility,
-            api_configuration,
-            storage_url=storage_url,
-            location_name=location_name,
-            location_type=location_type,
-            location_country=location_country,
-            location_city=location_city,
-            location_facility=location_facility,
         )
-    if setup_target:  # do we need this in this function?
     if setup_target:  # do we need this in this function?
         storage_name = watcher_config.target_name
         storage_root_directory = TARGET_ROOT
@@ -288,8 +256,6 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
         storage_name=storage_name,
         storage_phase=storage_phase,
         storage_url=storage_url,
-        storage_type=storage_type,  # compulsory for init_storage
-        storage_interface=storage_interface,  # compulsory for init_storage
         storage_type=storage_type,  # compulsory for init_storage
         storage_interface=storage_interface,  # compulsory for init_storage
         api_configuration=api_configuration,
