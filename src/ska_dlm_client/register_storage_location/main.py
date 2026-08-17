@@ -84,6 +84,12 @@ def get_or_init_location(
             except UnprocessableEntityException:
                 # Another process may have created the location first (race condition)
                 response = api_storage.query_location(location_name=location_name)
+                if not isinstance(response, list) or len(response) != 1:
+                    logger.error(
+                        "Location creation failed. Query returned unexpected response: %s",
+                        response,
+                    )
+                    raise
                 the_location_id = response[0]["location_id"]
                 logger.info(
                     "Location %s was created concurrently by another process",

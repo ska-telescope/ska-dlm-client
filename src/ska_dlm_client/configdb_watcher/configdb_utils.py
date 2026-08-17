@@ -205,8 +205,7 @@ async def on_message_received(message: aio_pika.abc.AbstractIncomingMessage) -> 
 
 async def start_rabbitmq_consumer(queue_connection_string: str, exchange_name: str):
     """Connect to RabbitMQ and consume DLM migration update messages."""
-    logging.info(" [Background Consumer] Connecting to RabbitMQ...")
-
+    logging.debug("Connecting to RabbitMQ...")
     connection = await aio_pika.connect_robust(queue_connection_string)
     channel = await connection.channel()
     await channel.set_qos(prefetch_count=10)

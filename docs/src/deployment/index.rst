@@ -121,6 +121,8 @@ ConfigDB Watcher component
 - ``target_name``: Target storage (where new data will be migrated to). Default is ``dlm-archive``.
 - ``uid_expiration_days``: Number of days from now until this UID expires. 0 = expire immediately. Leave empty to use DB default: now() + 24:00.
 - ``oid_expiration_days``: Number of days from now until this OID expires. Leave empty to use DB default: 2099-12-31T23:59:59.
+- ``queue_connection_string``: RabbitMQ connection URL used by the ConfigDB watcher. The credentials must match ``rabbitmq.auth`` in the DLM server configuration.
+- ``queue_exchange_name``: RabbitMQ exchange used by the ConfigDB watcher. Must match ``outbox.rabbitmq.exchange`` in the DLM server configuration.
 - ``pvc.name``: Name of the volume to mount into the configdb-watcher pod.
 - ``pvc.sub_path``: Optional subpath within the volume.
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the configdb-watcher can do. Needs to be ``false`` to allow for data deletion.

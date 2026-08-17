@@ -38,8 +38,8 @@ case "$watcher_mode" in
           --watcher-hostname ${WATCHER_HOSTNAME:-$(hostname)} \
           ${UID_EXPIRATION_DAYS:+--uid-expiration-days ${UID_EXPIRATION_DAYS}} \
           ${OID_EXPIRATION_DAYS:+--oid-expiration-days ${OID_EXPIRATION_DAYS}} \
-          --queue-connection-string ${QUEUE_CONNECTION_STRING} \
-          --queue-exchange-name ${QUEUE_EXCHANGE_NAME} "
+          ${QUEUE_CONNECTION_STRING:+--queue-connection-string ${QUEUE_CONNECTION_STRING}} \
+          ${QUEUE_EXCHANGE_NAME:+--queue-exchange-name ${QUEUE_EXCHANGE_NAME}} "
         ;;
     *)
         echo "Usage: entrypoint.sh <directory-watcher|configdb-watcher>"
