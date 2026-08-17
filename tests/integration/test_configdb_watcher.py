@@ -255,11 +255,23 @@ def test_data_was_copied_correctly(_common_dlm_endpoints):
         subprocess.run(["docker", "logs", "dlm_configdb_watcher"], check=False)
         subprocess.run(["docker", "logs", "dlm_directory_watcher"], check=False)
         subprocess.run(["docker", "logs", "dlm_storage"], check=False)
+    if result.returncode != 0:
+        log.error("docker exec failed")
+        log.error("stdout:\n%s", result.stdout)
+        log.error("stderr:\n%s", result.stderr)
+
+        subprocess.run(["docker", "ps", "-a"], check=False)
+        subprocess.run(["docker", "logs", "dlm_configdb_watcher"], check=False)
+        subprocess.run(["docker", "logs", "dlm_directory_watcher"], check=False)
+        subprocess.run(["docker", "logs", "dlm_storage"], check=False)
     assert result.returncode == 0, f"Could not find expected file: {expected_file}"
 
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+async def test_configdb_watcher(
+    request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
+):
 async def test_configdb_watcher(
     request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
 ):
@@ -290,6 +302,9 @@ async def test_configdb_watcher(
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+async def test_configdb_watcher_higher_dir(
+    request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
+):
 async def test_configdb_watcher_higher_dir(
     request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
 ):
@@ -333,6 +348,7 @@ async def test_configdb_watcher_higher_dir(
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+async def test_watcher_logs_failed_registration(_configdb_watcher_ready, _common_dlm_endpoints):
 async def test_watcher_logs_failed_registration(_configdb_watcher_ready, _common_dlm_endpoints):
     """Flow points to a data item that is already registered on the storage."""
     # Trigger a COMPLETED Flow with same subpath as previous test

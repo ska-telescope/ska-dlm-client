@@ -36,6 +36,7 @@ services:
       - LOGLEVEL=${LOGLEVEL:-INFO}
     entrypoint: uvicorn ska_dlm.dlm_storage.dlm_storage_requests:rest --host 0.0.0.0 --port 8003
 
+
     ports:
       - 8003:8003
     volumes:
@@ -107,6 +108,7 @@ services:
   dlm_migrations:
     platform: linux/amd64
     image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:c117abfc
+    image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:c117abfc
     container_name: dlm_migrations
     command: >
       --url="jdbc:postgresql://dlm_db:5432/ska_dlm_testing"
@@ -149,6 +151,7 @@ services:
     image: ${SERVER_IMAGE:-ska-data-lifecycle:2.2.0}
     container_name: dlm_outbox
     environment:
+      DLM_OUTBOX_DATABASE_URL: "postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm_testing"
       DLM_OUTBOX_DATABASE_URL: "postgresql+asyncpg://ska_dlm_admin:password@dlm_db:5432/ska_dlm_testing"
       DLM_OUTBOX_RABBITMQ_URL: "amqp://guest:guest@rabbitmq/"
       DLM_OUTBOX_POLL_INTERVAL: "10"
