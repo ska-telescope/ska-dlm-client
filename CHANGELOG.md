@@ -29,6 +29,7 @@
 
 ### Added
 
+* Added configurable RabbitMQ connection string and exchange name to the Helm chart for the ConfigDB watcher.
 * `location` as a command-line argument.
 * ConfigDB Watcher can receive messages from the server via RabbitMQ.
 * Optional `directory_watcher.tolerations` and `directory_watcher.affinity` to `values.yaml`.

@@ -60,6 +60,8 @@ def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
         target_name=args.target_name,
         etcd_url=args.etcd_url,
         location=args.location,
+        queue_connection_string=args.queue_connection_string,
+        queue_exchange_name=args.queue_exchange_name,
     )
 
 
