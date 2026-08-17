@@ -48,7 +48,7 @@ class WatcherArgs(CmdLineParameters):
             "--queue-connection-string",
             type=str,
             required=False,
-            default="amqp://dlm-user:dlm-password@rabbitmq/",  # Docker value
+            default="amqp://guest:guest@rabbitmq/",  # Docker value
             help="RabbitMQ connection URL.",
         )
         self.parser.add_argument(
