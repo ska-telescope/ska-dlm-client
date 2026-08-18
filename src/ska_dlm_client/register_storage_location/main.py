@@ -9,12 +9,10 @@ import logging
 import os
 import pwd
 import shutil
-import socket
 import sys
 
 import ska_ser_logging
 
-from ska_dlm_client.common_types import LocationCountry, LocationName, LocationType
 from ska_dlm_client.config import Config
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
@@ -23,33 +21,13 @@ from ska_dlm_client.openapi.exceptions import UnprocessableEntityException
 
 logger = logging.getLogger(__name__)
 
-# Constants that can be used for testing.
-LOCATION_NAME = os.getenv("LOCATION_NAME", LocationName.LOCAL_DEV.value)
-LOCATION_TYPE = os.getenv("LOCATION_TYPE", LocationType.LOCAL_DEV.value)
-LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY", LocationCountry.AU.value)
-LOCATION_CITY = os.getenv("LOCATION_CITY", "Perth")
-LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")
-TARGET_ROOT = os.getenv("TARGET_ROOT", "/dlm-archive")
-TGT_STORAGE_PHASE = os.getenv("TARGET_PHASE", "SOLID")
-RCLONE_CONFIG_SOURCE = {
-    "name": f"{os.getenv('SOURCE_NAME', 'dir-watcher')}",
-    "type": "sftp",
-    "parameters": {
-        "host": f"{os.getenv('WATCHER_HOSTNAME', socket.gethostname())}",
-        "key_file": "/root/.ssh/id_rsa",
-        "shell_type": "unix",
-        "type": "sftp",
-        "user": f"{os.getenv('USER', 'ska-dlm')}",
-    },
-}
-STORAGE_INTERFACE = "posix"
-STORAGE_TYPE = "filesystem"
+DEST_ROOT_DIR = "/dlm-archive"
 
 
 def get_or_init_location(
     api_configuration: Configuration,
     storage_url: str,
-    location_name: str = "",
+    location_name: str,
     location_type: str = "",  # required by init_location
     location_country: str = "",  # required by init_location
     location_city: str = "",  # required by init_location
@@ -90,25 +68,6 @@ def get_or_init_location(
                         response,
                     )
                     raise
-                the_location_id = response[0]["location_id"]
-                logger.info(
-                    "Location %s was created concurrently by another process",
-                    location_name,
-                )
-
-            try:
-                response = api_storage.init_location(
-                    location_name=location_name,
-                    location_type=location_type,
-                    location_country=location_country,
-                    location_city=location_city,
-                    location_facility=location_facility,
-                )
-                the_location_id = response
-                logger.info("Location created in DLM")
-            except UnprocessableEntityException:
-                # Another process may have created the location first (race condition)
-                response = api_storage.query_location(location_name=location_name)
                 the_location_id = response[0]["location_id"]
                 logger.info(
                     "Location %s was created concurrently by another process",
@@ -160,24 +119,22 @@ def get_or_init_storage(
     api_configuration: Configuration,
     the_location_id: str,
     rclone_config: dict,
-    storage_type: str = "filesystem",  # enum | None?
-    storage_interface: str = "posix",  # enum | None?
+    storage_type: str = "",  # enum | None?
+    storage_interface: str = "",  # enum | None?
     location_name: str = "",
     storage_phase: str = "GAS",  # enum = StoragePhase.GAS.value?
 ) -> str:
     """Get storage_id or perform storage initialisation based on the storage_name provided."""
     assert the_location_id is not None
-
     if not os.path.exists(storage_root_directory):
         try:
-            os.makedirs(storage_root_directory)
-            os.chmod(storage_root_directory, 0o777)
-            logger.info("Data directory %s created!", storage_root_directory)
+            os.makedirs(storage_root_directory, exist_ok=True)
         except PermissionError as e:
             # we just log the error here
             logger.error(
                 "Unable to create storage root directory %s: %s", storage_root_directory, e
             )
+    logger.info("Data directory %s created (or already existed)", storage_root_directory)
     with api_client.ApiClient(api_configuration) as the_api_client:
         api_storage = storage_api.StorageApi(the_api_client)
         # Ensure storage API calls go to the storage service, not ingest
@@ -240,7 +197,6 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     """Register and configure a storage volume. This takes care of already existing volumes."""
     if location_id is None:
         logger.debug("trying get_or_init_location...")
-        logger.debug("trying get_or_init_location...")
         location_id = get_or_init_location(
             api_configuration,
             storage_url=storage_url,
@@ -252,15 +208,12 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
         )
     if setup_target:  # do we need this in this function?
         storage_name = watcher_config.target_name
-        storage_root_directory = TARGET_ROOT
-        storage_phase = TGT_STORAGE_PHASE
+        storage_root_directory = DEST_ROOT_DIR
     else:
         storage_name = watcher_config.source_name
-        storage_phase = watcher_config.source_phase
         storage_root_directory = watcher_config.directory_to_watch
     storage_id = get_or_init_storage(
         storage_name=storage_name,
-        storage_phase=storage_phase,
         storage_url=storage_url,
         storage_type=storage_type,  # compulsory for init_storage
         storage_interface=storage_interface,  # compulsory for init_storage
