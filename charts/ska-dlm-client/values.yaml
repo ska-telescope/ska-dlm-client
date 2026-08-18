@@ -22,8 +22,8 @@ ska_dlm:
 
 # --- Shared client configuration ---
 ska_dlm_client:
-  image: artefact.skao.int/ska-dlm-client
-  version: "2.0.0" # use compatible server version
+  image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client #artefact.skao.int/ska-dlm-client
+  version: "e7e4d701" # use compatible server version
   imagePullPolicy: Always
   securityContext: {}
 

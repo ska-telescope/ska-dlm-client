@@ -54,12 +54,11 @@ def process_args(args: argparse.Namespace) -> WatcherConfig:
         RCLONE_CONFIG_SOURCE["name"] = args.source_name
     if args.watcher_hostname:
         RCLONE_CONFIG_SOURCE["parameters"]["host"] = args.watcher_hostname
-    source_phase = args.source_phase if args.source_phase else "GAS"
 
     config = WatcherConfig(
         directory_to_watch=args.directory_to_watch,
         source_name=args.source_name,
-        source_phase=source_phase,
+        source_phase=args.source_phase,
         target_name=args.target_name,
         storage_url=args.storage_url,
         migration_url=args.migration_url,
@@ -96,6 +95,7 @@ def create_directory_watcher() -> DirectoryWatcher:
         rclone_config=RCLONE_CONFIG_SOURCE,
         storage_url=config.storage_url,
         location_name=config.location,  # get_or_init_location. SHOULD already be there from server
+        # source_phase=config.source_phase ?
         # if no location, use fallback values:
         location_type="local-dev",  # compulsory arg for init_location
         location_country="AU",  # compulsory arg for init_location

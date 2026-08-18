@@ -12,7 +12,6 @@ class WatcherConfig(ClientConfig):
     """Configuration parameters for the directory watcher."""
 
     source_name: str = "dir-watcher"
-    source_phase: str = "GAS"
     directory_to_watch: str = "/dlm/watch_dir"
     reload_status_file: bool = True
     use_status_file: bool = False

@@ -53,10 +53,9 @@ def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
         RCLONE_CONFIG_SOURCE["name"] = args.source_name
     if args.watcher_hostname:
         RCLONE_CONFIG_SOURCE["parameters"]["host"] = args.watcher_hostname
-    source_phase = args.source_phase if args.source_phase else "GAS"
 
     return SdpWatcherConfig(
-        source_phase=source_phase,
+        source_phase=args.source_phase,
         ingest_url=args.ingest_url,
         storage_url=args.storage_url,
         migration_url=args.migration_url,
@@ -265,6 +264,7 @@ async def run_configdb_watcher(config: SdpWatcherConfig) -> None:
         rclone_config=RCLONE_CONFIG_SOURCE,
         storage_url=config.storage_url,
         location_name=config.location,  # get_or_init_location.
+        # source_phase=config.source_phase ?
         # SHOULD already be there from server. If not, fallback values for get_or_init_location:
         location_type="local-dev",  # compulsory arg for init_location
         location_country="AU",  # compulsory arg for init_location

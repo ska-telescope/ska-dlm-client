@@ -110,7 +110,6 @@ def install_ssh_key(api_storage):
 
 
 def get_or_init_storage(
-    # pylint: disable=too-many-arguments, disable=too-many-positional-arguments
     storage_name: str,
     storage_url: str,
     storage_root_directory: str,
@@ -177,7 +176,7 @@ def get_or_init_storage(
     return storage_id
 
 
-def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arguments
+def setup_volume(
     watcher_config: Config,
     api_configuration: Configuration,
     rclone_config: dict,

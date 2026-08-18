@@ -1,4 +1,5 @@
 # pylint: disable=invalid-name
+# pylint: disable=too-many-instance-attributes
 """Module-level constants used by the DLM client."""
 import argparse
 import logging
@@ -18,8 +19,6 @@ DIRECTORY_IS_MEASUREMENT_SET_SUFFIX = ".ms"
 METADATA_FILENAME = "ska-data-product.yaml"  # TODO: import from from ska_sdp_dataproduct_metadata
 METADATA_EXECUTION_BLOCK_KEY = "execution_block"
 
-# pylint: disable=too-many-instance-attributes
-
 
 @dataclass
 class ClientConfig:
@@ -31,7 +30,7 @@ class ClientConfig:
 
     location: str = ""
     source_name: str = ""
-    source_phase: str = os.getenv("SOURCE_PHASE", "GAS")
+    source_phase: str = ""
     directory_to_watch: str = "/dlm/watch_dir"
     target_name: str = "dlm-archive"
     ingest_url: str = "http://dlm_ingest:8001"
@@ -57,7 +56,7 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
 
     location: str = ""
     source_name: str = ""
-    source_phase: str = "GAS"
+    source_phase: str = ""
     directory_to_watch: str = ""
     target_name: str = ""
     storage_url: str = ""
