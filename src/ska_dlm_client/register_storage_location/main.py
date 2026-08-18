@@ -21,8 +21,6 @@ from ska_dlm_client.openapi.exceptions import UnprocessableEntityException
 
 logger = logging.getLogger(__name__)
 
-DEST_ROOT_DIR = "/dlm-archive"
-
 
 def get_or_init_location(
     api_configuration: Configuration,
@@ -191,8 +189,8 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     location_id: str | None = None,
     storage_url: str = "",
     storage_type: str = "",
+    storage_phase: str = "",
     storage_interface: str = "",  # required by init_storage
-    setup_target: bool = False,
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
     if location_id is None:
@@ -206,14 +204,13 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
             location_city=location_city,
             location_facility=location_facility,
         )
-    if setup_target:  # do we need this in this function?
-        storage_name = watcher_config.target_name
-        storage_root_directory = DEST_ROOT_DIR
-    else:
-        storage_name = watcher_config.source_name
-        storage_root_directory = watcher_config.directory_to_watch
+    storage_name = watcher_config.source_name
+    storage_root_directory = watcher_config.directory_to_watch
+    storage_phase = watcher_config.source_phase
+
     storage_id = get_or_init_storage(
         storage_name=storage_name,
+        storage_phase=storage_phase,
         storage_url=storage_url,
         storage_type=storage_type,  # compulsory for init_storage
         storage_interface=storage_interface,  # compulsory for init_storage
