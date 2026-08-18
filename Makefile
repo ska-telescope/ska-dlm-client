@@ -24,6 +24,7 @@ python-do-test:
 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest --ignore tests/integration" dlm_client_testrunner
 
 python-post-test: docker-compose-down
+	@test -n "$$CI" || rm -rf tests/registration_processor/product_dir/product/eb-00000000/ska-sdp/*
 
 # extract all compressed files in `data` directory
 extract-test-data:
