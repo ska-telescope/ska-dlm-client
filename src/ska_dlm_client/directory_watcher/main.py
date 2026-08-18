@@ -95,7 +95,6 @@ def create_directory_watcher() -> DirectoryWatcher:
         rclone_config=RCLONE_CONFIG_SOURCE,
         storage_url=config.storage_url,
         location_name=config.location,  # get_or_init_location. SHOULD already be there from server
-        # source_phase=config.source_phase ?
         # if no location, use fallback values:
         location_type="local-dev",  # compulsory arg for init_location
         location_country="AU",  # compulsory arg for init_location
