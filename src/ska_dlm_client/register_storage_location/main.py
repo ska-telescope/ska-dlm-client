@@ -116,16 +116,18 @@ def get_or_init_storage(
     api_configuration: Configuration,
     the_location_id: str,
     rclone_config: dict,
-    storage_type: str = "",  # enum | None?
-    storage_interface: str = "",  # enum | None?
+    storage_type: str = "",
+    storage_interface: str = "",
     location_name: str = "",
-    storage_phase: str = "GAS",  # enum = StoragePhase.GAS.value?
+    storage_phase: str = "",
 ) -> str:
     """Get storage_id or perform storage initialisation based on the storage_name provided."""
     assert the_location_id is not None
     if not os.path.exists(storage_root_directory):
         try:
-            os.makedirs(storage_root_directory, exist_ok=True)
+            os.makedirs(storage_root_directory)
+            os.chmod(storage_root_directory, 0o777)
+            logger.info("Data directory %s created!", storage_root_directory)
         except PermissionError as e:
             # we just log the error here
             logger.error(
