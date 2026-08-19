@@ -189,8 +189,11 @@ def log_configdb_backend_details(config: Config) -> None:
 async def on_message_received(message: aio_pika.abc.AbstractIncomingMessage) -> None:
     """Process and acknowledge an incoming RabbitMQ message."""
     try:
-        logging.info(" [x] Received message: %s", message.body.decode())
-        migration_record = json.loads(message.body.decode())
+        body = message.body.decode()
+        logging.info(" [x] Received message: %s", body)
+
+        migration_record = json.loads(body)
+
         if migration_record["complete"]:
             outcome = migration_record["job_status"]["success"]
             logging.info("outcome of migration %s: %s", migration_record, outcome)
@@ -198,8 +201,16 @@ async def on_message_received(message: aio_pika.abc.AbstractIncomingMessage) -> 
 
         await message.ack()
 
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        logging.warning(
+            "Received invalid/non-JSON RabbitMQ message; ignoring: %r",
+            message.body,
+        )
+        await message.ack()
+
     except Exception as e:  # pylint: disable=broad-except
-        logging.exception(e)
+        logging.exception("Failed to process RabbitMQ message; requeueing. Exception: %s", e)
+        # Requeue valid JSON messages that fail during processing
         await message.nack(requeue=True)
 
 

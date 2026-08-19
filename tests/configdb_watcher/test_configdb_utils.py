@@ -235,8 +235,8 @@ async def test_on_message_received_acknowledges_valid_message() -> None:
 
 
 @pytest.mark.asyncio
-async def test_on_message_received_nacks_invalid_message() -> None:
-    """Test that an invalid message is negatively acknowledged."""
+async def test_on_message_received_acknowledges_invalid_message() -> None:
+    """Test that an invalid message is ignored and acknowledged."""
     message = mock.MagicMock()
     message.body = b"not valid JSON"
     message.ack = mock.AsyncMock()
@@ -244,8 +244,8 @@ async def test_on_message_received_nacks_invalid_message() -> None:
 
     await on_message_received(message)
 
-    message.ack.assert_not_awaited()
-    message.nack.assert_awaited_once_with(requeue=True)
+    message.ack.assert_awaited_once()
+    message.nack.assert_not_awaited()
 
 
 @pytest.mark.asyncio
