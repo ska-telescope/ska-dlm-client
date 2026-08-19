@@ -81,9 +81,11 @@ class RegistrationProcessor:
         """
         self._config = config
         self.last_migration_result: str | None = None
-        self.target_storage_id, self.target_storage_phase = self._get_storage_info_from_name(
-            self._config.target_name,
-        )
+        if hasattr(self._config, "target_name"):
+            self.target_storage_id, self.target_storage_phase = self._get_storage_info_from_name(
+                self._config.target_name,)
+        else:
+            self.target_storage_id, self.target_storage_phase = None, None
 
         request_configuration = getattr(self._config, "request_configuration", None)
         with api_client.ApiClient(request_configuration) as the_api_client:
