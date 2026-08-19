@@ -135,8 +135,9 @@ class RegistrationProcessor:
         try:
             with api_client.ApiClient(storage_configuration) as the_api_client:
                 api_storage = storage_api.StorageApi(the_api_client)
+                # TODO: This needs to be replaced with the new rclone_about call.
                 response = api_storage.rclone_access(
-                    volume=f"{storage_name}:/", remote_file_path="etc/hosts"
+                    volume=f"{storage_name}:/", remote_file_path=""
                 )
         except Exception as exc:  # pragma: no cover - defensive logging branch
             logger.warning(
