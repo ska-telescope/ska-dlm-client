@@ -83,7 +83,8 @@ class RegistrationProcessor:
         self.last_migration_result: str | None = None
         if hasattr(self._config, "target_name"):
             self.target_storage_id, self.target_storage_phase = self._get_storage_info_from_name(
-                self._config.target_name,)
+                self._config.target_name,
+            )
         else:
             self.target_storage_id, self.target_storage_phase = None, None
 
