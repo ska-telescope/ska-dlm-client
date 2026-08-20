@@ -30,6 +30,7 @@
 
 ### Added
 
+* A guard to allow the ConfigDB watcher to continue watching Flows if the RabbitMQ consumer fails to connect.
 * Added configurable RabbitMQ connection string and exchange name to the Helm chart for the ConfigDB watcher.
 * `location` as a command-line argument.
 * ConfigDB Watcher can receive messages from the server via RabbitMQ.
