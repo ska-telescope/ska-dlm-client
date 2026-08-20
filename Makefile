@@ -11,9 +11,8 @@ PYTHON_LINE_LENGTH = 99
 PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
 
 # The DLM server image to use in integration tests:
-# DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:2.1.0  # future: use this when we have a new release of the DLM server image
-# DLM_SERVER_IMAGE = ska-data-lifecycle:2.1.0-dirty  # This works for local testing of the DLM server image built using make oci-image-build.
-DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:f99fcb9f  # test against server dev image
+# DLM_SERVER_IMAGE = ska-data-lifecycle:2.3.0-dirty  # This works for local testing of the DLM server image built using make oci-image-build.
+DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:2.3.0
 
 python-test: extract-test-data python-pre-test python-do-test python-post-test
 
@@ -24,6 +23,7 @@ python-do-test:
 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest --ignore tests/integration" dlm_client_testrunner
 
 python-post-test: docker-compose-down
+	@test -n "$$CI" || rm -rf tests/registration_processor/product_dir/product/eb-00000000/ska-sdp/*
 
 # extract all compressed files in `data` directory
 extract-test-data:

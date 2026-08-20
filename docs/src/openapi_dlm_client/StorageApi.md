@@ -4,6 +4,7 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**check_storage_access**](StorageApi.md#check_storage_access) | **GET** /storage/check_storage_access | Check Storage Access
 [**create_rclone_config**](StorageApi.md#create_rclone_config) | **POST** /storage/rclone_config | Create Rclone Config
 [**create_storage_config**](StorageApi.md#create_storage_config) | **POST** /storage/create_storage_config | Create Storage Config
 [**get_ssh_public_key**](StorageApi.md#get_ssh_public_key) | **GET** /storage/get_ssh_public_key | Get Ssh Public Key
@@ -13,7 +14,80 @@ Method | HTTP request | Description
 [**query_location**](StorageApi.md#query_location) | **GET** /storage/query_location | Query Location
 [**query_location_facility**](StorageApi.md#query_location_facility) | **GET** /storage/query_location_facility | Query Location Facility
 [**query_storage**](StorageApi.md#query_storage) | **GET** /storage/query_storage | Query Storage
+[**rclone_access**](StorageApi.md#rclone_access) | **GET** /storage/rclone_access | Rclone Access
 
+
+# **check_storage_access**
+> List[object] check_storage_access(storage_name=storage_name, storage_id=storage_id, remote_file_path=remote_file_path)
+
+Check Storage Access
+
+Check whether storage is accessible.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.StorageApi(api_client)
+    storage_name = '' # str | The name of the storage volume (either name or ID are required) (optional) (default to '')
+    storage_id = '' # str | The ID of the storage volume. (optional) (default to '')
+    remote_file_path = '' # str | Remote file. (optional) (default to '')
+
+    try:
+        # Check Storage Access
+        api_response = api_instance.check_storage_access(storage_name=storage_name, storage_id=storage_id, remote_file_path=remote_file_path)
+        print("The response of StorageApi->check_storage_access:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling StorageApi->check_storage_access: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **storage_name** | **str**| The name of the storage volume (either name or ID are required) | [optional] [default to &#39;&#39;]
+ **storage_id** | **str**| The ID of the storage volume. | [optional] [default to &#39;&#39;]
+ **remote_file_path** | **str**| Remote file. | [optional] [default to &#39;&#39;]
+
+### Return type
+
+**List[object]**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **create_rclone_config**
 > bool create_rclone_config(request_body)
@@ -41,7 +115,7 @@ configuration = ska_dlm_client.openapi.Configuration(
 with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = ska_dlm_client.openapi.StorageApi(api_client)
-    request_body = None # Dict[str, Optional[object]] | 
+    request_body = None # Dict[str, object] | 
 
     try:
         # Create Rclone Config
@@ -59,7 +133,7 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **request_body** | [**Dict[str, Optional[object]]**](object.md)|  | 
+ **request_body** | [**Dict[str, object]**](object.md)|  | 
 
 ### Return type
 
@@ -109,10 +183,10 @@ configuration = ska_dlm_client.openapi.Configuration(
 with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = ska_dlm_client.openapi.StorageApi(api_client)
-    request_body = None # Dict[str, Optional[object]] | 
+    request_body = None # Dict[str, object] | 
     storage_id = '' # str | the storage_id for which to create the entry. (optional) (default to '')
     storage_name = '' # str | the name of the storage for which the config is provided. (optional) (default to '')
-    config_type = 'rclone' # str |  (optional) (default to 'rclone')
+    config_type = rclone # str |  (optional) (default to rclone)
 
     try:
         # Create Storage Config
@@ -130,10 +204,10 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **request_body** | [**Dict[str, Optional[object]]**](object.md)|  | 
+ **request_body** | [**Dict[str, object]**](object.md)|  | 
  **storage_id** | **str**| the storage_id for which to create the entry. | [optional] [default to &#39;&#39;]
  **storage_name** | **str**| the name of the storage for which the config is provided. | [optional] [default to &#39;&#39;]
- **config_type** | **str**|  | [optional] [default to &#39;rclone&#39;]
+ **config_type** | **str**|  | [optional] [default to rclone]
 
 ### Return type
 
@@ -221,7 +295,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_storage_config**
-> List[Dict[str, Optional[object]]] get_storage_config(storage_id=storage_id, storage_name=storage_name, config_type=config_type)
+> List[Optional[Dict[str, object]]] get_storage_config(storage_id=storage_id, storage_name=storage_name, config_type=config_type)
 
 Get Storage Config
 
@@ -248,7 +322,7 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     api_instance = ska_dlm_client.openapi.StorageApi(api_client)
     storage_id = '' # str | the storage id, by default \"\" (optional) (default to '')
     storage_name = '' # str | the name of the storage volume, by default \"\" (optional) (default to '')
-    config_type = 'rclone' # str |  (optional) (default to 'rclone')
+    config_type = rclone # str |  (optional) (default to rclone)
 
     try:
         # Get Storage Config
@@ -268,11 +342,11 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **storage_id** | **str**| the storage id, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
  **storage_name** | **str**| the name of the storage volume, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
- **config_type** | **str**|  | [optional] [default to &#39;rclone&#39;]
+ **config_type** | **str**|  | [optional] [default to rclone]
 
 ### Return type
 
-**List[Dict[str, Optional[object]]]**
+**List[Optional[Dict[str, object]]]**
 
 ### Authorization
 
@@ -401,8 +475,8 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     location_id = 'location_id_example' # str | A dlm registered location id (optional)
     location_name = 'location_name_example' # str | A dlm registered location name (optional)
     storage_capacity = -1 # int | Reserved storage capacity in bytes (optional) (default to -1)
-    storage_phase = 'GAS' # str |  (optional) (default to 'GAS')
-    request_body = None # Dict[str, Optional[object]] |  (optional)
+    storage_phase = GAS # str |  (optional) (default to GAS)
+    request_body = None # Dict[str, object] |  (optional)
 
     try:
         # Init Storage
@@ -427,8 +501,8 @@ Name | Type | Description  | Notes
  **location_id** | **str**| A dlm registered location id | [optional] 
  **location_name** | **str**| A dlm registered location name | [optional] 
  **storage_capacity** | **int**| Reserved storage capacity in bytes | [optional] [default to -1]
- **storage_phase** | **str**|  | [optional] [default to &#39;GAS&#39;]
- **request_body** | [**Dict[str, Optional[object]]**](object.md)|  | [optional] 
+ **storage_phase** | **str**|  | [optional] [default to GAS]
+ **request_body** | [**Dict[str, object]**](object.md)|  | [optional] 
 
 ### Return type
 
@@ -453,7 +527,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_location**
-> List[Dict[str, Optional[object]]] query_location(location_name=location_name, location_id=location_id)
+> List[Optional[Dict[str, object]]] query_location(location_name=location_name, location_id=location_id)
 
 Query Location
 
@@ -502,7 +576,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**List[Dict[str, Optional[object]]]**
+**List[Optional[Dict[str, object]]]**
 
 ### Authorization
 
@@ -586,7 +660,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_storage**
-> List[Dict[str, Optional[object]]] query_storage(storage_name=storage_name, storage_id=storage_id)
+> List[Optional[Dict[str, object]]] query_storage(storage_name=storage_name, storage_id=storage_id)
 
 Query Storage
 
@@ -635,7 +709,77 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**List[Dict[str, Optional[object]]]**
+**List[Optional[Dict[str, object]]]**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **rclone_access**
+> List[object] rclone_access(volume, remote_file_path=remote_file_path)
+
+Rclone Access
+
+Check configured backend or explicit filepath is accessible and return its file stats.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.StorageApi(api_client)
+    volume = 'volume_example' # str | Volume name
+    remote_file_path = '' # str | Remote file path, by default \"\" (optional) (default to '')
+
+    try:
+        # Rclone Access
+        api_response = api_instance.rclone_access(volume, remote_file_path=remote_file_path)
+        print("The response of StorageApi->rclone_access:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling StorageApi->rclone_access: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **volume** | **str**| Volume name | 
+ **remote_file_path** | **str**| Remote file path, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
+
+### Return type
+
+**List[object]**
 
 ### Authorization
 

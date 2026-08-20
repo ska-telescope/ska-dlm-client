@@ -6,8 +6,8 @@ services:
     image: dlm_rclone
     container_name: dlm_rclone
     build:
-        context: .
-        dockerfile: Dockerfile-rclone
+       context: ..
+       dockerfile: integration/Dockerfile-rclone
     ports:
       - 5572:5572
     entrypoint: ["/bin/sh","-c"]
@@ -27,7 +27,8 @@ services:
         --rc-job-expire-duration=43200s \
         --rc-web-gui-no-open-browser \
         --rc-key=/etc/ssl/private/selfsigned.key \
-        --rc-cert=/etc/ssl/certs/selfsigned.cert
+        --rc-cert=/etc/ssl/certs/selfsigned.cert \
+        /
     healthcheck:
       test: ["CMD", "wget", "--no-check-certificate", "--post-data='{\"my_key\": \"my_value\"}'", "-qO-", "https://localhost:5572/rc/noop"]
       interval: 5s

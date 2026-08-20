@@ -19,12 +19,18 @@ services:
       dockerfile: Dockerfile
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./registration_processor/product_dir:/dlm/product_dir
+      - ${PRODUCT_DIR_PATH:-./registration_processor/product_dir}:/dlm/product_dir
     networks:
       - dlm_network
+    healthcheck:
+      test: ["CMD", "pgrep","-f", "/app/.venv/bin/python"]
+      interval: 1m
+      timeout: 5s
+      retries: 5
+      start_period: 5s
     depends_on:
       etcd:
-        condition: service_healthy
+        condition: service_started
       dlm_storage:
         condition: service_healthy
 
@@ -45,4 +51,6 @@ services:
       - dlm_network
     depends_on:
       dlm_storage:
+        condition: service_healthy
+      dlm_configdb_watcher: # make sure the location is fully registered.
         condition: service_healthy

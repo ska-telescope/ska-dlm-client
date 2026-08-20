@@ -469,6 +469,146 @@
                 }
             }
         },
+        "/storage/check_storage_access": {
+            "get": {
+                "summary": "Check Storage Access",
+                "tags": [
+                    "storage"
+                ],
+                "description": "Check whether storage is accessible.",
+                "operationId": "check_storage_access",
+                "parameters": [
+                    {
+                        "name": "storage_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "The name of the storage volume (either name or ID are required)",
+                            "default": "",
+                            "title": "Storage Name"
+                        },
+                        "description": "The name of the storage volume (either name or ID are required)"
+                    },
+                    {
+                        "name": "storage_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "The ID of the storage volume.",
+                            "default": "",
+                            "title": "Storage Id"
+                        },
+                        "description": "The ID of the storage volume."
+                    },
+                    {
+                        "name": "remote_file_path",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "Remote file.",
+                            "default": "",
+                            "title": "Remote File Path"
+                        },
+                        "description": "Remote file."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {},
+                                    "title": "Response Check Storage Access"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/storage/rclone_access": {
+            "get": {
+                "summary": "Rclone Access",
+                "tags": [
+                    "storage"
+                ],
+                "description": "Check configured backend or explicit filepath is accessible and return its file stats.",
+                "operationId": "rclone_access",
+                "parameters": [
+                    {
+                        "name": "volume",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "Volume name",
+                            "title": "Volume"
+                        },
+                        "description": "Volume name"
+                    },
+                    {
+                        "name": "remote_file_path",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "Remote file path, by default \"\"",
+                            "default": "",
+                            "title": "Remote File Path"
+                        },
+                        "description": "Remote file path, by default \"\""
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "prefixItems": [
+                                        {
+                                            "type": "boolean"
+                                        },
+                                        {
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "minItems": 2,
+                                    "maxItems": 2,
+                                    "title": "Response Rclone Access"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/storage/init_location": {
             "post": {
                 "summary": "Init Location",

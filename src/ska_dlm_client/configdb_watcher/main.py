@@ -1,4 +1,5 @@
 # pylint: disable=invalid-name
+# pylint: disable=protected-access
 """Main entry-point for Configuration Database watcher."""
 
 import argparse
@@ -54,6 +55,7 @@ def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
         RCLONE_CONFIG_SOURCE["parameters"]["host"] = args.watcher_hostname
 
     return SdpWatcherConfig(
+        source_phase=args.source_phase,
         ingest_url=args.ingest_url,
         storage_url=args.storage_url,
         migration_url=args.migration_url,
@@ -90,6 +92,10 @@ def _register_and_migrate_path(
     )
     logger.debug("dlm_source_uuid: %s", dlm_source_uuid)
 
+    source_name = getattr(processor._config, "source_name", None)
+    target_name = getattr(processor._config, "target_name", None)
+    register_only = bool(target_name is None or source_name == target_name)
+
     if dlm_source_uuid is None:  # Registration failed
         logger.warning(
             "DLM registration failed for %s; marking dependency %s as FAILED.",
@@ -102,12 +108,21 @@ def _register_and_migrate_path(
         logger.debug("migration_result: %s", migration_result)
 
         if migration_result is None:
-            logger.warning(
-                "Migration failed or was skipped for %s; marking dependency %s as FAILED.",
-                dataproduct_key,
-                new_dep,
-            )
-            dep_status = "FAILED"
+            if register_only:
+                logger.debug(
+                    "Registration succeeded for %s in register-only mode; "
+                    "marking dependency %s as FINISHED.",
+                    dataproduct_key,
+                    new_dep,
+                )
+                dep_status = "FINISHED"
+            else:
+                logger.warning(
+                    "Migration failed or was skipped for %s; marking dependency %s as FAILED.",
+                    dataproduct_key,
+                    new_dep,
+                )
+                dep_status = "FAILED"
         else:
             logger.debug(
                 "Registration and migration succeeded for %s; "

@@ -20,7 +20,7 @@ ska_dlm:
 # --- Shared client configuration ---
 ska_dlm_client:
   image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client #artefact.skao.int/ska-dlm-client
-  version: "2.0.0-dev.c363be711"
+  version: "67a2653f"
   imagePullPolicy: Always
   securityContext: {}
 
@@ -36,6 +36,7 @@ directory_watcher:
   storage_url: "http://ska-dlm-storage.dp-dm"
   migration_url: "http://ska-dlm-migration.dp-dm"
   source_name: dir_watcher
+  source_phase: "GAS"
   directory_to_watch: /dlm/watch_dir
   target_name: dlm-archive # default target storage 'dlm-archive' is defined in the DLM Server and always available.
   uid_expiration_days: # leave empty to use DB default, now() + 24:00
@@ -62,6 +63,7 @@ configdb_watcher:
   migration_url: "http://ska-dlm-migration.dp-dm"
   include_existing: false
   source_name: configdb-watcher
+  source_phase: "GAS"
   directory_to_watch: /dlm/product_dir
   target_name: dlm-archive
   uid_expiration_days: # leave empty to use DB default, now() + 24:00

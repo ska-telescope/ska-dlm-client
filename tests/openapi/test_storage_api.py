@@ -26,6 +26,13 @@ class TestStorageApi(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
+    def test_check_storage_access(self) -> None:
+        """Test case for check_storage_access
+
+        Check Storage Access
+        """
+        pass
+
     def test_create_rclone_config(self) -> None:
         """Test case for create_rclone_config
 
@@ -86,6 +93,13 @@ class TestStorageApi(unittest.TestCase):
         """Test case for query_storage
 
         Query Storage
+        """
+        pass
+
+    def test_rclone_access(self) -> None:
+        """Test case for rclone_access
+
+        Rclone Access
         """
         pass
 

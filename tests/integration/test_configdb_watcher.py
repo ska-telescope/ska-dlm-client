@@ -308,7 +308,8 @@ def test_automatic_deletion(
 
     # Update uid expirations of source items to now.
     for item in items:
-        dlm_request_api.set_uid_expiration(uid=item["uid"], expiration=now)
+        if "pb-test-20260126-24294" in item["item_name"]:
+            dlm_request_api.set_uid_expiration(uid=item["uid"], expiration=now)
 
     # Potential optimisation: expose a server-side bulk update endpoint via @rest.patch to
     # avoid iterative HTTP round-trips to a single DB update, from the client-side.

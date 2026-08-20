@@ -33,8 +33,8 @@ __all__ = [
     "ApiAttributeError",
     "ApiException",
     "HTTPValidationError",
-    "LocationInner",
     "ValidationError",
+    "ValidationErrorLocInner",
 ]
 
 from ska_dlm_client.openapi.api_client import ApiClient as ApiClient
@@ -60,5 +60,7 @@ from ska_dlm_client.openapi.exceptions import OpenApiException as OpenApiExcepti
 from ska_dlm_client.openapi.models.http_validation_error import (
     HTTPValidationError as HTTPValidationError,
 )
-from ska_dlm_client.openapi.models.location_inner import LocationInner as LocationInner
 from ska_dlm_client.openapi.models.validation_error import ValidationError as ValidationError
+from ska_dlm_client.openapi.models.validation_error_loc_inner import (
+    ValidationErrorLocInner as ValidationErrorLocInner,
+)

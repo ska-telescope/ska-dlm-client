@@ -21,8 +21,6 @@ from ska_dlm_client.openapi.exceptions import UnprocessableEntityException
 
 logger = logging.getLogger(__name__)
 
-DEST_ROOT_DIR = "/dlm-archive"
-
 
 def get_or_init_location(
     api_configuration: Configuration,
@@ -112,23 +110,24 @@ def install_ssh_key(api_storage):
 
 
 def get_or_init_storage(
-    # pylint: disable=too-many-arguments, disable=too-many-positional-arguments
     storage_name: str,
     storage_url: str,
     storage_root_directory: str,
     api_configuration: Configuration,
     the_location_id: str,
     rclone_config: dict,
-    storage_type: str = "",  # enum | None?
-    storage_interface: str = "",  # enum | None?
+    storage_type: str = "",
+    storage_interface: str = "",
     location_name: str = "",
-    storage_phase: str = "GAS",  # enum = StoragePhase.GAS.value?
+    storage_phase: str = "",
 ) -> str:
     """Get storage_id or perform storage initialisation based on the storage_name provided."""
     assert the_location_id is not None
     if not os.path.exists(storage_root_directory):
         try:
-            os.makedirs(storage_root_directory, exist_ok=True)
+            os.makedirs(storage_root_directory)
+            os.chmod(storage_root_directory, 0o777)
+            logger.info("Data directory %s created!", storage_root_directory)
         except PermissionError as e:
             # we just log the error here
             logger.error(
@@ -179,7 +178,7 @@ def get_or_init_storage(
     return storage_id
 
 
-def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arguments
+def setup_volume(
     watcher_config: Config,
     api_configuration: Configuration,
     rclone_config: dict,
@@ -191,8 +190,8 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
     location_id: str | None = None,
     storage_url: str = "",
     storage_type: str = "",
+    storage_phase: str = "",
     storage_interface: str = "",  # required by init_storage
-    setup_target: bool = False,
 ):
     """Register and configure a storage volume. This takes care of already existing volumes."""
     if location_id is None:
@@ -206,14 +205,13 @@ def setup_volume(  # pylint: disable=too-many-arguments, too-many-positional-arg
             location_city=location_city,
             location_facility=location_facility,
         )
-    if setup_target:  # do we need this in this function?
-        storage_name = watcher_config.target_name
-        storage_root_directory = DEST_ROOT_DIR
-    else:
-        storage_name = watcher_config.source_name
-        storage_root_directory = watcher_config.directory_to_watch
+    storage_name = watcher_config.source_name
+    storage_root_directory = watcher_config.directory_to_watch
+    storage_phase = watcher_config.source_phase
+
     storage_id = get_or_init_storage(
         storage_name=storage_name,
+        storage_phase=storage_phase,
         storage_url=storage_url,
         storage_type=storage_type,  # compulsory for init_storage
         storage_interface=storage_interface,  # compulsory for init_storage

@@ -43,9 +43,7 @@ class TestHTTPValidationError(unittest.TestCase):
                             null
                             ], 
                         msg = '', 
-                        type = '', 
-                        input = null, 
-                        ctx = ska_dlm_client.openapi.models.context.Context(), )
+                        type = '', )
                     ]
             )
         else:
