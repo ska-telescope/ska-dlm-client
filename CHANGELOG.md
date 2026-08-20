@@ -1,6 +1,6 @@
 # Version History
 
-## Development
+## 2.2.0
 
 ### Removed
 
@@ -14,6 +14,19 @@
 * The default SERVER_IMAGE for testing is now a local dirty build to enable direct startup of containers from the compose file.
 * The DLM heuristics removes test files (no direct `rm` commands)
 * location_name is now configurable as a global variable.
+
+### Added
+
+* A guard to allow the ConfigDB watcher to continue watching Flows if the RabbitMQ consumer fails to connect.
+* Added configurable RabbitMQ connection string and exchange name to the Helm chart for the ConfigDB watcher.
+* `location` as a command-line argument.
+* ConfigDB Watcher can receive messages from the server via RabbitMQ.
+
+
+## 2.1.0
+
+### Updated
+
 * Aligned CLI between configdb and directory watchers
 * Removed CLI setup complexity (no add_* functions)
 * Removed testing flags from CLI
@@ -30,10 +43,6 @@
 
 ### Added
 
-* A guard to allow the ConfigDB watcher to continue watching Flows if the RabbitMQ consumer fails to connect.
-* Added configurable RabbitMQ connection string and exchange name to the Helm chart for the ConfigDB watcher.
-* `location` as a command-line argument.
-* ConfigDB Watcher can receive messages from the server via RabbitMQ.
 * Optional `directory_watcher.tolerations` and `directory_watcher.affinity` to `values.yaml`.
 * Test file pb-test-20260126-24294.tar.bz2 to Git LFS.
 
