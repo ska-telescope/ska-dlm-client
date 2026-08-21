@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **copy_data_item**
-> Dict[str, Optional[object]] copy_data_item(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, authorization=authorization)
+> Dict[str, object] copy_data_item(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, authorization=authorization)
 
 Copy Data Item
 
@@ -76,7 +76,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, Optional[object]]**
+**Dict[str, object]**
 
 ### Authorization
 
@@ -165,7 +165,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_migrations**
-> List[Dict[str, object]] query_migrations(start_date=start_date, end_date=end_date, storage_id=storage_id, authorization=authorization)
+> List[Optional[Dict[str, object]]] query_migrations(start_date=start_date, end_date=end_date, storage_id=storage_id, authorization=authorization)
 
 Query Migrations
 
@@ -218,7 +218,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**List[Dict[str, object]]**
+**List[Optional[Dict[str, object]]]**
 
 ### Authorization
 

@@ -1,10 +1,12 @@
 # pylint: disable=invalid-name
+# pylint: disable=protected-access
 """Main entry-point for Configuration Database watcher."""
 
 import argparse
 import asyncio
 import logging
 import os
+import socket
 from pathlib import Path
 
 import athreading
@@ -21,14 +23,28 @@ from ska_dlm_client.configdb_watcher.configdb_utils import (
     update_dependency_state,
 )
 from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
-from ska_dlm_client.register_storage_location.main import RCLONE_CONFIG_SOURCE, setup_volume
+from ska_dlm_client.register_storage_location.main import setup_volume
 from ska_dlm_client.registration_processor import (
     RegistrationProcessor,
     directory_contains_metadata_file,
 )
 
 logger = logging.getLogger("ska_dlm_client.configdb_watcher")
-# TODO: add a proper option for LOG_LEVEL=DEBUG
+
+RCLONE_CONFIG_SOURCE = {
+    # TODO: Refactor RCLONE_CONFIG_SOURCE to be constructed from WatcherConfig/SdpWatcherConfig
+    # rather than mutating this global dictionary in process_args(). This would make all
+    # runtime configuration flow through the config object consistently.
+    "name": "configdb-watcher",
+    "type": "sftp",
+    "parameters": {
+        "host": socket.gethostname(),
+        "key_file": "/root/.ssh/id_rsa",
+        "shell_type": "unix",
+        "type": "sftp",
+        "user": os.getenv("USER", "ska-dlm"),
+    },
+}
 
 
 def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
@@ -39,11 +55,15 @@ def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
         RCLONE_CONFIG_SOURCE["parameters"]["host"] = args.watcher_hostname
 
     return SdpWatcherConfig(
+        source_phase=args.source_phase,
         ingest_url=args.ingest_url,
         storage_url=args.storage_url,
         migration_url=args.migration_url,
         target_name=args.target_name,
         etcd_url=args.etcd_url,
+        location=args.location,
+        queue_connection_string=args.queue_connection_string,
+        queue_exchange_name=args.queue_exchange_name,
     )
 
 
@@ -72,6 +92,10 @@ def _register_and_migrate_path(
     )
     logger.debug("dlm_source_uuid: %s", dlm_source_uuid)
 
+    source_name = getattr(processor._config, "source_name", None)
+    target_name = getattr(processor._config, "target_name", None)
+    register_only = bool(target_name is None or source_name == target_name)
+
     if dlm_source_uuid is None:  # Registration failed
         logger.warning(
             "DLM registration failed for %s; marking dependency %s as FAILED.",
@@ -84,12 +108,21 @@ def _register_and_migrate_path(
         logger.debug("migration_result: %s", migration_result)
 
         if migration_result is None:
-            logger.warning(
-                "Migration failed or was skipped for %s; marking dependency %s as FAILED.",
-                dataproduct_key,
-                new_dep,
-            )
-            dep_status = "FAILED"
+            if register_only:
+                logger.debug(
+                    "Registration succeeded for %s in register-only mode; "
+                    "marking dependency %s as FINISHED.",
+                    dataproduct_key,
+                    new_dep,
+                )
+                dep_status = "FINISHED"
+            else:
+                logger.warning(
+                    "Migration failed or was skipped for %s; marking dependency %s as FAILED.",
+                    dataproduct_key,
+                    new_dep,
+                )
+                dep_status = "FAILED"
         else:
             logger.debug(
                 "Registration and migration succeeded for %s; "
@@ -220,16 +253,24 @@ async def _process_completed_flow(  # noqa: C901
     await _aupdate_dependency_state(final_status)
 
 
-async def sdp_to_dlm_ingest_and_migrate(config: SdpWatcherConfig) -> None:
+async def run_configdb_watcher(config: SdpWatcherConfig) -> None:
     """Ingest and migrate SDP data-products using DLM."""
     configdb = Config(
         host=config.etcd_host, port=config.etcd_port
     )  # Share one handle between writer & watcher
-    _ = setup_volume(
+    _ = setup_volume(  # set up configdb-watcher storage endpoint.
         watcher_config=config,
         api_configuration=config.ingest_configuration,
         rclone_config=RCLONE_CONFIG_SOURCE,
         storage_url=config.storage_url,
+        location_name=config.location,  # get_or_init_location.
+        # SHOULD already be there from server. If not, fallback values for get_or_init_location:
+        location_type="local-dev",  # compulsory arg for init_location
+        location_country="AU",  # compulsory arg for init_location
+        location_city="Perth",  # compulsory arg for init_location
+        location_facility="local",  # compulsory arg for init_location
+        storage_type="filesystem",  # compulsory arg for init_storage
+        storage_interface="posix",  # compulsory arg for init_storage
     )
     logger.info(
         "Starting ConfigDB watcher (include_existing=%s, source name=%s, target name=%s)",
@@ -277,7 +318,7 @@ def main() -> None:
     cmd_line_parameters.parse_arguments(args)
     config = process_args(args)
 
-    asyncio.run(sdp_to_dlm_ingest_and_migrate(config))
+    asyncio.run(run_configdb_watcher(config))  # triggers source storage setup
 
 
 if __name__ == "__main__":

@@ -64,6 +64,7 @@ Directory Watcher component
 - ``storage_url``: Full HTTP URL of the storage server. E.g., ``<http://service.namespace:port>``
 - ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``source_name``: Storage to monitor for new data.
+- ``source_phase``: Optional, Phase of the source storage (default ``GAS``).
 - ``directory_to_watch``: Directory to monitor for new data.
 - ``target_name``: Target storage (where new data will be migrated to, default dlm-archive)
 - ``target_root``: Target storage root directory.
@@ -115,10 +116,13 @@ ConfigDB Watcher component
 - ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``include_existing``: If true, registers & migrates all existing COMPLETED data-products found in the etcd DB at startup.
 - ``source_name``: Storage where the new data appears.
+- ``source_phase``: Optional, Phase of the source storage (default ``GAS``).
 - ``directory_to_watch``: Directory used to generate URIs for the DLM database.
 - ``target_name``: Target storage (where new data will be migrated to). Default is ``dlm-archive``.
 - ``uid_expiration_days``: Number of days from now until this UID expires. 0 = expire immediately. Leave empty to use DB default: now() + 24:00.
 - ``oid_expiration_days``: Number of days from now until this OID expires. Leave empty to use DB default: 2099-12-31T23:59:59.
+- ``queue_connection_string``: RabbitMQ connection URL used by the ConfigDB watcher. The credentials must match ``rabbitmq.auth`` in the DLM server configuration.
+- ``queue_exchange_name``: RabbitMQ exchange used by the ConfigDB watcher. Must match ``outbox.rabbitmq.exchange`` in the DLM server configuration.
 - ``pvc.name``: Name of the volume to mount into the configdb-watcher pod.
 - ``pvc.sub_path``: Optional subpath within the volume.
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the configdb-watcher can do. Needs to be ``false`` to allow for data deletion.

@@ -1,6 +1,7 @@
 # pylint: disable=broad-exception-caught
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-positional-arguments
+# pylint: disable=too-many-locals
 """Register the given file or directory with the DLM."""
 
 import logging
@@ -80,9 +81,13 @@ class RegistrationProcessor:
         """
         self._config = config
         self.last_migration_result: str | None = None
-        (self.target_storage_id, self.target_storage_phase) = self._get_storage_info_from_name(
-            getattr(self._config, "target_name", None),
-        )
+        if hasattr(self._config, "target_name"):
+            self.target_storage_id, self.target_storage_phase = self._get_storage_info_from_name(
+                self._config.target_name,
+            )
+        else:
+            self.target_storage_id, self.target_storage_phase = None, None
+
         request_configuration = getattr(self._config, "request_configuration", None)
         with api_client.ApiClient(request_configuration) as the_api_client:
             self.api_request = request_api.RequestApi(the_api_client)
@@ -116,6 +121,42 @@ class RegistrationProcessor:
             path.resolve()
         return path
 
+    def _check_target_storage_access(self, storage_name: str | None) -> bool:
+        """Check whether the target storage is actually accessible via rclone."""
+        if not storage_name:
+            logger.warning("Skipping migration due to missing destination storage name")
+            return False
+
+        storage_configuration = getattr(self._config, "storage_configuration", None)
+        if storage_configuration is None:
+            logger.warning(
+                "Target storage '%s': configuration is unavailable",
+                storage_name,
+            )
+            return False
+
+        try:
+            with api_client.ApiClient(storage_configuration) as the_api_client:
+                api_storage = storage_api.StorageApi(the_api_client)
+                # TODO: This needs to be replaced with the new rclone_about call.
+                response = api_storage.rclone_access(
+                    volume=f"{storage_name}:/", remote_file_path=""
+                )
+        except Exception as exc:  # pragma: no cover - defensive logging branch
+            logger.warning(
+                "Target storage '%s' is not accessible to rclone: %s", storage_name, exc
+            )
+            return False
+
+        if not isinstance(response, list) or not response:
+            logger.warning(
+                "Target storage '%s' is not accessible to rclone: backend access check failed",
+                storage_name,
+            )
+            return False
+
+        return True
+
     def _execute_migration_checks(self, uid: str) -> bool:
         """Determine if migration should/can be performed based on the configuration."""
         # Require an explicit migration_configuration with a host
@@ -140,6 +181,9 @@ class RegistrationProcessor:
         )
         if not destination_storage_name:
             logger.warning("Skipping migration due to missing destination storage name")
+            return False
+
+        if not self._check_target_storage_access(destination_storage_name):
             return False
 
         if not uid:
@@ -209,6 +253,7 @@ class RegistrationProcessor:
             api_migration = migration_api.MigrationApi(migration_api_client)
             api_migration.api_client.configuration.host = migration_configuration.host
             try:
+                # copy_data_item is an async call and returns success in most cases
                 response = api_migration.copy_data_item(
                     uid=uid,
                     destination_name=destination_storage_name,
@@ -224,7 +269,7 @@ class RegistrationProcessor:
 
         return result
 
-    def _get_storage_info_from_name(self, storage_name: str) -> tuple[str, str] | None:
+    def _get_storage_info_from_name(self, storage_name: str) -> tuple[str | None, str | None]:
         """Get the storage_id and phase for a given storage_name.
 
         Args:
@@ -236,7 +281,7 @@ class RegistrationProcessor:
         storage_configuration = getattr(self._config, "storage_configuration", None)
         if storage_configuration is None:
             logger.error("Storage configuration not found")
-            return None
+            return None, None
         with api_client.ApiClient(storage_configuration) as the_api_client:
             api_storage = storage_api.StorageApi(the_api_client)
             # Get the storage_id
@@ -244,14 +289,14 @@ class RegistrationProcessor:
             logger.info("query_storage response: %s", response)
             if not isinstance(response, list):
                 logger.error("Unexpected response from query_storage")
-                return None
+                return None, None
             if len(response) != 1:
                 logger.error(
                     "Expected exactly one storage entry for %s, got %d",
                     storage_name,
                     len(response),
                 )
-                return None
+                return None, None
 
             the_storage_id = response[0]["storage_id"]
             the_storage_phase = response[0]["storage_phase"]
@@ -291,9 +336,14 @@ class RegistrationProcessor:
 
     def _migrate_item(self, migrate, item, uuid, api_ingest) -> None:
         """Migrate the last registered item."""
-        source_storage = getattr(self._config, "storage_name", None) or getattr(
+        source_name = getattr(self._config, "source_name", None) or getattr(
             self._config, "source_storage", None
         )  # TODO (DMAN-204): rename storage_name to source_storage in Dir Watcher
+        target_name = getattr(
+            self._config,
+            "target_name",
+            None,
+        )
         if migrate:
             # We are only migrating the top-level containers, since rclone is
             # performing a sync including all children.
@@ -305,16 +355,18 @@ class RegistrationProcessor:
             self._bookkeeping_after_registration(
                 item=item,
                 dlm_registration_uuid=uuid,
-                storage_name=source_storage,
+                storage_name=source_name,
                 migration_result=migration_result,
             )
-        else:
+        elif target_name is not None and source_name != target_name:
+            if not self._check_target_storage_access(target_name):
+                logger.warning(
+                    "Target storage '%s' unaccessible: Skipping child item registration",
+                    target_name,
+                )
+                return
+
             # register not explicitly migrated items on target storage
-            target_name = getattr(
-                self._config,
-                "target_name",
-                None,
-            )
             # get the oid of the already registered item on the source storage
             resp = []
             oid = None
@@ -382,6 +434,8 @@ class RegistrationProcessor:
         ingest_url = getattr(cfg, "ingest_url", None)
 
         source_name = getattr(cfg, "source_name", None)
+        target_name = getattr(cfg, "target_name", None)
+        register_only = bool(target_name is None or source_name == target_name)
 
         if ingest_configuration is None or ingest_url is None or source_name is None:
             logger.error(
@@ -422,13 +476,19 @@ class RegistrationProcessor:
                 logger.error("Ignoring and continuing.....")
                 return None
 
-        # This should be refactored out and made an async transaction.
-        self._migrate_item(
-            migrate=migrate,
-            item=item,
-            uuid=dlm_registration_uuid,
-            api_ingest=api_ingest,
-        )
+            if not register_only:
+                if not self._check_target_storage_access(target_name):
+                    logger.warning(
+                        "Target storage '%s' inaccessible: Skipping child item registration",
+                        target_name,
+                    )
+                    return None
+                self._migrate_item(
+                    migrate=migrate,
+                    item=item,
+                    uuid=dlm_registration_uuid,
+                    api_ingest=api_ingest,
+                )
         return dlm_registration_uuid
 
     def _register_container_items(self, item_list: list[Item], parent_uid: str = None) -> None:
@@ -441,7 +501,21 @@ class RegistrationProcessor:
             item_list: A list of data items to register with the DLM.
             parent_uid: The unique identifier of the parent item, if applicable.
         """
-        migrate = True
+        source_name = getattr(self._config, "source_name", None)
+        target_name = getattr(self._config, "target_name", None)
+        # Never migrate if target_name is not defined or if it is the same as source_name
+        migrate = bool(target_name and source_name != target_name)
+        if migrate:
+            logger.info(
+                "Migration will be performed for items from source %s to target storage %s",
+                source_name,
+                target_name,
+            )
+        else:
+            logger.info(
+                "Migration is disabled since target is either undefined or the same as source %s",
+                source_name,
+            )
         for item in item_list:
             _ = self._register_single_item(item=item, migrate=migrate, parent_uid=parent_uid)
             migrate = False  # Only the top-level container item triggers migration

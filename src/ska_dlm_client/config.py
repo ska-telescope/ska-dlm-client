@@ -1,4 +1,5 @@
 # pylint: disable=invalid-name
+# pylint: disable=too-many-instance-attributes
 """Module-level constants used by the DLM client."""
 import argparse
 import logging
@@ -18,8 +19,6 @@ DIRECTORY_IS_MEASUREMENT_SET_SUFFIX = ".ms"
 METADATA_FILENAME = "ska-data-product.yaml"  # TODO: import from from ska_sdp_dataproduct_metadata
 METADATA_EXECUTION_BLOCK_KEY = "execution_block"
 
-# pylint: disable=too-many-instance-attributes
-
 
 @dataclass
 class ClientConfig:
@@ -29,7 +28,9 @@ class ClientConfig:
     Specific configurations for the individual clients are expanding this class.
     """
 
+    location: str = ""
     source_name: str = ""
+    source_phase: str = ""
     directory_to_watch: str = "/dlm/watch_dir"
     target_name: str = "dlm-archive"
     ingest_url: str = "http://dlm_ingest:8001"
@@ -50,10 +51,12 @@ class ClientConfig:
 
 
 @dataclass
-class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
+class CmdLineParameters:
     """Class for common/required command line parameters and helper methods."""
 
+    location: str = ""
     source_name: str = ""
+    source_phase: str = ""
     directory_to_watch: str = ""
     target_name: str = ""
     storage_url: str = ""
@@ -68,10 +71,23 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
     def __default_args__(self):
         """Initialise parameters to include on the command line."""
         self.parser.add_argument(
+            "-l",
+            "--location",
+            type=str,
+            help="Source location name (e.g., 'LOW-ITF'). ",
+        )
+        self.parser.add_argument(
             "-s",
             "--source-name",
             type=str,
             help="Source storage name (e.g., 'configdb-watcher').",
+        )
+        self.parser.add_argument(
+            "-p",
+            "--source-phase",
+            type=str,
+            default="GAS",
+            help="Source storage phase ['SOLID'|'LIQUID'|'GAS'|'PLASMA'].",
         )
         self.parser.add_argument(
             "-d",
@@ -164,7 +180,9 @@ class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
         """Parse command line arguments and assign to class parameters."""
         if args is None:
             args = self.parser.parse_args()
+        self.location = args.location
         self.source_name = args.source_name
+        self.source_phase = args.source_phase
         self.directory_to_watch = args.directory_to_watch
         self.target_name = args.target_name
         self.ingest_url = args.ingest_url

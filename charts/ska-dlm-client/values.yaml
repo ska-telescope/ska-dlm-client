@@ -23,7 +23,7 @@ ska_dlm:
 # --- Shared client configuration ---
 ska_dlm_client:
   image: artefact.skao.int/ska-dlm-client
-  version: "2.0.0"
+  version: "2.2.0" # make sure this image is compatible with the server version that's running
   imagePullPolicy: Always
   securityContext: {}
 
@@ -40,6 +40,7 @@ directory_watcher:
   storage_url: "http://ska-dlm-storage"
   migration_url: "http://ska-dlm-migration"
   source_name: dir_watcher
+  source_phase: "GAS"
   directory_to_watch: /dlm/watch_dir
   target_name: dlm-archive  # default target storage 'dlm-archive' is defined in the DLM Server and always available.
   uid_expiration_days:  # leave empty to use DB default, now() + 24:00
@@ -72,12 +73,15 @@ configdb_watcher:
   migration_url: "http://ska-dlm-migration"
   include_existing: false
   source_name: configdb-watcher
+  source_phase: "GAS"
   directory_to_watch: /dlm/product_dir
   target_name: dlm-archive  # default target storage 'dlm-archive' is defined in the DLM Server and always available.
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-ingest.other-namespace:port
   uid_expiration_days:  # leave empty to use DB default, now() + 24:00
   oid_expiration_days:  # leave empty to use DB default, 2099-12-31T23:59:59
+  queue_connection_string: "amqp://guest:guest@ska-dlm-rabbitmq/" # must match rabbitmq.auth in dlm server
+  queue_exchange_name: "dlm.outbox" # must match outbox.rabbitmq.exchange in dlm server
   pvc:
     name: shared
     read_only: false

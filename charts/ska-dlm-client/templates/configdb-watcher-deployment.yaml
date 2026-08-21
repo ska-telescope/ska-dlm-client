@@ -95,6 +95,11 @@ spec:
           - name: SOURCE_NAME
             value: {{ .Values.configdb_watcher.source_name | quote }}
 
+          {{- if .Values.configdb_watcher.source_phase }}
+          - name: SOURCE_PHASE
+            value: {{ .Values.configdb_watcher.source_phase | quote }}
+          {{- end }}
+
           - name: DIRECTORY_TO_WATCH
             value: {{ .Values.configdb_watcher.directory_to_watch | quote }}
 
@@ -125,6 +130,12 @@ spec:
           - name: OID_EXPIRATION_DAYS
             value: {{ .Values.configdb_watcher.oid_expiration_days | quote }}
           {{- end }}
+
+          - name: QUEUE_CONNECTION_STRING
+            value: {{ .Values.configdb_watcher.queue_connection_string | quote }}
+
+          - name: QUEUE_EXCHANGE_NAME
+            value: {{ .Values.configdb_watcher.queue_exchange_name | quote }}
 
         command:
           - /entrypoint.sh

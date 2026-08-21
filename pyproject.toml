@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ska-dlm-client"
-version = "2.0.0"
+version = "2.2.0"
 description = "Client(s) for the SKA Data Lifecycle Manager"
 authors = ["Mark Boulton <mark.boulton@uwa.edu.au>"]
 repository = "https://gitlab.com/ska-telescope/ska-dlm-client"
@@ -16,7 +16,6 @@ packages = [{include="ska_dlm_client", from="src"}]
 [tool.poetry.scripts]
 dlm-directory-watcher = "ska_dlm_client.directory_watcher.main:main"
 dlm-configdb-watcher = "ska_dlm_client.configdb_watcher.main:main"
-dlm-register-storage-location = "ska_dlm_client.register_storage_location.main:main"
 dlm-startup-verification = "ska_dlm_client.startup_verification.main:main"
 
 [[tool.poetry.source]]

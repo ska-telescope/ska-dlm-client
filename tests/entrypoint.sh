@@ -9,7 +9,9 @@ case "$watcher_mode" in
         chmod g+w /dlm/watch_dir
 
         CMD="dlm-directory-watcher \
+          --location ${LOCATION_NAME:-SKA-DEV} \
           --source-name ${SOURCE_NAME:-dir-watcher} \
+          --source-phase ${SOURCE_PHASE:-GAS} \
           --directory-to-watch ${DIRECTORY_TO_WATCH:-/dlm/watch_dir} \
           --target-name ${TARGET_NAME:-dlm-archive} \
           --migration-url ${MIGRATION_URL:-http://dlm_migration:8004} \
@@ -24,7 +26,9 @@ case "$watcher_mode" in
         ;;
     "configdb-watcher")
         CMD="dlm-configdb-watcher \
+          --location ${LOCATION_NAME:-SKA-DEV} \
           --source-name ${SOURCE_NAME:-configdb-watcher} \
+          --source-phase ${SOURCE_PHASE:-GAS} \
           --directory-to-watch ${DIRECTORY_TO_WATCH:-/dlm/product_dir} \
           --target-name ${TARGET_NAME:-dlm-archive} \
           --storage-url ${STORAGE_URL:-http://dlm_storage:8003} \
@@ -34,8 +38,8 @@ case "$watcher_mode" in
           --watcher-hostname ${WATCHER_HOSTNAME:-$(hostname)} \
           ${UID_EXPIRATION_DAYS:+--uid-expiration-days ${UID_EXPIRATION_DAYS}} \
           ${OID_EXPIRATION_DAYS:+--oid-expiration-days ${OID_EXPIRATION_DAYS}} \
-          --queue-connection-string ${QUEUE_CONNECTION_STRING} \
-          --queue-exchange-name ${QUEUE_EXCHANGE_NAME} "
+          ${QUEUE_CONNECTION_STRING:+--queue-connection-string ${QUEUE_CONNECTION_STRING}} \
+          ${QUEUE_EXCHANGE_NAME:+--queue-exchange-name ${QUEUE_EXCHANGE_NAME}} "
         ;;
     *)
         echo "Usage: entrypoint.sh <directory-watcher|configdb-watcher>"

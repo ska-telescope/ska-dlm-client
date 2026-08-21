@@ -37,9 +37,9 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = ska_dlm_client.openapi.IngestApi(api_client)
     item_name = 'item_name_example' # str | the item_name, can be empty, but then json_data has to be specified. (optional)
-    uid_phase = 'GAS' # str |  (optional) (default to 'GAS')
+    uid_phase = GAS # str |  (optional) (default to GAS)
     authorization = 'authorization_example' # str | Validated Bearer token with UserInfo (optional)
-    request_body = None # Dict[str, Optional[object]] |  (optional)
+    request_body = None # Dict[str, object] |  (optional)
 
     try:
         # Init Data Item
@@ -58,9 +58,9 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **item_name** | **str**| the item_name, can be empty, but then json_data has to be specified. | [optional] 
- **uid_phase** | **str**|  | [optional] [default to &#39;GAS&#39;]
+ **uid_phase** | **str**|  | [optional] [default to GAS]
  **authorization** | **str**| Validated Bearer token with UserInfo | [optional] 
- **request_body** | [**Dict[str, Optional[object]]**](object.md)|  | [optional] 
+ **request_body** | [**Dict[str, object]**](object.md)|  | [optional] 
 
 ### Return type
 
@@ -123,8 +123,8 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     api_instance = ska_dlm_client.openapi.IngestApi(api_client)
     item_name = 'item_name_example' # str | item name to register with. Does not need to be unique.
     uri = 'uri_example' # str | the relative access path to the payload.
-    item_type = 'file' # str |  (optional) (default to 'file')
-    target_phase = 'SOLID' # str |  (optional) (default to 'SOLID')
+    item_type = file # str |  (optional) (default to file)
+    target_phase = SOLID # str |  (optional) (default to SOLID)
     uid_expiration = '2013-10-20T19:20:30+01:00' # datetime |  (optional)
     oid_expiration = '2013-10-20T19:20:30+01:00' # datetime |  (optional)
     storage_name = '' # str | the name of the configured storage volume (name or ID required). (optional) (default to '')
@@ -154,8 +154,8 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **item_name** | **str**| item name to register with. Does not need to be unique. | 
  **uri** | **str**| the relative access path to the payload. | 
- **item_type** | **str**|  | [optional] [default to &#39;file&#39;]
- **target_phase** | **str**|  | [optional] [default to &#39;SOLID&#39;]
+ **item_type** | **str**|  | [optional] [default to file]
+ **target_phase** | **str**|  | [optional] [default to SOLID]
  **uid_expiration** | **datetime**|  | [optional] 
  **oid_expiration** | **datetime**|  | [optional] 
  **storage_name** | **str**| the name of the configured storage volume (name or ID required). | [optional] [default to &#39;&#39;]

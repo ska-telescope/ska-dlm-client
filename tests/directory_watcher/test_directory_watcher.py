@@ -48,21 +48,6 @@ def create_args() -> argparse.Namespace:
     )
 
 
-class MockCmdLineParameters:
-    """Mock class for CmdLineParameters to use in tests."""
-
-    def __init__(self):
-        """Initialize with default values."""
-        self.migration_url = None
-        self.target_name = None
-
-    def parse_arguments(self, args):
-        """Mock method that does nothing."""
-
-    def set_application_ready(self):
-        """Mock method that does nothing."""
-
-
 class TestDirectoryWatcher:
     """DirectoryWatcher unit test stubs."""
 
@@ -86,7 +71,6 @@ class TestDirectoryWatcher:
                 cls.SOURCE_NAME,
             ]
         )
-        # cls.cmd_line_parameters = MockCmdLineParameters()
         cls.cmd_line_parameters.parse_arguments(cls.parsed)
         cls.config = process_args(args=cls.parsed)
 

@@ -205,18 +205,25 @@ async def on_message_received(message: aio_pika.abc.AbstractIncomingMessage) -> 
 
 async def start_rabbitmq_consumer(queue_connection_string: str, exchange_name: str):
     """Connect to RabbitMQ and consume DLM migration update messages."""
-    logging.info(" [Background Consumer] Connecting to RabbitMQ...")
+    try:
+        logging.debug("Connecting to RabbitMQ...")
+        connection = await aio_pika.connect_robust(queue_connection_string)
+        channel = await connection.channel()
+        await channel.set_qos(prefetch_count=10)
 
-    connection = await aio_pika.connect_robust(queue_connection_string)
-    channel = await connection.channel()
-    await channel.set_qos(prefetch_count=10)
+        exchange = await channel.declare_exchange(exchange_name, passive=True)
+        queue = await channel.declare_queue("configdb_watcher_queue", durable=True)
+        await queue.bind(exchange, routing_key="dlm.migration.update")
 
-    exchange = await channel.declare_exchange(exchange_name, passive=True)
-    queue = await channel.declare_queue("configdb_watcher_queue", durable=True)
-    await queue.bind(exchange, routing_key="dlm.migration.update")
+        # Start consuming (this registers the callback internally within aio-pika)
+        await queue.consume(on_message_received, no_ack=False)
 
-    # Start consuming (this registers the callback internally within aio-pika)
-    await queue.consume(on_message_received, no_ack=False)
+        # Keep the coroutine running to listen for messages
+        await asyncio.Future()
 
-    # Keep the coroutine running to listen for messages
-    await asyncio.Future()
+    except Exception as e:  # pylint: disable=broad-except
+        logging.warning(
+            "RabbitMQ consumer could not be started: %s. "
+            "ConfigDB watcher will continue without RabbitMQ. (WIP, DMAN-213)",
+            e,
+        )

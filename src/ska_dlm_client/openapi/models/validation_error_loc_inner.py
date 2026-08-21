@@ -31,11 +31,11 @@ from pydantic import (
 )
 from typing_extensions import Literal, Self
 
-LOCATIONINNER_ANY_OF_SCHEMAS = ["int", "str"]
+VALIDATIONERRORLOCINNER_ANY_OF_SCHEMAS = ["int", "str"]
 
 
-class LocationInner(BaseModel):
-    """LocationInner"""
+class ValidationErrorLocInner(BaseModel):
+    """ValidationErrorLocInner"""
 
     # data type: str
     anyof_schema_1_validator: Optional[StrictStr] = None
@@ -68,7 +68,7 @@ class LocationInner(BaseModel):
 
     @field_validator("actual_instance")
     def actual_instance_must_validate_anyof(cls, v):
-        instance = LocationInner.model_construct()
+        instance = ValidationErrorLocInner.model_construct()
         error_messages = []
         # validate data type: str
         try:
@@ -85,7 +85,7 @@ class LocationInner(BaseModel):
         if error_messages:
             # no match
             raise ValueError(
-                "No match found when setting the actual_instance in LocationInner with anyOf schemas: int, str. Details: "
+                "No match found when setting the actual_instance in ValidationErrorLocInner with anyOf schemas: int, str. Details: "
                 + ", ".join(error_messages)
             )
         else:
@@ -122,7 +122,7 @@ class LocationInner(BaseModel):
         if error_messages:
             # no match
             raise ValueError(
-                "No match found when deserializing the JSON string into LocationInner with anyOf schemas: int, str. Details: "
+                "No match found when deserializing the JSON string into ValidationErrorLocInner with anyOf schemas: int, str. Details: "
                 + ", ".join(error_messages)
             )
         else:
