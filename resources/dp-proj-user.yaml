@@ -19,8 +19,8 @@ ska_dlm:
 
 # --- Shared client configuration ---
 ska_dlm_client:
-  image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client #artefact.skao.int/ska-dlm-client
-  version: "67a2653f"
+  image: artefact.skao.int/ska-dlm-client
+  version: "2.2.0"
   imagePullPolicy: Always
   securityContext: {}
 
@@ -68,6 +68,8 @@ configdb_watcher:
   target_name: dlm-archive
   uid_expiration_days: # leave empty to use DB default, now() + 24:00
   oid_expiration_days: # leave empty to use DB default, 2099-12-31T23:59:59
+  queue_connection_string: "amqp://guest:guest@ska-dlm-rabbitmq/" # must match rabbitmq.auth in dlm server
+  queue_exchange_name: "dlm.outbox" # must match outbox.rabbitmq.exchange in dlm server
   pvc:
     name: shared
     read_only: false
