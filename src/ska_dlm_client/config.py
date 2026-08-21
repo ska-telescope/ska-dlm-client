@@ -51,7 +51,7 @@ class ClientConfig:
 
 
 @dataclass
-class CmdLineParameters:  # pylint: disable=too-many-instance-attributes
+class CmdLineParameters:
     """Class for common/required command line parameters and helper methods."""
 
     location: str = ""
