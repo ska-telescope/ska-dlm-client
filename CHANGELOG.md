@@ -1,5 +1,12 @@
 # Version History
 
+## Development
+
+### Added
+
+*  `MigrationResultTracker` to correlate RabbitMQ migration outcomes with their parent data_item.
+
+
 ## 2.2.0
 
 ### Removed

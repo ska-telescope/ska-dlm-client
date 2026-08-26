@@ -222,6 +222,7 @@ async def test_on_message_received_acknowledges_valid_message() -> None:
     message.body = json.dumps(
         {
             "oid": "test-oid",
+            "migration_id": 123,
             "complete": True,
             "job_status": {"success": True},
         }
