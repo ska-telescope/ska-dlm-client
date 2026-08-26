@@ -186,18 +186,86 @@ def log_configdb_backend_details(config: Config) -> None:
         )
 
 
-async def on_message_received(message: aio_pika.abc.AbstractIncomingMessage) -> None:
-    """Process and acknowledge an incoming RabbitMQ message."""
+class MigrationResultTracker:
+    """Track asynchronous migration results received from RabbitMQ.
+
+    A mechanism for RabbitMQ consumer to communicate the migration result back to
+    the configdb watcher. Migration results are correlated by matching the parent data item's OID
+    returned by registration with the OID in the corresponding RabbitMQ migration message.
+
+    The tracker handles either ordering of events: the caller may begin waiting before the
+    RabbitMQ result arrives, or the RabbitMQ result may arrive before the caller begins waiting.
+
+    Attributes:
+        _results: Completed migration outcomes that arrived before a caller started waiting for
+        them. Maps each OID to its success/failure outcome. Entries are removed when consumed by
+        ``wait_for()``.
+
+        _waiters: Migrations for which a caller is currently awaiting a result. Maps each OID to
+        an ``asyncio.Future``. When ``set_result()`` receives the corresponding RabbitMQ result,
+        the Future is resolved with the migration outcome, allowing the waiting coroutine to
+        continue.
+    """
+
+    def __init__(self):
+        """Init the class."""
+        self._results: dict[str, bool] = {}
+        self._waiters: dict[str, asyncio.Future[bool]] = {}
+
+    async def wait_for(self, oid: str) -> bool:
+        """Wait for and return the migration outcome for the given OID."""
+        if oid in self._results:
+            return self._results.pop(oid)
+
+        future = asyncio.get_running_loop().create_future()
+        self._waiters[oid] = future
+        return await future
+
+    def set_result(self, oid: str, outcome: bool) -> None:
+        """Store the migration outcome for an OID or deliver it to a waiting caller."""
+        future = self._waiters.pop(oid, None)
+
+        if future is not None:
+            future.set_result(outcome)
+        else:
+            self._results[oid] = outcome
+
+
+async def on_message_received(
+    message: aio_pika.abc.AbstractIncomingMessage,
+    migration_results: MigrationResultTracker,
+) -> None:
+    """Process a DLM migration update received from RabbitMQ.
+
+    Completed migration messages are correlated by OID and their success/failure
+    outcome is passed to ``migration_results``. Invalid or non-JSON messages are
+    acknowledged and ignored. Messages that fail during processing are negatively
+    acknowledged and requeued.
+
+    Args:
+        message: The incoming RabbitMQ message.
+        migration_results: Tracker used to publish completed migration outcomes.
+    """
     try:
         body = message.body.decode()
         logging.info(" [x] Received message: %s", body)
 
         migration_record = json.loads(body)
-
+        # Correlate the completed migration with the parent data item by OID.
         if migration_record["complete"]:
+            oid = migration_record["oid"]
+            migration_id = migration_record["migration_id"]
             outcome = migration_record["job_status"]["success"]
-            logging.info("outcome of migration %s: %s", migration_record, outcome)
-            # TODO: DMAN-213
+
+            logging.info(
+                "Migration completed: oid=%s, migration_id=%s, success=%s",
+                oid,
+                migration_id,
+                outcome,
+            )
+            logging.debug("Full migration result: %s", migration_record)
+
+            migration_results.set_result(oid, outcome)  # set_result() is synchronous
 
         await message.ack()
 
@@ -214,7 +282,9 @@ async def on_message_received(message: aio_pika.abc.AbstractIncomingMessage) -> 
         await message.nack(requeue=True)
 
 
-async def start_rabbitmq_consumer(queue_connection_string: str, exchange_name: str):
+async def start_rabbitmq_consumer(
+    queue_connection_string: str, exchange_name: str, migration_results: MigrationResultTracker
+):
     """Connect to RabbitMQ and consume DLM migration update messages."""
     try:
         logging.debug("Connecting to RabbitMQ...")
@@ -226,8 +296,11 @@ async def start_rabbitmq_consumer(queue_connection_string: str, exchange_name: s
         queue = await channel.declare_queue("configdb_watcher_queue", durable=True)
         await queue.bind(exchange, routing_key="dlm.migration.update")
 
-        # Start consuming (this registers the callback internally within aio-pika)
-        await queue.consume(on_message_received, no_ack=False)
+        # Start consuming messages
+        # Pass each one to the callback with the shared migration result tracker.
+        await queue.consume(
+            lambda message: on_message_received(message, migration_results), no_ack=False
+        )
 
         # Keep the coroutine running to listen for messages
         await asyncio.Future()

@@ -148,6 +148,27 @@ def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
     return statuses
 
 
+def _wait_for_dependency_status(
+    pb_id: str,
+    flow_name: str,
+    expected_status: str = "FINISHED",
+    timeout_s: int = 60,
+    poll_interval_s: int = 2,
+) -> list[str]:
+    """Poll dependency statuses until the expected status appears or time out."""
+    deadline = time.time() + timeout_s
+    statuses: list[str] = []
+
+    while time.time() < deadline:
+        statuses = _get_dependency_statuses_for_product(pb_id, flow_name)
+        if expected_status in statuses:
+            return statuses
+
+        sleep(poll_interval_s)
+
+    return statuses
+
+
 @pytest.mark.integration
 def test_data_was_copied_correctly(_configdb_watcher_ready, _common_dlm_endpoints):
     """Verify that the test data is visible inside the watcher container."""
@@ -180,13 +201,7 @@ async def test_configdb_watcher(
     trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH_DIRECT)
 
     # Poll for FINISHED dependency status
-    deadline = time.time() + 10
-    statuses = []
-    while time.time() < deadline:
-        statuses = _get_dependency_statuses_for_product(PB_ID, flow_name)
-        if "FINISHED" in statuses:
-            break
-        sleep(1)
+    statuses = _wait_for_dependency_status(PB_ID, flow_name, timeout_s=60)
 
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
 
@@ -219,27 +234,9 @@ async def test_configdb_watcher_higher_dir(
     persist_flow_name = "persist-flow2"
     trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH)
 
-    def _wait_for_dependency_status(
-        pb_id: str,
-        flow_name: str,
-        expected_status: str = "FINISHED",
-        timeout_s: int = 60,
-        poll_interval_s: int = 2,
-    ) -> list[str]:
-        """Poll dependency statuses until expected_status appears, or time out."""
-        deadline = time.time() + timeout_s
-        statuses: list[str] = []
-
-        while time.time() < deadline:
-            statuses = _get_dependency_statuses_for_product(pb_id, flow_name)
-            if expected_status in statuses:
-                return statuses
-
-            sleep(poll_interval_s)
-
-        return statuses
-
-    statuses = _wait_for_dependency_status(PB_ID, flow_name, timeout_s=60)
+    # This test migrates the full parent directory; registration, migration, RabbitMQ
+    # processing, and dependency update can take approximately 85-90 seconds in total.
+    statuses = _wait_for_dependency_status(PB_ID, flow_name, timeout_s=120)
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
 
     representative_items = [
@@ -274,14 +271,7 @@ async def test_watcher_logs_failed_registration(_configdb_watcher_ready, _common
     trigger_completed_flows("test-flow-failure", "persist-flow3", subpath=PVC_SUBPATH)
 
     # Poll for FAILED dependency status
-    deadline = time.time() + 10
-    statuses = []
-    while time.time() < deadline:
-        statuses = _get_dependency_statuses_for_product(PB_ID, "test-flow-failure")
-        if "FAILED" in statuses:
-            break
-        sleep(1)
-
+    statuses = _wait_for_dependency_status(PB_ID, "test-flow-failure", "FAILED", timeout_s=60)
     assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"
 
 
@@ -317,8 +307,9 @@ def test_automatic_deletion(
     test_dir = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}"
     counter = 0
     while counter < 3:
-        log.info("Sleep to give heuristics some time to do its thing.")
-        sleep(20)  # default poll interval of the heuristics is 10 seconds
+        sleep_s = 20
+        log.info("Sleeping %s seconds to give heuristics some time to do its thing..., %s")
+        sleep(sleep_s)  # default poll interval of the heuristics is 10 seconds
         result = subprocess.run(["docker", "exec", SRC_HOST, "test", "-d", test_dir])
         logs = subprocess.run(["docker", "logs", "dlm_heuristics"], capture_output=True, text=True)
         if result.returncode != 0:
