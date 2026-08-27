@@ -13,6 +13,7 @@ from ska_sdp_config.entity.common import PVCPath
 from ska_sdp_config.entity.flow import DataProduct, DataProductPersist, Flow, FlowSource
 
 from ska_dlm_client.configdb_watcher.configdb_utils import (
+    MigrationResultTracker,
     _initialise_dependency,
     create_sdp_migration_dependency,
     get_pvc_subpath,
@@ -307,3 +308,22 @@ async def test_start_rabbitmq_consumer_sets_up_consumer() -> None:
         await callback(message)
 
     handler.assert_awaited_once_with(message, migration_results)
+
+
+@pytest.mark.asyncio
+async def test_migration_result_tracker_ignores_unrelated_oids() -> None:
+    """Only the matching OID should resolve the waiter."""
+    tracker = MigrationResultTracker()
+
+    real_oid = "real-parent-oid"
+
+    waiter = asyncio.create_task(tracker.wait_for(real_oid))
+
+    tracker.set_result("decoy-oid-1", True)
+    tracker.set_result("decoy-oid-2", False)
+
+    assert not waiter.done()
+
+    tracker.set_result(real_oid, True)
+
+    assert await waiter is True

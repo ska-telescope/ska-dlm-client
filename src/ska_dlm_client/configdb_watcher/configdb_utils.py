@@ -222,12 +222,21 @@ class MigrationResultTracker:
         return await future
 
     def set_result(self, oid: str, outcome: bool) -> None:
-        """Store the migration outcome for an OID or deliver it to a waiting caller."""
-        future = self._waiters.pop(oid, None)
+        """Store the migration outcome for an OID or deliver it to a waiting caller.
 
-        if future is not None:
+        Args:
+            oid: OID of the migrated data item.
+            outcome: Whether the migration succeeded.
+        """
+        future = self._waiters.pop(oid, None)  # asyncio object - a result that doesn't exist yet
+
+        if future is not None:  # Check whether a caller is already waiting for this OID
+            # Supply the result and allow the waiting coroutine to resume.
+            logger.debug("Matched migration result for waiting OID %s; resuming caller", oid)
             future.set_result(outcome)
         else:
+            # No caller is waiting yet, so store the result for later.
+            logger.debug("No caller waiting for OID %s; storing migration result for later", oid)
             self._results[oid] = outcome
 
 
