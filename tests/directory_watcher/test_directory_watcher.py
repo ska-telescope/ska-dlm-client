@@ -7,6 +7,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+from ska_sdp_config.entity import Dependency
 
 from ska_dlm_client.config import STATUS_FILE_FILENAME
 from ska_dlm_client.directory_watcher.config import WatcherArgs
@@ -161,7 +162,13 @@ class MockRegistrationProcessor(RegistrationProcessor):
         """Return fixed storage info without calling the real helper."""
         return ("test-target", "SOLID")
 
-    def add_path(self, absolute_path: str, path_rel_to_watch_dir: str):
+    def add_path(
+        self,
+        absolute_path: str,
+        path_rel_to_watch_dir: str,
+        dependency_key: Dependency.Key | None = None,
+    ):
         """Perform testing on the given paths."""
         self.absolute_path = absolute_path
         self.path_rel_to_watch_dir = path_rel_to_watch_dir
+        self.dependency_key = dependency_key

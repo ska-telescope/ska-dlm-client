@@ -1,3 +1,6 @@
+# pylint: disable=redefined-outer-name
+# pylint: disable=protected-access
+# pylint: disable=unused-argument
 """Registration processor related tests."""
 
 import os
@@ -5,6 +8,7 @@ from datetime import datetime, timedelta
 from unittest import mock
 
 import pytest
+from ska_sdp_config.entity import Dependency
 
 from ska_dlm_client.data_product_metadata import DataProductMetadata
 from ska_dlm_client.directory_watcher.config import WatcherConfig
@@ -16,6 +20,35 @@ from ska_dlm_client.registration_processor import (
     ItemType,
     RegistrationProcessor,
     _generate_dir_item_list,
+)
+
+
+class MockRegistrationProcessor(RegistrationProcessor):
+    """A class to use for test of directory watcher."""
+
+    absolute_path: str
+    path_rel_to_watch_dir: str
+
+    def __init__(self, config):
+        """Initialize with default values."""
+        super().__init__(config)
+        self.absolute_path = ""
+        self.path_rel_to_watch_dir = ""
+
+    def _get_storage_info_from_name(self, storage_name: str) -> tuple[str, str]:
+        """Return fixed storage info without calling the real helper."""
+        return ("test-target", "SOLID")
+
+
+test_dependency = Dependency(
+    key=Dependency.Key(
+        pb_id="pb-test-20260126-24294",
+        name="test-flow",
+        kind="dlm-copy",
+        origin="ska-data-lifecycle-management",
+    ),
+    expiry_time=-1,
+    description="DLM: lock data-product for copy",
 )
 
 
@@ -154,13 +187,13 @@ def mock_data_product_metadata():
         yield mock_dpm
 
 
-def test_registration_processor_init(mock_config):  # pylint: disable=redefined-outer-name
+def test_registration_processor_init(mock_config):
     """Test the RegistrationProcessor initialization."""
     processor = MockRegistrationProcessor(mock_config)
     assert processor.get_config() == mock_config
 
 
-def test_registration_processor_set_config(mock_config):  # pylint: disable=redefined-outer-name
+def test_registration_processor_set_config(mock_config):
     """Test the RegistrationProcessor set_config method."""
     processor = MockRegistrationProcessor(mock.MagicMock(spec=WatcherConfig))
     processor.set_config(mock_config)
@@ -174,38 +207,40 @@ def test_registration_processor_follow_sym_link():
     # Test with a non-symlink path
     path = mock.MagicMock()
     path.is_symlink.return_value = False
-    result = processor._follow_sym_link(path)  # pylint: disable=protected-access
+    result = processor._follow_sym_link(path)
     assert result == path
     path.resolve.assert_not_called()
 
     # Test with a symlink path
     path = mock.MagicMock()
     path.is_symlink.return_value = True
-    result = processor._follow_sym_link(path)  # pylint: disable=protected-access
+    result = processor._follow_sym_link(path)
     assert result == path
     path.resolve.assert_called_once()
 
 
-def test_registration_processor_copy_data_item_to_new_storage(
-    mock_config, mock_migration_api
-):  # pylint: disable=protected-access, redefined-outer-name
+def test_registration_processor_copy_data_item_to_new_storage(mock_config, mock_migration_api):
     """Test the RegistrationProcessor _copy_data_item_to_new_storage method."""
     processor = MockRegistrationProcessor(mock_config)
 
     with mock.patch.object(processor, "_check_target_storage_access", return_value=True):
-        # Test with migration enabled using mocked storage info
-        result = processor._initiate_migration("test-uuid")
+        # Test with migration enabled using mocked storage info and mocked dependency.
+        result = processor._initiate_migration("test-uuid", dependency_key=test_dependency.key)
         assert result == "test-migration-uuid"
+
+    mock_migration_api.return_value.copy_data_item.assert_called_once()
+    _, kwargs = mock_migration_api.return_value.copy_data_item.call_args
+    assert kwargs["dependency"] == test_dependency.key
 
     # Test with missing destination storage name
     mock_config.target_name = None
-    result = processor._initiate_migration("test-uuid")
+    result = processor._initiate_migration("test-uuid", dependency_key=None)
     assert result is None
 
     # Test with unreachable target storage
     mock_config.target_name = "test-destination-storage"
     with mock.patch.object(processor, "_check_target_storage_access", return_value=False):
-        result = processor._initiate_migration("test-uuid")
+        result = processor._initiate_migration("test-uuid", dependency_key=None)
         assert result is None
 
     # Test with API exception
@@ -263,13 +298,13 @@ def test_registration_processor_skips_child_registration_when_target_storage_unr
 
             assert mock_warning.call_count >= 1
             assert any(
-                "Target storage '%s' unaccessible" in str(call.args[0])
+                "Target storage '%s' inaccessible" in str(call.args[0])
                 and mock_config.target_name in str(call.args[1])
                 for call in mock_warning.call_args_list
                 if len(call.args) > 1
             )
             assert any(
-                "Target storage '%s' unaccessible: Skipping child item registration"
+                "Target storage '%s' inaccessible: Skipping child item registration"
                 in str(call.args[0])
                 for call in mock_warning.call_args_list
             )
@@ -278,7 +313,7 @@ def test_registration_processor_skips_child_registration_when_target_storage_unr
 
 def test_registration_processor_register_single_item(
     mock_config, mock_ingest_api, mock_migration_api, mock_data_product_metadata
-):  # pylint: disable=protected-access, redefined-outer-name, unused-argument
+):
     """Test the RegistrationProcessor _register_single_item method."""
     mock_config.uid_expiration_days = 7
     mock_config.oid_expiration_days = 1
@@ -315,13 +350,13 @@ def test_registration_processor_register_single_item(
     assert timedelta(days=0) < delta_oid < timedelta(days=2), delta_oid
 
     # Test with registration disabled
-    # result = processor._register_single_item(item)
-    # assert result is None
+    result = processor._register_single_item(item)
+    assert result is None
 
-    # # Test with API exception
-    # mock_ingest_api.return_value.register_data_item.side_effect = OpenApiException("Test error")
-    # result = processor._register_single_item(item)
-    # assert result is None
+    # Test with API exception
+    mock_ingest_api.return_value.register_data_item.side_effect = OpenApiException("Test error")
+    result = processor._register_single_item(item)
+    assert result is None
 
 
 def test_registration_processor_register_container_items(
@@ -329,7 +364,7 @@ def test_registration_processor_register_container_items(
     mock_ingest_api,
     mock_migration_api,
     mock_data_product_metadata,
-):  # pylint: disable=protected-access, redefined-outer-name, unused-argument
+):
     """Test the RegistrationProcessor _register_container_items method."""
     processor = MockRegistrationProcessor(mock_config)
 
@@ -358,21 +393,40 @@ def test_registration_processor_register_container_items(
         parent_uid="test-uuid",
     )
 
-    # Test with registration enabled
-    processor._register_container_items([child_item1, child_item2], parent_uid=parent_item.uuid)
-    assert mock_ingest_api.return_value.register_data_item.call_count == 2
+    # Test child item registration
+    with mock.patch.object(
+        processor,
+        "_register_single_item",
+        return_value="test-uuid",
+    ) as mock_register:
+        processor._register_container_items(
+            [child_item1, child_item2],
+            parent_uid=parent_item.uuid,
+        )
 
-    # Test with API exception
-    mock_ingest_api.reset_mock()
-    mock_ingest_api.return_value.register_data_item.side_effect = OpenApiException("Test error")
-    processor._register_container_items([child_item1, child_item2], parent_uid=parent_item.uuid)
-    assert mock_ingest_api.return_value.register_data_item.call_count == 2
+    assert mock_register.call_count == 2
+
+    # Check the first child is registered without a dependency key
+    mock_register.assert_any_call(
+        item=child_item1,
+        migrate=True,
+        parent_uid=parent_item.uuid,
+        dependency_key=None,
+    )
+
+    # Check the second child is registered without a dependency key
+    mock_register.assert_any_call(
+        item=child_item2,
+        migrate=False,
+        parent_uid=parent_item.uuid,
+        dependency_key=None,
+    )
 
 
 @mock.patch("ska_dlm_client.registration_processor._generate_dir_item_list")
 def test_registration_processor_generate_dir_item_list(
     mock_generate, mock_config, mock_data_product_metadata
-):  # pylint: disable=protected-access, redefined-outer-name
+):
     """Test the RegistrationProcessor _generate_dir_item_list method."""
     processor = MockRegistrationProcessor(mock_config)
 
@@ -393,12 +447,20 @@ def test_registration_processor_generate_dir_item_list(
     mock_generate.assert_called_once_with(
         absolute_path="/test/abs/path", path_rel_to_watch_dir="rel/path"
     )
-    processor._register_single_item.assert_called_once_with(file_item)
-    processor._register_container_items.assert_called_once()
+    processor._register_single_item.assert_called_once_with(
+        file_item,
+        dependency_key=None,
+    )
+    processor._register_container_items.assert_called_once_with(
+        item_list=[],
+        parent_uid="test-uuid",
+    )
 
-    # Test with a single container item
+    # Test with a single container item and a Dependency key
     mock_generate.reset_mock()
     processor._register_single_item.reset_mock()
+    processor._register_container_items.reset_mock()
+
     container_item = Item(
         path_rel_to_watch_dir="container-item",
         item_type=ItemType.CONTAINER,
@@ -407,8 +469,20 @@ def test_registration_processor_generate_dir_item_list(
     )
     mock_generate.return_value = [container_item]
 
-    processor.add_path("/test/abs/path", "rel/path")
-    processor._register_single_item.assert_called_once()
+    processor.add_path(
+        "/test/abs/path",
+        "rel/path",
+        dependency_key=test_dependency.key,
+    )
+
+    processor._register_single_item.assert_called_once_with(
+        container_item,
+        dependency_key=test_dependency.key,
+    )
+    processor._register_container_items.assert_called_once_with(
+        item_list=[],
+        parent_uid="test-uuid",
+    )
 
     # Test with multiple items (container + files)
     mock_generate.reset_mock()
@@ -443,9 +517,13 @@ def test_registration_processor_generate_dir_item_list(
     with mock.patch("time.sleep"):
         processor.add_path("/test/abs/path", "rel/path")
 
-    processor._register_single_item.assert_called_once_with(container_item)
+    processor._register_single_item.assert_called_once_with(
+        container_item,
+        dependency_key=None,
+    )
     processor._register_container_items.assert_called_once_with(
-        item_list=[file_item1, file_item2], parent_uid=container_item.uuid
+        item_list=[file_item1, file_item2],
+        parent_uid="test-uuid",
     )
 
     # Test with no items
@@ -463,7 +541,7 @@ def test_registration_processor_generate_dir_item_list(
 @mock.patch("os.path.join")
 def test_registration_processor_register_data_products_from_watch_directory(
     mock_join, mock_listdir, mock_config
-):  # pylint: disable=redefined-outer-name
+):
     """Test the RegistrationProcessor register_data_products_from_watch_directory method."""
     processor = MockRegistrationProcessor(mock_config)
 
@@ -493,20 +571,3 @@ def test_registration_processor_register_data_products_from_watch_directory(
         absolute_path=f"{mock_config.directory_to_watch}/item3",
         path_rel_to_watch_dir="item3",
     )
-
-
-class MockRegistrationProcessor(RegistrationProcessor):
-    """A class to use for test of directory watcher."""
-
-    absolute_path: str
-    path_rel_to_watch_dir: str
-
-    def __init__(self, config):
-        """Initialize with default values."""
-        super().__init__(config)
-        self.absolute_path = ""
-        self.path_rel_to_watch_dir = ""
-
-    def _get_storage_info_from_name(self, storage_name: str) -> tuple[str, str]:
-        """Return fixed storage info without calling the real helper."""
-        return ("test-target", "SOLID")

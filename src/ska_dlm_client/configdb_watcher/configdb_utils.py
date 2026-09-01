@@ -11,6 +11,7 @@ import urllib.parse
 from typing import Optional
 
 import aio_pika
+import athreading
 from ska_sdp_config import Config, ConfigCollision
 from ska_sdp_config.backend.etcd3 import Etcd3Backend
 from ska_sdp_config.entity.common import PVCPath
@@ -28,7 +29,20 @@ def _initialise_dependency(
     expiry_time: int = -1,
     description: Optional[str],
 ) -> Dependency:
-    """Build a Flow.Dependency for this product without setting state.
+    """Build a Dependency for a data-product Flow without setting its state.
+
+    The Dependency is identified by a ``Dependency.Key``. ``Dependency.Key`` inherits
+    ``pb_id`` and ``name`` from ``Flow.Key`` and adds the ``kind`` and ``origin`` fields.
+    Therefore, the Dependency created here uses the ``pb_id`` and ``name`` from
+    ``product_key``, together with the supplied ``dep_kind`` and ``origin``.
+
+    Args:
+        product_key: Flow key providing the Dependency's ``pb_id`` and ``name``.
+        dep_kind: Kind of dependency, used as ``Dependency.Key.kind``.
+        origin: Component creating the dependency, used as ``Dependency.Key.origin``.
+        expiry_time: Time in seconds after which the dependency should be released.
+        ``-1`` means no expiry.
+        description: Optional description of the dependency.
 
     Returns:
         The Dependency object.
@@ -49,8 +63,24 @@ def _initialise_dependency(
     )
 
 
-async def create_sdp_migration_dependency(config, dataproduct_key: Flow.Key):
-    """Create migration dependency (no state yet)."""
+async def create_sdp_migration_dependency(config, dataproduct_key: Flow.Key) -> Dependency:
+    """Create and persist a DLM migration Dependency for a data-product Flow.
+
+    The Dependency is associated with the supplied Flow through its key: ``pb_id`` and
+    ``name`` are inherited from ``dataproduct_key``, while ``kind`` is set to ``"dlm-copy"``
+    and ``origin`` identifies DLM as the component creating the dependency.
+
+    The Dependency and an initially empty Dependency state are persisted in ConfigDB.
+    The state can subsequently be updated to WORKING, FINISHED, or FAILED.
+
+    Args:
+        config: SDP ConfigDB client.
+        dataproduct_key: Flow key identifying the data product for which the Dependency
+        is created.
+
+    Returns:
+        The created Dependency.
+    """
     dep = _initialise_dependency(
         dataproduct_key,
         dep_kind="dlm-copy",
@@ -143,6 +173,24 @@ def update_dependency_state(txn, dep: Dependency, status: str = "WORKING") -> No
         txn.dependency.state(dep).update({"status": status})
 
 
+@athreading.call
+def aupdate_dependency_state(
+    configdb: Config,
+    dependency_key: Dependency.Key,
+    status: str,
+) -> None:
+    """Update the state of a ConfigDB dependency."""
+    for txn in configdb.txn():
+        dependency = txn.dependency.get(dependency_key)
+        update_dependency_state(txn, dependency, status=status)
+        state = txn.dependency.state(dependency).get()
+        logger.info(
+            "Dependency %s status set to %s.",
+            dependency.key,
+            state.get("status"),
+        )
+
+
 def log_configdb_backend_details(config: Config) -> None:
     """Log backend and environment details for the SDP ConfigDB connection."""
     backend = getattr(config, "_backend", None)
@@ -186,95 +234,55 @@ def log_configdb_backend_details(config: Config) -> None:
         )
 
 
-class MigrationResultTracker:
-    """Track asynchronous migration results received from RabbitMQ.
-
-    A mechanism for RabbitMQ consumer to communicate the migration result back to
-    the configdb watcher. Migration results are correlated by matching the parent data item's OID
-    returned by registration with the OID in the corresponding RabbitMQ migration message.
-
-    The tracker handles either ordering of events: the caller may begin waiting before the
-    RabbitMQ result arrives, or the RabbitMQ result may arrive before the caller begins waiting.
-
-    Attributes:
-        _results: Completed migration outcomes that arrived before a caller started waiting for
-        them. Maps each OID to its success/failure outcome. Entries are removed when consumed by
-        ``wait_for()``.
-
-        _waiters: Migrations for which a caller is currently awaiting a result. Maps each OID to
-        an ``asyncio.Future``. When ``set_result()`` receives the corresponding RabbitMQ result,
-        the Future is resolved with the migration outcome, allowing the waiting coroutine to
-        continue.
-    """
-
-    def __init__(self):
-        """Init the class."""
-        self._results: dict[str, bool] = {}
-        self._waiters: dict[str, asyncio.Future[bool]] = {}
-
-    async def wait_for(self, oid: str) -> bool:
-        """Wait for and return the migration outcome for the given OID."""
-        if oid in self._results:
-            return self._results.pop(oid)
-
-        future = asyncio.get_running_loop().create_future()
-        self._waiters[oid] = future
-        return await future
-
-    def set_result(self, oid: str, outcome: bool) -> None:
-        """Store the migration outcome for an OID or deliver it to a waiting caller.
-
-        Args:
-            oid: OID of the migrated data item.
-            outcome: Whether the migration succeeded.
-        """
-        future = self._waiters.pop(oid, None)  # asyncio object - a result that doesn't exist yet
-
-        if future is not None:  # Check whether a caller is already waiting for this OID
-            # Supply the result and allow the waiting coroutine to resume.
-            logger.debug("Matched migration result for waiting OID %s; resuming caller", oid)
-            future.set_result(outcome)
-        else:
-            # No caller is waiting yet, so store the result for later.
-            logger.debug("No caller waiting for OID %s; storing migration result for later", oid)
-            self._results[oid] = outcome
-
-
 async def on_message_received(
     message: aio_pika.abc.AbstractIncomingMessage,
-    migration_results: MigrationResultTracker,
+    configdb: Config,
 ) -> None:
     """Process a DLM migration update received from RabbitMQ.
 
-    Completed migration messages are correlated by OID and their success/failure
-    outcome is passed to ``migration_results``. Invalid or non-JSON messages are
-    acknowledged and ignored. Messages that fail during processing are negatively
-    acknowledged and requeued.
+    Completed migration messages are correlated with their ConfigDB Dependency
+    using the Dependency key stored with the migration. The Dependency state is
+    updated to FINISHED or FAILED based on the migration outcome.
 
     Args:
-        message: The incoming RabbitMQ message.
-        migration_results: Tracker used to publish completed migration outcomes.
+        message: The incoming RabbitMQ migration update message.
+        configdb: ConfigDB client used to retrieve and update the Dependency.
     """
     try:
         body = message.body.decode()
         logging.info(" [x] Received message: %s", body)
 
         migration_record = json.loads(body)
-        # Correlate the completed migration with the parent data item by OID.
+        # Correlate the completed migration with the Dependency stored in the migration table.
         if migration_record["complete"]:
-            oid = migration_record["oid"]
-            migration_id = migration_record["migration_id"]
-            outcome = migration_record["job_status"]["success"]
+            dependency_data = migration_record.get("dependency")
 
-            logging.info(
-                "Migration completed: oid=%s, migration_id=%s, success=%s",
-                oid,
-                migration_id,
-                outcome,
-            )
+            if dependency_data is not None:
+                outcome = migration_record["job_status"]["success"]
+                status = "FINISHED" if outcome else "FAILED"
+
+                # assumes the migration JSON contains a serialized rep. of the actual Pydantic Dep.
+                dependency_key = Dependency.Key.model_validate_json(dependency_data)
+
+                # Find/update this dependency directly in ConfigDB.
+                await aupdate_dependency_state(configdb, dependency_key, status)
+
+                logging.info(
+                    "Migration completed: oid=%s, migration_id=%s, dependency=%s, success=%s",
+                    migration_record["oid"],
+                    migration_record["migration_id"],
+                    dependency_key,
+                    outcome,
+                )
+                logging.debug("Full migration result: %s", migration_record)
+
+            else:
+                logging.debug(
+                    "Completed migration %s has no ConfigDB dependency; ignoring.",
+                    migration_record["migration_id"],
+                )
+
             logging.debug("Full migration result: %s", migration_record)
-
-            migration_results.set_result(oid, outcome)  # set_result() is synchronous
 
         await message.ack()
 
@@ -292,7 +300,10 @@ async def on_message_received(
 
 
 async def start_rabbitmq_consumer(
-    queue_connection_string: str, exchange_name: str, migration_results: MigrationResultTracker
+    queue_connection_string: str,
+    exchange_name: str,
+    configdb: Config,
+    # migration_results: MigrationResultTracker,
 ):
     """Connect to RabbitMQ and consume DLM migration update messages."""
     try:
@@ -306,10 +317,7 @@ async def start_rabbitmq_consumer(
         await queue.bind(exchange, routing_key="dlm.migration.update")
 
         # Start consuming messages
-        # Pass each one to the callback with the shared migration result tracker.
-        await queue.consume(
-            lambda message: on_message_received(message, migration_results), no_ack=False
-        )
+        await queue.consume(lambda message: on_message_received(message, configdb), no_ack=False)
 
         # Keep the coroutine running to listen for messages
         await asyncio.Future()

@@ -2,6 +2,7 @@
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-positional-arguments
 # pylint: disable=too-many-locals
+# pylint: disable=too-many-instance-attributes
 """Register the given file or directory with the DLM."""
 
 import logging
@@ -13,6 +14,7 @@ from os.path import isfile
 from pathlib import Path
 from typing import Any
 
+from ska_sdp_config.entity import Dependency
 from typing_extensions import Self
 
 import ska_dlm_client.config
@@ -30,7 +32,6 @@ logger = logging.getLogger(__name__)
 class Item:
     """Data Item related information to aid registration."""
 
-    # pylint: disable=too-many-instance-attributes
     path_rel_to_watch_dir: str
     item_type: ItemType
     metadata: DataProductMetadata | None
@@ -208,7 +209,7 @@ class RegistrationProcessor:
             "item_size": item.item_size,
             "decompressed_size": item.decompressed_size,
             "do_storage_access_check": do_storage_access_check,
-            "request_body": (None if item.metadata is None else item.metadata.as_dict()),
+            "request_body": None if item.metadata is None else item.metadata.as_dict(),
         }
 
         uid_expiration_days = getattr(self._config, "uid_expiration_days", None)
@@ -225,7 +226,12 @@ class RegistrationProcessor:
 
         return register_kwargs
 
-    def _initiate_migration(self, uid: str, item_name: str = "") -> str | None:
+    def _initiate_migration(
+        self,
+        uid: str,
+        item_name: str = "",
+        dependency_key: Dependency.Key | None = None,
+    ) -> str | None:
         """Send migration request to DLM.
 
         Args:
@@ -238,6 +244,9 @@ class RegistrationProcessor:
         cfg = self._config
         migration_configuration = getattr(cfg, "migration_configuration", None)
         if self._execute_migration_checks(uid) is False:
+            return None
+        if migration_configuration is None:
+            logger.error("Migration configuration is not available.")
             return None
 
         result: str | None = None
@@ -257,6 +266,7 @@ class RegistrationProcessor:
                 response = api_migration.copy_data_item(
                     uid=uid,
                     destination_name=destination_storage_name,
+                    dependency=dependency_key,
                 )
                 logger.debug("Migration response: %s", response)
                 result = str(response)
@@ -304,7 +314,11 @@ class RegistrationProcessor:
         return the_storage_id, the_storage_phase
 
     def _bookkeeping_after_registration(
-        self, item: Item, dlm_registration_uuid: str, storage_name: str, migration_result: str
+        self,
+        item: Item,
+        dlm_registration_uuid: str,
+        storage_name: str | None,
+        migration_result: str | None,
     ) -> None:
         time_registered = time.time()
 
@@ -334,7 +348,9 @@ class RegistrationProcessor:
                 migration_result,
             )
 
-    def _migrate_item(self, migrate, item, uuid, api_ingest) -> None:
+    def _migrate_item(
+        self, migrate, item, uuid, api_ingest, dependency_key: Dependency.Key | None = None
+    ) -> None:
         """Migrate the last registered item."""
         source_name = getattr(self._config, "source_name", None) or getattr(
             self._config, "source_storage", None
@@ -350,6 +366,7 @@ class RegistrationProcessor:
             migration_result = self._initiate_migration(
                 uid=uuid,
                 item_name=item.path_rel_to_watch_dir,
+                dependency_key=dependency_key,
             )
             self.last_migration_result = migration_result
             self._bookkeeping_after_registration(
@@ -361,7 +378,7 @@ class RegistrationProcessor:
         elif target_name is not None and source_name != target_name:
             if not self._check_target_storage_access(target_name):
                 logger.warning(
-                    "Target storage '%s' unaccessible: Skipping child item registration",
+                    "Target storage '%s' inaccessible: Skipping child item registration",
                     target_name,
                 )
                 return
@@ -407,7 +424,11 @@ class RegistrationProcessor:
         # The return value is the UUID of the top level item.
 
     def _register_single_item(
-        self, item: Item, migrate: bool = True, parent_uid: str | None = None
+        self,
+        item: Item,
+        migrate: bool = True,
+        parent_uid: str | None = None,
+        dependency_key: Dependency.Key | None = None,
     ) -> str | None:
         """Register a single data item with the DLM.
 
@@ -488,10 +509,16 @@ class RegistrationProcessor:
                     item=item,
                     uuid=dlm_registration_uuid,
                     api_ingest=api_ingest,
+                    dependency_key=dependency_key,
                 )
         return dlm_registration_uuid
 
-    def _register_container_items(self, item_list: list[Item], parent_uid: str = None) -> None:
+    def _register_container_items(
+        self,
+        item_list: list[Item],
+        parent_uid: str | None = None,
+        # dependency_key: Dependency.Key | None = None,
+    ) -> None:
         """Register a list of data items with the DLM.
 
         Sends registration requests to the DLM API for each item in the list,
@@ -517,11 +544,18 @@ class RegistrationProcessor:
                 source_name,
             )
         for item in item_list:
-            _ = self._register_single_item(item=item, migrate=migrate, parent_uid=parent_uid)
+            _ = self._register_single_item(  # child items do not inherit the dep key
+                item=item, migrate=migrate, parent_uid=parent_uid, dependency_key=None
+            )
             migrate = False  # Only the top-level container item triggers migration
             time.sleep(0.01)
 
-    def add_path(self, absolute_path: str, path_rel_to_watch_dir: str) -> str | None:
+    def add_path(
+        self,
+        absolute_path: str,
+        path_rel_to_watch_dir: str,
+        dependency_key: Dependency.Key | None = None,
+    ) -> str | None:
         """Add the given path to the DLM.
 
         The logic is as follows:
@@ -546,7 +580,7 @@ class RegistrationProcessor:
         logger.debug("Items identified in %s: %s", absolute_path, item_list)
         # Register the container directory first so that its uuid can be used for the files.
         parent_item = item_list[0]
-        parent_uuid = self._register_single_item(parent_item)
+        parent_uuid = self._register_single_item(parent_item, dependency_key=dependency_key)
         time.sleep(1)
         item_list.remove(parent_item)
         self._register_container_items(item_list=item_list, parent_uid=parent_uuid)
@@ -670,7 +704,7 @@ def _generate_dir_item_list(absolute_path: str, path_rel_to_watch_dir: str) -> l
     return item_list
 
 
-def directory_contains_metadata_file(absolute_path: str) -> bool:
+def directory_contains_metadata_file(absolute_path: Path) -> bool:
     """Check if the given directory contains a metadata file.
 
     Args:

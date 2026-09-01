@@ -11,7 +11,6 @@ Do not edit the class manually.
 """
 # noqa: E501
 
-import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import Field, StrictFloat, StrictInt, StrictStr, validate_call
@@ -38,7 +37,7 @@ class MigrationApi:
     def copy_data_item(
         self,
         item_name: Annotated[
-            Optional[StrictStr],
+            Optional[Any],
             Field(
                 description='data item name, when empty the first 1000 items are returned, by default ""'
             ),
@@ -66,6 +65,10 @@ class MigrationApi:
         ] = None,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
+        ] = None,
+        dependency: Annotated[
+            Optional[Any],
+            Field(description='Dependency key associated with the parent data_item, optional ""'),
         ] = None,
         _request_timeout: Union[
             None,
@@ -135,6 +138,7 @@ class MigrationApi:
             destination_id=destination_id,
             path=path,
             authorization=authorization,
+            dependency=dependency,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -303,6 +307,9 @@ class MigrationApi:
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
+        dependency: Annotated[
+            Optional[Any], Field(description="Dependency associated with the parent data_item")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -337,6 +344,7 @@ class MigrationApi:
             \"\"
         authorization : str
             Validated Bearer token with UserInfo
+        dependency : Any
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -371,6 +379,7 @@ class MigrationApi:
             destination_id=destination_id,
             path=path,
             authorization=authorization,
+            dependency=dependency,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -393,6 +402,7 @@ class MigrationApi:
         destination_id,
         path,
         authorization,
+        dependency,
         _request_auth,
         _content_type,
         _headers,
@@ -435,6 +445,10 @@ class MigrationApi:
         if path is not None:
 
             _query_params.append(("path", path))
+
+        if dependency is not None:
+
+            _query_params.append(("dependency", dependency))
 
         # process the header parameters
         if authorization is not None:

@@ -4,6 +4,8 @@ import os
 import tempfile
 from pathlib import Path
 
+from ska_sdp_config.entity import Dependency
+
 from ska_dlm_client.directory_watcher.config import WatcherArgs, WatcherConfig
 from ska_dlm_client.directory_watcher.main import process_args
 from ska_dlm_client.registration_processor import Item, RegistrationProcessor
@@ -71,10 +73,14 @@ class TestDirectoryToWatch:
                 return ("test-target", "SOLID")
 
             def _register_single_item(
-                self, item: Item, migrate: bool = True, parent_uid: str = None
+                self,
+                item: Item,
+                migrate: bool = True,
+                dependency_key: Dependency.Key | None = None,
             ) -> str | None:
                 """Capture the item path that would be registered."""
                 _ = migrate
+                _ = dependency_key
                 self.register_data_item_args = {
                     "item_name": item.path_rel_to_watch_dir,
                     "uri": item.path_rel_to_watch_dir,

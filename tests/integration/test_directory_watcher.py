@@ -70,7 +70,7 @@ def test_auto_migration(  # this test is flaky
             api_request.set_uid_expiration(uid=item["uid"], expiration=now)
 
         sleep_s = 20
-        log.info("Sleeping %s seconds to give heuristics some time to do its thing..., %s")
+        log.info("Sleeping %s seconds to give heuristics some time to do its thing...", sleep_s)
         sleep(sleep_s)  # Default poll interval of the heuristics is 10 seconds
 
         result = subprocess.run(

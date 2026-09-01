@@ -308,7 +308,7 @@ def test_automatic_deletion(
     counter = 0
     while counter < 3:
         sleep_s = 20
-        log.info("Sleeping %s seconds to give heuristics some time to do its thing..., %s")
+        log.info("Sleeping %s seconds to give heuristics some time to do its thing...", sleep_s)
         sleep(sleep_s)  # default poll interval of the heuristics is 10 seconds
         result = subprocess.run(["docker", "exec", SRC_HOST, "test", "-d", test_dir])
         logs = subprocess.run(["docker", "logs", "dlm_heuristics"], capture_output=True, text=True)

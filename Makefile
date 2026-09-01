@@ -13,7 +13,7 @@ PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
 # The DLM server image to use in integration tests:
 # DLM_SERVER_IMAGE = ska-data-lifecycle:2.3.0-dirty  # This works for local testing of the DLM server image built using make oci-image-build.
 # DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:2.3.0
-DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:8dfa2d09
+DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:d85b9db3
 
 test-cleanup:
 	@test -n "$$CI" || rm -rf tests/registration_processor/product_dir/product/eb-00000000/ska-sdp/*
