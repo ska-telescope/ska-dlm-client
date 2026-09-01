@@ -157,6 +157,7 @@ class MockRegistrationProcessor(RegistrationProcessor):
         super().__init__(config)
         self.absolute_path = ""
         self.path_rel_to_watch_dir = ""
+        self.dependency_key = None
 
     def _get_storage_info_from_name(self, storage_name: str) -> tuple[str, str]:
         """Return fixed storage info without calling the real helper."""

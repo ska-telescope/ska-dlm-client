@@ -76,10 +76,12 @@ class TestDirectoryToWatch:
                 self,
                 item: Item,
                 migrate: bool = True,
+                parent_uid: str | None = None,
                 dependency_key: Dependency.Key | None = None,
             ) -> str | None:
                 """Capture the item path that would be registered."""
                 _ = migrate
+                _ = parent_uid
                 _ = dependency_key
                 self.register_data_item_args = {
                     "item_name": item.path_rel_to_watch_dir,
