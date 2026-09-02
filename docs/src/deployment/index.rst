@@ -75,6 +75,7 @@ Directory Watcher component
 - ``include_existing``: If ``true``, registers & migrates all contents of the watch directory at startup, not just newly detected files.
 - ``pvc.name``: Name of the volume to mount into the directory-watcher pod.
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the directory-watcher can do. Needs to be ``false`` to allow for data deletion.
+- ``pvc.sub_path``: Optional subpath within the volume. If not set, the entire root directory of the PVC will be mounted.
 - ``tolerations``: Optional list of Kubernetes pod tolerations for scheduling the directory watcher onto tainted nodes.
 - ``affinity``: Optional Kubernetes affinity configuration for scheduling the directory watcher onto specific nodes, for example where local storage is available.
 
@@ -124,8 +125,8 @@ ConfigDB Watcher component
 - ``queue_connection_string``: RabbitMQ connection URL used by the ConfigDB watcher. The credentials must match ``rabbitmq.auth`` in the DLM server configuration.
 - ``queue_exchange_name``: RabbitMQ exchange used by the ConfigDB watcher. Must match ``outbox.rabbitmq.exchange`` in the DLM server configuration.
 - ``pvc.name``: Name of the volume to mount into the configdb-watcher pod.
-- ``pvc.sub_path``: Optional subpath within the volume.
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the configdb-watcher can do. Needs to be ``false`` to allow for data deletion.
+- ``pvc.sub_path``: Optional subpath within the volume. If not set, the entire root directory of the PVC will be mounted.
 - ``sdp_config.etcd_url``: Full URL of the external ConfigDB (etcd) service, for example ``http://my-etcd.other-namespace:2379``. To deploy a local etcd instance instead, leave this empty and set ``sdp_config.local_etcd.enabled`` to ``true``.
 - ``sdp_config.local_etcd.enabled``: Optionally enable a local etcd instance (for testing purposes).
 
