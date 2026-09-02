@@ -1,5 +1,12 @@
 # Version History
 
+## Development
+
+### Added
+
+* A configurable `subPath` for the directory watcher.
+
+
 ## 2.2.0
 
 ### Removed

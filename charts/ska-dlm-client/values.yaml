@@ -53,6 +53,7 @@ directory_watcher:
   pvc:
     name: shared
     read_only: false
+    sub_path: # Optional
   tolerations: []
   affinity: {}
 

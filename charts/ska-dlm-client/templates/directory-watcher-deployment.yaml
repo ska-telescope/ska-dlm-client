@@ -123,6 +123,10 @@ spec:
             {{- if eq $.Values.directory_watcher.pvc.read_only true }}
             readOnly: true
             {{- end }}
+            {{- if $.Values.directory_watcher.pvc.sub_path }}
+            subPath: {{ $.Values.directory_watcher.pvc.sub_path }}
+            {{- end }}
+
       dnsPolicy: ClusterFirstWithHostNet
       volumes:
       - name: data-product-storage
