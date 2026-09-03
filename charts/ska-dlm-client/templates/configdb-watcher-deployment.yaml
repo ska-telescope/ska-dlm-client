@@ -2,6 +2,8 @@
 {{- $etcd_url := .Values.configdb_watcher.sdp_config.etcd_url | default "" | trim -}}
 {{- $local_etcd_enabled := .Values.configdb_watcher.sdp_config.local_etcd.enabled -}}
 
+{{- include "mychart.validateStoragePaths" . -}}
+
 {{- if and $local_etcd_enabled (ne $etcd_url "") -}}
 {{- fail "Invalid config: choose ONE etcd option for configdb_watcher. Either set configdb_watcher.sdp_config.etcd_url and set configdb_watcher.sdp_config.local_etcd.enabled=false, OR leave configdb_watcher.sdp_config.etcd_url empty and set configdb_watcher.sdp_config.local_etcd.enabled=true." -}}
 {{- end -}}

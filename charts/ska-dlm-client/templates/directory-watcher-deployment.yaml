@@ -1,4 +1,7 @@
 {{- if $.Values.directory_watcher.enabled }}
+
+{{- include "mychart.validateStoragePaths" . -}}
+
 apiVersion: v1
 kind: Service
 metadata:

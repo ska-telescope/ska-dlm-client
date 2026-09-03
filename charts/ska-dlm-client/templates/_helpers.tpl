@@ -126,3 +126,18 @@ component: ssh-storage-access
 subsystem: {{ .Values.ssh_storage_access.subsystem }}
 intent: production
 {{- end }}
+
+{{/*
+Check if dir-watcher and configdb-watcher point to the same directory
+*/}}
+{{- define "mychart.validateStoragePaths" -}}
+{{- $pvc1 := .Values.directory_watcher.pvc.name -}}
+{{- $subPath1 := .Values.directory_watcher.pvc.sub_path | default "" -}}
+{{- $pvc2 := .Values.configdb_watcher.pvc.name -}}
+{{- $subPath2 := .Values.configdb_watcher.pvc.sub_path | default "" -}}
+
+{{- if and (eq $pvc1 $pvc2) (eq $subPath1 $subPath2) -}}
+{{- fail (printf "\n[Deployment Guard] Configuration error: Directory-watcher and configdb-watcher point to the same directory. PVC: '%s', subPath: '%s'." $pvc1 $subPath1) -}}
+{{- end -}}
+{{- end -}}
+
