@@ -119,7 +119,7 @@ spec:
 
         volumeMounts:
           - name: data-product-storage
-            mountPath: /dlm/watch_dir
+            mountPath: {{ $.Values.directory_watcher.directory_to_watch }}
             {{- if eq $.Values.directory_watcher.pvc.read_only true }}
             readOnly: true
             {{- end }}
