@@ -1,5 +1,13 @@
 # Version History
 
+## Development
+
+### Added
+
+* An error if the two watchers are configured to the same directory.
+* A configurable `subPath` for the directory watcher.
+
+
 ## 2.2.0
 
 ### Removed
