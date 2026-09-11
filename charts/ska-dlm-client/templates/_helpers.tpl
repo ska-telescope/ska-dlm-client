@@ -128,9 +128,13 @@ intent: production
 {{- end }}
 
 {{/*
-Check if dir-watcher and configdb-watcher point to the same directory
+Check if dir-watcher and configdb-watcher point to the same directory.
+Only applies when both watchers are enabled.
 */}}
 {{- define "mychart.validateStoragePaths" -}}
+
+{{- if and .Values.directory_watcher.enabled .Values.configdb_watcher.enabled -}}
+
 {{- $pvc1 := .Values.directory_watcher.pvc.name -}}
 {{- $subPath1 := .Values.directory_watcher.pvc.sub_path | default "" -}}
 {{- $pvc2 := .Values.configdb_watcher.pvc.name -}}
@@ -139,5 +143,7 @@ Check if dir-watcher and configdb-watcher point to the same directory
 {{- if and (eq $pvc1 $pvc2) (eq $subPath1 $subPath2) -}}
 {{- fail (printf "\n[Deployment Guard] Configuration error: Directory-watcher and configdb-watcher point to the same directory. PVC: '%s', subPath: '%s'." $pvc1 $subPath1) -}}
 {{- end -}}
+{{- end -}}
+
 {{- end -}}
 
