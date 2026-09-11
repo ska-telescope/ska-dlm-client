@@ -4,7 +4,8 @@
 
 ### Added
 
-*  `MigrationResultTracker` to correlate RabbitMQ migration outcomes with their parent data_item.
+* An error if the two watchers are configured to the same directory.
+* A configurable `subPath` for the directory watcher.
 
 
 ## 2.2.0

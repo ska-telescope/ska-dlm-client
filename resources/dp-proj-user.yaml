@@ -19,8 +19,8 @@ ska_dlm:
 
 # --- Shared client configuration ---
 ska_dlm_client:
-  image: artefact.skao.int/ska-dlm-client
-  version: "2.2.0"
+  image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client #artefact.skao.int/ska-dlm-client
+  version: "7fb7c0c1" # make sure this image is compatible with the server version that's running
   imagePullPolicy: Always
   securityContext: {}
 
@@ -48,6 +48,7 @@ directory_watcher:
   pvc:
     name: shared
     read_only: false
+    sub_path: # If empty, the entire root directory of the PVC will be mounted.
 
 startup_verification:
   enabled: false
@@ -73,6 +74,7 @@ configdb_watcher:
   pvc:
     name: shared
     read_only: false
+    sub_path: # If empty, the entire root directory of the PVC will be mounted.
   sdp_config:
     etcd_url: # e.g., "http://some-external-etcd.namespace:port". Leave empty when using the local etcd service.
     path: ""      # optional
