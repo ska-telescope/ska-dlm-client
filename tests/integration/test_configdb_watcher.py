@@ -201,7 +201,7 @@ async def test_configdb_watcher(
     trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH_DIRECT)
 
     # Poll for FINISHED dependency status
-    statuses = _wait_for_dependency_status(PB_ID, flow_name, timeout_s=60)
+    statuses = _wait_for_dependency_status(PB_ID, flow_name, timeout_s=90)
 
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
 

@@ -225,22 +225,22 @@ def test_registration_processor_copy_data_item_to_new_storage(mock_config, mock_
 
     with mock.patch.object(processor, "_check_target_storage_access", return_value=True):
         # Test with migration enabled using mocked storage info and mocked dependency.
-        result = processor._initiate_migration("test-uuid", dependency_key=test_dependency.key)
+        result = processor._initiate_migration("test-uuid", metadata=test_dependency.key)
         assert result == "test-migration-uuid"
 
     mock_migration_api.return_value.copy_data_item.assert_called_once()
     _, kwargs = mock_migration_api.return_value.copy_data_item.call_args
-    assert kwargs["dependency"] == test_dependency.key
+    assert kwargs["metadata"] == test_dependency.key
 
     # Test with missing destination storage name
     mock_config.target_name = None
-    result = processor._initiate_migration("test-uuid", dependency_key=None)
+    result = processor._initiate_migration("test-uuid", metadata=None)
     assert result is None
 
     # Test with unreachable target storage
     mock_config.target_name = "test-destination-storage"
     with mock.patch.object(processor, "_check_target_storage_access", return_value=False):
-        result = processor._initiate_migration("test-uuid", dependency_key=None)
+        result = processor._initiate_migration("test-uuid", metadata=None)
         assert result is None
 
     # Test with API exception
@@ -411,7 +411,7 @@ def test_registration_processor_register_container_items(
         item=child_item1,
         migrate=True,
         parent_uid=parent_item.uuid,
-        dependency_key=None,
+        metadata=None,
     )
 
     # Check the second child is registered without a dependency key
@@ -419,7 +419,7 @@ def test_registration_processor_register_container_items(
         item=child_item2,
         migrate=False,
         parent_uid=parent_item.uuid,
-        dependency_key=None,
+        metadata=None,
     )
 
 
@@ -449,7 +449,7 @@ def test_registration_processor_generate_dir_item_list(
     )
     processor._register_single_item.assert_called_once_with(
         file_item,
-        dependency_key=None,
+        metadata=None,
     )
     processor._register_container_items.assert_called_once_with(
         item_list=[],
@@ -472,12 +472,12 @@ def test_registration_processor_generate_dir_item_list(
     processor.add_path(
         "/test/abs/path",
         "rel/path",
-        dependency_key=test_dependency.key,
+        metadata=test_dependency.key,
     )
 
     processor._register_single_item.assert_called_once_with(
         container_item,
-        dependency_key=test_dependency.key,
+        metadata=test_dependency.key,
     )
     processor._register_container_items.assert_called_once_with(
         item_list=[],
@@ -519,7 +519,7 @@ def test_registration_processor_generate_dir_item_list(
 
     processor._register_single_item.assert_called_once_with(
         container_item,
-        dependency_key=None,
+        metadata=None,
     )
     processor._register_container_items.assert_called_once_with(
         item_list=[file_item1, file_item2],

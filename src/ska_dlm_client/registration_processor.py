@@ -230,13 +230,14 @@ class RegistrationProcessor:
         self,
         uid: str,
         item_name: str = "",
-        dependency_key: Dependency.Key | None = None,
+        metadata: Dependency.Key | str | None = None,
     ) -> str | None:
         """Send migration request to DLM.
 
         Args:
             uid: The unique identifier of the data item to copy.
             item_name: The name of the item (only used for a log message)
+            metadata: Optional metadata associated with the migration, e.g. Dependency key.
 
         Returns:
             The UUID of the migrated data item, or None if migration was skipped or failed.
@@ -266,7 +267,7 @@ class RegistrationProcessor:
                 response = api_migration.copy_data_item(
                     uid=uid,
                     destination_name=destination_storage_name,
-                    dependency=dependency_key,
+                    metadata=metadata,
                 )
                 logger.debug("Migration response: %s", response)
                 result = str(response)
@@ -349,7 +350,7 @@ class RegistrationProcessor:
             )
 
     def _migrate_item(
-        self, migrate, item, uuid, api_ingest, dependency_key: Dependency.Key | None = None
+        self, migrate, item, uuid, api_ingest, metadata: Dependency.Key | str | None = None
     ) -> None:
         """Migrate the last registered item."""
         source_name = getattr(self._config, "source_name", None) or getattr(
@@ -366,7 +367,7 @@ class RegistrationProcessor:
             migration_result = self._initiate_migration(
                 uid=uuid,
                 item_name=item.path_rel_to_watch_dir,
-                dependency_key=dependency_key,
+                metadata=metadata,
             )
             self.last_migration_result = migration_result
             self._bookkeeping_after_registration(
@@ -428,7 +429,7 @@ class RegistrationProcessor:
         item: Item,
         migrate: bool = True,
         parent_uid: str | None = None,
-        dependency_key: Dependency.Key | None = None,
+        metadata: Dependency.Key | str | None = None,
     ) -> str | None:
         """Register a single data item with the DLM.
 
@@ -442,6 +443,8 @@ class RegistrationProcessor:
                 Whether to migrate the item. This is being used to make sure that the
                 top-level container item is synced including the whole sub-tree,
                 but not each item individually in addition.
+            metadata:
+                Optional metadata associated with the migration, e.g. Dependency key.
 
         Returns:
             The UUID of the registered data item, or None if registration failed.
@@ -509,7 +512,7 @@ class RegistrationProcessor:
                     item=item,
                     uuid=dlm_registration_uuid,
                     api_ingest=api_ingest,
-                    dependency_key=dependency_key,
+                    metadata=metadata,
                 )
         return dlm_registration_uuid
 
@@ -517,7 +520,7 @@ class RegistrationProcessor:
         self,
         item_list: list[Item],
         parent_uid: str | None = None,
-        # dependency_key: Dependency.Key | None = None,
+        # metadata: Dependency.Key | str | None = None,
     ) -> None:
         """Register a list of data items with the DLM.
 
@@ -545,7 +548,7 @@ class RegistrationProcessor:
             )
         for item in item_list:
             _ = self._register_single_item(  # child items do not inherit the dep key
-                item=item, migrate=migrate, parent_uid=parent_uid, dependency_key=None
+                item=item, migrate=migrate, parent_uid=parent_uid
             )
             migrate = False  # Only the top-level container item triggers migration
             time.sleep(0.01)
@@ -554,7 +557,7 @@ class RegistrationProcessor:
         self,
         absolute_path: str,
         path_rel_to_watch_dir: str,
-        dependency_key: Dependency.Key | None = None,
+        metadata: Dependency.Key | str | None = None,
     ) -> str | None:
         """Add the given path to the DLM.
 
@@ -580,7 +583,7 @@ class RegistrationProcessor:
         logger.debug("Items identified in %s: %s", absolute_path, item_list)
         # Register the container directory first so that its uuid can be used for the files.
         parent_item = item_list[0]
-        parent_uuid = self._register_single_item(parent_item, dependency_key=dependency_key)
+        parent_uuid = self._register_single_item(parent_item, metadata=metadata)
         time.sleep(1)
         item_list.remove(parent_item)
         self._register_container_items(item_list=item_list, parent_uid=parent_uuid)

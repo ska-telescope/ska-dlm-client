@@ -66,9 +66,9 @@ class MigrationApi:
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
-        dependency: Annotated[
+        metadata: Annotated[
             Optional[Any],
-            Field(description='Dependency key associated with the parent data_item, optional ""'),
+            Field(description='Metadata associated with the migration, optional ""'),
         ] = None,
         _request_timeout: Union[
             None,
@@ -138,7 +138,7 @@ class MigrationApi:
             destination_id=destination_id,
             path=path,
             authorization=authorization,
-            dependency=dependency,
+            metadata=metadata,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -307,8 +307,8 @@ class MigrationApi:
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
-        dependency: Annotated[
-            Optional[Any], Field(description="Dependency associated with the parent data_item")
+        metadata: Annotated[
+            Optional[Any], Field(description="Metadata associated with the migration")
         ] = None,
         _request_timeout: Union[
             None,
@@ -344,7 +344,7 @@ class MigrationApi:
             \"\"
         authorization : str
             Validated Bearer token with UserInfo
-        dependency : Any
+        metadata : Any
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -379,7 +379,7 @@ class MigrationApi:
             destination_id=destination_id,
             path=path,
             authorization=authorization,
-            dependency=dependency,
+            metadata=metadata,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -402,7 +402,7 @@ class MigrationApi:
         destination_id,
         path,
         authorization,
-        dependency,
+        metadata,
         _request_auth,
         _content_type,
         _headers,
@@ -446,9 +446,9 @@ class MigrationApi:
 
             _query_params.append(("path", path))
 
-        if dependency is not None:
+        if metadata is not None:
 
-            _query_params.append(("dependency", dependency))
+            _query_params.append(("metadata", metadata))
 
         # process the header parameters
         if authorization is not None:

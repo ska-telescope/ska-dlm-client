@@ -16,7 +16,7 @@ from ska_sdp_config.entity.flow import Dependency, Flow
 
 from ska_dlm_client.config import DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
 from ska_dlm_client.configdb_watcher.config import SdpWatcherConfig, WatcherArgs
-from ska_dlm_client.configdb_watcher.configdb_utils import (  # MigrationResultTracker,
+from ska_dlm_client.configdb_watcher.configdb_utils import (
     aupdate_dependency_state,
     create_sdp_migration_dependency,
     get_pvc_subpath,
@@ -86,13 +86,13 @@ def _register_and_migrate_path(
 
     Returns:
         "FAILED" if registration or migration initiation fails,
-        "FINISHED" for register-only operation, or None when a migration
-        has been initiated and its final status will arrive via RabbitMQ.
+        "FINISHED" for register-only operation, or
+        None when a migration has been initiated and its final status will arrive via RabbitMQ.
     """
     dlm_source_uuid = processor.add_path(  # triggers register & migrate
         absolute_path=src_dir,
         path_rel_to_watch_dir=os.path.relpath(src_dir, start=root_dir),
-        dependency_key=new_dep.key,
+        metadata=new_dep.key,
     )
     logger.info("Triggering register & migrate for dlm_source_uuid: %s", dlm_source_uuid)
 

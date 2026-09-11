@@ -253,9 +253,9 @@ async def on_message_received(
         logging.info(" [x] Received message: %s", body)
 
         migration_record = json.loads(body)
-        # Correlate the completed migration with the Dependency stored in the migration table.
+        # Correlate the completed migration with the Dependency stored in migration metadata col
         if migration_record["complete"]:
-            dependency_data = migration_record.get("dependency")
+            dependency_data = migration_record.get("metadata")
 
             if dependency_data is not None:
                 outcome = migration_record["job_status"]["success"]
@@ -278,7 +278,7 @@ async def on_message_received(
 
             else:
                 logging.debug(
-                    "Completed migration %s has no ConfigDB dependency; ignoring.",
+                    "Completed migration %s has no ConfigDB Dependency; ignoring.",
                     migration_record["migration_id"],
                 )
 
@@ -303,7 +303,6 @@ async def start_rabbitmq_consumer(
     queue_connection_string: str,
     exchange_name: str,
     configdb: Config,
-    # migration_results: MigrationResultTracker,
 ):
     """Connect to RabbitMQ and consume DLM migration update messages."""
     try:

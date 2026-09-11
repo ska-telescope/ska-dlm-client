@@ -157,7 +157,7 @@ class MockRegistrationProcessor(RegistrationProcessor):
         super().__init__(config)
         self.absolute_path = ""
         self.path_rel_to_watch_dir = ""
-        self.dependency_key = None
+        self.metadata = None
 
     def _get_storage_info_from_name(self, storage_name: str) -> tuple[str, str]:
         """Return fixed storage info without calling the real helper."""
@@ -167,9 +167,9 @@ class MockRegistrationProcessor(RegistrationProcessor):
         self,
         absolute_path: str,
         path_rel_to_watch_dir: str,
-        dependency_key: Dependency.Key | None = None,
+        metadata: Dependency.Key | str | None = None,
     ):
         """Perform testing on the given paths."""
         self.absolute_path = absolute_path
         self.path_rel_to_watch_dir = path_rel_to_watch_dir
-        self.dependency_key = dependency_key
+        self.metadata = metadata
