@@ -362,7 +362,6 @@ def test_registration_processor_register_single_item(
 def test_registration_processor_register_container_items(
     mock_config,
     mock_ingest_api,
-    mock_migration_api,
     mock_data_product_metadata,
 ):
     """Test the RegistrationProcessor _register_container_items method."""
@@ -394,24 +393,55 @@ def test_registration_processor_register_container_items(
     )
 
     # Test child item registration
-    with mock.patch.object(
-        processor,
-        "_register_single_item",
-        return_value="test-uuid",
-    ) as mock_register:
+    processor._register_container_items([child_item1, child_item2], parent_uid=parent_item.uuid)
+    assert mock_ingest_api.return_value.register_data_item.call_count == 2
+
+    # Test with API exception
+    mock_ingest_api.reset_mock()
+    mock_ingest_api.return_value.register_data_item.side_effect = OpenApiException("Test error")
+    processor._register_container_items([child_item1, child_item2], parent_uid=parent_item.uuid)
+    assert mock_ingest_api.return_value.register_data_item.call_count == 2
+
+
+def test_register_container_items_does_not_pass_dependency_metadata(
+    mock_config,
+    mock_data_product_metadata,
+):
+    """Child items should not inherit the parent dependency key."""
+    processor = MockRegistrationProcessor(mock_config)
+
+    parent_item = Item(
+        path_rel_to_watch_dir="parent-item",
+        item_type=ItemType.CONTAINER,
+        metadata=mock_data_product_metadata.return_value,
+    )
+    parent_item.uuid = "parent-uuid"
+
+    child_item1 = Item(
+        path_rel_to_watch_dir="child-item1",
+        item_type=ItemType.FILE,
+        metadata=None,
+        parent=parent_item,
+    )
+
+    child_item2 = Item(
+        path_rel_to_watch_dir="child-item2",
+        item_type=ItemType.FILE,
+        metadata=None,
+        parent=parent_item,
+    )
+
+    with mock.patch.object(processor, "_register_single_item") as mock_register:
         processor._register_container_items(
             [child_item1, child_item2],
             parent_uid=parent_item.uuid,
         )
-
-    assert mock_register.call_count == 2
 
     # Check the first child is registered without a dependency key
     mock_register.assert_any_call(
         item=child_item1,
         migrate=True,
         parent_uid=parent_item.uuid,
-        metadata=None,
     )
 
     # Check the second child is registered without a dependency key
@@ -419,7 +449,6 @@ def test_registration_processor_register_container_items(
         item=child_item2,
         migrate=False,
         parent_uid=parent_item.uuid,
-        metadata=None,
     )
 
 
