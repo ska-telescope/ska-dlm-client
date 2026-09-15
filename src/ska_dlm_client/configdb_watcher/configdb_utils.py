@@ -261,8 +261,8 @@ async def on_message_received(
                 outcome = migration_record["job_status"]["success"]
                 status = "FINISHED" if outcome else "FAILED"
 
-                # assumes the migration JSON contains a serialized rep. of the actual Pydantic Dep.
-                dependency_key = Dependency.Key.model_validate_json(dependency_data)
+                # assumes the migration metadata contains the fields of the Pydantic Dep key.
+                dependency_key = Dependency.Key.model_validate(dependency_data)
 
                 # Find/update this dependency directly in ConfigDB.
                 await aupdate_dependency_state(configdb, dependency_key, status)
