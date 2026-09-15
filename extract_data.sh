@@ -6,6 +6,14 @@ PB_ID="pb-test-20260126-24294"
 PB_REGO_ID="pb-test-20260126-24295"
 mkdir -p "$TARGET_DIR"
 
+SRC_PRODUCT_DIR="$TARGET_DIR/$PB_ID"
+DST_PRODUCT_DIR="$TARGET_DIR/$PB_REGO_ID"
+
+if [ -d "$SRC_PRODUCT_DIR" ] && [ -d "$DST_PRODUCT_DIR" ]; then
+    echo "Test data already exists; skipping extraction"
+    exit 0
+fi
+
 for filepath in "$SOURCE_DIR"/*.tar.*; do
     file=$(basename "$filepath")
     extracted_name=${file%.tar.*}
@@ -19,8 +27,9 @@ for filepath in "$SOURCE_DIR"/*.tar.*; do
     tar xf "$filepath" -C "$TARGET_DIR"
 done
 
-SRC_PRODUCT_DIR="$TARGET_DIR/$PB_ID"
-DST_PRODUCT_DIR="$TARGET_DIR/$PB_REGO_ID"
+echo "Checking source: $SRC_PRODUCT_DIR ($(test -d "$SRC_PRODUCT_DIR" && echo exists || echo missing))"
+echo "Checking destination: $DST_PRODUCT_DIR ($(test -d "$DST_PRODUCT_DIR" && echo exists || echo missing))"
+
 if [ -d "$SRC_PRODUCT_DIR" ] && [ ! -d "$DST_PRODUCT_DIR" ]; then
     echo "Copying $PB_ID to $PB_REGO_ID for registration-only tests"
     mkdir -p "$DST_PRODUCT_DIR"

@@ -13,12 +13,12 @@ PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
 # The DLM server image to use in integration tests:
 # DLM_SERVER_IMAGE = ska-data-lifecycle:2.3.0-dirty  # This works for local testing of the DLM server image built using make oci-image-build.
 # DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:2.3.0
-DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:5ff46e94
+DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:70aaeac0
 
 test-cleanup:
-	@test -n "$$CI" || rm -rf tests/registration_processor/product_dir/product/eb-00000000/ska-sdp/*
+	@test -n "$$CI" || (echo "Cleaning up old test files..." && rm -rf tests/registration_processor/product_dir/product/eb-00000000/ska-sdp/*)
 
-python-test: test-cleanup extract-test-data python-pre-test python-do-test python-post-test
+python-test: python-pre-test python-do-test python-post-test
 
 python-pre-test:
 	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml build
@@ -32,7 +32,7 @@ python-post-test: docker-compose-down
 extract-test-data:
 	./extract_data.sh
 
-integration-test: test-cleanup extract-test-data docker-compose-up run-integration-test docker-compose-down
+integration-test: test-cleanup extract-test-data docker-compose-up run-integration-test docker-compose-down test-cleanup
 
 integration-test-keep: test-cleanup extract-test-data docker-compose-up run-integration-test
 

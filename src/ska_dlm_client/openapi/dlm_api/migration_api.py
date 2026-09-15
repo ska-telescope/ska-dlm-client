@@ -189,6 +189,9 @@ class MigrationApi:
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
+        metadata: Annotated[
+            Optional[Any], Field(description="Metadata associated with the migration")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -257,6 +260,7 @@ class MigrationApi:
             destination_id=destination_id,
             path=path,
             authorization=authorization,
+            metadata=metadata,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
