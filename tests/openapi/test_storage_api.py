@@ -96,6 +96,13 @@ class TestStorageApi(unittest.TestCase):
         """
         pass
 
+    def test_rclone_about(self) -> None:
+        """Test case for rclone_about
+
+        Rclone About
+        """
+        pass
+
     def test_rclone_access(self) -> None:
         """Test case for rclone_access
 

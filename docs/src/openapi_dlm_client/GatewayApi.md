@@ -271,7 +271,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **token_by_username_password_token_by_username_password_get**
-> Dict[str, object] token_by_username_password_token_by_username_password_get(username, password)
+> Dict[str, Optional[object]] token_by_username_password_token_by_username_password_get(username, password)
 
 Token By Username Password
 
@@ -320,7 +320,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+**Dict[str, Optional[object]]**
 
 ### Authorization
 

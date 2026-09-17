@@ -4,11 +4,11 @@
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-instance-attributes
 """Register the given file or directory with the DLM."""
-
+import json
 import logging
 import os
 import time
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, is_dataclass
 from datetime import datetime, timedelta
 from os.path import isfile
 from pathlib import Path
@@ -262,12 +262,18 @@ class RegistrationProcessor:
             )
             api_migration = migration_api.MigrationApi(migration_api_client)
             api_migration.api_client.configuration.host = migration_configuration.host
+
+            if isinstance(metadata, str) or metadata is None:
+                migration_metadata = metadata
+            else:
+                migration_metadata = json.dumps(vars(metadata))
+
             try:
                 # copy_data_item is an async call and returns success in most cases
                 response = api_migration.copy_data_item(
                     uid=uid,
                     destination_name=destination_storage_name,
-                    metadata=metadata,
+                    metadata=migration_metadata,
                 )
                 logger.debug("Migration response: %s", response)
                 result = str(response)

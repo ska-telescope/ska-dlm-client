@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **copy_data_item**
-> Dict[str, object] copy_data_item(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, authorization=authorization)
+> Dict[str, Optional[object]] copy_data_item(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, metadata=metadata, authorization=authorization)
 
 Copy Data Item
 
@@ -48,11 +48,12 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     destination_name = '' # str | the name of the destination storage volume, by default \"\" (optional) (default to '')
     destination_id = '' # str | the destination storage, by default \"\" (optional) (default to '')
     path = '' # str | the destination path relative to storage root, by default \"\" (optional) (default to '')
+    metadata = 'metadata_example' # str | Metadata associated with the migration. Can be Null. (optional)
     authorization = 'authorization_example' # str | Validated Bearer token with UserInfo (optional)
 
     try:
         # Copy Data Item
-        api_response = api_instance.copy_data_item(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, authorization=authorization)
+        api_response = api_instance.copy_data_item(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, metadata=metadata, authorization=authorization)
         print("The response of MigrationApi->copy_data_item:\n")
         pprint(api_response)
     except Exception as e:
@@ -72,11 +73,12 @@ Name | Type | Description  | Notes
  **destination_name** | **str**| the name of the destination storage volume, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
  **destination_id** | **str**| the destination storage, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
  **path** | **str**| the destination path relative to storage root, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
+ **metadata** | **str**| Metadata associated with the migration. Can be Null. | [optional] 
  **authorization** | **str**| Validated Bearer token with UserInfo | [optional] 
 
 ### Return type
 
-**Dict[str, object]**
+**Dict[str, Optional[object]]**
 
 ### Authorization
 
@@ -165,7 +167,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_migrations**
-> List[Optional[Dict[str, object]]] query_migrations(start_date=start_date, end_date=end_date, storage_id=storage_id, authorization=authorization)
+> List[Dict[str, object]] query_migrations(start_date=start_date, end_date=end_date, storage_id=storage_id, authorization=authorization)
 
 Query Migrations
 
@@ -218,7 +220,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**List[Optional[Dict[str, object]]]**
+**List[Dict[str, object]]**
 
 ### Authorization
 

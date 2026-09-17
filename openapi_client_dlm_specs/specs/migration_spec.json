@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "2.1.0"
+        "version": "2.4.0"
     },
     "paths": {
         "/migration/query_migrations": {
@@ -251,6 +251,24 @@
                             "title": "Path"
                         },
                         "description": "the destination path relative to storage root, by default \"\""
+                    },
+                    {
+                        "name": "metadata",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Metadata associated with the migration. Can be Null.",
+                            "title": "Metadata"
+                        },
+                        "description": "Metadata associated with the migration. Can be Null."
                     },
                     {
                         "name": "authorization",

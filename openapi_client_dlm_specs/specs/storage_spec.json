@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "2.1.0"
+        "version": "2.4.0"
     },
     "paths": {
         "/storage/query_location_facility": {
@@ -521,8 +521,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {},
+                                    "type": "boolean",
                                     "title": "Response Check Storage Access"
                                 }
                             }
@@ -572,6 +571,15 @@
                             "title": "Remote File Path"
                         },
                         "description": "Remote file path, by default \"\""
+                    },
+                    {
+                        "name": "timeout",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "default": 1,
+                            "title": "Timeout"
+                        }
                     }
                 ],
                 "responses": {
@@ -586,12 +594,67 @@
                                             "type": "boolean"
                                         },
                                         {
-                                            "type": "string"
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "additionalProperties": true
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ]
                                         }
                                     ],
                                     "minItems": 2,
                                     "maxItems": 2,
                                     "title": "Response Rclone Access"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/storage/rclone_about": {
+            "get": {
+                "summary": "Rclone About",
+                "tags": [
+                    "storage"
+                ],
+                "description": "Return usage and capacity information for an rclone backend.",
+                "operationId": "rclone_about",
+                "parameters": [
+                    {
+                        "name": "volume",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "The configured rclone volume to query.",
+                            "title": "Volume"
+                        },
+                        "description": "The configured rclone volume to query."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Rclone About"
                                 }
                             }
                         }
