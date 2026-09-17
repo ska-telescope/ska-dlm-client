@@ -230,7 +230,12 @@ def test_registration_processor_copy_data_item_to_new_storage(mock_config, mock_
 
     mock_migration_api.return_value.copy_data_item.assert_called_once()
     _, kwargs = mock_migration_api.return_value.copy_data_item.call_args
-    assert kwargs["metadata"] == test_dependency.key
+    assert kwargs["request_body"] == {
+        "pb_id": test_dependency.key.pb_id,
+        "kind": test_dependency.key.kind,
+        "name": test_dependency.key.name,
+        "origin": test_dependency.key.origin,
+    }
 
     # Test with missing destination storage name
     mock_config.target_name = None
