@@ -64,13 +64,10 @@ class MigrationApi:
             Optional[StrictStr],
             Field(description='the destination path relative to storage root, by default ""'),
         ] = None,
-        metadata: Annotated[
-            Optional[StrictStr],
-            Field(description="Metadata associated with the migration. Can be Null."),
-        ] = None,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -103,10 +100,9 @@ class MigrationApi:
         path : str
             the destination path relative to storage root, by default
             \"\"
-        metadata : str
-            Metadata associated with the migration. Can be Null.
         authorization : str
             Validated Bearer token with UserInfo
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -140,8 +136,8 @@ class MigrationApi:
             destination_name=destination_name,
             destination_id=destination_id,
             path=path,
-            metadata=metadata,
             authorization=authorization,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -189,13 +185,10 @@ class MigrationApi:
             Optional[StrictStr],
             Field(description='the destination path relative to storage root, by default ""'),
         ] = None,
-        metadata: Annotated[
-            Optional[StrictStr],
-            Field(description="Metadata associated with the migration. Can be Null."),
-        ] = None,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -228,10 +221,9 @@ class MigrationApi:
         path : str
             the destination path relative to storage root, by default
             \"\"
-        metadata : str
-            Metadata associated with the migration. Can be Null.
         authorization : str
             Validated Bearer token with UserInfo
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -265,8 +257,8 @@ class MigrationApi:
             destination_name=destination_name,
             destination_id=destination_id,
             path=path,
-            metadata=metadata,
             authorization=authorization,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -314,13 +306,10 @@ class MigrationApi:
             Optional[StrictStr],
             Field(description='the destination path relative to storage root, by default ""'),
         ] = None,
-        metadata: Annotated[
-            Optional[StrictStr],
-            Field(description="Metadata associated with the migration. Can be Null."),
-        ] = None,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
+        request_body: Optional[Dict[str, Any]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -353,10 +342,9 @@ class MigrationApi:
         path : str
             the destination path relative to storage root, by default
             \"\"
-        metadata : str
-            Metadata associated with the migration. Can be Null.
         authorization : str
             Validated Bearer token with UserInfo
+        request_body : Dict[str, object]
         _request_timeout : int, tuple(int, int), optional
             timeout setting for this request. If one number provided, it
             will be total request timeout. It can also be a pair (tuple)
@@ -390,8 +378,8 @@ class MigrationApi:
             destination_name=destination_name,
             destination_id=destination_id,
             path=path,
-            metadata=metadata,
             authorization=authorization,
+            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -413,8 +401,8 @@ class MigrationApi:
         destination_name,
         destination_id,
         path,
-        metadata,
         authorization,
+        request_body,
         _request_auth,
         _content_type,
         _headers,
@@ -458,19 +446,27 @@ class MigrationApi:
 
             _query_params.append(("path", path))
 
-        if metadata is not None:
-
-            _query_params.append(("metadata", metadata))
-
         # process the header parameters
         if authorization is not None:
             _header_params["authorization"] = authorization
         # process the form parameters
         # process the body parameter
+        if request_body is not None:
+            _body_params = request_body
 
         # set the HTTP header `Accept`
         if "Accept" not in _header_params:
             _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params["Content-Type"] = _content_type
+        else:
+            _default_content_type = self.api_client.select_header_content_type(
+                ["application/json"]
+            )
+            if _default_content_type is not None:
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
         _auth_settings: List[str] = []

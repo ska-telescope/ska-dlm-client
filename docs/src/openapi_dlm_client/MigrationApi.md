@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **copy_data_item**
-> Dict[str, Optional[object]] copy_data_item(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, metadata=metadata, authorization=authorization)
+> Dict[str, Optional[object]] copy_data_item(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, authorization=authorization, request_body=request_body)
 
 Copy Data Item
 
@@ -48,12 +48,12 @@ with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
     destination_name = '' # str | the name of the destination storage volume, by default \"\" (optional) (default to '')
     destination_id = '' # str | the destination storage, by default \"\" (optional) (default to '')
     path = '' # str | the destination path relative to storage root, by default \"\" (optional) (default to '')
-    metadata = 'metadata_example' # str | Metadata associated with the migration. Can be Null. (optional)
     authorization = 'authorization_example' # str | Validated Bearer token with UserInfo (optional)
+    request_body = None # Dict[str, object] |  (optional)
 
     try:
         # Copy Data Item
-        api_response = api_instance.copy_data_item(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, metadata=metadata, authorization=authorization)
+        api_response = api_instance.copy_data_item(item_name=item_name, oid=oid, uid=uid, destination_name=destination_name, destination_id=destination_id, path=path, authorization=authorization, request_body=request_body)
         print("The response of MigrationApi->copy_data_item:\n")
         pprint(api_response)
     except Exception as e:
@@ -73,8 +73,8 @@ Name | Type | Description  | Notes
  **destination_name** | **str**| the name of the destination storage volume, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
  **destination_id** | **str**| the destination storage, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
  **path** | **str**| the destination path relative to storage root, by default \&quot;\&quot; | [optional] [default to &#39;&#39;]
- **metadata** | **str**| Metadata associated with the migration. Can be Null. | [optional] 
  **authorization** | **str**| Validated Bearer token with UserInfo | [optional] 
+ **request_body** | [**Dict[str, object]**](object.md)|  | [optional] 
 
 ### Return type
 
@@ -86,7 +86,7 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 ### HTTP response details

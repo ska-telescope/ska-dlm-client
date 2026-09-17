@@ -230,7 +230,7 @@ class RegistrationProcessor:
         self,
         uid: str,
         item_name: str = "",
-        metadata: Dependency.Key | str | None = None,
+        metadata: Dependency.Key | dict | None = None,
     ) -> str | None:
         """Send migration request to DLM.
 
@@ -263,17 +263,21 @@ class RegistrationProcessor:
             api_migration = migration_api.MigrationApi(migration_api_client)
             api_migration.api_client.configuration.host = migration_configuration.host
 
-            if isinstance(metadata, str) or metadata is None:
+            # Convert metadata objects to a JSON-compatible dict for the API request body:
+            if metadata is None:
+                migration_metadata = None
+            elif isinstance(metadata, dict):
                 migration_metadata = metadata
             else:
-                migration_metadata = json.dumps(vars(metadata))
+                migration_metadata = vars(metadata)
 
             try:
                 # copy_data_item is an async call and returns success in most cases
+                logger.info("DEBUG client metadata before API call: %r", migration_metadata)
                 response = api_migration.copy_data_item(
                     uid=uid,
                     destination_name=destination_storage_name,
-                    metadata=migration_metadata,
+                    request_body=migration_metadata,
                 )
                 logger.debug("Migration response: %s", response)
                 result = str(response)
@@ -356,7 +360,7 @@ class RegistrationProcessor:
             )
 
     def _migrate_item(
-        self, migrate, item, uuid, api_ingest, metadata: Dependency.Key | str | None = None
+        self, migrate, item, uuid, api_ingest, metadata: Dependency.Key | dict | None = None
     ) -> None:
         """Migrate the last registered item."""
         source_name = getattr(self._config, "source_name", None) or getattr(
@@ -435,7 +439,7 @@ class RegistrationProcessor:
         item: Item,
         migrate: bool = True,
         parent_uid: str | None = None,
-        metadata: Dependency.Key | str | None = None,
+        metadata: Dependency.Key | dict | None = None,
     ) -> str | None:
         """Register a single data item with the DLM.
 
@@ -526,7 +530,6 @@ class RegistrationProcessor:
         self,
         item_list: list[Item],
         parent_uid: str | None = None,
-        # metadata: Dependency.Key | str | None = None,
     ) -> None:
         """Register a list of data items with the DLM.
 
@@ -563,7 +566,7 @@ class RegistrationProcessor:
         self,
         absolute_path: str,
         path_rel_to_watch_dir: str,
-        metadata: Dependency.Key | str | None = None,
+        metadata: Dependency.Key | dict | None = None,
     ) -> str | None:
         """Add the given path to the DLM.
 

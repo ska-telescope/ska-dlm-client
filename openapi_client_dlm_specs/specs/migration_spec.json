@@ -253,24 +253,6 @@
                         "description": "the destination path relative to storage root, by default \"\""
                     },
                     {
-                        "name": "metadata",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "anyOf": [
-                                {
-                                    "type": "string"
-                                },
-                                {
-                                    "type": "null"
-                                }
-                            ],
-                            "description": "Metadata associated with the migration. Can be Null.",
-                            "title": "Metadata"
-                        },
-                        "description": "Metadata associated with the migration. Can be Null."
-                    },
-                    {
                         "name": "authorization",
                         "in": "header",
                         "required": false,
@@ -289,6 +271,24 @@
                         "description": "Validated Bearer token with UserInfo"
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "anyOf": [
+                                    {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "title": "Metadata"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Successful Response",
