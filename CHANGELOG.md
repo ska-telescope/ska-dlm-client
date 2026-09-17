@@ -2,8 +2,14 @@
 
 ## Development
 
+### Updated
+
+* OpenAPI specs
+* The configdb watcher now populates the metadata column in the migration table with the Dependency Key.
+
 ### Added
 
+* Metadata field to the migration call for parent data_items.
 * An error if the two watchers are configured to the same directory.
 * A configurable `subPath` for the directory watcher.
 

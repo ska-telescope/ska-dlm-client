@@ -4,11 +4,10 @@
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-instance-attributes
 """Register the given file or directory with the DLM."""
-import json
 import logging
 import os
 import time
-from dataclasses import asdict, dataclass, is_dataclass
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from os.path import isfile
 from pathlib import Path
