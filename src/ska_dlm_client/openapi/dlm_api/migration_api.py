@@ -64,6 +64,12 @@ class MigrationApi:
             Optional[StrictStr],
             Field(description='the destination path relative to storage root, by default ""'),
         ] = None,
+        origin: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="The service that triggered the migration request. Expected values are: configdb-watcher, directory-watcher, heuristics and cli."
+            ),
+        ] = None,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
@@ -100,6 +106,10 @@ class MigrationApi:
         path : str
             the destination path relative to storage root, by default
             \"\"
+        origin : str
+            The service that triggered the migration request. Expected
+            values are: configdb-watcher, directory-watcher, heuristics
+            and cli.
         authorization : str
             Validated Bearer token with UserInfo
         request_body : Dict[str, object]
@@ -136,6 +146,7 @@ class MigrationApi:
             destination_name=destination_name,
             destination_id=destination_id,
             path=path,
+            origin=origin,
             authorization=authorization,
             request_body=request_body,
             _request_auth=_request_auth,
@@ -185,6 +196,12 @@ class MigrationApi:
             Optional[StrictStr],
             Field(description='the destination path relative to storage root, by default ""'),
         ] = None,
+        origin: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="The service that triggered the migration request. Expected values are: configdb-watcher, directory-watcher, heuristics and cli."
+            ),
+        ] = None,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
@@ -221,6 +238,10 @@ class MigrationApi:
         path : str
             the destination path relative to storage root, by default
             \"\"
+        origin : str
+            The service that triggered the migration request. Expected
+            values are: configdb-watcher, directory-watcher, heuristics
+            and cli.
         authorization : str
             Validated Bearer token with UserInfo
         request_body : Dict[str, object]
@@ -257,6 +278,7 @@ class MigrationApi:
             destination_name=destination_name,
             destination_id=destination_id,
             path=path,
+            origin=origin,
             authorization=authorization,
             request_body=request_body,
             _request_auth=_request_auth,
@@ -306,6 +328,12 @@ class MigrationApi:
             Optional[StrictStr],
             Field(description='the destination path relative to storage root, by default ""'),
         ] = None,
+        origin: Annotated[
+            Optional[StrictStr],
+            Field(
+                description="The service that triggered the migration request. Expected values are: configdb-watcher, directory-watcher, heuristics and cli."
+            ),
+        ] = None,
         authorization: Annotated[
             Optional[StrictStr], Field(description="Validated Bearer token with UserInfo")
         ] = None,
@@ -342,6 +370,10 @@ class MigrationApi:
         path : str
             the destination path relative to storage root, by default
             \"\"
+        origin : str
+            The service that triggered the migration request. Expected
+            values are: configdb-watcher, directory-watcher, heuristics
+            and cli.
         authorization : str
             Validated Bearer token with UserInfo
         request_body : Dict[str, object]
@@ -378,6 +410,7 @@ class MigrationApi:
             destination_name=destination_name,
             destination_id=destination_id,
             path=path,
+            origin=origin,
             authorization=authorization,
             request_body=request_body,
             _request_auth=_request_auth,
@@ -401,6 +434,7 @@ class MigrationApi:
         destination_name,
         destination_id,
         path,
+        origin,
         authorization,
         request_body,
         _request_auth,
@@ -445,6 +479,10 @@ class MigrationApi:
         if path is not None:
 
             _query_params.append(("path", path))
+
+        if origin is not None:
+
+            _query_params.append(("origin", origin))
 
         # process the header parameters
         if authorization is not None:

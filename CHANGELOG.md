@@ -9,7 +9,8 @@
 
 ### Added
 
-* Metadata field to the migration call for parent data_items.
+* An `origin` field to the migration call.
+* A `metadata` field to the migration call for parent data_items.
 * An error if the two watchers are configured to the same directory.
 * A configurable `subPath` for the directory watcher.
 
