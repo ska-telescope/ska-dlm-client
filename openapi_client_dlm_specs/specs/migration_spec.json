@@ -7,7 +7,7 @@
             "name": "BSD-3-Clause",
             "identifier": "BSD-3-Clause"
         },
-        "version": "2.1.0"
+        "version": "2.4.0"
     },
     "paths": {
         "/migration/query_migrations": {
@@ -271,6 +271,24 @@
                         "description": "Validated Bearer token with UserInfo"
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "anyOf": [
+                                    {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "title": "Metadata"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Successful Response",

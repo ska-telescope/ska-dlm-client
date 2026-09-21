@@ -1,5 +1,6 @@
 # pylint: disable=invalid-name
 # pylint: disable=protected-access
+# pylint: disable=too-many-locals
 """Main entry-point for Configuration Database watcher."""
 
 import argparse
@@ -9,7 +10,6 @@ import os
 import socket
 from pathlib import Path
 
-import athreading
 import ska_ser_logging
 from ska_sdp_config import Config
 from ska_sdp_config.entity.flow import Dependency, Flow
@@ -17,10 +17,10 @@ from ska_sdp_config.entity.flow import Dependency, Flow
 from ska_dlm_client.config import DIRECTORY_IS_MEASUREMENT_SET_SUFFIX
 from ska_dlm_client.configdb_watcher.config import SdpWatcherConfig, WatcherArgs
 from ska_dlm_client.configdb_watcher.configdb_utils import (
+    aupdate_dependency_state,
     create_sdp_migration_dependency,
     get_pvc_subpath,
     start_rabbitmq_consumer,
-    update_dependency_state,
 )
 from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
 from ska_dlm_client.register_storage_location.main import setup_volume
@@ -72,7 +72,7 @@ def _register_and_migrate_path(
     src_dir: str,
     root_dir: str,
     dataproduct_key: Flow.Key,
-    new_dep: str,
+    new_dep: Dependency,
 ) -> str | None:
     """Register and migrate a whole path.
 
@@ -82,60 +82,52 @@ def _register_and_migrate_path(
         root_dir: The root directory of the source storage.
         dataproduct_key: The Flow.Key of the data product being processed.
         new_dep: The dependency created for this data product.
+        migration_results: Tracker for completed DLM migration results.
 
     Returns:
-        The dependency status.
+        "FAILED" if registration or migration initiation fails,
+        "FINISHED" for register-only operation, or
+        None when a migration has been initiated and its final status will arrive via RabbitMQ.
     """
-    dlm_source_uuid = processor.add_path(
+    dlm_source_uuid = processor.add_path(  # triggers register & migrate
         absolute_path=src_dir,
         path_rel_to_watch_dir=os.path.relpath(src_dir, start=root_dir),
+        metadata=new_dep.key,
     )
-    logger.debug("dlm_source_uuid: %s", dlm_source_uuid)
+    logger.info("Triggering register & migrate for dlm_source_uuid: %s", dlm_source_uuid)
+
+    if dlm_source_uuid is None:  # Registration failed
+        logger.warning(
+            "Registration failed for %s; marking dependency %s as FAILED.",
+            dataproduct_key,
+            new_dep,
+        )
+        return "FAILED"
 
     source_name = getattr(processor._config, "source_name", None)
     target_name = getattr(processor._config, "target_name", None)
     register_only = bool(target_name is None or source_name == target_name)
 
-    if dlm_source_uuid is None:  # Registration failed
-        logger.warning(
-            "DLM registration failed for %s; marking dependency %s as FAILED.",
+    if register_only:  # For register_only we just mark the dep as FINISHED.
+        logger.debug(
+            "Registration succeeded for %s in register-only mode; "
+            "marking dependency %s as FINISHED.",
             dataproduct_key,
             new_dep,
         )
-        dep_status = "FAILED"
-    else:
-        migration_result = processor.last_migration_result  # TODO: DMAN-213
-        logger.debug("migration_result: %s", migration_result)
+        return "FINISHED"
 
-        if migration_result is None:
-            if register_only:
-                logger.debug(
-                    "Registration succeeded for %s in register-only mode; "
-                    "marking dependency %s as FINISHED.",
-                    dataproduct_key,
-                    new_dep,
-                )
-                dep_status = "FINISHED"
-            else:
-                logger.warning(
-                    "Migration failed or was skipped for %s; marking dependency %s as FAILED.",
-                    dataproduct_key,
-                    new_dep,
-                )
-                dep_status = "FAILED"
-        else:
-            logger.debug(
-                "Registration and migration succeeded for %s; "
-                "marking dependency %s as FINISHED.",
-                dataproduct_key,
-                new_dep,
-            )
-            dep_status = "FINISHED"
-    return dep_status
+    logger.debug(
+        "Migration initiated for %s; dependency %s will remain WORKING "
+        "until a RabbitMQ completion message is received.",
+        dataproduct_key,
+        new_dep,
+    )
+
+    return None
 
 
 async def _process_completed_flow(  # noqa: C901
-    # pylint: disable=too-many-locals
     configdb: Config,
     dataproduct_key: Flow.Key,
     config: SdpWatcherConfig,
@@ -144,30 +136,23 @@ async def _process_completed_flow(  # noqa: C901
 
     - Resolve the directory from DataProduct Flow.sink.data_dir.
     - Identify the .ms file(s) in that directory (or one level deeper).
-    - Create a DLM migration Dependency.
+    - Create a DLM migration Dependency and set its state to WORKING.
     - Register data product(s) in DLM.
-    - Migrate the data product(s) to the configured destination storage.
-    - Set Dependency state to WORKING/FINISHED/FAILED depending on outcome.
+    - Initiate migration of the data product(s) to the configured destination storage.
+    - Set the Dependency state to FAILED if registration or migration initiation fails.
+    - Otherwise, leave the Dependency as WORKING until its final state is updated from
+      the migration outcome received via RabbitMQ.
 
     Args:
         configdb: Shared SDP ConfigDB client.
         dataproduct_key: Flow.Key from the related DataProduct Flow.
+        config: Configuration for the ConfigDB watcher.
 
     Notes:
         This implementation processes each derived work directory sequentially.
         If later we want faster throughput, could add bounded concurrency (e.g. 2–4 in-flight).
     """
-    new_dep: Dependency | None = None
-
-    @athreading.call
-    def _aupdate_dependency_state(status: str) -> None:
-        """Async wrapper for updating Dependency state."""
-        for txn in configdb.txn():
-            update_dependency_state(txn, new_dep, status=status)
-            state = txn.dependency.state(new_dep).get()
-            logger.info("Dependency status set to %s.", state.get("status"))
-
-    # Resolve the source directory from the Flow sink
+    # ---- Resolve the source directory from the Flow sink ----
     directory_to_watch = SdpWatcherConfig.directory_to_watch
     source_subpath = get_pvc_subpath(configdb, dataproduct_key)
     source_path_full = Path(directory_to_watch / source_subpath)
@@ -189,7 +174,6 @@ async def _process_completed_flow(  # noqa: C901
         return
 
     processor = RegistrationProcessor(config)
-    processor.last_migration_result = None  # Clear any stale migration result
 
     # ---- Find MS directories (directly or one level deeper) ----
     def iter_ms_dirs_one_level(path: Path):
@@ -228,7 +212,7 @@ async def _process_completed_flow(  # noqa: C901
         return
     logger.debug("New dependency created: %s", new_dep)
 
-    await _aupdate_dependency_state("WORKING")
+    await aupdate_dependency_state(configdb, new_dep.key, "WORKING")
 
     # ---- Process each work directory ----
     any_failed = False
@@ -239,6 +223,7 @@ async def _process_completed_flow(  # noqa: C901
             logger.info("Found the metadata file in %s!", work_dir)
 
         dep_status = _register_and_migrate_path(
+            # Process work directories sequentially within this Flow.
             processor,
             str(work_dir),
             config.directory_to_watch,
@@ -249,8 +234,8 @@ async def _process_completed_flow(  # noqa: C901
             any_failed = True
 
     # ---- Set final dependency state once all MS in the Flow have been attempted ----
-    final_status = "FAILED" if any_failed else "FINISHED"
-    await _aupdate_dependency_state(final_status)
+    if any_failed:
+        await aupdate_dependency_state(configdb, new_dep.key, "FAILED")
 
 
 async def run_configdb_watcher(config: SdpWatcherConfig) -> None:
@@ -279,20 +264,25 @@ async def run_configdb_watcher(config: SdpWatcherConfig) -> None:
         config.target_name,
     )
 
-    # initialise RabbitMQ consumer (WIP)
+    # initialise RabbitMQ consumer
     asyncio.create_task(
-        start_rabbitmq_consumer(config.queue_connection_string, config.queue_exchange_name)
+        start_rabbitmq_consumer(
+            config.queue_connection_string,
+            config.queue_exchange_name,
+            configdb,
+        )
     )
 
     async with watch_dataproduct_status(
         configdb,
         status="COMPLETED",
         include_existing=config.include_existing,
-    ) as producer:  # make the desired status configurable?
+    ) as producer:
         logger.info("Watcher READY and looking for events.")
 
         async for dataproduct_key, _ in producer:
             try:
+                # Process each Flow sequentially. Flow B won't be processed until Flow A is done.
                 await _process_completed_flow(
                     configdb,
                     dataproduct_key,

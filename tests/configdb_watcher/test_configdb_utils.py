@@ -221,6 +221,8 @@ async def test_on_message_received_acknowledges_valid_message() -> None:
     message = mock.MagicMock()
     message.body = json.dumps(
         {
+            "oid": "test-oid",
+            "migration_id": 123,
             "complete": True,
             "job_status": {"success": True},
         }
@@ -228,24 +230,26 @@ async def test_on_message_received_acknowledges_valid_message() -> None:
     message.ack = mock.AsyncMock()
     message.nack = mock.AsyncMock()
 
-    await on_message_received(message)
+    configdb = mock.MagicMock()
+    await on_message_received(message, configdb)
 
     message.ack.assert_awaited_once()
     message.nack.assert_not_awaited()
 
 
 @pytest.mark.asyncio
-async def test_on_message_received_nacks_invalid_message() -> None:
-    """Test that an invalid message is negatively acknowledged."""
+async def test_on_message_received_acknowledges_invalid_message() -> None:
+    """Test that an invalid message is ignored and acknowledged."""
     message = mock.MagicMock()
     message.body = b"not valid JSON"
     message.ack = mock.AsyncMock()
     message.nack = mock.AsyncMock()
 
-    await on_message_received(message)
+    configdb = mock.MagicMock()
+    await on_message_received(message, configdb)
 
-    message.ack.assert_not_awaited()
-    message.nack.assert_awaited_once_with(requeue=True)
+    message.ack.assert_awaited_once()
+    message.nack.assert_not_awaited()
 
 
 @pytest.mark.asyncio
@@ -274,27 +278,30 @@ async def test_start_rabbitmq_consumer_sets_up_consumer() -> None:
         ),
         pytest.raises(asyncio.CancelledError),
     ):
+
+        migration_results = mock.MagicMock()
         await start_rabbitmq_consumer(
             "amqp://guest:guest@rabbitmq/",
             "dlm_exchange",
+            migration_results,
         )
 
     connect_robust.assert_awaited_once_with("amqp://guest:guest@rabbitmq/")
     connection.channel.assert_awaited_once()
     channel.set_qos.assert_awaited_once_with(prefetch_count=10)
-    channel.declare_exchange.assert_awaited_once_with(
-        "dlm_exchange",
-        passive=True,
-    )
-    channel.declare_queue.assert_awaited_once_with(
-        "configdb_watcher_queue",
-        durable=True,
-    )
-    queue.bind.assert_awaited_once_with(
-        exchange,
-        routing_key="dlm.migration.update",
-    )
-    queue.consume.assert_awaited_once_with(
-        on_message_received,
-        no_ack=False,
-    )
+    channel.declare_exchange.assert_awaited_once_with("dlm_exchange", passive=True)
+    channel.declare_queue.assert_awaited_once_with("configdb_watcher_queue", durable=True)
+    queue.bind.assert_awaited_once_with(exchange, routing_key="dlm.migration.update")
+    queue.consume.assert_awaited_once()
+
+    callback = queue.consume.await_args.args[0]
+    assert queue.consume.await_args.kwargs["no_ack"] is False
+
+    message = mock.MagicMock()
+    with mock.patch(
+        "ska_dlm_client.configdb_watcher.configdb_utils.on_message_received",
+        new=mock.AsyncMock(),
+    ) as handler:
+        await callback(message)
+
+    handler.assert_awaited_once_with(message, migration_results)
