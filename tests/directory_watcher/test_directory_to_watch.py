@@ -1,3 +1,4 @@
+# pylint: disable=too-many-arguments, too-many-positional-arguments
 """Tests for directory_to_watch parameter in directory_watcher."""
 
 import os
@@ -78,11 +79,14 @@ class TestDirectoryToWatch:
                 migrate: bool = True,
                 parent_uid: str | None = None,
                 metadata: Dependency.Key | str | None = None,
+                migration_origin: str | None = None,
             ) -> str | None:
                 """Capture the item path that would be registered."""
                 _ = migrate
                 _ = parent_uid
                 _ = metadata
+                _ = migration_origin
+                _ = migration_origin
                 self.register_data_item_args = {
                     "item_name": item.path_rel_to_watch_dir,
                     "uri": item.path_rel_to_watch_dir,
