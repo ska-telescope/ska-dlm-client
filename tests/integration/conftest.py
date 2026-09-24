@@ -195,6 +195,13 @@ def request_configuration(request) -> Configuration:
 
 
 @pytest.fixture(scope="session")
+def migration_configuration(request) -> Configuration:
+    """Migration API client config."""
+    request.getfixturevalue("dlm_service_readiness")
+    return Configuration(host=MIGRATION_URL)
+
+
+@pytest.fixture(scope="session")
 def _configdb_watcher_ready(storage_configuration: Configuration, _common_dlm_endpoints):
     """Wait until the ConfigDB watcher has registered its source storage."""
     with api_client.ApiClient(storage_configuration) as the_api_client:

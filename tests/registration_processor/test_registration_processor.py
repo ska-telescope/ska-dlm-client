@@ -31,11 +31,11 @@ class MockRegistrationProcessor(RegistrationProcessor):
 
     def __init__(self, config):
         """Initialize with default values."""
-        super().__init__(config)
+        super().__init__(config)  # Run the real RegistrationProcessor.__init__()
         self.absolute_path = ""
         self.path_rel_to_watch_dir = ""
 
-    def _get_storage_info_from_name(self, storage_name: str) -> tuple[str, str]:
+    def _get_storage_info_from_name(self, storage_name: str) -> tuple[str, str]:  # mock
         """Return fixed storage info without calling the real helper."""
         return ("test-target", "SOLID")
 
@@ -50,6 +50,8 @@ test_dependency = Dependency(
     expiry_time=-1,
     description="DLM: lock data-product for copy",
 )
+
+test_migration_origin = "test-origin"
 
 
 def returned_items_match(test_path: str, dir_entries: list[Item]):
@@ -127,20 +129,25 @@ def test_generate_dir_item_list(request):
 @pytest.fixture
 def mock_config():
     """Create a mock Config object for testing."""
+    # FAKE WatcherConfig
     config = mock.MagicMock(spec=WatcherConfig)
+
     config.directory_to_watch = "/test/watch/dir"
     config.source_storage = "test-storage"
     config.storage_name = None  # TODO (DMAN-288): fix source_storage/storage_name discrepency
     config.rclone_access_check_on_register = False
     config.target_name = "test-destination-storage"
     config.target_phase = "SOLID"
+
+    # FAKE DirectoryWatcherEntries
     config.directory_watcher_entries = mock.MagicMock(spec=DirectoryWatcherEntries)
+
     config.ingest_url = "http://test-ingest:8000"
     config.storage_url = "http://test-storage:8000"
     config.uid_expiration_days = None
     config.oid_expiration_days = None
 
-    # Use real Configuration instances instead of MagicMocks
+    # Use REAL Configuration instances instead of MagicMocks
     config.ingest_configuration = Configuration(host="http://test-ingest:8000")
     config.storage_configuration = Configuration(host="http://test-storage:8000")
     config.migration_configuration = Configuration(host="http://test-migration:8000")
@@ -335,7 +342,7 @@ def test_registration_processor_register_single_item(
 
     # Test with registration enabled
     with mock.patch.object(processor, "_check_target_storage_access", return_value=True):
-        result = processor._register_single_item(item)
+        result = processor._register_single_item(item, migration_origin=test_migration_origin)
     assert result == "test-uuid"
     mock_ingest_api.return_value.register_data_item.assert_called_once()
     _, kwargs = mock_ingest_api.return_value.register_data_item.call_args
@@ -437,9 +444,10 @@ def test_register_container_items_does_not_pass_dependency_metadata(
     )
 
     with mock.patch.object(processor, "_register_single_item") as mock_register:
-        processor._register_container_items(
+        processor._register_container_items(  # call the real function
             [child_item1, child_item2],
             parent_uid=parent_item.uuid,
+            migration_origin=test_migration_origin,
         )
 
     # Check the first child is registered without a dependency key
@@ -447,6 +455,7 @@ def test_register_container_items_does_not_pass_dependency_metadata(
         item=child_item1,
         migrate=True,
         parent_uid=parent_item.uuid,
+        migration_origin=test_migration_origin,
     )
 
     # Check the second child is registered without a dependency key
@@ -454,6 +463,7 @@ def test_register_container_items_does_not_pass_dependency_metadata(
         item=child_item2,
         migrate=False,
         parent_uid=parent_item.uuid,
+        migration_origin=test_migration_origin,
     )
 
 
@@ -477,17 +487,20 @@ def test_registration_processor_generate_dir_item_list(
     )
     mock_generate.return_value = [file_item]
 
-    processor.add_path("/test/abs/path", "rel/path")
+    processor.add_path("/test/abs/path", "rel/path", migration_origin=test_migration_origin)
     mock_generate.assert_called_once_with(
-        absolute_path="/test/abs/path", path_rel_to_watch_dir="rel/path"
+        absolute_path="/test/abs/path",
+        path_rel_to_watch_dir="rel/path",
     )
     processor._register_single_item.assert_called_once_with(
         file_item,
         metadata=None,
+        migration_origin=test_migration_origin,
     )
     processor._register_container_items.assert_called_once_with(
         item_list=[],
         parent_uid="test-uuid",
+        migration_origin=test_migration_origin,
     )
 
     # Test with a single container item and a Dependency key
@@ -507,15 +520,18 @@ def test_registration_processor_generate_dir_item_list(
         "/test/abs/path",
         "rel/path",
         metadata=test_dependency.key,
+        migration_origin=test_migration_origin,
     )
 
     processor._register_single_item.assert_called_once_with(
         container_item,
         metadata=test_dependency.key,
+        migration_origin=test_migration_origin,
     )
     processor._register_container_items.assert_called_once_with(
         item_list=[],
         parent_uid="test-uuid",
+        migration_origin=test_migration_origin,
     )
 
     # Test with multiple items (container + files)
@@ -549,15 +565,17 @@ def test_registration_processor_generate_dir_item_list(
 
     # Mock time.sleep to avoid waiting
     with mock.patch("time.sleep"):
-        processor.add_path("/test/abs/path", "rel/path")
+        processor.add_path("/test/abs/path", "rel/path", migration_origin=test_migration_origin)
 
     processor._register_single_item.assert_called_once_with(
         container_item,
         metadata=None,
+        migration_origin=test_migration_origin,
     )
     processor._register_container_items.assert_called_once_with(
         item_list=[file_item1, file_item2],
         parent_uid="test-uuid",
+        migration_origin=test_migration_origin,
     )
 
     # Test with no items
@@ -566,7 +584,7 @@ def test_registration_processor_generate_dir_item_list(
     processor._register_container_items.reset_mock()
     mock_generate.return_value = []
 
-    processor.add_path("/test/abs/path", "rel/path")
+    processor.add_path("/test/abs/path", "rel/path", migration_origin=test_migration_origin)
     processor._register_single_item.assert_not_called()
     processor._register_container_items.assert_not_called()
 

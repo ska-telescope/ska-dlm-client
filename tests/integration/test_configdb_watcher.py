@@ -25,7 +25,7 @@ from ska_sdp_config.entity.flow import (
 from ska_dlm_client.common_types import LocationCountry, LocationName, LocationType
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.dlm_api import request_api, storage_api
+from ska_dlm_client.openapi.dlm_api import migration_api, request_api, storage_api
 
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -192,7 +192,10 @@ def test_data_was_copied_correctly(_configdb_watcher_ready, _common_dlm_endpoint
 @pytest.mark.asyncio
 @pytest.mark.integration
 async def test_configdb_watcher(
-    request_configuration: Configuration, _configdb_watcher_ready, _common_dlm_endpoints
+    request_configuration: Configuration,
+    migration_configuration: Configuration,
+    _configdb_watcher_ready,
+    _common_dlm_endpoints,
 ):
     """Flow points to subfolder scan90-99, containing 10 MS files."""
     # Trigger COMPLETED Flow pointing directly at scan90-99
@@ -210,13 +213,20 @@ async def test_configdb_watcher(
         for i in range(90, 100)
     ]
 
+    # assert each data_item is in source and destination:
     with api_client.ApiClient(request_configuration) as the_api_client:
         api_request = request_api.RequestApi(the_api_client)
 
         for item_name in expected_items:
             resp = api_request.query_data_item(item_name=item_name)
-            # assert each data_item is in source and destination:
             assert len(resp) == 2, f"Expected 2 entries for {item_name}, got {len(resp)}"
+
+    # Check that the dlm.migration `origin` column was populated:
+    with api_client.ApiClient(migration_configuration) as the_api_client:
+        api_migration = migration_api.MigrationApi(the_api_client)
+        migrations = api_migration.query_migrations()
+        assert migrations
+        assert all(migration["origin"] == "configdb-watcher" for migration in migrations)
 
 
 @pytest.mark.asyncio
