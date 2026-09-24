@@ -253,6 +253,24 @@
                         "description": "the destination path relative to storage root, by default \"\""
                     },
                     {
+                        "name": "origin",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The service that triggered the migration request. Expected values are: configdb-watcher,\ndirectory-watcher, heuristics and cli.",
+                            "title": "Origin"
+                        },
+                        "description": "The service that triggered the migration request. Expected values are: configdb-watcher,\ndirectory-watcher, heuristics and cli."
+                    },
+                    {
                         "name": "authorization",
                         "in": "header",
                         "required": false,
