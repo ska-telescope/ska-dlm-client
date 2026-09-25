@@ -168,6 +168,7 @@ class MockRegistrationProcessor(RegistrationProcessor):
         absolute_path: str,
         path_rel_to_watch_dir: str,
         metadata: Dependency.Key | str | None = None,
+        migration_origin: str | None = None,
     ):
         """Perform testing on the given paths."""
         self.absolute_path = absolute_path

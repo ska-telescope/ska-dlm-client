@@ -93,6 +93,7 @@ def _register_and_migrate_path(
         absolute_path=src_dir,
         path_rel_to_watch_dir=os.path.relpath(src_dir, start=root_dir),
         metadata=new_dep.key,
+        migration_origin="configdb-watcher",
     )
     logger.info("Triggering register & migrate for dlm_source_uuid: %s", dlm_source_uuid)
 

@@ -1,3 +1,4 @@
+# pylint: disable=too-many-arguments, too-many-positional-arguments
 """Tests for directory_to_watch parameter in directory_watcher."""
 
 import os
@@ -12,7 +13,7 @@ from ska_dlm_client.registration_processor import Item, RegistrationProcessor
 
 
 class TestDirectoryToWatch:
-    """Test class for directory_to_watch parameter."""
+    """Tests for registration from the configured watch directory."""
 
     SOURCE_NAME = "test-storage"
     INGEST_URL = os.getenv("INGEST_URL", "http://localhost:8001")
@@ -78,14 +79,16 @@ class TestDirectoryToWatch:
                 migrate: bool = True,
                 parent_uid: str | None = None,
                 metadata: Dependency.Key | str | None = None,
+                migration_origin: str | None = None,
             ) -> str | None:
-                """Capture the item path that would be registered."""
-                _ = migrate
-                _ = parent_uid
-                _ = metadata
+                """Capture the registration arguments for testing."""
                 self.register_data_item_args = {
                     "item_name": item.path_rel_to_watch_dir,
                     "uri": item.path_rel_to_watch_dir,
+                    "migrate": migrate,
+                    "parent_uid": parent_uid,
+                    "metadata": metadata,
+                    "migration_origin": migration_origin,
                 }
                 return "test-uuid"
 
@@ -100,14 +103,18 @@ class TestDirectoryToWatch:
         # Create a registration processor with our config
         processor = MockRegistrationProcessor(config)
 
-        # Register the test file
-        processor.add_path(absolute_path=test_file_path, path_rel_to_watch_dir=test_file_name)
+        # Register the test file (real add_path call)
+        processor.add_path(
+            absolute_path=test_file_path,
+            path_rel_to_watch_dir=test_file_name,
+            migration_origin="test-migration-origin",
+        )
 
         assert processor.register_data_item_args is not None
-
-        expected_uri = test_file_name
-        assert processor.register_data_item_args["uri"] == expected_uri
+        assert processor.register_data_item_args["uri"] == test_file_name
         assert processor.register_data_item_args["item_name"] == test_file_name
+        assert processor.register_data_item_args["migration_origin"] == "test-migration-origin"
+        assert processor.register_data_item_args["metadata"] is None
 
         # Clean up
         os.remove(test_file_path)

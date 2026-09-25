@@ -230,6 +230,7 @@ class RegistrationProcessor:
         uid: str,
         item_name: str = "",
         metadata: Dependency.Key | dict | None = None,
+        migration_origin: str | None = None,
     ) -> str | None:
         """Send migration request to DLM.
 
@@ -237,6 +238,7 @@ class RegistrationProcessor:
             uid: The unique identifier of the data item to copy.
             item_name: The name of the item (only used for a log message)
             metadata: Optional metadata associated with the migration, e.g. Dependency key.
+            migration_origin: The service that triggered the migration request.
 
         Returns:
             The UUID of the migrated data item, or None if migration was skipped or failed.
@@ -272,11 +274,11 @@ class RegistrationProcessor:
 
             try:
                 # copy_data_item is an async call and returns success in most cases
-                logger.info("DEBUG client metadata before API call: %r", migration_metadata)
                 response = api_migration.copy_data_item(
                     uid=uid,
                     destination_name=destination_storage_name,
                     request_body=migration_metadata,
+                    origin=migration_origin,
                 )
                 logger.debug("Migration response: %s", response)
                 result = str(response)
@@ -359,7 +361,13 @@ class RegistrationProcessor:
             )
 
     def _migrate_item(
-        self, migrate, item, uuid, api_ingest, metadata: Dependency.Key | dict | None = None
+        self,
+        migrate,
+        item,
+        uuid,
+        api_ingest,
+        metadata: Dependency.Key | dict | None = None,
+        migration_origin: str | None = None,
     ) -> None:
         """Migrate the last registered item."""
         source_name = getattr(self._config, "source_name", None) or getattr(
@@ -377,6 +385,7 @@ class RegistrationProcessor:
                 uid=uuid,
                 item_name=item.path_rel_to_watch_dir,
                 metadata=metadata,
+                migration_origin=migration_origin,
             )
             self.last_migration_result = migration_result
             self._bookkeeping_after_registration(
@@ -439,6 +448,7 @@ class RegistrationProcessor:
         migrate: bool = True,
         parent_uid: str | None = None,
         metadata: Dependency.Key | dict | None = None,
+        migration_origin: str | None = None,
     ) -> str | None:
         """Register a single data item with the DLM.
 
@@ -454,6 +464,8 @@ class RegistrationProcessor:
                 but not each item individually in addition.
             metadata:
                 Optional metadata associated with the migration, e.g. Dependency key.
+            migration_origin:
+                The service that triggered the migration request.
 
         Returns:
             The UUID of the registered data item, or None if registration failed.
@@ -522,6 +534,7 @@ class RegistrationProcessor:
                     uuid=dlm_registration_uuid,
                     api_ingest=api_ingest,
                     metadata=metadata,
+                    migration_origin=migration_origin,
                 )
         return dlm_registration_uuid
 
@@ -529,6 +542,7 @@ class RegistrationProcessor:
         self,
         item_list: list[Item],
         parent_uid: str | None = None,
+        migration_origin: str | None = None,
     ) -> None:
         """Register a list of data items with the DLM.
 
@@ -538,6 +552,7 @@ class RegistrationProcessor:
         Args:
             item_list: A list of data items to register with the DLM.
             parent_uid: The unique identifier of the parent item, if applicable.
+            migration_origin: The service that triggered the migration request.
         """
         source_name = getattr(self._config, "source_name", None)
         target_name = getattr(self._config, "target_name", None)
@@ -555,8 +570,11 @@ class RegistrationProcessor:
                 source_name,
             )
         for item in item_list:
-            _ = self._register_single_item(  # child items do not inherit the dep key
-                item=item, migrate=migrate, parent_uid=parent_uid
+            _ = self._register_single_item(  # child items do not inherit migration metadata
+                item=item,
+                migrate=migrate,
+                parent_uid=parent_uid,
+                migration_origin=migration_origin,
             )
             migrate = False  # Only the top-level container item triggers migration
             time.sleep(0.01)
@@ -566,6 +584,7 @@ class RegistrationProcessor:
         absolute_path: str,
         path_rel_to_watch_dir: str,
         metadata: Dependency.Key | dict | None = None,
+        migration_origin: str | None = None,
     ) -> str | None:
         """Add the given path to the DLM.
 
@@ -581,6 +600,8 @@ class RegistrationProcessor:
         Args:
             absolute_path: The absolute path to the file or directory to register.
             path_rel_to_watch_dir: The path relative to the watch directory.
+            metadata: Optional metadata associated with the migration, e.g. Dependency key.
+            migration_origin: The service that triggered the migration request.
         """
         item_list = _generate_dir_item_list(
             absolute_path=absolute_path, path_rel_to_watch_dir=path_rel_to_watch_dir
@@ -591,10 +612,14 @@ class RegistrationProcessor:
         logger.debug("Items identified in %s: %s", absolute_path, item_list)
         # Register the container directory first so that its uuid can be used for the files.
         parent_item = item_list[0]
-        parent_uuid = self._register_single_item(parent_item, metadata=metadata)
+        parent_uuid = self._register_single_item(
+            parent_item, metadata=metadata, migration_origin=migration_origin
+        )
         time.sleep(1)
         item_list.remove(parent_item)
-        self._register_container_items(item_list=item_list, parent_uid=parent_uuid)
+        self._register_container_items(
+            item_list=item_list, parent_uid=parent_uuid, migration_origin=migration_origin
+        )
         logger.debug(
             "Finished adding %s",
             (
