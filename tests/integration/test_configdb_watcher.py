@@ -221,12 +221,21 @@ async def test_configdb_watcher(
             resp = api_request.query_data_item(item_name=item_name)
             assert len(resp) == 2, f"Expected 2 entries for {item_name}, got {len(resp)}"
 
-    # Check that the dlm.migration `origin` column was populated:
+    expected_metadata = {
+        "kind": "dlm-copy",
+        "name": flow_name,
+        "pb_id": PB_ID,
+        "origin": "ska-data-lifecycle-management",
+    }
+
+    # Check that the dlm.migration `origin` column was populated.
+    # Use parent data_item for the check.
     with api_client.ApiClient(migration_configuration) as the_api_client:
         api_migration = migration_api.MigrationApi(the_api_client)
         migrations = api_migration.query_migrations()
-        assert migrations
-        assert all(migration["origin"] == "configdb-watcher" for migration in migrations)
+
+        migration = next(m for m in migrations if m["metadata"] == expected_metadata)
+        assert migration["origin"] == "configdb-watcher"
 
 
 @pytest.mark.asyncio
