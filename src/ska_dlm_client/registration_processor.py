@@ -23,6 +23,7 @@ from ska_dlm_client.directory_watcher.directory_watcher_entries import Directory
 from ska_dlm_client.openapi import ApiException, api_client
 from ska_dlm_client.openapi.dlm_api import ingest_api, migration_api, request_api, storage_api
 from ska_dlm_client.openapi.exceptions import OpenApiException
+from ska_dlm_client.openapi.models.update_data_item_request import UpdateDataItemRequest
 
 logger = logging.getLogger(__name__)
 
@@ -204,7 +205,6 @@ class RegistrationProcessor:
             "uri": str(item.path_rel_to_watch_dir),
             "item_type": item.item_type,
             "storage_name": storage_name,
-            "parents": item.parent_uid,
             "item_size": item.item_size,
             "decompressed_size": item.decompressed_size,
             "do_storage_access_check": do_storage_access_check,
@@ -471,6 +471,7 @@ class RegistrationProcessor:
             The UUID of the registered data item, or None if registration failed.
         """
         cfg = self._config
+        item.uuid = None
 
         rclone_access_check_on_register = getattr(cfg, "rclone_access_check_on_register", False)
 
@@ -513,6 +514,7 @@ class RegistrationProcessor:
                 response = api_ingest.register_data_item(**register_kwargs)
                 logger.debug("register_data_item response: %s", response)
                 dlm_registration_uuid = str(response) if response is not None else None
+                item.uuid = dlm_registration_uuid
             except OpenApiException as err:
                 logger.error("OpenApiException caught during data item registration")
                 if isinstance(err, ApiException):
@@ -569,15 +571,66 @@ class RegistrationProcessor:
                 "Migration is disabled since target is either undefined or the same as source %s",
                 source_name,
             )
+        children_by_parent: dict[str, list[str]] = {}
         for item in item_list:
-            _ = self._register_single_item(  # child items do not inherit migration metadata
-                item=item,
-                migrate=migrate,
-                parent_uid=parent_uid,
-                migration_origin=migration_origin,
+            item_parent_uid = item.parent.uuid if item.parent is not None else parent_uid
+            item.uuid = None
+            registration_uuid = (
+                self._register_single_item(  # child items do not inherit migration metadata
+                    item=item,
+                    migrate=migrate,
+                    parent_uid=item_parent_uid,
+                    migration_origin=migration_origin,
+                )
             )
+            if registration_uuid is not None:
+                item.uuid = registration_uuid
+            if item.uuid is not None and item_parent_uid is not None:
+                children_by_parent.setdefault(item_parent_uid, []).append(item.uuid)
             migrate = False  # Only the top-level container item triggers migration
             time.sleep(0.01)
+
+        self._associate_container_children(children_by_parent)
+
+    def _associate_container_children(self, children_by_parent: dict[str, list[str]]) -> None:
+        """Persist successfully registered child associations for each container."""
+        if not children_by_parent:
+            return
+
+        ingest_configuration = getattr(self._config, "ingest_configuration", None)
+        ingest_url = getattr(self._config, "ingest_url", None)
+        if ingest_configuration is None or ingest_url is None:
+            logger.error(
+                "Cannot associate container children: ingest configuration or URL is missing"
+            )
+            return
+
+        with api_client.ApiClient(ingest_configuration) as ingest_api_client:
+            api_ingest = ingest_api.IngestApi(ingest_api_client)
+            api_ingest.api_client.configuration.host = ingest_url
+            for container_uid, child_uids in children_by_parent.items():
+                request = UpdateDataItemRequest(
+                    parent_data_item_uid=container_uid,
+                    children=child_uids,
+                )
+                try:
+                    response = api_ingest.update_data_item(
+                        update_data_item_request=request,
+                    )
+                    logger.debug(
+                        "Associated children %s with container %s: %s",
+                        child_uids,
+                        container_uid,
+                        response,
+                    )
+                except OpenApiException as err:
+                    logger.error(
+                        "OpenApiException caught while associating children with container %s",
+                        container_uid,
+                    )
+                    if isinstance(err, ApiException):
+                        logger.error("ApiException: %s", err.body)
+                    logger.error("%s", err)
 
     def add_path(
         self,
