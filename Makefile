@@ -32,7 +32,7 @@ python-post-test: docker-compose-down
 extract-test-data:
 	./extract_data.sh
 
-integration-test: test-cleanup extract-test-data docker-compose-up run-integration-test
+integration-test: test-cleanup extract-test-data docker-compose-up run-integration-test docker-compose-down test-cleanup
 
 integration-test-keep: test-cleanup extract-test-data docker-compose-up run-integration-test
 
