@@ -3,6 +3,7 @@
 # pylint: disable=unused-argument
 """Registration processor related tests."""
 
+import logging
 import os
 from datetime import datetime, timedelta
 from unittest import mock
@@ -15,6 +16,7 @@ from ska_dlm_client.directory_watcher.config import WatcherConfig
 from ska_dlm_client.directory_watcher.directory_watcher_entries import DirectoryWatcherEntries
 from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.openapi.exceptions import OpenApiException
+from ska_dlm_client.openapi.models.update_data_item_request import UpdateDataItemRequest
 from ska_dlm_client.registration_processor import (
     Item,
     ItemType,
@@ -337,13 +339,18 @@ def test_registration_processor_register_single_item(
         path_rel_to_watch_dir="test-item",
         item_type=ItemType.FILE,
         metadata=mock_data_product_metadata.return_value,
-        parent_uid=None,
+        parent_uid="00000000-0000-0000-0000-000000000001",
     )
 
     # Test with registration enabled
     with mock.patch.object(processor, "_check_target_storage_access", return_value=True):
-        result = processor._register_single_item(item, migration_origin=test_migration_origin)
+        result = processor._register_single_item(
+            item,
+            parent_uid="00000000-0000-0000-0000-000000000001",
+            migration_origin=test_migration_origin,
+        )
     assert result == "test-uuid"
+    assert item.uuid == "test-uuid"
     mock_ingest_api.return_value.register_data_item.assert_called_once()
     _, kwargs = mock_ingest_api.return_value.register_data_item.call_args
 
@@ -353,6 +360,7 @@ def test_registration_processor_register_single_item(
     assert kwargs["storage_name"] == mock_config.source_name
     assert kwargs["do_storage_access_check"] == mock_config.rclone_access_check_on_register
     assert kwargs["request_body"] == item.metadata.as_dict()
+    assert "parents" not in kwargs
 
     now = datetime.now()
     delta_uid = kwargs["uid_expiration"] - now
@@ -385,7 +393,7 @@ def test_registration_processor_register_container_items(
         item_type=ItemType.CONTAINER,
         metadata=mock_data_product_metadata.return_value,
     )
-    parent_item.uuid = "parent-uuid"
+    parent_item.uuid = "00000000-0000-0000-0000-000000000001"
 
     # Create child items
     child_item1 = Item(
@@ -393,7 +401,7 @@ def test_registration_processor_register_container_items(
         item_type=ItemType.FILE,
         metadata=None,
         parent=parent_item,
-        parent_uid="test-uuid",
+        parent_uid=parent_item.uuid,
     )
 
     child_item2 = Item(
@@ -401,22 +409,114 @@ def test_registration_processor_register_container_items(
         item_type=ItemType.FILE,
         metadata=None,
         parent=parent_item,
-        parent_uid="test-uuid",
+        parent_uid=parent_item.uuid,
     )
 
     # Test child item registration
+    mock_ingest_api.return_value.register_data_item.side_effect = [
+        "00000000-0000-0000-0000-000000000002",
+        "00000000-0000-0000-0000-000000000003",
+    ]
     processor._register_container_items([child_item1, child_item2], parent_uid=parent_item.uuid)
     assert mock_ingest_api.return_value.register_data_item.call_count == 2
+    mock_ingest_api.return_value.update_data_item.assert_called_once_with(
+        update_data_item_request=UpdateDataItemRequest(
+            parent_data_item_uid=parent_item.uuid,
+            children=[
+                "00000000-0000-0000-0000-000000000002",
+                "00000000-0000-0000-0000-000000000003",
+            ],
+        )
+    )
 
     # Test with API exception
     mock_ingest_api.reset_mock()
-    mock_ingest_api.return_value.register_data_item.side_effect = OpenApiException("Test error")
+    mock_ingest_api.return_value.register_data_item.side_effect = [
+        "00000000-0000-0000-0000-000000000002",
+        OpenApiException("Test error"),
+    ]
     processor._register_container_items([child_item1, child_item2], parent_uid=parent_item.uuid)
     assert mock_ingest_api.return_value.register_data_item.call_count == 2
+    mock_ingest_api.return_value.update_data_item.assert_called_once_with(
+        update_data_item_request=UpdateDataItemRequest(
+            parent_data_item_uid=parent_item.uuid,
+            children=["00000000-0000-0000-0000-000000000002"],
+        )
+    )
+
+
+def test_container_children(
+    mock_config,
+    mock_ingest_api,
+    caplog,
+):
+    """Associate direct children with each container, continuing after API errors."""
+    processor = MockRegistrationProcessor(mock_config)
+
+    parent_item = Item(
+        path_rel_to_watch_dir="parent-item",
+        item_type=ItemType.CONTAINER,
+        metadata=None,
+    )
+    parent_item.uuid = "00000000-0000-0000-0000-000000000001"
+    nested_container = Item(
+        path_rel_to_watch_dir="parent-item/nested",
+        item_type=ItemType.CONTAINER,
+        metadata=None,
+        parent=parent_item,
+    )
+    root_child = Item(
+        path_rel_to_watch_dir="parent-item/file",
+        item_type=ItemType.FILE,
+        metadata=None,
+        parent=parent_item,
+    )
+    nested_child = Item(
+        path_rel_to_watch_dir="parent-item/nested/file",
+        item_type=ItemType.FILE,
+        metadata=None,
+        parent=nested_container,
+    )
+
+    mock_ingest_api.return_value.register_data_item.side_effect = [
+        "00000000-0000-0000-0000-000000000002",
+        "00000000-0000-0000-0000-000000000003",
+        "00000000-0000-0000-0000-000000000004",
+    ]
+    mock_ingest_api.return_value.update_data_item.side_effect = OpenApiException(
+        "Association failed"
+    )
+
+    with caplog.at_level(logging.ERROR):
+        processor._register_container_items(
+            [nested_container, root_child, nested_child],
+            parent_uid=parent_item.uuid,
+        )
+
+    assert mock_ingest_api.return_value.update_data_item.call_args_list == [
+        mock.call(
+            update_data_item_request=UpdateDataItemRequest(
+                parent_data_item_uid=parent_item.uuid,
+                children=[
+                    "00000000-0000-0000-0000-000000000002",
+                    "00000000-0000-0000-0000-000000000003",
+                ],
+            )
+        ),
+        mock.call(
+            update_data_item_request=UpdateDataItemRequest(
+                parent_data_item_uid="00000000-0000-0000-0000-000000000002",
+                children=["00000000-0000-0000-0000-000000000004"],
+            )
+        ),
+    ]
+    assert mock_ingest_api.return_value.register_data_item.call_count == 3
+    assert "Association failed" in caplog.text
 
 
 def test_register_container_items_does_not_pass_dependency_metadata(
     mock_config,
+    mock_ingest_api,
     mock_data_product_metadata,
 ):
     """Child items should not inherit the parent dependency key."""
@@ -427,7 +527,7 @@ def test_register_container_items_does_not_pass_dependency_metadata(
         item_type=ItemType.CONTAINER,
         metadata=mock_data_product_metadata.return_value,
     )
-    parent_item.uuid = "parent-uuid"
+    parent_item.uuid = "00000000-0000-0000-0000-000000000001"
 
     child_item1 = Item(
         path_rel_to_watch_dir="child-item1",
@@ -444,6 +544,10 @@ def test_register_container_items_does_not_pass_dependency_metadata(
     )
 
     with mock.patch.object(processor, "_register_single_item") as mock_register:
+        mock_register.side_effect = [
+            "00000000-0000-0000-0000-000000000002",
+            "00000000-0000-0000-0000-000000000003",
+        ]
         processor._register_container_items(  # call the real function
             [child_item1, child_item2],
             parent_uid=parent_item.uuid,
