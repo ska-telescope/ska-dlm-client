@@ -15,4 +15,7 @@ Do not edit the class manually.
 # import models into model package
 from ska_dlm_client.openapi.models.http_validation_error import HTTPValidationError
 from ska_dlm_client.openapi.models.location_inner import LocationInner
+from ska_dlm_client.openapi.models.storage_endpoint import StorageEndpoint
+from ska_dlm_client.openapi.models.update_data_item_request import UpdateDataItemRequest
+from ska_dlm_client.openapi.models.update_data_item_response import UpdateDataItemResponse
 from ska_dlm_client.openapi.models.validation_error import ValidationError

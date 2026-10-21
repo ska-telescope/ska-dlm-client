@@ -40,6 +40,13 @@ class TestIngestApi(unittest.TestCase):
         """
         pass
 
+    def test_update_data_item_children(self) -> None:
+        """Test case for update_data_item_children
+
+        Update Data Item Children
+        """
+        pass
+
 
 if __name__ == "__main__":
     unittest.main()

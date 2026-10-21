@@ -6,6 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**init_data_item**](IngestApi.md#init_data_item) | **POST** /ingest/init_data_item | Init Data Item
 [**register_data_item**](IngestApi.md#register_data_item) | **POST** /ingest/register_data_item | Register Data Item
+[**update_data_item_children**](IngestApi.md#update_data_item_children) | **POST** /ingest/update_data_item_children | Update Data Item Children
 
 
 # **init_data_item**
@@ -170,6 +171,76 @@ Name | Type | Description  | Notes
 ### Return type
 
 **str**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **update_data_item_children**
+> UpdateDataItemResponse update_data_item_children(update_data_item_request)
+
+Update Data Item Children
+
+Add child data items to a parent without duplicating existing associations.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.models.update_data_item_request import UpdateDataItemRequest
+from ska_dlm_client.openapi.models.update_data_item_response import UpdateDataItemResponse
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.IngestApi(api_client)
+    update_data_item_request = ska_dlm_client.openapi.UpdateDataItemRequest() # UpdateDataItemRequest | 
+
+    try:
+        # Update Data Item Children
+        api_response = api_instance.update_data_item_children(update_data_item_request)
+        print("The response of IngestApi->update_data_item_children:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling IngestApi->update_data_item_children: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **update_data_item_request** | [**UpdateDataItemRequest**](UpdateDataItemRequest.md)|  | 
+
+### Return type
+
+[**UpdateDataItemResponse**](UpdateDataItemResponse.md)
 
 ### Authorization
 

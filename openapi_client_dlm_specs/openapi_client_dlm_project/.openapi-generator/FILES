@@ -11,6 +11,9 @@ docs/LocationInner.md
 docs/MigrationApi.md
 docs/RequestApi.md
 docs/StorageApi.md
+docs/StorageEndpoint.md
+docs/UpdateDataItemRequest.md
+docs/UpdateDataItemResponse.md
 docs/ValidationError.md
 git_push.sh
 pyproject.toml
@@ -26,6 +29,9 @@ ska_dlm_client/openapi/exceptions.py
 ska_dlm_client/openapi/models/__init__.py
 ska_dlm_client/openapi/models/http_validation_error.py
 ska_dlm_client/openapi/models/location_inner.py
+ska_dlm_client/openapi/models/storage_endpoint.py
+ska_dlm_client/openapi/models/update_data_item_request.py
+ska_dlm_client/openapi/models/update_data_item_response.py
 ska_dlm_client/openapi/models/validation_error.py
 ska_dlm_client/openapi/py.typed
 ska_dlm_client/openapi/rest.py
@@ -44,5 +50,8 @@ test/test_location_inner.py
 test/test_migration_api.py
 test/test_request_api.py
 test/test_storage_api.py
+test/test_storage_endpoint.py
+test/test_update_data_item_request.py
+test/test_update_data_item_response.py
 test/test_validation_error.py
 tox.ini

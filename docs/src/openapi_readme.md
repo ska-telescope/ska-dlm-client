@@ -91,9 +91,11 @@ Class | Method | HTTP request | Description
 *GatewayApi* | [**token_by_username_password_token_by_username_password_get**](openapi_dlm_client/GatewayApi.md#token_by_username_password_token_by_username_password_get) | **GET** /token_by_username_password | Token By Username Password
 *IngestApi* | [**init_data_item**](openapi_dlm_client/IngestApi.md#init_data_item) | **POST** /ingest/init_data_item | Init Data Item
 *IngestApi* | [**register_data_item**](openapi_dlm_client/IngestApi.md#register_data_item) | **POST** /ingest/register_data_item | Register Data Item
+*IngestApi* | [**update_data_item_children**](openapi_dlm_client/IngestApi.md#update_data_item_children) | **POST** /ingest/update_data_item_children | Update Data Item Children
 *MigrationApi* | [**copy_data_item**](openapi_dlm_client/MigrationApi.md#copy_data_item) | **POST** /migration/copy_data_item | Copy Data Item
 *MigrationApi* | [**get_migration_record**](openapi_dlm_client/MigrationApi.md#get_migration_record) | **GET** /migration/get_migration | Get Migration Record
 *MigrationApi* | [**query_migrations**](openapi_dlm_client/MigrationApi.md#query_migrations) | **GET** /migration/query_migrations | Query Migrations
+*RequestApi* | [**get_data_item**](openapi_dlm_client/RequestApi.md#get_data_item) | **GET** /request/get_data_item | Get Data Item
 *RequestApi* | [**query_data_item**](openapi_dlm_client/RequestApi.md#query_data_item) | **GET** /request/query_data_item | Query Data Item
 *RequestApi* | [**query_deleted**](openapi_dlm_client/RequestApi.md#query_deleted) | **GET** /request/query_deleted | Query Deleted
 *RequestApi* | [**query_exists**](openapi_dlm_client/RequestApi.md#query_exists) | **GET** /request/query_exists | Query Exists
@@ -117,6 +119,7 @@ Class | Method | HTTP request | Description
 *StorageApi* | [**create_storage_config**](openapi_dlm_client/StorageApi.md#create_storage_config) | **POST** /storage/create_storage_config | Create Storage Config
 *StorageApi* | [**get_ssh_public_key**](openapi_dlm_client/StorageApi.md#get_ssh_public_key) | **GET** /storage/get_ssh_public_key | Get Ssh Public Key
 *StorageApi* | [**get_storage_config**](openapi_dlm_client/StorageApi.md#get_storage_config) | **GET** /storage/get_storage_config | Get Storage Config
+*StorageApi* | [**get_storage_endpoints**](openapi_dlm_client/StorageApi.md#get_storage_endpoints) | **GET** /storage/get_storage_endpoints | Get Storage Endpoints
 *StorageApi* | [**init_location**](openapi_dlm_client/StorageApi.md#init_location) | **POST** /storage/init_location | Init Location
 *StorageApi* | [**init_storage**](openapi_dlm_client/StorageApi.md#init_storage) | **POST** /storage/init_storage | Init Storage
 *StorageApi* | [**query_location**](openapi_dlm_client/StorageApi.md#query_location) | **GET** /storage/query_location | Query Location
@@ -130,6 +133,9 @@ Class | Method | HTTP request | Description
 
  - [HTTPValidationError](openapi_dlm_client/HTTPValidationError.md)
  - [LocationInner](openapi_dlm_client/LocationInner.md)
+ - [StorageEndpoint](openapi_dlm_client/StorageEndpoint.md)
+ - [UpdateDataItemRequest](openapi_dlm_client/UpdateDataItemRequest.md)
+ - [UpdateDataItemResponse](openapi_dlm_client/UpdateDataItemResponse.md)
  - [ValidationError](openapi_dlm_client/ValidationError.md)
 
 

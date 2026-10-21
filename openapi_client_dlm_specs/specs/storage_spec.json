@@ -36,6 +36,32 @@
                 }
             }
         },
+        "/storage/get_storage_endpoints": {
+            "get": {
+                "summary": "Get Storage Endpoints",
+                "tags": [
+                    "storage"
+                ],
+                "description": "Return all storage entries as typed endpoint models.",
+                "operationId": "get_storage_endpoints",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/StorageEndpoint"
+                                    },
+                                    "type": "array",
+                                    "title": "Response Get Storage Endpoints"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/storage/get_ssh_public_key": {
             "get": {
                 "summary": "Get Ssh Public Key",
@@ -888,6 +914,25 @@
                 ],
                 "title": "PhaseType",
                 "description": "Phase type / resilience level."
+            },
+            "StorageEndpoint": {
+                "properties": {
+                    "storage_id": {
+                        "type": "string",
+                        "title": "Storage Id"
+                    },
+                    "storage_name": {
+                        "type": "string",
+                        "title": "Storage Name"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "storage_id",
+                    "storage_name"
+                ],
+                "title": "StorageEndpoint",
+                "description": "Storage endpoint fields exposed by the storage API."
             },
             "StorageInterface": {
                 "type": "string",
