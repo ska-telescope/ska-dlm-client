@@ -614,7 +614,7 @@ class RegistrationProcessor:
                     children=child_uids,
                 )
                 try:
-                    response = api_ingest.update_data_item(
+                    response = api_ingest.update_data_item_children(
                         update_data_item_request=request,
                     )
                     logger.debug(

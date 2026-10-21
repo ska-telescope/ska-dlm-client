@@ -419,7 +419,7 @@ def test_registration_processor_register_container_items(
     ]
     processor._register_container_items([child_item1, child_item2], parent_uid=parent_item.uuid)
     assert mock_ingest_api.return_value.register_data_item.call_count == 2
-    mock_ingest_api.return_value.update_data_item.assert_called_once_with(
+    mock_ingest_api.return_value.update_data_item_children.assert_called_once_with(
         update_data_item_request=UpdateDataItemRequest(
             parent_data_item_uid=parent_item.uuid,
             children=[
@@ -437,7 +437,7 @@ def test_registration_processor_register_container_items(
     ]
     processor._register_container_items([child_item1, child_item2], parent_uid=parent_item.uuid)
     assert mock_ingest_api.return_value.register_data_item.call_count == 2
-    mock_ingest_api.return_value.update_data_item.assert_called_once_with(
+    mock_ingest_api.return_value.update_data_item_children.assert_called_once_with(
         update_data_item_request=UpdateDataItemRequest(
             parent_data_item_uid=parent_item.uuid,
             children=["00000000-0000-0000-0000-000000000002"],
@@ -483,7 +483,7 @@ def test_container_children(
         "00000000-0000-0000-0000-000000000003",
         "00000000-0000-0000-0000-000000000004",
     ]
-    mock_ingest_api.return_value.update_data_item.side_effect = OpenApiException(
+    mock_ingest_api.return_value.update_data_item_children.side_effect = OpenApiException(
         "Association failed"
     )
 
@@ -493,7 +493,7 @@ def test_container_children(
             parent_uid=parent_item.uuid,
         )
 
-    assert mock_ingest_api.return_value.update_data_item.call_args_list == [
+    assert mock_ingest_api.return_value.update_data_item_children.call_args_list == [
         mock.call(
             update_data_item_request=UpdateDataItemRequest(
                 parent_data_item_uid=parent_item.uuid,
