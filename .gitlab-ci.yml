@@ -1,8 +1,8 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  CI_POETRY_VERSION: 1.8.2
-  DLM_SERVER_IMAGE: artefact.skao.int/ska-data-lifecycle:2.3.0
+  CI_POETRY_VERSION: 2.5.1
+  DLM_SERVER_IMAGE: artefact.skao.int/ska-data-lifecycle:2.4.0
 
 # Enable caching for python
 cache:
@@ -43,9 +43,9 @@ include:
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
 
-oci-image-build:
-  tags:
-    - ska-default # force the job onto the ska-default runners
+# oci-image-build:
+#   tags:
+#     - ska-default # force the job onto the ska-default runners
 
 python-test:
   stage: test
