@@ -49,6 +49,10 @@ spec:
         {{- include "ska-dlm-client.configdb-watcher.labels" . | nindent 8 }}
     spec:
       dnsPolicy: ClusterFirst
+      {{- with .Values.ska_dlm_client.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 
       # if bringing up a local etcd service, wait for the pod to be ready
       {{ if .Values.configdb_watcher.sdp_config.local_etcd.enabled }}
