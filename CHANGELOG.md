@@ -4,6 +4,7 @@
 
 ### Updated
 
+* Updated project build system to `poetry>=2`.
 * When the watchers trigger a migration, they populate the dlm.migration `origin` column.
 * OpenAPI specs
 * The configdb watcher now populates the metadata column in the migration table with the Dependency Key.
