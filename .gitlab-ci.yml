@@ -43,7 +43,7 @@ include:
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
 
-# the setting below blocks the aws runners
+# Disabling for now so that pipelines can run on the AWS
 # oci-image-build:
 #   tags:
 #     - ska-default # force the job onto the ska-default runners

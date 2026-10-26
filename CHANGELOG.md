@@ -8,6 +8,7 @@
 * When the watchers trigger a migration, they populate the dlm.migration `origin` column.
 * OpenAPI specs
 * The configdb watcher now populates the metadata column in the migration table with the Dependency Key.
+* SecurityContext support is exxtended to the configdb-watcher Deployment.
 
 ### Added
 
