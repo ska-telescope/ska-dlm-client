@@ -91,9 +91,11 @@ Class | Method | HTTP request | Description
 *GatewayApi* | [**token_by_username_password_token_by_username_password_get**](docs/GatewayApi.md#token_by_username_password_token_by_username_password_get) | **GET** /token_by_username_password | Token By Username Password
 *IngestApi* | [**init_data_item**](docs/IngestApi.md#init_data_item) | **POST** /ingest/init_data_item | Init Data Item
 *IngestApi* | [**register_data_item**](docs/IngestApi.md#register_data_item) | **POST** /ingest/register_data_item | Register Data Item
+*IngestApi* | [**update_data_item_children**](docs/IngestApi.md#update_data_item_children) | **POST** /ingest/update_data_item_children | Update Data Item Children
 *MigrationApi* | [**copy_data_item**](docs/MigrationApi.md#copy_data_item) | **POST** /migration/copy_data_item | Copy Data Item
 *MigrationApi* | [**get_migration_record**](docs/MigrationApi.md#get_migration_record) | **GET** /migration/get_migration | Get Migration Record
 *MigrationApi* | [**query_migrations**](docs/MigrationApi.md#query_migrations) | **GET** /migration/query_migrations | Query Migrations
+*RequestApi* | [**get_data_item**](docs/RequestApi.md#get_data_item) | **GET** /request/get_data_item | Get Data Item
 *RequestApi* | [**query_data_item**](docs/RequestApi.md#query_data_item) | **GET** /request/query_data_item | Query Data Item
 *RequestApi* | [**query_deleted**](docs/RequestApi.md#query_deleted) | **GET** /request/query_deleted | Query Deleted
 *RequestApi* | [**query_exists**](docs/RequestApi.md#query_exists) | **GET** /request/query_exists | Query Exists
@@ -117,6 +119,7 @@ Class | Method | HTTP request | Description
 *StorageApi* | [**create_storage_config**](docs/StorageApi.md#create_storage_config) | **POST** /storage/create_storage_config | Create Storage Config
 *StorageApi* | [**get_ssh_public_key**](docs/StorageApi.md#get_ssh_public_key) | **GET** /storage/get_ssh_public_key | Get Ssh Public Key
 *StorageApi* | [**get_storage_config**](docs/StorageApi.md#get_storage_config) | **GET** /storage/get_storage_config | Get Storage Config
+*StorageApi* | [**get_storage_endpoints**](docs/StorageApi.md#get_storage_endpoints) | **GET** /storage/get_storage_endpoints | Get Storage Endpoints
 *StorageApi* | [**init_location**](docs/StorageApi.md#init_location) | **POST** /storage/init_location | Init Location
 *StorageApi* | [**init_storage**](docs/StorageApi.md#init_storage) | **POST** /storage/init_storage | Init Storage
 *StorageApi* | [**query_location**](docs/StorageApi.md#query_location) | **GET** /storage/query_location | Query Location
@@ -130,6 +133,9 @@ Class | Method | HTTP request | Description
 
  - [HTTPValidationError](docs/HTTPValidationError.md)
  - [LocationInner](docs/LocationInner.md)
+ - [StorageEndpoint](docs/StorageEndpoint.md)
+ - [UpdateDataItemRequest](docs/UpdateDataItemRequest.md)
+ - [UpdateDataItemResponse](docs/UpdateDataItemResponse.md)
  - [ValidationError](docs/ValidationError.md)
 
 

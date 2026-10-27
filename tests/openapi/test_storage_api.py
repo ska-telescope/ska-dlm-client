@@ -61,6 +61,13 @@ class TestStorageApi(unittest.TestCase):
         """
         pass
 
+    def test_get_storage_endpoints(self) -> None:
+        """Test case for get_storage_endpoints
+
+        Get Storage Endpoints
+        """
+        pass
+
     def test_init_location(self) -> None:
         """Test case for init_location
 

@@ -2,6 +2,8 @@
 
 ## Development
 
+* Add DLM client OpenAPI support for ingest, request, and storage APIs, including data-item updates and container-child registration.
+
 ### Updated
 
 * Updated project build system to `poetry>=2`.

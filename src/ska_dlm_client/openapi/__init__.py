@@ -34,6 +34,9 @@ __all__ = [
     "ApiException",
     "HTTPValidationError",
     "LocationInner",
+    "StorageEndpoint",
+    "UpdateDataItemRequest",
+    "UpdateDataItemResponse",
     "ValidationError",
 ]
 
@@ -61,4 +64,11 @@ from ska_dlm_client.openapi.models.http_validation_error import (
     HTTPValidationError as HTTPValidationError,
 )
 from ska_dlm_client.openapi.models.location_inner import LocationInner as LocationInner
+from ska_dlm_client.openapi.models.storage_endpoint import StorageEndpoint as StorageEndpoint
+from ska_dlm_client.openapi.models.update_data_item_request import (
+    UpdateDataItemRequest as UpdateDataItemRequest,
+)
+from ska_dlm_client.openapi.models.update_data_item_response import (
+    UpdateDataItemResponse as UpdateDataItemResponse,
+)
 from ska_dlm_client.openapi.models.validation_error import ValidationError as ValidationError

@@ -26,6 +26,13 @@ class TestRequestApi(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
+    def test_get_data_item(self) -> None:
+        """Test case for get_data_item
+
+        Get Data Item
+        """
+        pass
+
     def test_query_data_item(self) -> None:
         """Test case for query_data_item
 

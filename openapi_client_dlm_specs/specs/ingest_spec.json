@@ -108,6 +108,48 @@
                 }
             }
         },
+        "/ingest/update_data_item_children": {
+            "post": {
+                "summary": "Update Data Item Children",
+                "tags": [
+                    "ingest"
+                ],
+                "description": "Add child data items to a parent without duplicating existing associations.",
+                "operationId": "update_data_item_children",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateDataItemRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateDataItemResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/ingest/register_data_item": {
             "post": {
                 "summary": "Register Data Item",
@@ -379,6 +421,44 @@
                 ],
                 "title": "PhaseType",
                 "description": "Phase type / resilience level."
+            },
+            "UpdateDataItemRequest": {
+                "properties": {
+                    "parent_data_item_uid": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Parent Data Item Uid"
+                    },
+                    "children": {
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "type": "array",
+                        "title": "Children"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "parent_data_item_uid",
+                    "children"
+                ],
+                "title": "UpdateDataItemRequest",
+                "description": "Request body for associating child items with a data item."
+            },
+            "UpdateDataItemResponse": {
+                "properties": {
+                    "inserted_count": {
+                        "type": "integer",
+                        "title": "Inserted Count"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "inserted_count"
+                ],
+                "title": "UpdateDataItemResponse",
+                "description": "Response containing the number of newly inserted child associations."
             },
             "ValidationError": {
                 "properties": {
