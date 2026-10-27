@@ -1,5 +1,5 @@
 [build-system]
-requires = ["poetry>=1.8.2"]
+requires = ["poetry>=2"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
@@ -28,7 +28,7 @@ name = "pypi"
 priority = "supplemental"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10, <4"
 pydantic = "^2.11.9"
 python-dateutil = "^2.9.0.post0"
 python-benedict = "^0.37.0"

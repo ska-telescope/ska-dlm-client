@@ -2,10 +2,9 @@
 
 ## Development
 
-* Add DLM client OpenAPI support for ingest, request, and storage APIs, including data-item updates and container-child registration.
-
 ### Updated
 
+* Updated project build system to `poetry>=2`.
 * When the watchers trigger a migration, they populate the dlm.migration `origin` column.
 * OpenAPI specs
 * The configdb watcher now populates the metadata column in the migration table with the Dependency Key.
@@ -13,6 +12,7 @@
 
 ### Added
 
+* Add DLM client OpenAPI support for ingest, request, and storage APIs, including data-item updates and container-child registration.
 * An `origin` field to the migration call.
 * A `metadata` field to the migration call for parent data_items.
 * An error if the two watchers are configured to the same directory.
