@@ -43,9 +43,10 @@ include:
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
 
-#oci-image-build:
-#  tags:
-#    - ska-default # force the job onto the ska-default runners
+# Disabling for now so that pipelines can run on the AWS
+# oci-image-build:
+#   tags:
+#     - ska-default # force the job onto the ska-default runners
 
 python-test:
   stage: test
