@@ -4,6 +4,7 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**get_data_item**](RequestApi.md#get_data_item) | **GET** /request/get_data_item | Get Data Item
 [**query_data_item**](RequestApi.md#query_data_item) | **GET** /request/query_data_item | Query Data Item
 [**query_deleted**](RequestApi.md#query_deleted) | **GET** /request/query_deleted | Query Deleted
 [**query_exists**](RequestApi.md#query_exists) | **GET** /request/query_exists | Query Exists
@@ -23,6 +24,74 @@ Method | HTTP request | Description
 [**update_data_item**](RequestApi.md#update_data_item) | **PATCH** /request/update_data_item | Update Data Item
 [**update_item_tags**](RequestApi.md#update_item_tags) | **PATCH** /request/update_item_tags | Update Item Tags
 
+
+# **get_data_item**
+> Dict[str, Optional[object]] get_data_item(oid)
+
+Get Data Item
+
+Get the first data item matching an OID, including immediate container children.
+
+### Example
+
+
+```python
+import ska_dlm_client.openapi
+from ska_dlm_client.openapi.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = ska_dlm_client.openapi.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with ska_dlm_client.openapi.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = ska_dlm_client.openapi.RequestApi(api_client)
+    oid = UUID('38400000-8cf0-11bd-b23e-10b96e4ef00d') # UUID | 
+
+    try:
+        # Get Data Item
+        api_response = api_instance.get_data_item(oid)
+        print("The response of RequestApi->get_data_item:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling RequestApi->get_data_item: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **oid** | **UUID**|  | 
+
+### Return type
+
+**Dict[str, Optional[object]]**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **query_data_item**
 > List[Optional[Dict[str, object]]] query_data_item(item_name=item_name, oid=oid, uid=uid, storage_id=storage_id, params=params)

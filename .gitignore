@@ -115,3 +115,6 @@ ska-dlm-client.iml
 # Helm chart lock files and dependencies
 /charts/*/Chart.lock
 /charts/*/charts/*.tgz
+
+# MacOS
+.DS_Store

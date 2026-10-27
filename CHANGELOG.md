@@ -2,6 +2,8 @@
 
 ## Development
 
+* Add DLM client OpenAPI support for ingest, request, and storage APIs, including data-item updates and container-child registration.
+
 ### Updated
 
 * When the watchers trigger a migration, they populate the dlm.migration `origin` column.

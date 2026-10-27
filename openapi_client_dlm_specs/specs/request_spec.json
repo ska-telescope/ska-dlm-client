@@ -115,6 +115,52 @@
                 }
             }
         },
+        "/request/get_data_item": {
+            "get": {
+                "summary": "Get Data Item",
+                "tags": [
+                    "request"
+                ],
+                "description": "Get the first data item matching an OID, including immediate container children.",
+                "operationId": "get_data_item",
+                "parameters": [
+                    {
+                        "name": "oid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Oid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Get Data Item"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/request/update_data_item": {
             "patch": {
                 "summary": "Update Data Item",

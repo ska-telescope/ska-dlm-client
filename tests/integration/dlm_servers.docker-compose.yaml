@@ -66,6 +66,11 @@ services:
     platform: linux/amd64
     environment:
       - LOGLEVEL=${LOGLEVEL:-INFO}
+      - PGHOST=dlm_db
+      - PGPORT=5432
+      - PGUSER=ska_dlm_admin
+      - PGPASSWORD=password
+      - PGDATABASE=ska_dlm_testing
     entrypoint: uvicorn ska_dlm.dlm_request.dlm_request_requests:rest --host 0.0.0.0 --port 8002
     ports:
       - 8002:8002
@@ -89,6 +94,13 @@ services:
     user: root
     environment:
       - LOGLEVEL=${LOGLEVEL:-INFO}
+      - VIRTUAL_HOST=dlm_ingest.localhost
+      - PGHOST=dlm_db
+      - PGPORT=5432
+      - PGUSER=ska_dlm_admin
+      - PGPASSWORD=password
+      - PGDATABASE=ska_dlm_testing
+
     entrypoint: uvicorn ska_dlm.dlm_ingest.dlm_ingest_requests:rest --host 0.0.0.0 --port 8001
     ports:
       - 8001:8001
@@ -107,7 +119,7 @@ services:
 
   dlm_migrations:
     platform: linux/amd64
-    image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:3e609e94
+    image: registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle-migrations:308d5b64
     container_name: dlm_migrations
     command: >
       --url="jdbc:postgresql://dlm_db:5432/ska_dlm_testing"
@@ -117,7 +129,7 @@ services:
       --search-path=/changelog
       --changelog-file=changelog.yaml
       update
-      --context-filter=!create-db,!create-roles,create-schema,!create-external-triggers,2.3-release,2.4-release
+      --context-filter=!create-db,!create-roles,create-schema,!create-external-triggers
     depends_on:
       dlm_db:
         condition: service_healthy
