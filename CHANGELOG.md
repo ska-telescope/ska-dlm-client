@@ -4,6 +4,8 @@
 
 ### Updated
 
+* Upgraded the base image and dependencies to address CVE's (SDR-1762).
+* Enabled security scanning jobs on all CI branch pushes.
 * Updated project build system to `poetry>=2`.
 * When the watchers trigger a migration, they populate the dlm.migration `origin` column.
 * OpenAPI specs
