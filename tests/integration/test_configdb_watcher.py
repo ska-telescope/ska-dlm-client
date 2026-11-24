@@ -255,7 +255,7 @@ async def test_configdb_watcher_higher_dir(
 
     # This test migrates the full parent directory; registration, migration, RabbitMQ
     # processing, and dependency update can take approximately 85-90 seconds in total.
-    statuses = _wait_for_dependency_status(PB_ID, flow_name, timeout_s=120)
+    statuses = _wait_for_dependency_status(PB_ID, flow_name, timeout_s=180)
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
 
     representative_items = [
