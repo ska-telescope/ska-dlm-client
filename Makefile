@@ -47,8 +47,13 @@ run-all-tests:
 	export LOGLEVEL=DEBUG && $(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml up dlm_client_testrunner
 
 docs-pre-build:
-	poetry config virtualenvs.create false
-	poetry install --no-root --only docs
+# Preserve CI behaviour without modifying local Poetry configuration.
+	@if [ -n "$$CI" ]; then \
+		poetry config virtualenvs.create false; \
+		poetry install --no-root --only docs; \
+	else \
+		POETRY_VIRTUALENVS_CREATE=true poetry install --no-root --only docs; \
+	fi
 
 .PHONY: docs-pre-build openapi-code-from-local-dlm
 
