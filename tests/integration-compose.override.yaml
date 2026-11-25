@@ -30,6 +30,9 @@ services:
   keycloak:
     image: dlm-client-integration/keycloak
     container_name: dlm-client-integration-keycloak
+    healthcheck:
+      # Slow CI runners may need extra time for Keycloak's initial augmentation.
+      start_period: 180s
   keycloak_db:
     container_name: dlm-client-integration-keycloak_db
   dlm_migration:
