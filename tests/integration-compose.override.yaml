@@ -12,6 +12,10 @@ services:
   dlm_gateway:
     image: dlm-client-integration/gateway
     container_name: dlm-client-integration-dlm_gateway
+    healthcheck:
+      # Starting the gateway's workers can take longer on constrained CI runners.
+      start_period: 180s
+      timeout: 30s
   dlm_outbox:
     image: dlm-client-integration/outbox
     container_name: dlm-client-integration-dlm_outbox
