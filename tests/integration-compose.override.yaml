@@ -1,0 +1,75 @@
+services:
+  dlm-client-data-init:
+    image: alpine:3.22
+    entrypoint:
+      - /bin/sh
+      - -ec
+      - mkdir -p /dlm/archive && chown 1000:1000 /dlm/archive && chmod 0777 /dlm/archive
+    volumes:
+      - ${DLM_DATA_VOLUME:-shared-tmpfs}:/dlm
+  nginx-proxy:
+    container_name: dlm-client-integration-nginx-proxy
+  dlm_gateway:
+    image: dlm-client-integration/gateway
+    container_name: dlm-client-integration-dlm_gateway
+  dlm_outbox:
+    image: dlm-client-integration/outbox
+    container_name: dlm-client-integration-dlm_outbox
+  dlm_archive:
+    container_name: dlm-client-integration-dlm_archive
+  dlm_postgrest:
+    container_name: dlm-client-integration-dlm_postgrest
+  dlm_migrations:
+    image: dlm-client-integration/migrations
+    container_name: dlm-client-integration-dlm_migrations
+  dlm_db:
+    image: dlm-client-integration/db
+    container_name: dlm-client-integration-dlm_db
+  rabbitmq:
+    container_name: dlm-client-integration-rabbitmq
+  keycloak:
+    image: dlm-client-integration/keycloak
+    container_name: dlm-client-integration-keycloak
+  keycloak_db:
+    container_name: dlm-client-integration-keycloak_db
+  dlm_migration:
+    image: dlm-client-integration/migration
+    container_name: dlm-client-integration-dlm_migration
+  dlm_storage:
+    image: dlm-client-integration/storage
+    container_name: dlm-client-integration-dlm_storage
+    environment:
+      STORAGE_CONFIG: ""
+    depends_on:
+      dlm-client-data-init:
+        condition: service_completed_successfully
+  dlm_request:
+    image: dlm-client-integration/request
+    container_name: dlm-client-integration-dlm_request
+  dlm_ingest:
+    image: dlm-client-integration/ingest
+    container_name: dlm-client-integration-dlm_ingest
+  dlm_heuristics:
+    image: dlm-client-integration/heuristics
+    container_name: dlm-client-integration-dlm_heuristics
+  etcd:
+    container_name: dlm-client-integration-etcd
+  dlm_configdb_watcher:
+    image: dlm-client-integration/client
+    container_name: dlm-client-integration-dlm_configdb_watcher
+  dlm_directory_watcher:
+    image: dlm-client-integration/client
+    container_name: dlm-client-integration-dlm_directory_watcher
+  dlm_client_testrunner:
+    image: dlm-client-integration/testrunner
+    container_name: dlm-client-integration-dlm_client_testrunner
+
+networks:
+  dlm_network:
+    name: dlm-client-integration-network
+
+volumes:
+  shared-tmpfs:
+    name: dlm-client-integration-data
+  data:
+    name: dlm-client-integration-server-data

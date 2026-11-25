@@ -37,6 +37,7 @@ directory_watcher:
   subsystem: data-lifecycle-management
   replicas: 1
   ingest_url: "http://ska-dlm-ingest"
+  request_url: "http://ska-dlm-request"
   storage_url: "http://ska-dlm-storage"
   migration_url: "http://ska-dlm-migration"
   source_name: dir_watcher
@@ -47,6 +48,7 @@ directory_watcher:
   oid_expiration_days:  # leave empty to use DB default, 2099-12-31T23:59:59
   use_polling_watcher: false  # false means using the iNotify-based watcher, which might not work with networked filesystems.
   skip_rclone_access_check_on_register: false
+  server_manages_child_migrations: false
   include_existing: false
   # Kubernetes' internal DNS resolves service names to the correct IP addresses automatically.
   # If these services run in another namespace, use e.g. ska-dlm-ingest.other-namespace:port
@@ -70,9 +72,11 @@ configdb_watcher:
   subsystem: data-lifecycle-management
   replicas: 1
   ingest_url: "http://ska-dlm-ingest"
+  request_url: "http://ska-dlm-request"
   storage_url: "http://ska-dlm-storage"
   migration_url: "http://ska-dlm-migration"
   include_existing: false
+  server_manages_child_migrations: false
   source_name: configdb-watcher
   source_phase: "GAS"
   directory_to_watch: /dlm/product_dir

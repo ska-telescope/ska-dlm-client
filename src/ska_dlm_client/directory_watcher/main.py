@@ -67,6 +67,7 @@ def process_args(args: argparse.Namespace) -> WatcherConfig:
         reload_status_file=args.reload_status_file,
         rclone_access_check_on_register=not args.skip_rclone_access_check_on_register,
         location=args.location,
+        server_manages_child_migrations=getattr(args, "server_manages_child_migrations", False),
     )
     return config
 

@@ -1,5 +1,20 @@
 system: dlm
 
+global:
+  labels: {}
+
 ska_dlm:
   fullname: "ska-dlm"
+
+ska_dlm_client:
+  image: registry.gitlab.com/ska-telescope/ska-dlm-client/ska-dlm-client
+  version: "7fb7c0c1"
+  imagePullPolicy: Always
+
+directory_watcher:
+  component: directory-watcher
+  subsystem: data-lifecycle-management
+  source_name: dir_watcher
+  directory_to_watch: /dlm/watch_dir
+  storage_url: "http://ska-dlm-storage"
 

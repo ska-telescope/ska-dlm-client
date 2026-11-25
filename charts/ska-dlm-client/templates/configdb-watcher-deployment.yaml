@@ -95,6 +95,9 @@ spec:
           - name: INGEST_URL
             value: {{ .Values.configdb_watcher.ingest_url | quote }}
 
+          - name: REQUEST_URL
+            value: {{ .Values.configdb_watcher.request_url | quote }}
+
           - name: STORAGE_URL
             value: {{ .Values.configdb_watcher.storage_url | quote }}
 
@@ -121,6 +124,11 @@ spec:
 
           {{- if .Values.configdb_watcher.include_existing }}
           - name: INCLUDE_EXISTING
+            value: "true"
+          {{- end }}
+
+          {{- if .Values.configdb_watcher.server_manages_child_migrations }}
+          - name: SERVER_MANAGES_CHILD_MIGRATIONS
             value: "true"
           {{- end }}
 

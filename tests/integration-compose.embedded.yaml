@@ -1,0 +1,11 @@
+services:
+  dlm_configdb_watcher:
+    environment:
+      SERVER_MANAGES_CHILD_MIGRATIONS: "1"
+  dlm_directory_watcher:
+    environment:
+      SERVER_MANAGES_CHILD_MIGRATIONS: "1"
+  rclone-key-init:
+    image: dlm-client-integration/rclone-key-bootstrap
+  dlm_rclone_worker:
+    image: dlm-client-integration/rclone-worker

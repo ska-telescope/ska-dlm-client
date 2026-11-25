@@ -1,0 +1,15 @@
+services:
+  etcd:
+    container_name: dlm-client-unit-etcd
+    ports: !reset []
+  dlm_client_testrunner:
+    image: dlm-client-unit/testrunner
+    container_name: dlm-client-unit-testrunner
+
+networks:
+  dlm_network:
+    name: dlm-client-unit-network
+
+volumes:
+  shared-tmpfs:
+    name: dlm-client-unit-data

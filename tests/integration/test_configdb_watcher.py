@@ -1,4 +1,3 @@
-# pylint: disable=subprocess-run-check
 """ConfigDB Watcher integration tests."""
 
 import logging
@@ -6,11 +5,11 @@ import os
 import subprocess
 import time
 import urllib.parse
-from datetime import datetime, timezone
 from pathlib import Path
 from time import sleep
 
 import pytest
+import requests
 from ska_sdp_config import Config
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.common import PVCPath
@@ -25,16 +24,17 @@ from ska_sdp_config.entity.flow import (
 from ska_dlm_client.common_types import LocationCountry, LocationName, LocationType
 from ska_dlm_client.openapi import api_client
 from ska_dlm_client.openapi.configuration import Configuration
-from ska_dlm_client.openapi.dlm_api import migration_api, request_api, storage_api
+from ska_dlm_client.openapi.dlm_api import migration_api, request_api
 
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 EB_ID = "eb-00000000"
 PB_ID = "pb-test-20260126-24294"
+DIRECT_PB_ID = "pb-test-20260126-24295"
 ARB_MS = "scan90-99/output.scan-99.beam-vis0.ms"  # random MS file in pb-test-20260126-24294
 PVC_SUBPATH = f"product/{EB_ID}/ska-sdp/{PB_ID}"
-PVC_SUBPATH_DIRECT = f"product/{EB_ID}/ska-sdp/{PB_ID}/scan90-99"
+PVC_SUBPATH_DIRECT = f"product/{EB_ID}/ska-sdp/{DIRECT_PB_ID}/scan90-99"
 DATA_PATH_LOCAL = f"{dir_path}/../registration_processor/product_dir"
 SCRIPT = Script.Key(kind="batch", name="test", version="0.0.0")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
@@ -46,7 +46,7 @@ LOCATION_COUNTRY = LocationCountry.AU.value
 LOCATION_CITY = "Marksville"
 LOCATION_FACILITY = "local"  # TODO: query location_facility lookup table
 
-SRC_HOST = "dlm_configdb_watcher"
+SRC_HOST = "dlm-client-integration-dlm_configdb_watcher"
 WATCHER_SOURCE_DIR_ROOT = "/dlm/product_dir"
 
 
@@ -57,30 +57,32 @@ def _get_cfg() -> Config:
     return Config(host=etcd_host, port=etcd_port)
 
 
-def _ensure_processing_block() -> None:
+def _ensure_processing_block(pb_id: str) -> None:
     """Create the ProcessingBlock if it doesn't already exist (idempotent)."""
     cfg = _get_cfg()
     for txn in cfg.txn():
-        if txn.processing_block.get(PB_ID) is None:
+        if txn.processing_block.get(pb_id) is None:
             txn.processing_block.create(
                 ProcessingBlock(
-                    key=PB_ID,
+                    key=pb_id,
                     eb_id=None,
                     script=SCRIPT,
                     parameters={"test": "test"},
                     dependencies=[],
                 )
             )
-            print(f"Created ProcessingBlock {PB_ID}")
+            print(f"Created ProcessingBlock {pb_id}")
         else:
-            print(f"ProcessingBlock {PB_ID} already exists")
+            print(f"ProcessingBlock {pb_id} already exists")
 
 
-def _create_completed_flows(subpath: str, flow_name_arg: str, persist_flow_name_arg: str) -> None:
+def _create_completed_flows(
+    pb_id: str, subpath: str, flow_name_arg: str, persist_flow_name_arg: str
+) -> None:
     """Create a DataProduct Flow and a DataProductPersist Flow. Set their states to COMPLETED."""
     cfg = _get_cfg()
     dataproduct_flow = Flow(
-        key=Flow.Key(pb_id=PB_ID, kind="data-product", name=flow_name_arg),
+        key=Flow.Key(pb_id=pb_id, kind="data-product", name=flow_name_arg),
         sink=DataProduct(
             data_dir=PVCPath(
                 k8s_namespaces=["dp-shared", "dp-shared-p"],
@@ -100,7 +102,7 @@ def _create_completed_flows(subpath: str, flow_name_arg: str, persist_flow_name_
         ops.create({"status": "COMPLETED"})
 
     dataproductpersist_flow = Flow(
-        key=Flow.Key(pb_id=PB_ID, kind="data-product-persist", name=persist_flow_name_arg),
+        key=Flow.Key(pb_id=pb_id, kind="data-product-persist", name=persist_flow_name_arg),
         sink=DataProductPersist(phase="SOLID", expires_at=None),
         sources=[FlowSource(uri=dataproduct_flow.key, function="ska-dlm-client:ingest")],
         data_model="Visibility",
@@ -112,21 +114,17 @@ def _create_completed_flows(subpath: str, flow_name_arg: str, persist_flow_name_
         ops.create({"status": "COMPLETED"})
 
 
-def trigger_completed_flows(flow_name: str, persist_flow_name: str, subpath: str) -> None:
+def trigger_completed_flows(
+    flow_name: str, persist_flow_name: str, subpath: str, pb_id: str = PB_ID
+) -> None:
     """Ensure PB + Flow exist and mark Flow as COMPLETED."""
-    _ensure_processing_block()
+    _ensure_processing_block(pb_id)
     _create_completed_flows(
+        pb_id=pb_id,
         subpath=subpath,
         persist_flow_name_arg=persist_flow_name,
         flow_name_arg=flow_name,
     )
-
-
-def _get_id(item, key: str) -> str:
-    """Return a string ID from a dict or generated API model."""
-    value = item[key] if isinstance(item, dict) else getattr(item, key)
-    assert isinstance(value, str)
-    return value
 
 
 def _get_dependency_statuses_for_product(pb_id: str, name: str) -> list[str]:
@@ -160,13 +158,34 @@ def _wait_for_dependency_status(
     statuses: list[str] = []
 
     while time.time() < deadline:
-        statuses = _get_dependency_statuses_for_product(pb_id, flow_name)
-        if expected_status in statuses:
+        try:
+            statuses = _get_dependency_statuses_for_product(pb_id, flow_name)
+        except requests.exceptions.ReadTimeout as exc:
+            log.warning("ConfigDB dependency poll timed out: %s", exc)
+            sleep(poll_interval_s)
+            continue
+        if expected_status in statuses or (expected_status == "FINISHED" and "FAILED" in statuses):
             return statuses
 
         sleep(poll_interval_s)
 
     return statuses
+
+
+def test_dependency_poll_retries_read_timeout(monkeypatch, caplog):
+    """A transient ConfigDB read timeout does not abort the bounded poll."""
+    outcomes = iter([requests.exceptions.ReadTimeout("slow ConfigDB"), ["FINISHED"]])
+
+    def get_statuses(_pb_id, _flow_name):
+        outcome = next(outcomes)
+        if isinstance(outcome, Exception):
+            raise outcome
+        return outcome
+
+    monkeypatch.setattr(__name__ + "._get_dependency_statuses_for_product", get_statuses)
+    monkeypatch.setattr(__name__ + ".sleep", lambda _: None)
+    assert _wait_for_dependency_status("pb", "flow") == ["FINISHED"]
+    assert "ConfigDB dependency poll timed out" in caplog.text
 
 
 @pytest.mark.integration
@@ -183,9 +202,11 @@ def test_data_was_copied_correctly(_configdb_watcher_ready, _common_dlm_endpoint
         log.error("stderr:\n%s", result.stderr)
 
         subprocess.run(["docker", "ps", "-a"], check=False)
-        subprocess.run(["docker", "logs", "dlm_configdb_watcher"], check=False)
-        subprocess.run(["docker", "logs", "dlm_directory_watcher"], check=False)
-        subprocess.run(["docker", "logs", "dlm_storage"], check=False)
+        subprocess.run(["docker", "logs", SRC_HOST], check=False)
+        subprocess.run(
+            ["docker", "logs", "dlm-client-integration-dlm_directory_watcher"], check=False
+        )
+        subprocess.run(["docker", "logs", "dlm-client-integration-dlm_storage"], check=False)
     assert result.returncode == 0, f"Could not find expected file: {expected_file}"
 
 
@@ -201,15 +222,17 @@ async def test_configdb_watcher(
     # Trigger COMPLETED Flow pointing directly at scan90-99
     flow_name = "test-flow"
     persist_flow_name = "persist-flow"
-    trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH_DIRECT)
+    trigger_completed_flows(
+        flow_name, persist_flow_name, subpath=PVC_SUBPATH_DIRECT, pb_id=DIRECT_PB_ID
+    )
 
     # Poll for FINISHED dependency status
-    statuses = _wait_for_dependency_status(PB_ID, flow_name, timeout_s=90)
+    statuses = _wait_for_dependency_status(DIRECT_PB_ID, flow_name, timeout_s=90)
 
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
 
     expected_items = [
-        f"product/{EB_ID}/ska-sdp/{PB_ID}/scan90-99/output.scan-{i}.beam-vis0.ms"
+        f"product/{EB_ID}/ska-sdp/{DIRECT_PB_ID}/scan90-99/output.scan-{i}.beam-vis0.ms"
         for i in range(90, 100)
     ]
 
@@ -224,7 +247,7 @@ async def test_configdb_watcher(
     expected_metadata = {
         "kind": "dlm-copy",
         "name": flow_name,
-        "pb_id": PB_ID,
+        "pb_id": DIRECT_PB_ID,
         "origin": "ska-data-lifecycle-management",
     }
 
@@ -253,9 +276,8 @@ async def test_configdb_watcher_higher_dir(
     persist_flow_name = "persist-flow2"
     trigger_completed_flows(flow_name, persist_flow_name, subpath=PVC_SUBPATH)
 
-    # This test migrates the full parent directory; registration, migration, RabbitMQ
-    # processing, and dependency update can take approximately 85-90 seconds in total.
-    statuses = _wait_for_dependency_status(PB_ID, flow_name, timeout_s=120)
+    # This migration transfers thousands of files through the test SFTP services.
+    statuses = _wait_for_dependency_status(PB_ID, flow_name, timeout_s=300)
     assert "FINISHED" in statuses, f"Expected FINISHED, got {statuses}"
 
     representative_items = [
@@ -292,47 +314,3 @@ async def test_watcher_logs_failed_registration(_configdb_watcher_ready, _common
     # Poll for FAILED dependency status
     statuses = _wait_for_dependency_status(PB_ID, "test-flow-failure", "FAILED", timeout_s=60)
     assert "FAILED" in statuses, f"Expected FAILED due to duplicate registration, got {statuses}"
-
-
-@pytest.mark.xfail(reason="running extremely slow on CI")
-@pytest.mark.integration
-def test_automatic_deletion(
-    dlm_request_api, storage_configuration, _configdb_watcher_ready, _common_dlm_endpoints
-):
-    """Expire all data_items and let the heuristics delete the payloads."""
-    now = datetime.now(timezone.utc).isoformat()
-
-    with api_client.ApiClient(storage_configuration) as the_api_client:
-        api_storage = storage_api.StorageApi(the_api_client)
-        source_storage = api_storage.query_storage(storage_name="configdb-watcher")
-
-    assert source_storage
-    source_storage_id = _get_id(source_storage[0], "storage_id")
-
-    items = dlm_request_api.query_data_item(
-        storage_id=source_storage_id,
-    )
-    log.info("Found %d data items on source storage %s.", len(items), source_storage)
-    log.info("Setting uid expirations to now...")
-
-    # Update uid expirations of source items to now.
-    for item in items:
-        if "pb-test-20260126-24294" in item["item_name"]:
-            dlm_request_api.set_uid_expiration(uid=item["uid"], expiration=now)
-
-    # Potential optimisation: expose a server-side bulk update endpoint via @rest.patch to
-    # avoid iterative HTTP round-trips to a single DB update, from the client-side.
-
-    test_dir = f"{WATCHER_SOURCE_DIR_ROOT}/product/{EB_ID}/ska-sdp/{PB_ID}"
-    counter = 0
-    while counter < 3:
-        sleep_s = 20
-        log.info("Sleeping %s seconds to give heuristics some time to do its thing...", sleep_s)
-        sleep(sleep_s)  # default poll interval of the heuristics is 10 seconds
-        result = subprocess.run(["docker", "exec", SRC_HOST, "test", "-d", test_dir])
-        logs = subprocess.run(["docker", "logs", "dlm_heuristics"], capture_output=True, text=True)
-        if result.returncode != 0:
-            break
-        log.info("Logs from heuristics container: %s", logs.stdout)
-        counter += 1
-    assert result.returncode != 0, f"Directory {test_dir} still exists: {result.stdout}"

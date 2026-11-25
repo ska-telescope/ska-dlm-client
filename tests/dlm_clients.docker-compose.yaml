@@ -1,6 +1,6 @@
 include:
-  - path: test_services.docker-compose.yaml
-  - path: integration/dlm_servers.docker-compose.yaml
+  - path: ${DLM_SERVER_DIR:?DLM_SERVER_DIR is required}/tests/dlm.docker-compose.yaml
+  - path: testrunner.docker-compose.yaml
 
 
 services:

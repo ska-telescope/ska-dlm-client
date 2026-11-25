@@ -61,6 +61,8 @@ spec:
             value: {{ .Values.global.location_name | quote }}
           - name: STORAGE_URL
             value: {{ .Values.directory_watcher.storage_url | quote }}
+          - name: REQUEST_URL
+            value: {{ .Values.directory_watcher.request_url | quote }}
           - name: DIRECTORY_TO_WATCH
             value: {{ .Values.directory_watcher.directory_to_watch | quote }}
           - name: SOURCE_NAME
@@ -95,6 +97,10 @@ spec:
           {{- end }}
           {{- if eq $.Values.directory_watcher.include_existing true }}
           - name: INCLUDE_EXISTING
+            value: "true"
+          {{- end }}
+          {{- if .Values.directory_watcher.server_manages_child_migrations }}
+          - name: SERVER_MANAGES_CHILD_MIGRATIONS
             value: "true"
           {{- end }}
           - name: WATCHER_HOSTNAME

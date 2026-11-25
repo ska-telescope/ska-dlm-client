@@ -5,46 +5,49 @@ include .make/k8s.mk
 include .make/helm.mk
 
 DOCKER_COMPOSE = docker compose
+UNIT_COMPOSE = $(DOCKER_COMPOSE) --project-name dlm-client-unit \
+	--file tests/testrunner.docker-compose.yaml --file tests/unit-compose.override.yaml
 # NOTE: removed the -W option from SPHINXOPTS due to warnings from code generated docs.
 DOCS_SPHINXOPTS = -n --keep-going
 PYTHON_LINE_LENGTH = 99
 PYTHON_VARS_AFTER_PYTEST = --ignore=tests/integration -m integration
 
-# The DLM server image to use in integration tests:
-# DLM_SERVER_IMAGE = ska-data-lifecycle:2.4.0-dirty  # This works for local testing of the DLM server image built using make oci-image-build.
-# DLM_SERVER_IMAGE = artefact.skao.int/ska-data-lifecycle:2.4.0
-DLM_SERVER_IMAGE = registry.gitlab.com/ska-telescope/ska-data-lifecycle/ska-data-lifecycle:1adc1379
+export DLM_SERVER_REF
 
 test-cleanup:
-	@test -n "$$CI" || (echo "Cleaning up old test files..." && rm -rf tests/registration_processor/product_dir/product/eb-00000000/ska-sdp/*)
+	@test -n "$$CI" || (echo "Cleaning up generated test files..." && rm -rf \
+		tests/registration_processor/product_dir/product/eb-00000000/ska-sdp/pb-test-20260126-24294 \
+		tests/registration_processor/product_dir/product/eb-00000000/ska-sdp/pb-test-20260126-24295)
 
 python-test: python-pre-test python-do-test python-post-test
 
 python-pre-test:
-	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml build
+	$(UNIT_COMPOSE) build
 
 python-do-test:
-	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest --ignore tests/integration" dlm_client_testrunner
+	$(UNIT_COMPOSE) run --rm --entrypoint="pytest --ignore tests/integration $(PYTHON_TEST_FILE)" dlm_client_testrunner
 
-python-post-test: docker-compose-down
+python-post-test:
+	$(UNIT_COMPOSE) down --volumes --remove-orphans
 
 # extract all compressed files in `data` directory
 extract-test-data:
 	./extract_data.sh
 
-integration-test: test-cleanup extract-test-data docker-compose-up run-integration-test docker-compose-down test-cleanup
+integration-test:
+	bash ./scripts/dlm-integration.sh test
 
-integration-test-keep: test-cleanup extract-test-data docker-compose-up run-integration-test
+integration-test-keep:
+	bash ./scripts/dlm-integration.sh test-keep
 
 run-integration-test:
-	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml ps -a
-	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml logs --no-color dlm_storage
-	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml run --rm --entrypoint="pytest -m integration" dlm_client_testrunner
+	bash ./scripts/dlm-integration.sh run-integration-test
 
-all-tests: test-cleanup extract-test-data docker-compose-up run-all-tests docker-compose-down
+all-tests:
+	bash ./scripts/dlm-integration.sh all-tests
 
 run-all-tests:
-	export LOGLEVEL=DEBUG && $(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml up dlm_client_testrunner
+	bash ./scripts/dlm-integration.sh run-all-tests
 
 docs-pre-build:
 	poetry config virtualenvs.create false
@@ -53,30 +56,14 @@ docs-pre-build:
 .PHONY: docs-pre-build openapi-code-from-local-dlm
 
 docker-compose-up: ## Bring up test services in docker
-# create shared-tmpfs volume if it doesn't exist:
-	docker volume inspect shared-tmpfs >/dev/null 2>&1 || \
-		docker volume create \
-			--driver local \
-			--opt type=tmpfs \
-			--opt device=tmpfs \
-			--opt o=mode=1777,uid=1000,gid=1000 \
-			shared-tmpfs
-
-	export LOGLEVEL=DEBUG && export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml build
-	export LOGLEVEL=DEBUG && export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml up -d --remove-orphans
+	bash ./scripts/dlm-integration.sh up
 
 docker-compose-down: ## Shut down test services in docker previously started with docker-compose-up
-	$(DOCKER_COMPOSE) --file tests/testrunner.docker-compose.yaml down --volumes --remove-orphans
-	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/dlm_clients.docker-compose.yaml down --volumes
+	bash ./scripts/dlm-integration.sh down
 
 oci-build-dlm-client:
 	make oci-build OCI_IMAGE=ska-dlm-client \
 	OCI_IMAGE_FILE_PATH=Dockerfile
 
 openapi-code-from-local-dlm: ## Use the connection to DLM services to retrieve and generate OpenAPI code
-	@echo "Using the connection to DLM services to retrieve and generate OpenAPI code"
-	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml up -d --wait
-	$(DOCKER_COMPOSE) --file tests/integration/dlm_auth.docker-compose.yaml up -d --wait
-	cd openapi_client_dlm_specs && /bin/bash generate_code.sh
-	export SERVER_IMAGE=$(DLM_SERVER_IMAGE) && $(DOCKER_COMPOSE) --file tests/integration/dlm_servers.docker-compose.yaml down
-	$(DOCKER_COMPOSE) --file tests/integration/dlm_auth.docker-compose.yaml down
+	bash ./scripts/dlm-integration.sh openapi

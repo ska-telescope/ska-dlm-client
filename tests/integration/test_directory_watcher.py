@@ -29,7 +29,7 @@ def test_auto_migration(  # this test is flaky
     testfilename = f"group.{str(time())}"
     dst = f"/dlm/watch_dir/{testfilename}"
 
-    cmd = f"docker exec dlm_directory_watcher cp /etc/group {dst}"
+    cmd = f"docker exec dlm-client-integration-dlm_directory_watcher cp /etc/group {dst}"
     log.info("Migration initialization copy command: %s", cmd)
 
     p = subprocess.run(cmd, capture_output=True, shell=True, check=True, text=True)
@@ -48,10 +48,21 @@ def test_auto_migration(  # this test is flaky
 
     with api_client.ApiClient(request_configuration) as the_api_client:
         api_request = request_api.RequestApi(the_api_client)
-        sleep(2)  # TODO: DMAN-193
-
-        items = api_request.query_data_item(item_name=testfilename)
+        deadline = time() + 90
+        items = []
+        while time() < deadline:
+            items = api_request.query_data_item(item_name=testfilename)
+            if len(items) == 2 and any(
+                item["storage_id"] != source_storage_id and item["item_state"] == "READY"
+                for item in items
+            ):
+                break
+            sleep(2)
         assert len(items) == 2
+        assert any(
+            item["storage_id"] != source_storage_id and item["item_state"] == "READY"
+            for item in items
+        ), f"Migration did not publish a ready destination: {items}"
         assert items and _get_id(items[0], "item_name") == testfilename
         assert items and _get_id(items[1], "item_name") == testfilename
 
@@ -69,13 +80,14 @@ def test_auto_migration(  # this test is flaky
         for item in source_items:
             api_request.set_uid_expiration(uid=item["uid"], expiration=now)
 
-        sleep_s = 20
-        log.info("Sleeping %s seconds to give heuristics some time to do its thing...", sleep_s)
-        sleep(sleep_s)  # Default poll interval of the heuristics is 10 seconds
-
-        result = subprocess.run(
-            f"docker exec dlm_directory_watcher test -f {dst}",
-            shell=True,
-            check=False,
-        )
+        deadline = time() + 60
+        while True:
+            result = subprocess.run(
+                f"docker exec dlm-client-integration-dlm_directory_watcher test -f {dst}",
+                shell=True,
+                check=False,
+            )
+            if result.returncode != 0 or time() >= deadline:
+                break
+            sleep(2)
         assert result.returncode != 0, f"File {dst} still exists. Automatic deletion failed."

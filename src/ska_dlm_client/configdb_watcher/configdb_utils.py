@@ -268,8 +268,7 @@ async def on_message_received(
                 await aupdate_dependency_state(configdb, dependency_key, status)
 
                 logging.info(
-                    "Migration completed: oid=%s, migration_id=%s, dependency=%s, success=%s",
-                    migration_record["oid"],
+                    "Migration completed: migration_id=%s, dependency=%s, success=%s",
                     migration_record["migration_id"],
                     dependency_key,
                     outcome,

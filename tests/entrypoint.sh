@@ -16,11 +16,13 @@ case "$watcher_mode" in
           --target-name ${TARGET_NAME:-dlm-archive} \
           --migration-url ${MIGRATION_URL:-http://dlm_migration:8004} \
           --storage-url ${STORAGE_URL:-http://dlm_storage:8003} \
+          --request-url ${REQUEST_URL:-http://dlm_request:8002} \
           --ingest-url ${INGEST_URL:-http://dlm_ingest:8001} \
           --watcher-hostname ${WATCHER_HOSTNAME:-$(hostname)} \
           --readiness-probe-file "${READINESS_PROBE_FILE:-/tmp/dlm-client-ready}" \
           ${UID_EXPIRATION_DAYS:+--uid-expiration-days ${UID_EXPIRATION_DAYS}} \
           ${OID_EXPIRATION_DAYS:+--oid-expiration-days ${OID_EXPIRATION_DAYS}} \
+          ${SERVER_MANAGES_CHILD_MIGRATIONS:+--server-manages-child-migrations} \
           ${SKIP_RCLONE_ACCESS_CHECK_ON_REGISTER:+--skip-rclone-access-check-on-register} \
           ${USE_POLLING_WATCHER:+--use-polling-watcher}"
         ;;
@@ -32,12 +34,14 @@ case "$watcher_mode" in
           --directory-to-watch ${DIRECTORY_TO_WATCH:-/dlm/product_dir} \
           --target-name ${TARGET_NAME:-dlm-archive} \
           --storage-url ${STORAGE_URL:-http://dlm_storage:8003} \
+          --request-url ${REQUEST_URL:-http://dlm_request:8002} \
           --migration-url ${MIGRATION_URL:-http://dlm_migration:8004} \
           --ingest-url ${INGEST_URL:-http://dlm_ingest:8001} \
           --etcd-url ${ETCD_URL:-http://etcd:2379} \
           --watcher-hostname ${WATCHER_HOSTNAME:-$(hostname)} \
           ${UID_EXPIRATION_DAYS:+--uid-expiration-days ${UID_EXPIRATION_DAYS}} \
           ${OID_EXPIRATION_DAYS:+--oid-expiration-days ${OID_EXPIRATION_DAYS}} \
+          ${SERVER_MANAGES_CHILD_MIGRATIONS:+--server-manages-child-migrations} \
           ${QUEUE_CONNECTION_STRING:+--queue-connection-string ${QUEUE_CONNECTION_STRING}} \
           ${QUEUE_EXCHANGE_NAME:+--queue-exchange-name ${QUEUE_EXCHANGE_NAME}} "
         ;;

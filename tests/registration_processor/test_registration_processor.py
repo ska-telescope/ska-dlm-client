@@ -138,6 +138,7 @@ def mock_config():
     config.source_storage = "test-storage"
     config.storage_name = None  # TODO (DMAN-288): fix source_storage/storage_name discrepency
     config.rclone_access_check_on_register = False
+    config.server_manages_child_migrations = False
     config.target_name = "test-destination-storage"
     config.target_phase = "SOLID"
 
@@ -323,6 +324,70 @@ def test_registration_processor_skips_child_registration_when_target_storage_unr
                 for call in mock_warning.call_args_list
             )
             api_ingest.init_data_item.assert_not_called()
+
+
+def test_server_managed_children_are_not_registered_on_target(mock_config):
+    """The server creates child copies when it publishes the parent migration."""
+    mock_config.server_manages_child_migrations = True
+    processor = MockRegistrationProcessor(mock_config)
+    item = Item(path_rel_to_watch_dir="parent/child", item_type=ItemType.FILE, metadata=None)
+    api_ingest = mock.MagicMock()
+
+    processor._migrate_item(migrate=False, item=item, uuid="child", api_ingest=api_ingest)
+
+    api_ingest.init_data_item.assert_not_called()
+
+
+def test_server_managed_migration_waits_for_child_registration(mock_config):
+    """Start the migration only after the source tree has been registered."""
+    mock_config.server_manages_child_migrations = True
+    mock_config.source_name = "source"
+    processor = MockRegistrationProcessor(mock_config)
+    parent = Item(path_rel_to_watch_dir="parent", item_type=ItemType.CONTAINER, metadata=None)
+    child = Item(path_rel_to_watch_dir="parent/child", item_type=ItemType.FILE, metadata=None)
+    calls = mock.Mock()
+    calls.attach_mock(mock.Mock(return_value="parent-uid"), "register")
+    calls.attach_mock(mock.Mock(), "children")
+    calls.attach_mock(mock.Mock(), "migrate")
+    with (
+        mock.patch(
+            "ska_dlm_client.registration_processor._generate_dir_item_list",
+            return_value=[parent, child],
+        ),
+        mock.patch.object(processor, "_register_single_item", calls.register),
+        mock.patch.object(processor, "_register_container_items", calls.children),
+        mock.patch.object(processor, "_migrate_registered_item", calls.migrate),
+        mock.patch("time.sleep"),
+    ):
+        assert (
+            processor.add_path("/parent", "parent", metadata=test_dependency.key) == "parent-uid"
+        )
+
+    assert calls.mock_calls == [
+        mock.call.register(
+            parent, migrate=False, metadata=test_dependency.key, migration_origin=None
+        ),
+        mock.call.children(item_list=[child], parent_uid="parent-uid", migration_origin=None),
+        mock.call.migrate(parent, "parent-uid", test_dependency.key, None),
+    ]
+
+
+def test_server_managed_migration_stops_when_child_registration_fails(mock_config):
+    """Do not publish an incomplete source tree."""
+    mock_config.server_manages_child_migrations = True
+    processor = MockRegistrationProcessor(mock_config)
+    parent = Item(path_rel_to_watch_dir="parent", item_type=ItemType.CONTAINER, metadata=None)
+    with (
+        mock.patch(
+            "ska_dlm_client.registration_processor._generate_dir_item_list", return_value=[parent]
+        ),
+        mock.patch.object(processor, "_register_single_item", return_value="parent-uid"),
+        mock.patch.object(processor, "_register_container_items", return_value=False),
+        mock.patch.object(processor, "_migrate_registered_item") as migrate,
+        mock.patch("time.sleep"),
+    ):
+        assert processor.add_path("/parent", "parent") is None
+        migrate.assert_not_called()
 
 
 def test_registration_processor_register_single_item(
@@ -557,7 +622,7 @@ def test_register_container_items_does_not_pass_dependency_metadata(
     # Check the first child is registered without a dependency key
     mock_register.assert_any_call(
         item=child_item1,
-        migrate=True,
+        migrate=False,
         parent_uid=parent_item.uuid,
         migration_origin=test_migration_origin,
     )
@@ -598,6 +663,7 @@ def test_registration_processor_generate_dir_item_list(
     )
     processor._register_single_item.assert_called_once_with(
         file_item,
+        migrate=True,
         metadata=None,
         migration_origin=test_migration_origin,
     )
@@ -629,6 +695,7 @@ def test_registration_processor_generate_dir_item_list(
 
     processor._register_single_item.assert_called_once_with(
         container_item,
+        migrate=True,
         metadata=test_dependency.key,
         migration_origin=test_migration_origin,
     )
@@ -673,6 +740,7 @@ def test_registration_processor_generate_dir_item_list(
 
     processor._register_single_item.assert_called_once_with(
         container_item,
+        migrate=True,
         metadata=None,
         migration_origin=test_migration_origin,
     )

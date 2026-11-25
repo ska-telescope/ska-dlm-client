@@ -10,21 +10,21 @@ spec:
   restartPolicy: Never
   containers:
   - name: setup-dlm
-    image: {{ .Values.directory_watcher.image}}:{{ .Values.directory_watcher.version }}
-    imagePullPolicy: {{ .Values.directory_watcher.imagePullPolicy }}
+    image: {{ .Values.ska_dlm_client.image }}:{{ .Values.ska_dlm_client.version }}
+    imagePullPolicy: {{ .Values.ska_dlm_client.imagePullPolicy }}
     volumeMounts:
       - name: test-configmap
         mountPath: "/dlm"
         readOnly: true
     command:
-    - python3
+    - /app/.venv/bin/python
     - /dlm/setup_dlm.py
     - "--storage-name"
-    - "dir-watcher"
+    - {{ .Values.directory_watcher.source_name | quote }}
     - "--storage-url"
-    - "http://{{ .Values.ska_dlm.fullname }}-storage.{{ .Release.Namespace }}:80"
-    - "--directory-to-watch"
-    - "/dlm"
+    - {{ .Values.directory_watcher.storage_url | quote }}
+    - "--storage-root-directory"
+    - {{ .Values.directory_watcher.directory_to_watch | quote }}
   volumes:
     - name: test-configmap
       configMap:

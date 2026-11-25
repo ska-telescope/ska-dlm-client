@@ -44,6 +44,7 @@ class ClientConfig:
     migration_configuration: Configuration = field(init=False)
     include_existing: bool = False
     rclone_access_check_on_register: bool = False
+    server_manages_child_migrations: bool = False
     METADATA_FILENAME: str = METADATA_FILENAME
     METADATA_EXECUTION_BLOCK_KEY: str = METADATA_EXECUTION_BLOCK_KEY
     status_file_filename: str = STATUS_FILE_FILENAME
@@ -108,6 +109,11 @@ class CmdLineParameters:
             "--include-existing",
             action="store_true",
             help="If set, first yield existing dataproduct keys with matching status.",
+        )
+        self.parser.add_argument(
+            "--server-manages-child-migrations",
+            action="store_true",
+            help="Let the server create destination child records when migrating a container.",
         )
         self.parser.add_argument(
             "--ingest-url",

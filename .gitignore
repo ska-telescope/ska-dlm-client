@@ -46,7 +46,6 @@ coverage.xml
 .hypothesis/
 
 # Files created during testing
-tests/integration/certs
 **/.cache
 **/.pytest_cache/
 

@@ -1,0 +1,4 @@
+services:
+  dlm_rclone:
+    image: dlm-client-integration/rclone
+    container_name: dlm-client-integration-dlm_rclone

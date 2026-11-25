@@ -253,6 +253,38 @@ async def test_on_message_received_acknowledges_invalid_message() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("success", [True, False])
+async def test_on_message_received_handles_migration_without_oid(success: bool) -> None:
+    """Current server migration events do not include an OID."""
+    message = mock.MagicMock()
+    message.body = json.dumps(
+        {
+            "migration_id": 123,
+            "complete": True,
+            "job_status": {"success": success},
+            "metadata": {
+                "pb_id": PB_ID,
+                "kind": "dlm-copy",
+                "name": DP_FLOW_NAME,
+                "origin": "ska-data-lifecycle-management",
+            },
+        }
+    ).encode()
+    message.ack = mock.AsyncMock()
+    message.nack = mock.AsyncMock()
+
+    with mock.patch(
+        "ska_dlm_client.configdb_watcher.configdb_utils.aupdate_dependency_state",
+        new_callable=mock.AsyncMock,
+    ) as update:
+        await on_message_received(message, mock.MagicMock())
+
+    assert update.await_args.args[2] == ("FINISHED" if success else "FAILED")
+    message.ack.assert_awaited_once()
+    message.nack.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 async def test_start_rabbitmq_consumer_sets_up_consumer() -> None:
     """Test that the RabbitMQ consumer is configured correctly."""
     connection = mock.MagicMock()

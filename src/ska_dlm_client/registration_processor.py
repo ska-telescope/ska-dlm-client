@@ -360,6 +360,25 @@ class RegistrationProcessor:
                 migration_result,
             )
 
+    def _migrate_registered_item(self, item, uuid, metadata, migration_origin) -> None:
+        """Migrate a registered root item."""
+        source_name = getattr(self._config, "source_name", None) or getattr(
+            self._config, "source_storage", None
+        )
+        migration_result = self._initiate_migration(
+            uid=uuid,
+            item_name=item.path_rel_to_watch_dir,
+            metadata=metadata,
+            migration_origin=migration_origin,
+        )
+        self.last_migration_result = migration_result
+        self._bookkeeping_after_registration(
+            item=item,
+            dlm_registration_uuid=uuid,
+            storage_name=source_name,
+            migration_result=migration_result,
+        )
+
     def _migrate_item(
         self,
         migrate,
@@ -379,22 +398,12 @@ class RegistrationProcessor:
             None,
         )
         if migrate:
-            # We are only migrating the top-level containers, since rclone is
-            # performing a sync including all children.
-            migration_result = self._initiate_migration(
-                uid=uuid,
-                item_name=item.path_rel_to_watch_dir,
-                metadata=metadata,
-                migration_origin=migration_origin,
-            )
-            self.last_migration_result = migration_result
-            self._bookkeeping_after_registration(
-                item=item,
-                dlm_registration_uuid=uuid,
-                storage_name=source_name,
-                migration_result=migration_result,
-            )
-        elif target_name is not None and source_name != target_name:
+            self._migrate_registered_item(item, uuid, metadata, migration_origin)
+        elif (
+            target_name is not None
+            and source_name != target_name
+            and not getattr(self._config, "server_manages_child_migrations", False)
+        ):
             if not self._check_target_storage_access(target_name):
                 logger.warning(
                     "Target storage '%s' inaccessible: Skipping child item registration",
@@ -545,7 +554,7 @@ class RegistrationProcessor:
         item_list: list[Item],
         parent_uid: str | None = None,
         migration_origin: str | None = None,
-    ) -> None:
+    ) -> bool:
         """Register a list of data items with the DLM.
 
         Sends registration requests to the DLM API for each item in the list,
@@ -572,30 +581,32 @@ class RegistrationProcessor:
                 source_name,
             )
         children_by_parent: dict[str, list[str]] = {}
+        registered_all = True
         for item in item_list:
             item_parent_uid = item.parent.uuid if item.parent is not None else parent_uid
             item.uuid = None
             registration_uuid = (
                 self._register_single_item(  # child items do not inherit migration metadata
                     item=item,
-                    migrate=migrate,
+                    migrate=False,
                     parent_uid=item_parent_uid,
                     migration_origin=migration_origin,
                 )
             )
             if registration_uuid is not None:
                 item.uuid = registration_uuid
+            else:
+                registered_all = False
             if item.uuid is not None and item_parent_uid is not None:
                 children_by_parent.setdefault(item_parent_uid, []).append(item.uuid)
-            migrate = False  # Only the top-level container item triggers migration
             time.sleep(0.01)
 
-        self._associate_container_children(children_by_parent)
+        return self._associate_container_children(children_by_parent) and registered_all
 
-    def _associate_container_children(self, children_by_parent: dict[str, list[str]]) -> None:
+    def _associate_container_children(self, children_by_parent: dict[str, list[str]]) -> bool:
         """Persist successfully registered child associations for each container."""
         if not children_by_parent:
-            return
+            return True
 
         ingest_configuration = getattr(self._config, "ingest_configuration", None)
         ingest_url = getattr(self._config, "ingest_url", None)
@@ -603,8 +614,9 @@ class RegistrationProcessor:
             logger.error(
                 "Cannot associate container children: ingest configuration or URL is missing"
             )
-            return
+            return False
 
+        associated_all = True
         with api_client.ApiClient(ingest_configuration) as ingest_api_client:
             api_ingest = ingest_api.IngestApi(ingest_api_client)
             api_ingest.api_client.configuration.host = ingest_url
@@ -624,6 +636,7 @@ class RegistrationProcessor:
                         response,
                     )
                 except OpenApiException as err:
+                    associated_all = False
                     logger.error(
                         "OpenApiException caught while associating children with container %s",
                         container_uid,
@@ -631,6 +644,7 @@ class RegistrationProcessor:
                     if isinstance(err, ApiException):
                         logger.error("ApiException: %s", err.body)
                     logger.error("%s", err)
+        return associated_all
 
     def add_path(
         self,
@@ -665,14 +679,30 @@ class RegistrationProcessor:
         logger.debug("Items identified in %s: %s", absolute_path, item_list)
         # Register the container directory first so that its uuid can be used for the files.
         parent_item = item_list[0]
+        server_manages_children = getattr(self._config, "server_manages_child_migrations", False)
         parent_uuid = self._register_single_item(
-            parent_item, metadata=metadata, migration_origin=migration_origin
+            parent_item,
+            migrate=not server_manages_children,
+            metadata=metadata,
+            migration_origin=migration_origin,
         )
+        if server_manages_children and parent_uuid is None:
+            return None
         time.sleep(1)
         item_list.remove(parent_item)
-        self._register_container_items(
+        registered_children = self._register_container_items(
             item_list=item_list, parent_uid=parent_uuid, migration_origin=migration_origin
         )
+        if server_manages_children and not registered_children:
+            logger.error("Cannot migrate %s: source child registration failed", absolute_path)
+            return None
+        if (
+            server_manages_children
+            and parent_uuid is not None
+            and self._config.target_name
+            and self._config.source_name != self._config.target_name
+        ):
+            self._migrate_registered_item(parent_item, parent_uuid, metadata, migration_origin)
         logger.debug(
             "Finished adding %s",
             (

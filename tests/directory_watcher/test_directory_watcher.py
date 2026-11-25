@@ -21,6 +21,14 @@ from ska_dlm_client.openapi.configuration import Configuration
 from ska_dlm_client.registration_processor import RegistrationProcessor
 
 
+def test_process_args_enables_server_managed_children():
+    """Pass the server-managed migration option to the watcher configuration."""
+    args = WatcherArgs().parser.parse_args(
+        ["--directory-to-watch", "/dlm/watch_dir", "--server-manages-child-migrations"]
+    )
+    assert process_args(args).server_manages_child_migrations is True
+
+
 def create_cmd_line_parameters() -> WatcherArgs:
     """Create command-line parameters for directory watcher tests."""
     return WatcherArgs()

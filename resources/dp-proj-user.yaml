@@ -33,6 +33,7 @@ directory_watcher:
   subsystem: data-lifecycle-management
   replicas: 1
   ingest_url: "http://ska-dlm-ingest.dp-dm"
+  request_url: "http://ska-dlm-request.dp-dm"
   storage_url: "http://ska-dlm-storage.dp-dm"
   migration_url: "http://ska-dlm-migration.dp-dm"
   source_name: dir_watcher
@@ -60,6 +61,7 @@ configdb_watcher:
   subsystem: data-lifecycle-management
   replicas: 1
   ingest_url: "http://ska-dlm-ingest.dp-dm"
+  request_url: "http://ska-dlm-request.dp-dm"
   storage_url: "http://ska-dlm-storage.dp-dm"
   migration_url: "http://ska-dlm-migration.dp-dm"
   include_existing: false

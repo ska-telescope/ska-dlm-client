@@ -1,6 +1,25 @@
-include:
-  - path: test_services.docker-compose.yaml
 services:
+  etcd:
+    image: artefact.skao.int/ska-sdp-etcd:3.5.9
+    container_name: etcd
+    platform: linux/amd64
+    networks:
+      - dlm_network
+    ports:
+      - "23791:2379"
+    pull_policy: missing
+    command:
+      - /usr/bin/etcd
+      - "--advertise-client-urls=http://0.0.0.0:2379"
+      - "--listen-client-urls=http://0.0.0.0:2379"
+      - "--initial-advertise-peer-urls=http://0.0.0.0:2380"
+      - "--listen-peer-urls=http://0.0.0.0:2380"
+      - "--initial-cluster=default=http://0.0.0.0:2380"
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 1s
+      timeout: 10s
+      retries: 10
   dlm_client_testrunner:
     platform: linux/amd64
     image: dlm_client_testrunner
@@ -12,9 +31,22 @@ services:
        context: ..
        dockerfile: tests/Dockerfile-client-testrunner
     volumes:
-      - shared-tmpfs:/dlm
+      - ${DLM_DATA_VOLUME:-shared-tmpfs}:/dlm
       - /var/run/docker.sock:/var/run/docker.sock
     env_file:
       - testrunner.env
     networks:
       - dlm_network
+
+networks:
+  dlm_network:
+    name: dlm_network
+
+volumes:
+  shared-tmpfs:
+    name: shared-tmpfs
+    driver: local
+    driver_opts:
+      type: "tmpfs"
+      device: "tmpfs"
+      o: "mode=777,uid=1000,gid=1000"

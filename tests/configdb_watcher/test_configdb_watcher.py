@@ -9,11 +9,30 @@ import pytest
 from ska_sdp_config.entity import ProcessingBlock, Script
 from ska_sdp_config.entity.flow import DataProduct, DataProductPersist, Flow, FlowSource
 
+from ska_dlm_client.configdb_watcher.config import WatcherArgs
 from ska_dlm_client.configdb_watcher.configdb_watcher import watch_dataproduct_status
+from ska_dlm_client.configdb_watcher.main import process_args
 
 SCRIPT = Script.Key(kind="batch", name="unit_test", version="0.0.0")
 PB_ID = "pb-madeup-00000000-a"
 NAME = "prod-a"
+
+
+def test_process_args_uses_request_url():
+    """The configured request service URL is used by the watcher."""
+    args = WatcherArgs().parser.parse_args(
+        ["--directory-to-watch", "/dlm/product_dir", "--request-url", "http://dlm_request:80"]
+    )
+    config = process_args(args)
+    assert config.request_configuration.host == "http://dlm_request:80"
+
+
+def test_process_args_enables_server_managed_children():
+    """Pass the server-managed migration option to the watcher configuration."""
+    args = WatcherArgs().parser.parse_args(
+        ["--directory-to-watch", "/dlm/product_dir", "--server-manages-child-migrations"]
+    )
+    assert process_args(args).server_manages_child_migrations is True
 
 
 @pytest.mark.asyncio

@@ -61,6 +61,7 @@ Directory Watcher component
 
 - ``enabled``: Whether to deploy the ``directory-watcher`` component.
 - ``ingest_url``: Full HTTP URL of the ingest server. E.g., ``<http://service.namespace:port>``
+- ``request_url``: Full HTTP URL of the request server.
 - ``storage_url``: Full HTTP URL of the storage server. E.g., ``<http://service.namespace:port>``
 - ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``source_name``: Storage to monitor for new data.
@@ -72,6 +73,7 @@ Directory Watcher component
 - ``oid_expiration_days``: Number of days from now until this OID expires. Leave empty to use DB default: 2099-12-31T23:59:59.
 - ``use_polling_watcher``: false means using the iNotify-based watcher, which might not work with networked filesystems.
 - ``skip_rclone_access_check_on_register``: If ``true``, skips verifying rclone access before attempting to register the file.
+- ``server_manages_child_migrations``: Set to ``true`` when the server creates destination child records during container migration. Defaults to ``false`` for older servers.
 - ``include_existing``: If ``true``, registers & migrates all contents of the watch directory at startup, not just newly detected files.
 - ``pvc.name``: Name of the volume to mount into the directory-watcher pod.
 - ``pvc.read_only``: Set to ``true`` to limit the scope of what the directory-watcher can do. Needs to be ``false`` to allow for data deletion.
@@ -113,9 +115,11 @@ ConfigDB Watcher component
 
 - ``enabled``: Whether to deploy the ``configdb-watcher`` component.
 - ``ingest_url``: Full HTTP URL of the ingest server. E.g., ``<http://service.namespace:port>``
+- ``request_url``: Full HTTP URL of the request server.
 - ``storage_url``: Full HTTP URL of the storage server. E.g., ``<http://service.namespace:port>``
 - ``migration_url``: Full HTTP URL of the migration server. E.g., ``<http://service.namespace:port>``
 - ``include_existing``: If true, registers & migrates all existing COMPLETED data-products found in the etcd DB at startup.
+- ``server_manages_child_migrations``: Set to ``true`` when the server creates destination child records during container migration. Defaults to ``false`` for older servers.
 - ``source_name``: Storage where the new data appears.
 - ``source_phase``: Optional, Phase of the source storage (default ``GAS``).
 - ``directory_to_watch``: Directory used to generate URIs for the DLM database.

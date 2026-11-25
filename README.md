@@ -47,17 +47,67 @@ Run the unit tests:
 make python-test
 ```
 
-Run the integration tests:
+Run the integration tests against a specific DLM server Git tag or commit:
 
 ```sh
-make integration-test
+make integration-test DLM_SERVER_REF=<tag-or-commit>
 ```
 
-Run all tests (unit and integration):
+This requires Git, Docker with Compose, and access to the
+`ska-data-lifecycle` Git repository and its build dependencies. The first run
+clones the server into the ignored `build/dlm-server` directory. Each run
+fetches the requested revision, prints its resolved commit, and builds the
+server services and database migrations from that checkout. Local changes in a
+separate server checkout are not used. Builds can take considerable time.
+
+The client supports the current server test stack; older server revisions may
+have incompatible Compose services or APIs and will need additional adaptation.
+The stack uses dedicated container, network and volume names, but its host ports
+must be free.
+
+For servers that create destination child records when publishing a container
+migration, start either watcher with `--server-manages-child-migrations`. This
+registers the source tree before requesting the migration and avoids duplicate
+destination records. The integration stack enables this for its embedded-worker
+server configuration; the default preserves compatibility with older servers.
+For Helm deployments, set `server_manages_child_migrations: true` under each
+watcher that connects to such a server, and configure its `request_url`.
+
+Run all tests (unit and integration) against a server revision:
 
 ```sh
-make all-tests
+make all-tests DLM_SERVER_REF=<tag-or-commit>
 ```
+
+Use `make integration-test-keep DLM_SERVER_REF=<tag-or-commit>` to leave the
+services running for debugging, or `make docker-compose-up DLM_SERVER_REF=<tag-or-commit>`
+to start them without running tests. Starting the stack also extracts the test
+fixtures if needed. Run `make docker-compose-down` afterwards.
+The standard integration and all-tests targets shut down their stack even if
+the tests fail. The server checkout remains in `build/dlm-server` for reuse.
+
+To start the stack separately and run the integration-test target against it:
+
+```sh
+make docker-compose-up DLM_SERVER_REF=<tag-or-commit>
+make run-integration-test
+make docker-compose-down
+```
+
+`run-integration-test` uses the revision selected when the stack was started;
+it does not fetch or switch server revisions. If `DLM_SERVER_REF` is also set
+for this command, it must resolve to that same revision.
+If the fixtures are missing from an already running stack, run
+`make extract-test-data`, then restart the stack before running the tests.
+
+GitLab CI defaults to a commit from the server's `DMAN-356` branch,
+specified by `DLM_SERVER_REF` in `.gitlab-ci.yml`. Override this variable when
+starting a pipeline to test a different tag or commit.
+
+The 2.4 development revision does not implement the client's
+`update_data_item_children` endpoint. The watcher logs a 404 for child
+associations against this revision; the integration tests do not verify those
+associations.
 
 You can also run specific tests by specifying the test file or directory:
 
@@ -103,5 +153,7 @@ openapi-generator-cli 7.9.0
 
 The OpenAPI generated client can be regenerated using exported OpenAPI specs from [ska-data-lifecycle](https://gitlab.com/ska-telescope/ska-data-lifecycle):
 
-* Start the DLM services such that they can be accessed from `http://localhost`
-* run `make openapi-code-from-local-dlm`
+* Run `make openapi-code-from-local-dlm DLM_SERVER_REF=<tag-or-commit>`. This
+  starts the selected server stack, generates the client and stops the stack.
+* OpenAPI Generator and the other tools required by the generation script must
+  be installed locally.

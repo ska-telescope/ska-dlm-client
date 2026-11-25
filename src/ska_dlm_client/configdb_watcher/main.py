@@ -57,6 +57,7 @@ def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
     return SdpWatcherConfig(
         source_phase=args.source_phase,
         ingest_url=args.ingest_url,
+        request_url=args.request_url,
         storage_url=args.storage_url,
         migration_url=args.migration_url,
         target_name=args.target_name,
@@ -64,6 +65,7 @@ def process_args(args: argparse.Namespace) -> SdpWatcherConfig:
         location=args.location,
         queue_connection_string=args.queue_connection_string,
         queue_exchange_name=args.queue_exchange_name,
+        server_manages_child_migrations=getattr(args, "server_manages_child_migrations", False),
     )
 
 

@@ -32,7 +32,6 @@ REQUEST_URL = os.getenv("REQUEST_URL", "http://dlm_request:8002")
 STORAGE_URL = os.getenv("STORAGE_URL", "http://dlm_storage:8003")
 MIGRATION_URL = os.getenv("MIGRATION_URL", "http://dlm_migration:8004")
 POSTGREST_URL = os.getenv("POSTGREST_URL", "http://dlm_postgrest:3000")
-RCLONE_BASE = os.getenv("RCLONE_BASE", "https://dlm_rclone:5572")
 ETCD_URL = os.getenv("ETCD_URL", "http://etcd:2379")
 
 # Test constants to set up common end points: SKA-DEV location and dlm-archive storage
@@ -41,13 +40,18 @@ LOCATION_TYPE = os.getenv("LOCATION_TYPE", LocationType.LOCAL_DEV.value)
 LOCATION_COUNTRY = os.getenv("LOCATION_COUNTRY", LocationCountry.AU.value)
 LOCATION_CITY = os.getenv("LOCATION_CITY", "Marksville")
 LOCATION_FACILITY = os.getenv("LOCATION_FACILITY", "local")  # TODO: query lookup table
-TARGET_ROOT = os.getenv("TARGET_ROOT", "/dlm-archive")
+TARGET_ROOT = os.getenv("TARGET_ROOT", "/dlm/archive")
 TGT_STORAGE_PHASE = os.getenv("TARGET_PHASE", "SOLID")
 RCLONE_CONFIG_TARGET = {
     "name": "dlm-archive",
-    "type": "alias",
+    "type": "sftp",
     "root_path": "/",
-    "parameters": {"remote": "/"},
+    "parameters": {
+        "host": "dlm_archive",
+        "port": 2222,
+        "user": "dlm",
+        "key_file": "/root/.ssh/id_rsa",
+    },
 }
 
 STORAGE_INTERFACE = StorageInterface.POSIX
