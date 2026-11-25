@@ -15,6 +15,9 @@ services:
   dlm_outbox:
     image: dlm-client-integration/outbox
     container_name: dlm-client-integration-dlm_outbox
+    healthcheck:
+      # The server's CLI-based probes are slow on CPU-constrained runners.
+      timeout: 30s
   dlm_archive:
     container_name: dlm-client-integration-dlm_archive
   dlm_postgrest:
@@ -49,12 +52,18 @@ services:
   dlm_request:
     image: dlm-client-integration/request
     container_name: dlm-client-integration-dlm_request
+    healthcheck:
+      timeout: 30s
   dlm_ingest:
     image: dlm-client-integration/ingest
     container_name: dlm-client-integration-dlm_ingest
+    healthcheck:
+      timeout: 30s
   dlm_heuristics:
     image: dlm-client-integration/heuristics
     container_name: dlm-client-integration-dlm_heuristics
+    healthcheck:
+      timeout: 30s
   etcd:
     container_name: dlm-client-integration-etcd
   dlm_configdb_watcher:

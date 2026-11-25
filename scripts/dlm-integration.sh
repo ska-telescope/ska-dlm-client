@@ -135,10 +135,20 @@ run_tests() {
 }
 
 cleanup() {
-    local status=$? cleanup_status=0
+    local status=$? cleanup_status=0 containers container
     trap - EXIT
     if (( status != 0 )); then
         "${compose[@]}" ps -a || true
+        if containers=$("${compose[@]}" ps --all -q); then
+            while IFS= read -r container; do
+                [[ -n $container ]] || continue
+                docker inspect --format \
+                    '{{if .State.Health}}{{if ne .State.Health.Status "healthy"}}{{.Name}}: {{json .State.Health}}{{end}}{{end}}' \
+                    "$container" || echo "DLM integration: cannot inspect container $container" >&2
+            done <<< "$containers"
+        else
+            echo "DLM integration: cannot list containers for health diagnostics" >&2
+        fi
         "${compose[@]}" logs --no-color --tail 200 || true
     fi
     down || cleanup_status=$?

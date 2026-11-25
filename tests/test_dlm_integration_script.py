@@ -63,12 +63,15 @@ def make_integration_workspace(tmp_path: Path) -> tuple[Path, Path, str]:
         '  exec) echo "checking fixture $*"; case "$*" in\n'
         '    *"${FAKE_DOCKER_MISSING_FIXTURE:-no-missing-fixture}"*) exit 1 ;;\n'
         "    *) exit 0 ;; esac ;;\n"
+        '  inspect) echo "unhealthy: health probe timed out"; exit 0 ;;\n'
         "  network|volume) exit 1 ;;\n"
         '  compose) case "$*" in *"config --services"*)\n'
         '    printf "%s\\n" dlm_storage dlm_ingest dlm_request dlm_migration '
         "dlm_outbox dlm_rclone_worker rclone-key-init dlm_heuristics ;;\n"
         '    *"config --volumes"*) echo "${FAKE_DOCKER_VOLUME:-shared-tmpfs}" ;;\n'
-        '    *" up "*) echo "data volume: $DLM_DATA_VOLUME" ;;\n'
+        '    *" up "*) echo "data volume: $DLM_DATA_VOLUME"; '
+        '[ "${FAKE_DOCKER_UP_FAIL:-0}" = 1 ] && exit 17 ;;\n'
+        '    *" ps --all -q"*) echo fake-container ;;\n'
         '    *" run "*) echo "running tests" ;;\n'
         "    esac; exit 0 ;;\n"
         "  *) exit 1 ;;\n"
@@ -94,6 +97,17 @@ def run_up(client: Path, server: Path, ref: str | None) -> subprocess.CompletedP
         text=True,
         check=False,
     )
+
+
+def test_failed_start_reports_health_diagnostics(
+    integration_workspace: tuple[Path, Path, str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Startup failures include health output and retain the original exit status."""
+    client, server, commit = integration_workspace
+    monkeypatch.setenv("FAKE_DOCKER_UP_FAIL", "1")
+    result = run_up(client, server, commit)
+    assert result.returncode == 17
+    assert "unhealthy: health probe timed out" in result.stdout
 
 
 def test_select_tag_then_commit(integration_workspace: tuple[Path, Path, str]) -> None:
